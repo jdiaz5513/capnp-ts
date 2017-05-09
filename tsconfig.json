@@ -1,0 +1,30 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "module": "umd",
+    "moduleResolution": "node",
+    "newLine": "LF",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "lib",
+    "pretty": true,
+    "sourceMap": true,
+    "strict": true,
+    "stripInternal": true,
+    "target": "es5"
+  },
+  "exclude": [
+    "bak",
+    "bak_test",
+    "lib",
+    "node_modules",
+    "test/**/*"
+  ]
+}
