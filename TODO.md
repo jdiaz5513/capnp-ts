@@ -35,6 +35,7 @@
 
 * [ ] Use const enums.
 * [ ] Get rid of all known slow things (`instanceof`, `for in`, `eval`, `try`, `catch`).
+* [ ] Consider fast optimizations to avoid division (`>>> 3` vs `/ 8`).
 * [ ] Test memoization of pointer read operations.
 * [ ] Gather CPU/RAM profiles on large messages.
 * [ ] Benchmark against C++ reference implementation.
