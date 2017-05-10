@@ -97,7 +97,7 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	$(nodemon) -e ts --watch src --watch test --watch Makefile --watch package.json --exec 'make test'
+	$(nodemon) -e ts --watch src --watch test --watch Makefile --watch package.json --exec 'npm test'
 
 ###############
 # build targets
