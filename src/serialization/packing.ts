@@ -92,33 +92,6 @@ export function getTagByte(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte,
 }
 
 /**
- * Compute the number of zero bytes that occur in a given 64-bit word, provided as eight separate bytes.
- *
- * @param {byte} a The first byte.
- * @param {byte} b The second byte.
- * @param {byte} c The third byte.
- * @param {byte} d The fourth byte.
- * @param {byte} e The fifth byte.
- * @param {byte} f The sixth byte.
- * @param {byte} g The seventh byte.
- * @param {byte} h The eighth byte (phew!).
- * @returns {number} The number of these bytes that are zero.
- */
-
-export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte, g: byte, h: byte): number {
-
-  return (a === 0 ? 1 : 0) +
-         (b === 0 ? 1 : 0) +
-         (c === 0 ? 1 : 0) +
-         (d === 0 ? 1 : 0) +
-         (e === 0 ? 1 : 0) +
-         (f === 0 ? 1 : 0) +
-         (g === 0 ? 1 : 0) +
-         (h === 0 ? 1 : 0) ;
-
-}
-
-/**
  * Efficiently calculate the length of a packed Cap'n Proto message.
  *
  * @export
@@ -166,6 +139,33 @@ export function getUnpackedByteLength(packed: ArrayBuffer): number {
   }
 
   return wordLength * 8;
+
+}
+
+/**
+ * Compute the number of zero bytes that occur in a given 64-bit word, provided as eight separate bytes.
+ *
+ * @param {byte} a The first byte.
+ * @param {byte} b The second byte.
+ * @param {byte} c The third byte.
+ * @param {byte} d The fourth byte.
+ * @param {byte} e The fifth byte.
+ * @param {byte} f The sixth byte.
+ * @param {byte} g The seventh byte.
+ * @param {byte} h The eighth byte (phew!).
+ * @returns {number} The number of these bytes that are zero.
+ */
+
+export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte, g: byte, h: byte): number {
+
+  return (a === 0 ? 1 : 0) +
+         (b === 0 ? 1 : 0) +
+         (c === 0 ? 1 : 0) +
+         (d === 0 ? 1 : 0) +
+         (e === 0 ? 1 : 0) +
+         (f === 0 ? 1 : 0) +
+         (g === 0 ? 1 : 0) +
+         (h === 0 ? 1 : 0) ;
 
 }
 
