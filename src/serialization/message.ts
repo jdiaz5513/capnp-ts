@@ -262,6 +262,12 @@ export class Message {
 
   }
 
+  toPackedArrayBuffer(): ArrayBuffer {
+
+    return pack(this.toArrayBuffer());
+
+  }
+
   private _allocateSegment(_byteLength: number): Segment {
 
     throw new Error(format(NOT_IMPLEMENTED, 'Message.prototype._allocateSegment'));
