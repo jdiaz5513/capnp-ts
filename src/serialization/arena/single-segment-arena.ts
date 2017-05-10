@@ -5,7 +5,7 @@
 import initTrace from 'debug';
 
 import {DEFAULT_BUFFER_SIZE, MIN_SINGLE_SEGMENT_GROWTH} from '../../constants';
-import {SEG_GET_NON_ZERO_SINGLE} from '../../errors';
+import {SEG_GET_NON_ZERO_SINGLE, SEG_NOT_WORD_ALIGNED} from '../../errors';
 import {format, padToWord} from '../../util';
 import {Segment} from '../segment';
 import {Arena} from './arena';
@@ -20,6 +20,8 @@ export class SingleSegmentArena extends Arena {
   constructor(buffer = new ArrayBuffer(DEFAULT_BUFFER_SIZE)) {
 
     super();
+
+    if ((buffer.byteLength & 7) !== 0) throw new Error(format(SEG_NOT_WORD_ALIGNED, buffer.byteLength));
 
     this._buffer = buffer;
 
