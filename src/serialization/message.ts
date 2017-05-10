@@ -235,7 +235,7 @@ export class Message {
 
   }
 
-  writeToArrayBuffer(): ArrayBuffer {
+  toArrayBuffer(): ArrayBuffer {
 
     const streamFrame = this._getStreamFrame();
 
