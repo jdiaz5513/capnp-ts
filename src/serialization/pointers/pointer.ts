@@ -648,7 +648,7 @@ export class Pointer {
   }
 
   /**
-   * Read some bits off a list pointer to make sure it has the right pointer type.
+   * Read some bits off a list pointer to make sure it has the right pointer data.
    *
    * @param {PointerType} pointerType The expected pointer type.
    * @param {ListElementSize} [elementSize] For list pointers, the expected element size. Leave this
@@ -683,6 +683,8 @@ export class Pointer {
     // Check the object size, if provided.
 
     if (objectSize !== undefined) {
+
+      objectSize = objectSize.padToWord();
 
       switch (pointerType) {
 
