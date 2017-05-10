@@ -7,6 +7,7 @@ import initTrace from 'debug';
 import {DEFAULT_BUFFER_SIZE, MAX_UINT32} from '../constants';
 import {
   INVARIANT_UNREACHABLE_CODE,
+  MSG_NO_SEGMENTS_IN_ARENA,
   MSG_SEGMENT_HAS_DATA,
   MSG_SEGMENT_ID_TOO_LARGE,
   MSG_SEGMENT_OUT_OF_BOUNDS,
@@ -16,6 +17,7 @@ import {
 import {format, pad, padToWord, repeat} from '../util';
 import {Arena, SingleSegmentArena} from './arena';
 import {pack, unpack} from './packing';
+import {PointerType} from './pointers';
 import {Struct, StructCtor} from './pointers';
 import {Segment} from './segment';
 
@@ -34,19 +36,21 @@ export class Message {
 
   constructor(source: MessageSource = new SingleSegmentArena()) {
 
-    let firstSegment: Segment;
-
     if (source instanceof ArrayBuffer) {
 
       this._arena = new SingleSegmentArena(source);
+      this._preallocateSegments();
 
     } else if (source instanceof Array) {
 
       // this._arena = new MultiSegmentArena(source);
+      // this._preallocateSegments();
 
       throw new Error(format(NOT_IMPLEMENTED, 'new Message(ArrayBuffer[])'));
 
     } else {
+
+      let firstSegment: Segment;
 
       this._arena = source;
 
@@ -320,6 +324,31 @@ export class Message {
     });
 
     return out.buffer;
+
+  }
+
+  private _preallocateSegments(): void {
+
+    const numSegments = this._arena.getNumSegments();
+
+    if (numSegments < 1) throw new Error(MSG_NO_SEGMENTS_IN_ARENA);
+
+    this._segments = new Array(numSegments);
+
+    for (let i = 0; i < numSegments; i++) {
+
+      // Set up each segment so that they're fully allocated to the extents of the existing buffers.
+
+      const buffer = this._arena.getBuffer(i);
+      const segment = new Segment(i, this, buffer);
+      segment.byteLength = buffer.byteLength;
+      segment.byteOffset = buffer.byteLength;
+
+      this._segments[i] = segment;
+
+    }
+
+    this._firstSegment = this._segments[0];
 
   }
 
