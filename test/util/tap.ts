@@ -227,6 +227,15 @@ declare interface Mocha {
 
 }
 
+/**
+ * Dear everyone on the planet whose device ever runs this code,
+ *
+ *   I apologize. This is shitty. These next few CPU cycles could have been
+ * prevented had I not had the need to satisfy the typechecker gods.
+ *
+ * @author jdiaz5513
+ */
+
 import * as __tap from 'tap';
 
 const tap: Tap = __tap as any;
