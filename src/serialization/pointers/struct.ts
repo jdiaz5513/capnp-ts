@@ -8,6 +8,7 @@ import {MAX_DEPTH, NATIVE_LITTLE_ENDIAN} from '../../constants';
 import {
   NOT_IMPLEMENTED,
   PTR_INIT_COMPOSITE_STRUCT,
+  PTR_INVALID_UNION_ACCESS,
   PTR_STRUCT_DATA_OUT_OF_BOUNDS,
   PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
 } from '../../errors';
@@ -779,6 +780,12 @@ export class Struct extends Pointer {
     if (defaultMask !== undefined) value ^= defaultMask.getUint8(0);
 
     ds.segment.setUint8(ds.byteOffset + byteOffset, value);
+
+  }
+
+  protected _testWhich(name: string, found: number, wanted: number): void {
+
+    if (found !== wanted) throw new Error(format(PTR_INVALID_UNION_ACCESS, this, name, found, wanted));
 
   }
 
