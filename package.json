@@ -12,6 +12,7 @@
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
   "devDependencies": {
     "@types/debug": "0.0.29",
+    "@types/node": "^7.0.18",
     "nodemon": "^1.11.0",
     "tap": "^10.3.2",
     "ts-node": "^3.0.2",
