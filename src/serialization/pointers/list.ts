@@ -5,7 +5,7 @@
 import initTrace from 'debug';
 
 import {PTR_COMPOSITE_SIZE_UNDEFINED, PTR_INVALID_LIST_SIZE} from '../../errors';
-import {format} from '../../util';
+import {format, identity} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
 import {Pointer} from './pointer';
@@ -15,15 +15,103 @@ trace('load');
 
 export class List<T> extends Pointer {
 
+  every(callbackFn: (this: void, value: T, index: number) => boolean): boolean {
+
+    const length = this.getLength();
+
+    for (let i = 0; i < length; i++) {
+
+      if (!callbackFn(this.get(i), i)) return false;
+
+    }
+
+    return true;
+
+  }
+
+  filter(callbackFn: (this: void, value: T, index: number) => boolean): T[] {
+
+    const length = this.getLength();
+    const res: T[] = [];
+
+    for (let i = 0; i < length; i++) {
+
+      const value = this.get(i);
+
+      if (callbackFn(value, i)) res.push(value);
+
+    }
+
+    return res;
+
+  }
+
+  forEach(callbackFn: (this: void, value: T, index: number) => void): void {
+
+    const length = this.getLength();
+
+    for (let i = 0; i < length; i++) callbackFn(this.get(i), i);
+
+  }
+
   get(_index: number): T {
 
     throw new TypeError();
 
   }
 
+  map<U>(callbackFn: (this: void, value: T, index: number) => U): U[] {
+
+    const length = this.getLength();
+    const res: U[] = new Array(length);
+
+    for (let i = 0; i < length; i++) res[i] = callbackFn(this.get(i), i);
+
+    return res;
+
+  }
+
+  reduce<U>(callbackFn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue?: U): U {
+
+    let i = 0;
+    let res: U;
+
+    if (initialValue === undefined) {
+
+      // LINT: It's okay, I know what I'm doing here.
+      /* tslint:disable-next-line:no-any */
+      res = this.get(0) as any;
+      i++;
+
+    } else {
+
+      res = initialValue;
+
+    }
+
+    for (; i < length; i++) res = callbackFn(res, this.get(i), i);
+
+    return res;
+
+  }
+
   set(_index: number, _value: T): void {
 
     throw new TypeError();
+
+  }
+
+  some(callbackFn: (this: void, value: T, index: number) => boolean): boolean {
+
+    const length = this.getLength();
+
+    for (let i = 0; i < length; i++) {
+
+      if (callbackFn(this.get(i), i)) return true;
+
+    }
+
+    return false;
 
   }
 
@@ -112,6 +200,12 @@ export class List<T> extends Pointer {
   getLength(): number {
 
     return this._getTargetListLength();
+
+  }
+
+  toArray(): T[] {
+
+    return this.map(identity);
 
   }
 
