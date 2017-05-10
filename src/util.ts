@@ -304,24 +304,6 @@ export function extendDataView(dataView: DataView, relByteOffset = 0, byteLength
 }
 
 /**
- * Compute the Hamming weight (number of bits set) of a number. Useful for dealing with tag bytes in the packing
- * algorithm. Using this with floating point numbers will void your warranty.
- *
- * @param {number} x A real integer.
- * @returns {number} The hamming weight (integer).
- */
-
-export function getHammingWeight(x: number) {
-
-  // Thanks, HACKMEM!
-
-  let w = x - ((x >> 1) & 0x55555555);
-  w = (w & 0x33333333) + ((w >> 2) & 0x33333333);
-  return ((w + (w >> 4) & 0x0f0f0f0f) * 0x01010101) >> 24;
-
-}
-
-/**
  * Return the thing that was passed in. Yaaaaawn.
  *
  * @export

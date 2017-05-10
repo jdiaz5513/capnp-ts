@@ -31,6 +31,16 @@ export const DEFAULT_DEPTH_LIMIT = 64;
 
 export const DEFAULT_TRAVERSE_LIMIT = 64 << 20;   // 64 MiB
 
+/**
+ * When allocating array buffers dynamically (while packing or in certain Arena implementations) the previous buffer's
+ * size is multiplied by this number to determine the next buffer's size. This is chosen to keep both time spent
+ * reallocating and wasted memory to a minimum.
+ *
+ * Smaller numbers would save memory at the expense of CPU time.
+ */
+
+export const GROWTH_FACTOR = 1.5;
+
 /** A bitmask applied to obtain the size of a list pointer. */
 
 export const LIST_SIZE_MASK = 0b00000000000000000000000000000111;
@@ -62,6 +72,18 @@ export const MIN_SINGLE_SEGMENT_GROWTH = 4096;
  */
 
 export const NATIVE_LITTLE_ENDIAN = tmpWord.getUint8(0) === 0x02;
+
+/**
+ * When packing a message, this is the number of zero bytes required after a SPAN (0xff) tag is written to the packed
+ * message before the span is terminated.
+ *
+ * This little detail is left up to the implementation because it can be tuned for performance. Setting this to a higher
+ * value may help with messages that contain a ton of text/data.
+ *
+ * It is imperative to never set this too low or else BAD THINGS. You have been warned.
+ */
+
+export const PACK_SPAN_THRESHOLD = 8;
 
 /**
  * How far to travel into a nested pointer structure during a deep copy; when this limit is exhausted the copy

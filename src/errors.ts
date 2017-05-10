@@ -22,6 +22,7 @@ export const INVARIANT_UNREACHABLE_CODE = 'Unreachable code detected.';
 //
 // Now who told you it would be a good idea to fuzz the inputs? You just made the program sad.
 
+export const MSG_PACK_NOT_WORD_ALIGNED = 'Attempted to pack a message that was not word-aligned.';
 export const MSG_SEGMENT_HAS_DATA = 'Attempted to create a new message with an arena that already has data in it.';
 export const MSG_SEGMENT_ID_TOO_LARGE = 'Segment ID %X exceeds the maximum 32-bit integer value.';
 export const MSG_SEGMENT_OUT_OF_BOUNDS = 'Segment ID %X is out of bounds for message %s.';
