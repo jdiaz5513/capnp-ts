@@ -6,7 +6,7 @@
 
 /* tslint:disable:no-any */
 
-declare class Test {
+export declare class Test {
 
   // Assertions
   ok: Assertions.Basic;
@@ -117,8 +117,8 @@ declare class Test {
   threw(er: Error, extra?: Error, proxy?: Test): void;
   pragma(set: Options.Pragma): void;
   plan(n: number, comment?: string): void;
-  test(name: string, extra?: Options.Test, cb?: (t: Test) => Promise<any> | void): Promise<any>;
-  test(name: string, cb?: (t: Test) => Promise<any> | void): Promise<any>;
+  test(name: string, extra?: Options.Test, cb?: (t: Test) => Promise<any> | void): Promise<Test>;
+  test(name: string, cb?: (t: Test) => Promise<any> | void): Promise<Test>;
   current(): Test;
   stdin(name: string, extra?: Options.Bag): Promise<any>;
   spawn(cmd: string, args: string, options?: Options.Bag, name?: string, extra?: Options.Spawn): Promise<any>;
@@ -137,7 +137,7 @@ declare class Test {
 
 // Little hack to simulate the Test class on the tap export.
 
-declare interface TestConstructor {
+export declare interface TestConstructor {
 
   prototype: Test;
 
@@ -145,7 +145,7 @@ declare interface TestConstructor {
 
 }
 
-declare interface Tap extends Test {
+export declare interface Tap extends Test {
 
   Test: TestConstructor;
   mocha: Mocha;
@@ -155,46 +155,46 @@ declare interface Tap extends Test {
 }
 
 
-declare namespace Options {
+export declare namespace Options {
 
-export interface Bag {
+  export interface Bag {
 
-  [propName: string]: any;
+    [propName: string]: any;
+
+  }
+
+  export interface Pragma {
+
+    [propName: string]: boolean;
+
+  }
+
+  export interface Assert extends Bag {
+
+    todo?: boolean | string;
+    skip?: boolean | string;
+
+  }
+
+  export interface Spawn extends Assert {
+
+    bail?: boolean;
+    timeout?: number;
+
+  }
+
+  export interface Test extends Assert {
+
+    name?: string;
+    timeout?: number;
+    bail?: boolean;
+    autoend?: boolean;
+
+  }
 
 }
 
-export interface Pragma {
-
-  [propName: string]: boolean;
-
-}
-
-export interface Assert extends Bag {
-
-  todo?: boolean | string;
-  skip?: boolean | string;
-
-}
-
-export interface Spawn extends Assert {
-
-  bail?: boolean;
-  timeout?: number;
-
-}
-
-export interface Test extends Assert {
-
-  name?: string;
-  timeout?: number;
-  bail?: boolean;
-  autoend?: boolean;
-
-}
-
-}
-
-declare namespace Assertions {
+export declare namespace Assertions {
   export type Basic =
     (obj: any, message?: string, extra?: Options.Assert) => boolean;
 
@@ -219,7 +219,7 @@ declare namespace Assertions {
 
 // Super minimal description of returned Promise (which are really Bluebird promises).
 
-declare interface Mocha {
+export declare interface Mocha {
 
   it(name?: string, fn?: (a: any) => any): void;
   describe(name?: string, fn?: (a: any) => any): void;
