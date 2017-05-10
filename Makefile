@@ -34,6 +34,7 @@ capnp_in += $(shell find test -name *.capnp -print)
 src := $(shell find src -name *.ts -print)
 
 test := $(shell find test -name *.ts -print)
+test_spec := $(shell find test -name *.spec.ts -print)
 
 ##############
 # output files
@@ -46,6 +47,7 @@ lib += $(patsubst src/%.ts,lib/%.js.map,$(src))
 
 lib_test := $(patsubst test/%.ts,lib-test/%.js,$(test))
 lib_test += $(patsubst test/%.ts,lib-test/%.js.map,$(test))
+lib_test_spec := $(patsubst test/%.ts,lib-test/%.js,$(test_spec))
 
 ################
 # build commands
@@ -87,7 +89,7 @@ test: $(lib_test)
 	@echo starting test run
 	@echo =================
 	@echo
-	$(tap) $(TAP_FLAGS) lib-test/**/*.spec.js
+	@$(tap) $(TAP_FLAGS) $(lib_test_spec)
 
 .PHONY: watch
 watch: node_modules
@@ -120,14 +122,14 @@ $(lib): node_modules
 	@echo	
 	$(tsc) $(TSC_FLAGS)
 
-$(lib_test): node_modules
 $(lib_test): $(lib)
 $(lib_test): $(test)
+$(lib_test): node_modules
 	@echo
 	@echo compiling tests
 	@echo ===============
 	@echo
-	$(tsc) $(TSC_FLAGS) --outDir lib-test --rootDir test --sourceMap $<
+	$(tsc) $(TSC_FLAGS) --outDir lib-test --rootDir test --sourceMap test/index.ts
 
 node_modules: package.json
 	npm install
