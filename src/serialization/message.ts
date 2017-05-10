@@ -288,7 +288,9 @@ export class Message {
 
       if (!this._firstSegment) {
 
-        return new Uint8Array([0x00, 0x00]).buffer;
+        // Just return a single zero word for the frame header.
+
+        return new Float64Array(1).buffer;
 
       }
 
