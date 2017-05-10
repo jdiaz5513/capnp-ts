@@ -199,6 +199,25 @@ export class Message {
 
   }
 
+  /**
+   * Get a struct pointer for the root of this message. This is primarily used when reading a message; it will not
+   * overwrite existing data.
+   *
+   * @template T
+   * @param {StructCtor<T>} RootStruct The struct type to use as the root.
+   * @returns {T} A struct representing the root of the message.
+   */
+
+  getRoot<T extends Struct>(RootStruct: StructCtor<T>): T {
+
+    const root = new RootStruct(this.getSegment(0), 0);
+
+    root._validate(PointerType.STRUCT, undefined, RootStruct._size);
+
+    return root;
+
+  }
+
   getSegment(id: number): Segment {
 
     if (id < 0 || id >= this._arena.getNumSegments()) {
