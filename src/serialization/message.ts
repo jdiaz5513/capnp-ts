@@ -110,12 +110,14 @@ export class Message {
 
     const segments: ArrayBuffer[] = new Array(segmentCount);
 
+    trace('reading %d framed segments from stream', segmentCount);
+
     let byteOffset = 4 + segmentCount * 4;
     byteOffset += byteOffset % 8;
 
     for (let i = 0; i < segmentCount; i++) {
 
-      const byteLength = dv.getUint32(4 + i * 4, true);
+      const byteLength = dv.getUint32(4 + i * 4, true) * 8;
 
       segments[i] = stream.slice(byteOffset, byteOffset + byteLength);
 
