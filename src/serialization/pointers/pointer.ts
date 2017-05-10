@@ -12,8 +12,12 @@ import {
   PTR_INVALID_LIST_SIZE,
   PTR_INVALID_POINTER_TYPE,
   PTR_OFFSET_OUT_OF_BOUNDS,
+  PTR_WRONG_COMPOSITE_DATA_SIZE,
+  PTR_WRONG_COMPOSITE_PTR_SIZE,
   PTR_WRONG_LIST_TYPE,
   PTR_WRONG_POINTER_TYPE,
+  PTR_WRONG_STRUCT_DATA_SIZE,
+  PTR_WRONG_STRUCT_PTR_SIZE,
   TYPE_COMPOSITE_SIZE_UNDEFINED,
 } from '../../errors';
 import {bufferToHex, format} from '../../util';
@@ -58,6 +62,12 @@ export class Pointer {
   constructor(segment: Segment, byteOffset: number, depthLimit = MAX_DEPTH) {
 
     if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
+
+    if (byteOffset < 0 || byteOffset > segment.byteOffset - 8) {
+
+      throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
+
+    }
 
     this.segment = segment;
     this.byteOffset = byteOffset;
@@ -127,44 +137,7 @@ export class Pointer {
 
   _add(offset: number): Pointer {
 
-    const byteOffset = this.byteOffset + offset;
-
-    if (byteOffset < 0 || byteOffset >= this.segment.byteLength) {
-
-      throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
-
-    }
-
     return new Pointer(this.segment, this.byteOffset + offset, this._depthLimit);
-
-  }
-
-  /**
-   * Read some bits off a list pointer to make sure it has the right pointer type.
-   *
-   * @internal
-   * @param {PointerType} pointerType The expected pointer type.
-   * @param {ListElementSize} [elementSize] For list pointers, the expected element size.
-   * @returns {void}
-   */
-
-  _checkPointerType(pointerType: PointerType, elementSize?: ListElementSize): void {
-
-    if (this._isNull()) return;
-
-    const p = this._followFars();
-
-    const A = p.segment.getUint32(p.byteOffset) & POINTER_TYPE_MASK;
-
-    if (A !== pointerType) throw new Error(format(PTR_WRONG_POINTER_TYPE, this, pointerType));
-
-    if (elementSize !== undefined) {
-
-      const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
-
-      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, elementSize));
-
-    }
 
   }
 
@@ -450,6 +423,38 @@ export class Pointer {
   }
 
   /**
+   * Get a pointer to this pointer's composite list tag word, following far pointers as needed.
+   *
+   * @internal
+   * @returns {Pointer} A pointer to the list's composite tag word.
+   */
+
+  _getTargetCompositeListTag(): Pointer {
+
+    const c = this._getContent();
+
+    // The composite list tag is always one word before the content.
+
+    c.byteOffset -= 8;
+
+    return c;
+
+  }
+
+  /**
+   * Get the object size for the target composite list, following far pointers as needed.
+   *
+   * @internal
+   * @returns {ObjectSize} An object describing the size of each struct in the list.
+   */
+
+  _getTargetCompositeListSize(): ObjectSize {
+
+    return this._getTargetCompositeListTag()._getStructSize();
+
+  }
+
+  /**
    * Get the size of the list elements referenced by this pointer, following far pointers if necessary.
    *
    * @internal
@@ -479,11 +484,7 @@ export class Pointer {
 
       // The content is prefixed by a tag word; it's a struct pointer whose offset contains the list's length.
 
-      const c = this._getContent();
-
-      c.byteOffset -= 8;
-
-      return c._getOffsetWords();
+      return this._getTargetCompositeListTag()._getOffsetWords();
 
     }
 
@@ -643,6 +644,87 @@ export class Pointer {
     this.segment.setUint32(this.byteOffset, A | B << 2);
     this.segment.setUint16(this.byteOffset + 4, C);
     this.segment.setUint16(this.byteOffset + 6, D);
+
+  }
+
+  /**
+   * Read some bits off a list pointer to make sure it has the right pointer type.
+   *
+   * @param {PointerType} pointerType The expected pointer type.
+   * @param {ListElementSize} [elementSize] For list pointers, the expected element size. Leave this
+   * undefined for struct pointers.
+   * @param {ObjectSize} [objectSize] For structs this is the expected size of the struct. For composite lists this is
+   * the expected size of each struct in the list.
+   * @returns {void}
+   */
+
+  _validate(pointerType: PointerType, elementSize?: ListElementSize, objectSize?: ObjectSize): void {
+
+    if (this._isNull()) return;
+
+    const p = this._followFars();
+
+    // Check the pointer type.
+
+    const A = p.segment.getUint32(p.byteOffset) & POINTER_TYPE_MASK;
+
+    if (A !== pointerType) throw new Error(format(PTR_WRONG_POINTER_TYPE, this, pointerType));
+
+    // Check the list element size, if provided.
+
+    if (elementSize !== undefined) {
+
+      const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
+
+      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, elementSize));
+
+    }
+
+    // Check the object size, if provided.
+
+    if (objectSize !== undefined) {
+
+      switch (pointerType) {
+
+        case PointerType.STRUCT:
+
+          const C = p.segment.getUint16(p.byteOffset + 4);
+          const D = p.segment.getUint16(p.byteOffset + 6);
+
+          const dataWordLength = objectSize.getDataWordLength();
+          const pointerLength = objectSize.pointerLength;
+
+          if (C !== dataWordLength) throw new Error(format(PTR_WRONG_STRUCT_DATA_SIZE, this, dataWordLength));
+
+          if (D !== pointerLength) throw new Error(format(PTR_WRONG_STRUCT_PTR_SIZE, this, pointerLength));
+
+          break;
+
+        case PointerType.LIST:
+
+          const actualSize = this._getTargetCompositeListSize();
+
+          if (actualSize.dataByteLength !== objectSize.dataByteLength) {
+
+            throw new Error(format(PTR_WRONG_COMPOSITE_DATA_SIZE, this, actualSize.dataByteLength));
+
+          }
+
+          if (actualSize.pointerLength !== objectSize.pointerLength) {
+
+            throw new Error(format(PTR_WRONG_COMPOSITE_PTR_SIZE, this, actualSize.pointerLength));
+
+          }
+
+          break;
+
+        default:
+
+          throw new Error(PTR_INVALID_POINTER_TYPE);
+
+      }
+
+    }
 
   }
 
