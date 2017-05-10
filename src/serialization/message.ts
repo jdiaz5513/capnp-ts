@@ -34,6 +34,19 @@ export class Message {
 
   private _segments: Segment[];
 
+  /**
+   * Creates a new Message, optionally preallocating its segments from existing data.
+   *
+   * When dealing with packed data, use the `Message.fromPacked*` factory methods instead.
+   *
+   * @constructor {Message}
+   * @param {MessageSource} [source=new SingleSegmentArena()] The message source. If an ArrayBuffer or array of
+   * ArrayBuffers is provided, the message will be preallocated with the existing buffer data. This is the first step to
+   * read from an unpacked message buffer. If an Arena is provided instead, that arena will be used for segment
+   * allocation and the message will be empty. A message will be created with an empty SingleSegmentArena if no source
+   * is provided.
+   */
+
   constructor(source: MessageSource = new SingleSegmentArena()) {
 
     if (source instanceof ArrayBuffer) {
@@ -90,11 +103,29 @@ export class Message {
 
   }
 
+  /**
+   * Read a message from a packed array buffer. This packed buffer must contain segment framing headers.
+   *
+   * @static
+   * @param {ArrayBuffer} packed The packed message.
+   * @returns {Message} A new message instance.
+   */
+
   static fromPackedBuffer(packed: ArrayBuffer): Message {
 
     return new this(this.getFramedSegments(unpack(packed)));
 
   }
+
+  /**
+   * Read a message from a single packed segment.
+   *
+   * Use of this method is not idiomatic but may prove useful in certain scenarios.
+   *
+   * @static
+   * @param {ArrayBuffer} packed A packed segment _without_ a framing header.
+   * @returns {Message} A new message instance.
+   */
 
   static fromPackedUnframedBuffer(packed: ArrayBuffer): Message {
 
@@ -102,9 +133,20 @@ export class Message {
 
   }
 
-  static getFramedSegments(stream: ArrayBuffer): ArrayBuffer[] {
+  /**
+   * Given an _unpacked_ message with a segment framing header, this will generate an ArrayBuffer for each segment in
+   * the message.
+   *
+   * This method is not typically called directly, but can be useful in certain cases.
+   *
+   * @static
+   * @param {ArrayBuffer} message An unpacked message with a framing header.
+   * @returns {ArrayBuffer[]} An array of buffers containing the segment data.
+   */
 
-    const dv = new DataView(stream);
+  static getFramedSegments(message: ArrayBuffer): ArrayBuffer[] {
+
+    const dv = new DataView(message);
 
     const segmentCount = dv.getUint32(0, true) + 1;
 
@@ -119,7 +161,7 @@ export class Message {
 
       const byteLength = dv.getUint32(4 + i * 4, true) * 8;
 
-      segments[i] = stream.slice(byteOffset, byteOffset + byteLength);
+      segments[i] = message.slice(byteOffset, byteOffset + byteLength);
 
       byteOffset += byteLength;
 
