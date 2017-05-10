@@ -15,11 +15,14 @@ import {
 } from '../errors';
 import {format, pad, padToWord, repeat} from '../util';
 import {Arena, SingleSegmentArena} from './arena';
+import {pack, unpack} from './packing';
 import {Struct, StructCtor} from './pointers';
 import {Segment} from './segment';
 
 const trace = initTrace('capnp:message');
 trace('load');
+
+export type MessageSource = Arena | ArrayBuffer | ArrayBuffer[];
 
 export class Message {
 
@@ -29,41 +32,94 @@ export class Message {
 
   private _segments: Segment[];
 
-  constructor(arena=new SingleSegmentArena()) {
+  constructor(source: MessageSource = new SingleSegmentArena()) {
 
     let firstSegment: Segment;
 
-    this._arena = arena;
+    if (source instanceof ArrayBuffer) {
 
-    switch (arena.getNumSegments()) {
+      this._arena = new SingleSegmentArena(source);
 
-      case 0:
+    } else if (source instanceof Array) {
 
-        firstSegment = this._allocateSegment(DEFAULT_BUFFER_SIZE);
+      // this._arena = new MultiSegmentArena(source);
 
-        break;
+      throw new Error(format(NOT_IMPLEMENTED, 'new Message(ArrayBuffer[])'));
 
-      case 1:
+    } else {
 
-        firstSegment = this.getSegment(0);
+      this._arena = source;
 
-        if (firstSegment.byteOffset !== 0) throw new Error(MSG_SEGMENT_HAS_DATA);
+      // When passing in an Arena as the source we expect it to be empty.
 
-        if (!firstSegment.hasCapacity(8)) throw new Error(MSG_SEGMENT_TOO_SMALL);
+      switch (this._arena.getNumSegments()) {
 
-        break;
+        case 0:
 
-      default:
+          firstSegment = this._allocateSegment(DEFAULT_BUFFER_SIZE);
 
-        throw new Error(MSG_SEGMENT_HAS_DATA);
+          break;
+
+        case 1:
+
+          firstSegment = this.getSegment(0);
+
+          if (firstSegment.byteOffset !== 0) throw new Error(MSG_SEGMENT_HAS_DATA);
+
+          if (!firstSegment.hasCapacity(8)) throw new Error(MSG_SEGMENT_TOO_SMALL);
+
+          break;
+
+        default:
+
+          throw new Error(MSG_SEGMENT_HAS_DATA);
+
+      }
+
+      // Allocate the root pointer.
+
+      this._firstSegment.allocate(8);
 
     }
 
-    // Allocate the root pointer.
-
-    this._firstSegment.allocate(8);
-
     trace('Instantiated message %s.', this);
+
+  }
+
+  static fromPackedBuffer(packed: ArrayBuffer): Message {
+
+    return new this(this.getFramedSegments(unpack(packed)));
+
+  }
+
+  static fromPackedUnframedBuffer(packed: ArrayBuffer): Message {
+
+    return new this(unpack(packed));
+
+  }
+
+  static getFramedSegments(stream: ArrayBuffer): ArrayBuffer[] {
+
+    const dv = new DataView(stream);
+
+    const segmentCount = dv.getUint32(0, true) + 1;
+
+    const segments: ArrayBuffer[] = new Array(segmentCount);
+
+    let byteOffset = 4 + segmentCount * 4;
+    byteOffset += byteOffset % 8;
+
+    for (let i = 0; i < segmentCount; i++) {
+
+      const byteLength = dv.getUint32(4 + i * 4, true);
+
+      segments[i] = stream.slice(byteOffset, byteOffset + byteLength);
+
+      byteOffset += byteLength;
+
+    }
+
+    return segments;
 
   }
 
