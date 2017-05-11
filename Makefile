@@ -94,7 +94,7 @@ lint: node_modules
 	@echo running linter
 	@echo ==============
 	@echo
-	tslint $(TSLINT_FLAGS)
+	tslint $(TSLINT_FLAGS) src/**/*.ts
 
 .PHONY: prebuild
 prebuild: lint
@@ -125,14 +125,14 @@ watch: node_modules
 
 # FIXME: Need to implement the schema compiler.
 
-$(capnp_out): node_modules
-$(capnp_out): %.ts: %.capnp
-	@echo
-	@echo compiling capnp schemas
-	@echo =======================
-	@echo
-	@# capnp compile -o bin/capnpc-ts $< > $@
-	touch $@
+# $(capnp_out): node_modules
+# $(capnp_out): %.ts: %.capnp
+# 	@echo
+# 	@echo compiling capnp schemas
+# 	@echo =======================
+# 	@echo
+# 	@# capnp compile -o bin/capnpc-ts $< > $@
+# 	touch $@
 
 # $(lib): $(capnp_out)
 $(lib): $(src)

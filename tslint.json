@@ -53,13 +53,42 @@
       true,
       "check-space"
     ],
-    "completed-docs": [
-      true,
-      "classes",
-      "functions",
-      "methods",
-      "properties"
-    ],
+    "completed-docs": {
+      "options": [{
+        "classes": {
+          "visibilities": "exported"
+        },
+        "enums": {
+          "visibilities": "exported"
+        },
+        "functions": {
+          "visibilities": "exported"
+        },
+        "interfaces": {
+          "visibilities": "exported"
+        },
+        "methods": {
+          "locations": "all",
+          "privacies": "public",
+          "visibilities": "exported"
+        },
+        "namespaces": {
+          "visibilities": "exported"
+        },
+        "properties": {
+          "locations": "all",
+          "privacies": "public",
+          "visibilities": "exported"
+        },
+        "types": {
+          "visibilities": "exported"
+        },
+        "variables": {
+          "visibilities": "exported"
+        }
+      }],
+      "severity": "warning"
+    },
     "curly": [
       true,
       "ignore-same-line"
@@ -200,15 +229,11 @@
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
-    "no-unreachable": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": [
       true,
       "allow-fast-null-checks"
-    ],
-    "no-unused-variable": [
-      true
     ],
     "no-use-before-declare": true,
     "no-var-keyword": true,
@@ -307,9 +332,6 @@
     "typeof-compare": true,
     "unified-signatures": true,
     "use-isnan": true,
-    "use-strict": [
-      false
-    ],
     "valid-jsdoc": true,
     "valid-typeof": true,
     "variable-name": [

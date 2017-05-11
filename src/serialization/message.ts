@@ -30,9 +30,9 @@ export class Message {
 
   private readonly _arena: Arena;
 
-  private _firstSegment: Segment;
+  private _firstSegment?: Segment;
 
-  private _segments: Segment[];
+  private _segments?: Segment[];
 
   /**
    * Creates a new Message, optionally preallocating its segments from existing data.
@@ -94,6 +94,8 @@ export class Message {
       }
 
       // Allocate the root pointer.
+
+      if (this._firstSegment === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
       this._firstSegment.allocate(8);
 
@@ -173,14 +175,14 @@ export class Message {
 
   allocateSegment(byteLength: number): Segment {
 
+    if (this._firstSegment === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
+
     if (this._segments === undefined) {
 
       this._segments = [];
       this._segments[0] = this._firstSegment;
 
     }
-
-    if (this._segments === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
     const [id, buffer] = this._arena.allocate(byteLength, this._segments);
 
@@ -304,9 +306,11 @@ export class Message {
 
   toArrayBuffer(): ArrayBuffer {
 
+    if (this._segments === undefined) return new ArrayBuffer(0);
+
     const streamFrame = this._getStreamFrame();
 
-    const segments: Segment[] = this._segments.filter((s) => s !== undefined);
+    const segments = this._segments;
 
     // Add space for the stream framing.
 
@@ -345,7 +349,7 @@ export class Message {
 
     if (this._segments === undefined) {
 
-      if (id === 0 && this._firstSegment && this._firstSegment.message !== undefined) return this._firstSegment;
+      if (id === 0 && this._firstSegment) return this._firstSegment;
 
       return undefined;
 
@@ -431,6 +435,8 @@ export class Message {
       trace('Lazily allocating segment map in %s.', this);
 
       this._segments = [];
+
+      if (this._firstSegment === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
       this._segments[0] = this._firstSegment;
 
