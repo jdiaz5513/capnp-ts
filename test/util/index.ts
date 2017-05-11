@@ -1,3 +1,4 @@
+import {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
 
 import {pad} from '../../lib/util';
@@ -38,6 +39,33 @@ export function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: Arr
     t.end();
 
   });
+
+}
+
+export function logBench(suite: Suite) {
+
+  // LINT: This is benchmark code, not library code.
+  /* tslint:disable:no-console only-arrow-functions no-invalid-this */
+
+  return suite.on('start', function() {
+
+    console.log(`\nStarting benchmark: ${this.name}`);
+
+  }).on('cycle', (ev) => {
+
+    console.log(String(ev.target));
+
+  }).on('complete', function() {
+
+    const name = this.name as string;
+    const fastest = this.filter('fastest');
+    const slowest = this.filter('slowest');
+    const ratio = fastest.map('hz') / slowest.map('hz');
+    console.log(`Fastest ${name} is ${fastest.map('name')} (${ratio.toFixed(3)}x faster)`);
+
+  });
+
+  /* tslint:enable:no-console only-arrow-functions no-invalid-this */
 
 }
 

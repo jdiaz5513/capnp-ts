@@ -52,6 +52,14 @@ lib_test_spec := $(patsubst test/%.ts,lib-test/%.js,$(test_spec))
 ################
 # build commands
 
+.PHONY: benchmark
+benchmark: $(lib_test)
+	@echo
+	@echo running benchmarks
+	@echo ==================
+	@echo
+	node lib-test/benchmark/index.js
+
 .PHONY: build
 build: $(lib)
 
