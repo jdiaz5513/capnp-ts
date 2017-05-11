@@ -334,7 +334,7 @@ export class Pointer {
 
   _getListElementSize(): ListElementSize {
 
-    return this.segment.getUint32(this.byteOffset) & LIST_SIZE_MASK;
+    return this.segment.getUint32(this.byteOffset + 4) & LIST_SIZE_MASK;
 
   }
 

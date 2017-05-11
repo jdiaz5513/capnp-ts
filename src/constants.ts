@@ -43,7 +43,7 @@ export const GROWTH_FACTOR = 1.5;
 
 /** A bitmask applied to obtain the size of a list pointer. */
 
-export const LIST_SIZE_MASK = 0b00000000000000000000000000000111;
+export const LIST_SIZE_MASK = 0x00000007;
 
 /** The maximum value for a 32-bit integer. */
 
@@ -94,11 +94,11 @@ export const POINTER_COPY_LIMIT = 32;
 
 /** A bitmask for looking up the double-far flag on a far pointer. */
 
-export const POINTER_DOUBLE_FAR_MASK = 0b00000000000000000000000000000100;
+export const POINTER_DOUBLE_FAR_MASK = 0x00000004;
 
 /** A bitmask for looking up the pointer type. */
 
-export const POINTER_TYPE_MASK = 0b00000000000000000000000000000011;
+export const POINTER_TYPE_MASK = 0x00000003;
 
 /** Used for some 64-bit conversions, equal to Math.pow(2, 32). */
 
