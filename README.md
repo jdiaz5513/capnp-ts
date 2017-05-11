@@ -19,6 +19,7 @@
 
 ```
 
+![travis ci status](https://travis-ci.org/jdiaz5513/capnp-ts.svg?branch=master)
 
 ## Overview
 
