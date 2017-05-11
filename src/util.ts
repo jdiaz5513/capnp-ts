@@ -113,8 +113,10 @@ export function checkSizeOverflow(size: number): number {
 
 const _decoder = new TextDecoder();
 const _encoder = new TextEncoder();
-export const decodeUtf8 = _decoder.decode.bind(_decoder);
-export const encodeUtf8 = _encoder.encode.bind(_encoder);
+export const decodeUtf8: (input?: ArrayBuffer | ArrayBufferView, options?: {}) => string =
+  _decoder.decode.bind(_decoder);
+export const encodeUtf8: (input?: string) => Uint8Array =
+  _encoder.encode.bind(_encoder);
 
 /**
  * Produce a `printf`-style string. Nice for providing arguments to `assert` without paying the cost for string
