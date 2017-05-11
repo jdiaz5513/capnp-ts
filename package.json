@@ -15,6 +15,7 @@
     "@types/debug": "0.0.29",
     "@types/node": "^7.0.18",
     "benchmark": "^2.1.4",
+    "codecov": "^2.2.0",
     "nodemon": "^1.11.0",
     "tap": "^10.3.2",
     "ts-node": "^3.0.2",
@@ -38,6 +39,7 @@
   "scripts": {
     "benchmark": "make benchmark",
     "build": "make build",
+    "ci": "make ci",
     "prebuild": "make prebuild",
     "prepublish": "make prepublish",
     "test": "make test",

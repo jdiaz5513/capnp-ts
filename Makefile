@@ -11,8 +11,8 @@ SHELL := bash
 #####################
 # environment options
 
-TAP_FLAGS := -j8
-TSC_FLAGS :=
+TAP_FLAGS += -j8
+TSC_FLAGS +=
 
 ##############
 # binary paths
@@ -20,6 +20,7 @@ TSC_FLAGS :=
 node_bin := node_modules/.bin
 
 capnp := capnp
+codecov := $(node_bin)/codecov
 nodemon := $(node_bin)/nodemon
 tap := $(node_bin)/tap
 tsc := $(node_bin)/tsc
@@ -65,6 +66,17 @@ build: $(lib)
 
 .PHONY: capnp-compile
 capnp-compile: $(capnp_out)
+
+.PHONY: ci
+ci: TAP_FLAGS += --cov
+ci: lint
+ci: test
+	@echo
+	@echo uploading coverage report
+	@echo =========================
+	@echo
+	$(tap) --coverage-report=lcov
+	$(codecov) --disable=gcov
 
 .PHONY: clean
 clean:
