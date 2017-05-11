@@ -14,6 +14,7 @@ SHELL := bash
 CODECOV_FLAGS ?= --disable=gcov
 TAP_FLAGS ?= -j8
 TSC_FLAGS ?=
+TSLINT_FLAGS ?= -t stylish --type-check --project tsconfig.json
 
 ##############
 # binary paths
@@ -100,7 +101,7 @@ lint: node_modules
 	@echo running linter
 	@echo ==============
 	@echo
-	$(tslint) src test
+	$(tslint) $(TSLINT_FLAGS)
 
 .PHONY: prebuild
 prebuild: lint
