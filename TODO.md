@@ -15,6 +15,7 @@
 * [ ] Unit test all the things.
 * [ ] Carefully export only useful classes in `src/index.ts`.
 * [ ] Tighen down class member/method access.
+* [ ] Consider a separate ES6 build (with proxied array accessors).
 
 # Milestone: RPC
 
