@@ -16,18 +16,6 @@ TAP_FLAGS ?= -j8
 TSC_FLAGS ?=
 TSLINT_FLAGS ?= -t stylish --type-check --project tsconfig.json
 
-##############
-# binary paths
-
-node_bin := node_modules/.bin
-
-capnp := capnp
-codecov := $(node_bin)/codecov
-nodemon := $(node_bin)/nodemon
-tap := $(node_bin)/tap
-tsc := $(node_bin)/tsc
-tslint := $(node_bin)/tslint
-
 #############
 # input files
 
@@ -51,6 +39,11 @@ lib += $(patsubst src/%.ts,lib/%.js.map,$(src))
 lib_test := $(patsubst test/%.ts,lib-test/%.js,$(test))
 lib_test += $(patsubst test/%.ts,lib-test/%.js.map,$(test))
 lib_test_spec := $(patsubst test/%.ts,lib-test/%.js,$(test_spec))
+
+#########
+# exports
+
+export PATH := node_modules/.bin:$(PATH)
 
 ################
 # build commands
@@ -76,7 +69,7 @@ ci: coverage
 	@echo uploading coverage report
 	@echo =========================
 	@echo
-	$(codecov) $(CODECOV_FLAGS)
+	codecov $(CODECOV_FLAGS)
 
 .PHONY: clean
 clean:
@@ -93,7 +86,7 @@ coverage: test
 	@echo generating coverage report
 	@echo ==========================
 	@echo
-	$(tap) --coverage-report=lcov
+	tap --coverage-report=lcov
 
 .PHONY: lint
 lint: node_modules
@@ -101,7 +94,7 @@ lint: node_modules
 	@echo running linter
 	@echo ==============
 	@echo
-	$(tslint) $(TSLINT_FLAGS)
+	tslint $(TSLINT_FLAGS)
 
 .PHONY: prebuild
 prebuild: lint
@@ -117,7 +110,7 @@ test: $(lib_test)
 	@echo starting test run
 	@echo =================
 	@echo
-	@$(tap) $(TAP_FLAGS) $(lib_test_spec)
+	@tap $(TAP_FLAGS) $(lib_test_spec)
 
 .PHONY: watch
 watch: node_modules
@@ -125,7 +118,7 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	$(nodemon) -e ts --watch src --watch test --watch Makefile --watch package.json --exec 'npm test'
+	nodemon -e ts --watch src --watch test --watch Makefile --watch package.json --exec 'npm test'
 
 ###############
 # build targets
@@ -138,7 +131,7 @@ $(capnp_out): %.ts: %.capnp
 	@echo compiling capnp schemas
 	@echo =======================
 	@echo
-	@# $(capnp) compile -o bin/capnpc-ts $< > $@
+	@# capnp compile -o bin/capnpc-ts $< > $@
 	touch $@
 
 # $(lib): $(capnp_out)
@@ -148,7 +141,7 @@ $(lib): node_modules
 	@echo compiling capnp-ts library
 	@echo ==========================
 	@echo	
-	$(tsc) $(TSC_FLAGS)
+	tsc $(TSC_FLAGS)
 
 $(lib_test): $(lib)
 $(lib_test): $(test)
@@ -157,7 +150,7 @@ $(lib_test): node_modules
 	@echo compiling tests
 	@echo ===============
 	@echo
-	$(tsc) $(TSC_FLAGS) --outDir lib-test --rootDir test --sourceMap test/index.ts
+	tsc $(TSC_FLAGS) --outDir lib-test --rootDir test --sourceMap test/index.ts
 
 node_modules: package.json
 	npm install
