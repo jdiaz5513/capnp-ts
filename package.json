@@ -40,6 +40,7 @@
     "benchmark": "make benchmark",
     "build": "make build",
     "ci": "make ci",
+    "coverage": "make coverage",
     "prebuild": "make prebuild",
     "prepublish": "make prepublish",
     "test": "make test",

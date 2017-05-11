@@ -19,7 +19,7 @@
 
 ```
 
-![travis ci status](https://travis-ci.org/jdiaz5513/capnp-ts.svg?branch=master)
+![travis ci](https://travis-ci.org/jdiaz5513/capnp-ts.svg?branch=master) [![codecov](https://codecov.io/gh/jdiaz5513/capnp-ts/branch/master/graph/badge.svg)](https://codecov.io/gh/jdiaz5513/capnp-ts)
 
 ## Overview
 

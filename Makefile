@@ -11,8 +11,9 @@ SHELL := bash
 #####################
 # environment options
 
-TAP_FLAGS += -j8
-TSC_FLAGS +=
+CODECOV_FLAGS ?= --disable=gcov
+TAP_FLAGS ?= -j8
+TSC_FLAGS ?=
 
 ##############
 # binary paths
@@ -68,15 +69,13 @@ build: $(lib)
 capnp-compile: $(capnp_out)
 
 .PHONY: ci
-ci: TAP_FLAGS += --cov
 ci: lint
-ci: test
+ci: coverage
 	@echo
 	@echo uploading coverage report
 	@echo =========================
 	@echo
-	$(tap) --coverage-report=lcov
-	$(codecov) --disable=gcov
+	$(codecov) $(CODECOV_FLAGS)
 
 .PHONY: clean
 clean:
@@ -85,6 +84,15 @@ clean:
 	@echo ========
 	@echo
 	rm -rf .nyc-output coverage lib lib-test
+
+.PHONY: coverage
+coverage: TAP_FLAGS += --cov
+coverage: test
+	@echo
+	@echo generating coverage report
+	@echo ==========================
+	@echo
+	$(tap) --coverage-report=lcov
 
 .PHONY: lint
 lint: node_modules
