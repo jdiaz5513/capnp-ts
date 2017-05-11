@@ -89,6 +89,7 @@ prebuild: lint
 prepublish: build
 
 .PHONY: test
+test: lint
 test: node_modules
 test: $(lib_test)
 	@echo
