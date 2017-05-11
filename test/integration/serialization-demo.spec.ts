@@ -6,7 +6,7 @@ import * as capnp from '../../lib';
 import {compareBuffers, readFileBuffer, tap} from '../util';
 import {AddressBook, Person} from './serialization-demo';
 
-const EXPECTED_OUT = readFileBuffer('test/data/serialization-demo.bin');
+const SERIALIZATION_DEMO = readFileBuffer('test/data/serialization-demo.bin');
 
 tap.test('write address book', (t) => {
 
@@ -67,9 +67,64 @@ tap.test('write address book', (t) => {
 
   t.comment('should not crash while setting void union');
 
-  const out = message.writeToArrayBuffer();
+  const out = message.toArrayBuffer();
 
-  compareBuffers(t, out, EXPECTED_OUT);
+  compareBuffers(t, out, SERIALIZATION_DEMO);
+
+  t.end();
+
+});
+
+tap.test('read address book', (t) => {
+
+  // Normally this is silly, but we're sure that this .bin file only contains a single segment.
+
+  const message = new capnp.Message(capnp.Message.getFramedSegments(SERIALIZATION_DEMO)[0]);
+
+  const addressBook = message.getRoot(AddressBook);
+
+  const people = addressBook.getPeople();
+
+  t.equal(people.getLength(), 2);
+
+  const alice = people.get(0);
+
+  t.equal(alice.getId(), 456);
+  t.equal(alice.getName(), 'Alice');
+  t.equal(alice.getEmail(), 'alice@example.com');
+
+  const alicePhones = alice.getPhones();
+
+  t.equal(alicePhones.getLength(), 1);
+
+  t.equal(alicePhones.get(0).getNumber(), '555-1212');
+  t.equal(alicePhones.get(0).getType(), Person.PhoneNumber.Type.MOBILE);
+
+  const aliceEmployment = alice.getEmployment();
+
+  t.equal(aliceEmployment.which(), Person.Employment.SCHOOL);
+  t.ok(aliceEmployment.isSchool());
+  t.equal(aliceEmployment.getSchool(), 'MIT');
+
+  const bob = people.get(1);
+
+  t.equal(bob.getId(), 456);
+  t.equal(bob.getName(), 'Bob');
+  t.equal(bob.getEmail(), 'bob@example.com');
+
+  const bobPhones = bob.getPhones();
+
+  t.equal(bobPhones.getLength(), 2);
+
+  t.equal(bobPhones.get(0).getNumber(), '555-4567');
+  t.equal(bobPhones.get(0).getType(), Person.PhoneNumber.Type.HOME);
+  t.equal(bobPhones.get(1).getNumber(), '555-7654');
+  t.equal(bobPhones.get(1).getType(), Person.PhoneNumber.Type.WORK);
+
+  const bobEmployment = bob.getEmployment();
+
+  t.equal(bobEmployment.which(), Person.Employment.UNEMPLOYED);
+  t.ok(bobEmployment.isUnemployed());
 
   t.end();
 

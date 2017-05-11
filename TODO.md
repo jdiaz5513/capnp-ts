@@ -2,7 +2,7 @@
 
 * [X] ~~*Make sure basic docstrings are in place for all modules.*~~
 * [X] ~~*Get address book write test working.*~~
-* [ ] Get address book read test working.
+* [X] ~~*Get address book read test working.*~~
 * [ ] Implement entire Struct and List API.
 * [ ] Consider monorepo structure (`capnp-ts`, `capnpc-ts`, `capnp-ts-websocket-demo`, `capnp-ts-xhr-demo`).
 * [ ] Implement/test schema compiler.
