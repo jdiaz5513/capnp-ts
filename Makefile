@@ -80,7 +80,7 @@ clean:
 	rm -rf .nyc-output coverage lib lib-test
 
 .PHONY: coverage
-coverage: TAP_FLAGS += --cov
+coverage: TAP_FLAGS += --cov --nyc-arg='-x=lib-test/**/*'
 coverage: test
 	@echo
 	@echo generating coverage report
