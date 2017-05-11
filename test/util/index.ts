@@ -42,32 +42,36 @@ export function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: Arr
 
 }
 
+// LINT: This is benchmark code, not library code. This does not run as part of the test suite.
+/* tslint:disable:no-console only-arrow-functions no-invalid-this */
 export function logBench(suite: Suite) {
 
-  // LINT: This is benchmark code, not library code.
-  /* tslint:disable:no-console only-arrow-functions no-invalid-this */
+  return suite
 
-  return suite.on('start', function() {
+    .on('start', function() {
 
-    console.log(`\nStarting benchmark: ${this.name}`);
+      console.log(`\nStarting benchmark: ${this.name}`);
 
-  }).on('cycle', (ev) => {
+    })
 
-    console.log(String(ev.target));
+    .on('cycle', (ev) => {
 
-  }).on('complete', function() {
+      console.log(String(ev.target));
 
-    const name = this.name as string;
-    const fastest = this.filter('fastest');
-    const slowest = this.filter('slowest');
-    const ratio = fastest.map('hz') / slowest.map('hz');
-    console.log(`Fastest ${name} is ${fastest.map('name')} (${ratio.toFixed(3)}x faster)`);
+    })
 
-  });
+    .on('complete', function() {
 
-  /* tslint:enable:no-console only-arrow-functions no-invalid-this */
+      const name = this.name as string;
+      const fastest = this.filter('fastest');
+      const slowest = this.filter('slowest');
+      const ratio = fastest.map('hz') / slowest.map('hz');
+      console.log(`Fastest ${name} is ${fastest.map('name')} (${ratio.toFixed(3)}x faster)`);
+
+    });
 
 }
+/* tslint:enable:no-console only-arrow-functions no-invalid-this */
 
 export function readFileBuffer(path: string): ArrayBuffer {
 
