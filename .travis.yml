@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - "node"
+  - "iojs"
+  - "7"
+  - "6"
+  - "5"
+  - "4"
+
+# We'll need this gcc config down the road to support building the capnpc binary.
+
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
