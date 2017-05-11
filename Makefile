@@ -87,8 +87,6 @@ prebuild: lint
 
 .PHONY: prepublish
 prepublish: build
-prepublish: lint
-prepublish: test
 
 .PHONY: test
 test: node_modules
