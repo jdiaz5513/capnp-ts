@@ -5,7 +5,7 @@
 import initTrace from 'debug';
 
 import {MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN} from '../constants';
-import {SEG_SIZE_OVERFLOW} from '../errors';
+import {SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW} from '../errors';
 import {Int64, Uint64} from '../types';
 import {checkSizeOverflow, format, padToWord} from '../util';
 import {Message} from './message';
@@ -18,7 +18,16 @@ export class Segment implements DataView {
 
   buffer: ArrayBuffer;
 
+  /** The number of bytes currently allocated in the segment. */
+
   byteLength: number;
+
+  /**
+   * This value should always be zero. It's only here to satisfy the DataView interface.
+   *
+   * In the future the Segment implementation (or a child class) may allow accessing the buffer from a nonzero offset,
+   * but that adds a lot of extra arithmetic.
+   */
 
   byteOffset: number;
 
@@ -26,20 +35,28 @@ export class Segment implements DataView {
 
   readonly message: Message;
 
-  private readonly _dv: DataView;
+  private _dv: DataView;
 
-  constructor(id: number, message: Message, buffer: ArrayBuffer) {
+  constructor(id: number, message: Message, buffer: ArrayBuffer, byteLength=0) {
 
     this.id = id;
     this.message = message;
     this.buffer = buffer;
     this._dv = new DataView(buffer);
 
-    this.byteLength = buffer.byteLength;
     this.byteOffset = 0;
+    this.byteLength = byteLength;
 
   }
 
+
+  /**
+   * Attempt to allocate the requested number of bytes in this segment. If this segment is full this method will return
+   * a pointer to freshly allocated space in another segment from the same message.
+   *
+   * @param {number} byteLength The number of bytes to allocate, will be rounded up to the nearest word.
+   * @returns {Pointer} A pointer to the newly allocated space.
+   */
 
   allocate(byteLength: number): Pointer {
 
@@ -51,9 +68,9 @@ export class Segment implements DataView {
 
     if (!segment.hasCapacity(byteLength)) segment = segment.message.allocateSegment(byteLength);
 
-    const byteOffset = segment.byteOffset;
+    const byteOffset = segment.byteLength;
 
-    segment.byteOffset = checkSizeOverflow(segment.byteOffset + byteLength);
+    segment.byteLength = checkSizeOverflow(segment.byteLength + byteLength);
 
     trace('Allocated %x bytes in %s (requested segment: %s).', byteLength, this, segment);
 
@@ -72,6 +89,18 @@ export class Segment implements DataView {
   fillZeroWords(byteOffset: number, wordLength: number): void {
 
     new Float64Array(this.buffer, byteOffset, wordLength * 8).fill(0);
+
+  }
+
+  /**
+   * Get the total number of bytes available in this segment (the size of its underlying buffer).
+   *
+   * @returns {number} The total number of bytes this segment can hold.
+   */
+
+  getCapacity(): number {
+
+    return this.buffer.byteLength;
 
   }
 
@@ -208,9 +237,9 @@ export class Segment implements DataView {
 
   hasCapacity(byteLength: number): boolean {
 
-    // Test `capacity - allocated >= requested`.
+    // capacity - allocated >= requested
 
-    return this.byteLength - this.byteOffset >= byteLength;
+    return this.buffer.byteLength - this.byteLength >= byteLength;
 
   }
 
@@ -232,6 +261,23 @@ export class Segment implements DataView {
 
   }
 
+
+  /**
+   * Swap out this segment's underlying buffer with a new one. It's assumed that the new buffer has the same content but
+   * more free space, otherwise all existing pointers to this segment will be hilariously broken.
+   *
+   * @param {ArrayBuffer} buffer The new buffer to use.
+   * @returns {void}
+   */
+
+  replaceBuffer(buffer: ArrayBuffer): void {
+
+    if (buffer.byteLength < this.byteLength) throw new Error(SEG_REPLACEMENT_BUFFER_TOO_SMALL);
+
+    this._dv = new DataView(buffer);
+    this.buffer = buffer;
+
+  }
 
   /**
    * Write a float32 value to the specified offset.
@@ -398,7 +444,8 @@ export class Segment implements DataView {
 
   toString() {
 
-    return `Segment_id:${this.id},len:0x${this.byteLength.toString(16)},alloc:0x${this.byteOffset.toString(16)}`;
+    return format('Segment_id:%d,off:%a,len:%a,cap:%a', this.id, this.byteLength, this.byteOffset,
+                  this.buffer.byteLength);
 
   }
 

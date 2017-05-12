@@ -3,7 +3,7 @@
  */
 
 // LINT: a lot of the util functions need the any type.
-/* tslint:disable:no-any */
+/* tslint:disable:no-any no-unsafe-any */
 
 import initTrace from 'debug';
 import {TextDecoder, TextEncoder} from 'utf8-encoding';

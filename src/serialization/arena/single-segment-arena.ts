@@ -9,6 +9,7 @@ import {SEG_GET_NON_ZERO_SINGLE, SEG_NOT_WORD_ALIGNED} from '../../errors';
 import {format, padToWord} from '../../util';
 import {Segment} from '../segment';
 import {Arena} from './arena';
+import {ArenaAllocationResult} from './arena-allocation-result';
 
 const trace = initTrace('capnp:arena:single');
 trace('load');
@@ -29,11 +30,11 @@ export class SingleSegmentArena extends Arena {
 
   }
 
-  allocate(minSize: number, segments: {[id: number]: Segment}): [number, ArrayBuffer] {
+  allocate(minSize: number, segments: Segment[]): ArenaAllocationResult {
 
     trace('Allocating %x bytes for segment 0 in %s.', minSize, this);
 
-    const srcBuffer = segments[0] ? segments[0].buffer : this._buffer;
+    const srcBuffer = segments.length > 0 ? segments[0].buffer : this._buffer;
 
     if (minSize < MIN_SINGLE_SEGMENT_GROWTH) {
 
@@ -51,7 +52,7 @@ export class SingleSegmentArena extends Arena {
     // at a time.
     new Float64Array(this._buffer).set(new Float64Array(srcBuffer));
 
-    return [0, this._buffer];
+    return new ArenaAllocationResult(0, this._buffer);
 
   }
 

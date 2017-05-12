@@ -24,8 +24,6 @@ export const INVARIANT_UNREACHABLE_CODE = 'Unreachable code detected.';
 
 export const MSG_NO_SEGMENTS_IN_ARENA = 'Attempted to preallocate a message with no segments in the arena.';
 export const MSG_PACK_NOT_WORD_ALIGNED = 'Attempted to pack a message that was not word-aligned.';
-export const MSG_SEGMENT_HAS_DATA = 'Attempted to create a new message with an arena that already has data in it.';
-export const MSG_SEGMENT_ID_TOO_LARGE = 'Segment ID %X exceeds the maximum 32-bit integer value.';
 export const MSG_SEGMENT_OUT_OF_BOUNDS = 'Segment ID %X is out of bounds for message %s.';
 export const MSG_SEGMENT_TOO_SMALL = 'First segment must have at least enough room to hold the root pointer (8 bytes).';
 
@@ -78,6 +76,8 @@ export const RANGE_UINT32_OVERFLOW = '32-bit unsigned integer overflow detected.
 export const SEG_BUFFER_NOT_ALLOCATED = 'allocate() needs to be called at least once before getting a buffer.';
 export const SEG_GET_NON_ZERO_SINGLE = 'Attempted to get a segment other than 0 (%d) from a single segment arena.';
 export const SEG_NOT_WORD_ALIGNED = 'Segment buffer length %d is not a multiple of 8.';
+export const SEG_REPLACEMENT_BUFFER_TOO_SMALL =
+  'Attempted to replace a segment buffer with one that is smaller than the allocated space.';
 export const SEG_SIZE_OVERFLOW = `Requested size %x exceeds maximum value (${MAX_SEGMENT_LENGTH}).`;
 
 // Custom error messages for the built-in `TypeError` class.

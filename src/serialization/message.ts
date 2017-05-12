@@ -4,18 +4,10 @@
 
 import initTrace from 'debug';
 
-import {DEFAULT_BUFFER_SIZE, MAX_UINT32} from '../constants';
-import {
-  INVARIANT_UNREACHABLE_CODE,
-  MSG_NO_SEGMENTS_IN_ARENA,
-  MSG_SEGMENT_HAS_DATA,
-  MSG_SEGMENT_ID_TOO_LARGE,
-  MSG_SEGMENT_OUT_OF_BOUNDS,
-  MSG_SEGMENT_TOO_SMALL,
-  NOT_IMPLEMENTED,
-} from '../errors';
+import {DEFAULT_BUFFER_SIZE} from '../constants';
+import {MSG_NO_SEGMENTS_IN_ARENA, MSG_SEGMENT_OUT_OF_BOUNDS, MSG_SEGMENT_TOO_SMALL} from '../errors';
 import {format, pad, padToWord, repeat} from '../util';
-import {Arena, SingleSegmentArena} from './arena';
+import {Arena, MultiSegmentArena, SingleSegmentArena} from './arena';
 import {pack, unpack} from './packing';
 import {PointerType} from './pointers';
 import {Struct, StructCtor} from './pointers';
@@ -24,98 +16,64 @@ import {Segment} from './segment';
 const trace = initTrace('capnp:message');
 trace('load');
 
-export type MessageSource = Arena | ArrayBuffer | ArrayBuffer[];
-
 export class Message {
 
   private readonly _arena: Arena;
 
-  private _firstSegment?: Segment;
-
-  private _segments?: Segment[];
+  private _segments: Segment[];
 
   /**
-   * Creates a new Message, optionally preallocating its segments from existing data.
+   * Creates a new Message, optionally using a provided arena for segment allocation.
    *
-   * When dealing with packed data, use the `Message.fromPacked*` factory methods instead.
+   * When dealing with existing data, use the `Message.from*` factory methods instead.
    *
    * @constructor {Message}
-   * @param {MessageSource} [source=new SingleSegmentArena()] The message source. If an ArrayBuffer or array of
-   * ArrayBuffers is provided, the message will be preallocated with the existing buffer data. This is the first step to
-   * read from an unpacked message buffer. If an Arena is provided instead, that arena will be used for segment
-   * allocation and the message will be empty. A message will be created with an empty SingleSegmentArena if no source
-   * is provided.
+   * @param {Arena} [arena=new SingleSegmentArena()] The arena to use for allocating new segments.
    */
 
-  constructor(source: MessageSource = new SingleSegmentArena()) {
+  constructor(arena: Arena = new SingleSegmentArena()) {
 
-    if (source instanceof ArrayBuffer) {
-
-      this._arena = new SingleSegmentArena(source);
-      this._preallocateSegments();
-
-    } else if (source instanceof Array) {
-
-      // this._arena = new MultiSegmentArena(source);
-      // this._preallocateSegments();
-
-      throw new Error(format(NOT_IMPLEMENTED, 'new Message(ArrayBuffer[])'));
-
-    } else {
-
-      let firstSegment: Segment;
-
-      this._arena = source;
-
-      // When passing in an Arena as the source we expect it to be empty.
-
-      switch (this._arena.getNumSegments()) {
-
-        case 0:
-
-          firstSegment = this._allocateSegment(DEFAULT_BUFFER_SIZE);
-
-          break;
-
-        case 1:
-
-          firstSegment = this.getSegment(0);
-
-          if (firstSegment.byteOffset !== 0) throw new Error(MSG_SEGMENT_HAS_DATA);
-
-          if (!firstSegment.hasCapacity(8)) throw new Error(MSG_SEGMENT_TOO_SMALL);
-
-          break;
-
-        default:
-
-          throw new Error(MSG_SEGMENT_HAS_DATA);
-
-      }
-
-      // Allocate the root pointer.
-
-      if (this._firstSegment === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
-
-      this._firstSegment.allocate(8);
-
-    }
+    this._arena = arena;
+    this._segments = [];
 
     trace('Instantiated message %s.', this);
 
   }
 
   /**
+   * Read a message from an uncompressed array buffer. This buffer must contain segment framing headers.
+   *
+   * This is what you'd use to read a message written with `toArrayBuffer()`.
+   *
+   * @static
+   * @param {ArrayBuffer} unpacked The unpacked message as a single array buffer.
+   * @returns {Message} A new message instance.
+   */
+
+  static fromArrayBuffer(unpacked: ArrayBuffer): Message {
+
+    const message = new this(new MultiSegmentArena(this.getFramedSegments(unpacked)));
+
+    message._preallocateSegments();
+
+    return message;
+
+  }
+
+  /**
    * Read a message from a packed array buffer. This packed buffer must contain segment framing headers.
+   *
+   * This is most likely the function you want to use if you're reading a message from a buffer, particularly if it was
+   * written with `toPackedArrayBuffer()`.
    *
    * @static
    * @param {ArrayBuffer} packed The packed message.
    * @returns {Message} A new message instance.
    */
 
-  static fromPackedBuffer(packed: ArrayBuffer): Message {
+  static fromPackedArrayBuffer(packed: ArrayBuffer): Message {
 
-    return new this(this.getFramedSegments(unpack(packed)));
+    return this.fromArrayBuffer(unpack(packed));
 
   }
 
@@ -131,7 +89,26 @@ export class Message {
 
   static fromPackedUnframedBuffer(packed: ArrayBuffer): Message {
 
-    return new this(unpack(packed));
+    return this.fromSegmentBuffer((unpack(packed)));
+
+  }
+
+  /**
+   * Create a new message from an array buffer containing a single unpacked segment. Great for reading canonical
+   * messages without a framing header.
+   *
+   * @static
+   * @param {ArrayBuffer} buffer A buffer containing the raw segment data.
+   * @returns {Message} A new message instance.
+   */
+
+  static fromSegmentBuffer(buffer: ArrayBuffer): Message {
+
+    const message = new this(new SingleSegmentArena(buffer));
+
+    message._preallocateSegments();
+
+    return message;
 
   }
 
@@ -175,41 +152,51 @@ export class Message {
 
   allocateSegment(byteLength: number): Segment {
 
-    if (this._firstSegment === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
+    trace('Need to allocate %x bytes from the arena for %s.', byteLength, this);
 
-    if (this._segments === undefined) {
+    const res = this._arena.allocate(byteLength, this._segments);
 
-      this._segments = [];
-      this._segments[0] = this._firstSegment;
+    if (res.id === this._segments.length) {
+
+      // Note how we're only allowing new segments in if they're exactly the next one in the array. There is no logical
+      // reason for segments to be created out of order.
+
+      this._segments.push(new Segment(res.id, this, res.buffer));
+
+    } else if (res.id < 0 || res.id > this._segments.length) {
+
+      throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, res.id, this));
+
+    } else {
+
+      this._segments[res.id].replaceBuffer(res.buffer);
 
     }
 
-    const [id, buffer] = this._arena.allocate(byteLength, this._segments);
-
-    if (id > MAX_UINT32) throw new Error(format(MSG_SEGMENT_ID_TOO_LARGE, id));
-
-    return this._setSegment(id, buffer);
+    return this._segments[res.id];
 
   }
+
+  /**
+   * Create a pretty-printed string dump of this message; incredibly useful for debugging.
+   *
+   * WARNING: Do not call this method on large messages!
+   *
+   * @returns {string} A big steaming pile of pretty hex digits.
+   */
 
   dump(): string {
 
     let r = '';
 
-    if (this._segments === undefined) {
-
-      if (this._firstSegment === undefined) return '\n================\nNo Segments\n================\n';
-
-      this._segments = [this._firstSegment];
-
-    }
+    if (this._segments.length === 0) return '\n================\nNo Segments\n================\n';
 
     for (let i = 0; i < this._segments.length; i++) {
 
       r += `\n================\nSegment #${i}\n================\n`;
 
-      const {buffer, byteOffset} = this._segments[i];
-      const b = new Uint8Array(buffer, 0, byteOffset);
+      const {buffer, byteLength} = this._segments[i];
+      const b = new Uint8Array(buffer, 0, byteLength);
 
       for (let j = 0; j < b.byteLength; j += 16) {
 
@@ -262,19 +249,51 @@ export class Message {
 
   }
 
+  /**
+   * Get a segment by its id.
+   *
+   * This will lazily allocate the first segment if it doesn't already exist.
+   *
+   * @param {number} id The segment id.
+   * @returns {Segment} The requested segment.
+   */
+
   getSegment(id: number): Segment {
 
-    if (id < 0 || id >= this._arena.getNumSegments()) {
+    const segmentLength = this._segments.length;
 
-      throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, this, id));
+    if (id === 0 && segmentLength === 0) {
+
+      // Segment zero is special. If we have no segments in the arena we'll want to allocate a new one and leave room
+      // for the root pointer.
+
+      const arenaSegments = this._arena.getNumSegments();
+
+      if (arenaSegments === 0) {
+
+        this.allocateSegment(DEFAULT_BUFFER_SIZE);
+
+      } else {
+
+        // Okay, the arena already has a buffer we can use. This is totally fine.
+
+        this._segments[0] = new Segment(0, this, this._arena.getBuffer(0));
+
+      }
+
+      if (!this._segments[0].hasCapacity(8)) throw new Error(MSG_SEGMENT_TOO_SMALL);
+
+      // This will leave room for the root pointer.
+
+      this._segments[0].allocate(8);
+
+      return this._segments[0];
 
     }
 
-    const s = this._getSegment(id);
+    if (id < 0 || id >= segmentLength) throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, this, id));
 
-    if (s !== undefined) return s;
-
-    return this._setSegment(id, this._arena.getBuffer(id));
+    return this._segments[id];
 
   }
 
@@ -304,17 +323,26 @@ export class Message {
 
   }
 
+  /**
+   * Combine the contents of this message's segments into a single array buffer and prepend a stream framing header
+   * containing information about the following segment data.
+   *
+   * @returns {ArrayBuffer} An ArrayBuffer with the contents of this message.
+   */
+
   toArrayBuffer(): ArrayBuffer {
 
-    if (this._segments === undefined) return new ArrayBuffer(0);
-
     const streamFrame = this._getStreamFrame();
+
+    // Make sure the first segment is allocated.
+
+    if (this._segments.length === 0) this.getSegment(0);
 
     const segments = this._segments;
 
     // Add space for the stream framing.
 
-    const totalLength = streamFrame.byteLength + segments.reduce((l, s) => l + padToWord(s.byteOffset), 0);
+    const totalLength = streamFrame.byteLength + segments.reduce((l, s) => l + padToWord(s.byteLength), 0);
     const out = new Uint8Array(new ArrayBuffer(totalLength));
     let o = streamFrame.byteLength;
 
@@ -322,7 +350,7 @@ export class Message {
 
     segments.forEach((s) => {
 
-      const segmentLength = padToWord(s.byteOffset);
+      const segmentLength = padToWord(s.byteLength);
       out.set(new Uint8Array(s.buffer, 0, segmentLength), o);
 
       o += segmentLength;
@@ -333,68 +361,31 @@ export class Message {
 
   }
 
+  /**
+   * Like `toArrayBuffer()`, but also applies the packing algorithm to the output. This is typically what you want to
+   * use if you're sending the message over a network link or other slow I/O interface where size matters.
+   *
+   * @returns {ArrayBuffer} A packed message.
+   */
+
   toPackedArrayBuffer(): ArrayBuffer {
 
     return pack(this.toArrayBuffer());
 
   }
 
-  private _allocateSegment(_byteLength: number): Segment {
+  /**
+   * This method is called on messages that were constructed with existing data to prepopulate the segments array with
+   * everything we can find in the arena. Each segment will have it's `byteLength` set to the size of its buffer.
+   *
+   * Technically speaking, the message's segments will be "full" after calling this function. Calling this on your own
+   * may void your warranty.
+   *
+   * @protected
+   * @returns {void}
+   */
 
-    throw new Error(format(NOT_IMPLEMENTED, 'Message.prototype._allocateSegment'));
-
-  }
-
-  private _getSegment(id: number): Segment|undefined {
-
-    if (this._segments === undefined) {
-
-      if (id === 0 && this._firstSegment) return this._firstSegment;
-
-      return undefined;
-
-    }
-
-    return this._segments[id];
-
-  }
-
-  private _getStreamFrame(): ArrayBuffer {
-
-    if (this._segments === undefined) {
-
-      if (!this._firstSegment) {
-
-        // Just return a single zero word for the frame header.
-
-        return new Float64Array(1).buffer;
-
-      }
-
-      this._segments = [this._firstSegment];
-
-    }
-
-    const frameLength = 4 + this._segments.length * 4 + (1 - this._segments.length % 2) * 4;
-    const out = new DataView(new ArrayBuffer(frameLength));
-
-    trace('Writing message stream frame with segment count: %d.', this._segments.length);
-
-    out.setUint32(0, this._segments.length - 1, true);
-
-    this._segments.forEach((s, i) => {
-
-      trace('Message segment %d word count: %d.', s.id, s.byteOffset / 8);
-
-      out.setUint32(i * 4 + 4, s.byteOffset / 8, true);
-
-    });
-
-    return out.buffer;
-
-  }
-
-  private _preallocateSegments(): void {
+  protected _preallocateSegments(): void {
 
     const numSegments = this._arena.getNumSegments();
 
@@ -407,57 +398,42 @@ export class Message {
       // Set up each segment so that they're fully allocated to the extents of the existing buffers.
 
       const buffer = this._arena.getBuffer(i);
-      const segment = new Segment(i, this, buffer);
-      segment.byteLength = buffer.byteLength;
-      segment.byteOffset = buffer.byteLength;
+      const segment = new Segment(i, this, buffer, buffer.byteLength);
 
       this._segments[i] = segment;
 
     }
 
-    this._firstSegment = this._segments[0];
-
   }
 
-  private _setSegment(id: number, buffer: ArrayBuffer): Segment {
+  private _getStreamFrame(): ArrayBuffer {
 
-    if (this._segments === undefined) {
+    const length = this._segments.length;
 
-      if (id === 0) {
+    if (length === 0) {
 
-        trace('Initializing first segment in %s.', this);
+      // Don't bother allocating the first segment, just return a single zero word for the frame header.
 
-        this._firstSegment = new Segment(id, this, buffer);
-        return this._firstSegment;
-
-      }
-
-      trace('Lazily allocating segment map in %s.', this);
-
-      this._segments = [];
-
-      if (this._firstSegment === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
-
-      this._segments[0] = this._firstSegment;
-
-    } else if (this._segments[id]) {
-
-      trace('Reallocating existing segment %d in %s.', id, this);
-
-      this._segments[id].buffer = buffer;
-      this._segments[id].byteLength = buffer.byteLength;
-
-      return this._segments[id];
+      return new Float64Array(1).buffer;
 
     }
 
-    trace('Adding segment %d to %s', id, this);
+    const frameLength = 4 + length * 4 + (1 - length % 2) * 4;
+    const out = new DataView(new ArrayBuffer(frameLength));
 
-    const s = new Segment(id, this, buffer);
+    trace('Writing message stream frame with segment count: %d.', length);
 
-    this._segments[id] = s;
+    out.setUint32(0, length - 1, true);
 
-    return s;
+    this._segments.forEach((s, i) => {
+
+      trace('Message segment %d word count: %d.', s.id, s.byteLength / 8);
+
+      out.setUint32(i * 4 + 4, s.byteLength / 8, true);
+
+    });
+
+    return out.buffer;
 
   }
 

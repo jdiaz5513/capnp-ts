@@ -53,7 +53,7 @@ export class Uint64 {
 
     if (noCopy) return new this(new Uint8Array(source.buffer, source.byteOffset + offset, 8));
 
-    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteOffset + offset + 8)));
+    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteLength + offset + 8)));
 
   }
 

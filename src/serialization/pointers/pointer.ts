@@ -63,7 +63,7 @@ export class Pointer {
 
     if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
 
-    if (byteOffset < 0 || byteOffset > segment.byteOffset - 8) {
+    if (byteOffset < 0 || byteOffset > segment.byteLength - 8) {
 
       throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
 

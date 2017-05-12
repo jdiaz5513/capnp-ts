@@ -35,7 +35,7 @@ const deeplyNested = new Suite('iteration over deeply nested lists')
 
   .add('capnp.Message', () => {
 
-    const message = new capnp.Message(messageSegment);
+    const message = capnp.Message.fromSegmentBuffer(messageSegment);
 
     const addressBook = message.getRoot(AddressBook);
 
@@ -63,7 +63,7 @@ const listLength = new Suite('top level list length access')
 
   .add('capnp.Message', () => {
 
-    const message = new capnp.Message(messageSegment);
+    const message = capnp.Message.fromSegmentBuffer(messageSegment);
 
     const addressBook = message.getRoot(AddressBook);
 
@@ -83,7 +83,7 @@ const parse = new Suite('parse')
 
     // Okay, this isn't fair. Cap'n Proto only does "parsing" at access time. :)
 
-    new capnp.Message(messageSegment).getRoot(AddressBook);
+    capnp.Message.fromSegmentBuffer(messageSegment).getRoot(AddressBook);
 
   });
 
