@@ -2,22 +2,35 @@ import {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
 
 import * as capnp from '../../lib';
-import {decodeUtf8, encodeUtf8, pad} from '../../lib/util';
+import {bufferToHex, decodeUtf8, encodeUtf8, pad} from '../../lib/util';
 import {AddressBook} from '../integration/serialization-demo';
 import {logBench, readFileBuffer} from '../util';
 
-const jsonBuffer = readFileBuffer('test/data/serialization-demo.json');
+const jsonBuffer = new Uint8Array(readFileBuffer('test/data/serialization-demo.json'));
 const jsonString = readFileSync('test/data/serialization-demo.json', 'utf-8');
 const messageData = readFileBuffer('test/data/serialization-demo.bin');
 // Let's preprocess it so we have just the raw segment data.
 const messageSegment = capnp.Message.getFramedSegments(messageData)[0];
-const messageString = decodeUtf8(new Uint8Array(messageSegment));
-
-function noop(x: any): void {}
 
 const deeplyNested = new Suite('iteration over deeply nested lists')
 
-  .add('JSON', () => {
+  .add('JSON.parse(decodeUtf8(m))', () => {
+
+    const addressBook = JSON.parse(decodeUtf8(jsonBuffer));
+
+    addressBook.people.forEach((person) => {
+
+      person.phones.forEach((phone) => {
+
+        phone.number.toUpperCase();
+
+      });
+
+    });
+
+  })
+
+  .add('JSON.parse(m)', () => {
 
     const addressBook = JSON.parse(jsonString);
 
@@ -33,7 +46,7 @@ const deeplyNested = new Suite('iteration over deeply nested lists')
 
   })
 
-  .add('capnp.Message', () => {
+  .add('capnp.Message.fromSegmentBuffer(m)', () => {
 
     const message = capnp.Message.fromSegmentBuffer(messageSegment);
 
@@ -53,7 +66,15 @@ const deeplyNested = new Suite('iteration over deeply nested lists')
 
 const listLength = new Suite('top level list length access')
 
-  .add('JSON', () => {
+  .add('JSON.parse(decodeUtf8(m))', () => {
+
+    const addressBook = JSON.parse(decodeUtf8(jsonBuffer));
+
+    addressBook.people.length.toFixed(0);
+
+  })
+
+  .add('JSON.parse(m)', () => {
 
     const addressBook = JSON.parse(jsonString);
 
@@ -61,7 +82,7 @@ const listLength = new Suite('top level list length access')
 
   })
 
-  .add('capnp.Message', () => {
+  .add('capnp.Message.fromSegmentBuffer(m)', () => {
 
     const message = capnp.Message.fromSegmentBuffer(messageSegment);
 
@@ -71,15 +92,21 @@ const listLength = new Suite('top level list length access')
 
   });
 
-const parse = new Suite('parse')
+const parse = new Suite('"parse"')
 
-  .add('JSON', () => {
+  .add('JSON.parse(decodeUtf8(m))', () => {
+
+    JSON.parse(decodeUtf8(jsonBuffer));
+
+  })
+
+  .add('JSON.parse(m)', () => {
 
     JSON.parse(jsonString);
 
   })
 
-  .add('capnp.Message', () => {
+  .add('capnp.Message.fromSegmentBuffer(m).getRoot(A)', () => {
 
     // Okay, this isn't fair. Cap'n Proto only does "parsing" at access time. :)
 
