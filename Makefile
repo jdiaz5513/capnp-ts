@@ -43,7 +43,7 @@ lib_test_spec := $(patsubst test/%.ts,lib-test/%.js,$(test_spec))
 #########
 # exports
 
-export PATH := node_modules/.bin:$(PATH)
+export PATH := $(PATH):node_modules/.bin
 
 ################
 # build commands
