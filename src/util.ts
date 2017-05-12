@@ -6,13 +6,9 @@
 /* tslint:disable:no-any no-unsafe-any */
 
 import initTrace from 'debug';
-import {TextDecoder, TextEncoder} from 'utf8-encoding';
-// LINT: this module doesn't export its typings correctly :(
-/* tslint:disable-next-line:no-import-side-effect */
-import './types/utf8-encoding';
 
 import {MAX_INT32, MAX_SEGMENT_LENGTH, MAX_UINT32} from './constants';
-import {RANGE_INT32_OVERFLOW, RANGE_SIZE_OVERFLOW, RANGE_UINT32_OVERFLOW} from './errors';
+import {RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_SIZE_OVERFLOW, RANGE_UINT32_OVERFLOW} from './errors';
 
 const trace = initTrace('capnp:util');
 trace('load');
@@ -111,12 +107,157 @@ export function checkSizeOverflow(size: number): number {
 
 }
 
-const _decoder = new TextDecoder();
-const _encoder = new TextEncoder();
-export const decodeUtf8: (input?: ArrayBuffer | ArrayBufferView, options?: {}) => string =
-  _decoder.decode.bind(_decoder);
-export const encodeUtf8: (input?: string) => Uint8Array =
-  _encoder.encode.bind(_encoder);
+/**
+ * Decode a UTF-8 encoded byte array into a JavaScript string (UCS-2).
+ *
+ * @export
+ * @param {Uint8Array} src A utf-8 encoded byte array.
+ * @returns {string} A string representation of the byte array.
+ */
+
+export function decodeUtf8(src: Uint8Array): string {
+
+  // This ain't for the faint of heart, kids. If you suffer from seizures, heart palpitations, or have had a history of
+  // stroke you may want to look away now.
+
+  const l = src.byteLength;
+  let dst = '';
+  let i = 0;
+  let cp = 0;
+  let a = 0;
+  let b = 0;
+  let c = 0;
+  let d = 0;
+
+  // Unlike other implementations out there on the net, this one has no `Math`, `%`, `*`, or `/` operations. :)
+
+  while (i < l) {
+
+    a = src[i++];
+
+    if ((a & 0b10000000) === 0) {
+
+      cp = a;
+
+    } else if ((a & 0b11100000) === 0b11000000) {
+
+      if (i + 1 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      b = src[i++];
+
+      if ((b & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
+
+      cp = ((b & 0b00111111) << 5) | (a & 0x00011111);
+
+    } else if ((a & 0b11110000) === 0b11100000) {
+
+      if (i + 2 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      b = src[i++];
+      c = src[i++];
+
+      if ((b & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
+      if ((c & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
+
+      cp = ((c & 0b00111111) << 10) | ((b & 0b00111111) << 4) | (a & 0x00001111);
+
+    } else if ((a & 0b11111000) === 0b11110000) {
+
+      if (i + 3 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      b = src[i++];
+      c = src[i++];
+      d = src[i++];
+
+      if ((b & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
+      if ((c & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
+
+      cp = ((d & 0b00111111) << 15) | ((c & 0b00111111) << 9) | ((b & 0b00111111) << 3) | (a & 0x00001111);
+
+    } else {
+
+      throw new RangeError(RANGE_INVALID_UTF8);
+
+    }
+
+    if (cp < 0) throw new RangeError(RANGE_INVALID_UTF8);
+
+    if (cp <= 0xD7ff || (cp >= 0xe000 && cp <= 0xffff)) {
+
+      dst += String.fromCharCode(cp);
+
+    } else {
+
+      cp -= 0x010000;
+
+      const lo = (cp & 0x03ff) + 0xdc00;
+      const hi = (cp >>> 10) + 0xd800;
+
+      if (lo < 0xdc00 || lo > 0xdfff) throw new RangeError(RANGE_INVALID_UTF8);
+      if (hi < 0xd800 || hi > 0xdbff) throw new RangeError(RANGE_INVALID_UTF8);
+
+      dst += String.fromCharCode(lo, hi);
+
+    }
+
+  }
+
+  return dst;
+
+}
+
+/**
+ * Encode a JavaScript string (UCS-2) to a UTF-8 encoded string inside a Uint8Array.
+ *
+ * Note that the underlying buffer for the array will likely be larger than the actual contents; ignore the extra bytes.
+ *
+ * @export
+ * @param {string} src The input string.
+ * @returns {Uint8Array} A UTF-8 encoded buffer with the string's contents.
+ */
+
+export function encodeUtf8(src: string): Uint8Array {
+
+  const l = src.length;
+  const dst = new Uint8Array(new ArrayBuffer(l * 4));
+  let j = 0;
+
+  for (let i = 0; i < l; i++) {
+
+    const c = src.charCodeAt(i);
+
+    if (c <= 0x7f) {
+
+      dst[j++] = c;
+
+    } else if (c <= 0x07ff) {
+
+      dst[j++] = 0xc0 | (c >>> 6);
+      dst[j++] = 0x80 | (c & 0x3f);
+
+    } else if (c <= 0xffff) {
+
+      dst[j++] = 0xe0 | (c >>> 12);
+      dst[j++] = 0x80 | ((c >>> 6) & 0x3f);
+      dst[j++] = 0x80 | (c & 0x3f);
+
+    } else {
+
+      let k = 4;
+
+      while (c >> (6 * k)) k++;
+
+      dst[j++] = ((0xff00 >>> k) & 0xff) | (c >>> (6 * --k));
+
+      while (k--) dst[j++] = 0x80 | ((c >>> (6 * k)) & 0x3f);
+
+    }
+
+  }
+
+  return dst.subarray(0, j);
+
+}
 
 /**
  * Produce a `printf`-style string. Nice for providing arguments to `assert` without paying the cost for string

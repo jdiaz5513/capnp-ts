@@ -66,6 +66,7 @@ export const PTR_WRONG_STRUCT_PTR_SIZE = 'Attempted to convert %s to a struct wi
 
 export const RANGE_INT32_OVERFLOW = '32-bit signed integer overflow detected.';
 export const RANGE_INT64_UNDERFLOW = 'Buffer is not large enough to hold a word.';
+export const RANGE_INVALID_UTF8 = 'Invalid UTF-8 code sequence detected.';
 export const RANGE_SIZE_OVERFLOW = `Size %x exceeds maximum ${MAX_SEGMENT_LENGTH.toString(16)}.`;
 export const RANGE_UINT32_OVERFLOW = '32-bit unsigned integer overflow detected.';
 
