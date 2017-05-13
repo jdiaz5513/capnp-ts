@@ -47,11 +47,11 @@ export const LIST_SIZE_MASK = 0x00000007;
 
 /** The maximum value for a 32-bit integer. */
 
-export const MAX_INT32 = 0x7FFFFFFF;
+export const MAX_INT32 = 0x7fffffff;
 
 /** The maximum value for a 32-bit unsigned integer. */
 
-export const MAX_UINT32 = 0xFFFFFFFF;
+export const MAX_UINT32 = 0xffffffff;
 
 /** The largest integer that can be precisely represented in JavaScript. */
 
@@ -60,6 +60,10 @@ export const MAX_SAFE_INTEGER = 9007199254740991;
 /** Maximum limit on the number of segments in a message stream. */
 
 export const MAX_STREAM_SEGMENTS = 512;
+
+/** The smallest integer that can be precisely represented in JavaScript. */
+
+export const MIN_SAFE_INTEGER = -9007199254740991;
 
 /** Minimum growth increment for a SingleSegmentArena. */
 
