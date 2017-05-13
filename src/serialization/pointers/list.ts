@@ -89,7 +89,7 @@ export class List<T> extends Pointer {
 
     }
 
-    for (; i < length; i++) res = callbackFn(res, this.get(i), i);
+    for (; i < this.getLength(); i++) res = callbackFn(res, this.get(i), i);
 
     return res;
 
