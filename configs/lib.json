@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "../lib",
+    "rootDir": "../src"
+  },
+  "extends": "./base",
+  "include": [
+    "../src/**/*.ts"
+  ]
+}

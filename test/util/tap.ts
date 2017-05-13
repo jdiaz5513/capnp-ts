@@ -4,7 +4,7 @@
  * @author jdiaz5513
  */
 
-/* tslint:disable:no-any */
+/* tslint:disable:no-any promise-function-async no-unsafe-any no-var-requires */
 
 export declare class Test {
 
@@ -236,8 +236,6 @@ export declare interface Mocha {
  * @author jdiaz5513
  */
 
-import * as __tap from 'tap';
-
-const tap: Tap = __tap as any;
+const tap = require('tap') as Tap;
 
 export default tap;

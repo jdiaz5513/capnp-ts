@@ -77,7 +77,7 @@ tap.test('decodeUtf8()', (t) => {
   });
 
   BAD_UTF8.forEach((b) => {
-    
+
     t.throws(() => decodeUtf8(b), new RangeError(RANGE_INVALID_UTF8));
 
   });

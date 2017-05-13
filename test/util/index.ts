@@ -1,4 +1,4 @@
-import {Suite} from 'benchmark';
+import Benchmark, {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
 import {check, CheckOptions, Property} from 'testcheck';
 
@@ -7,7 +7,7 @@ import {Test} from './tap';
 
 export {default as tap} from './tap';
 
-export function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: ArrayBuffer): Promise<Test> {
+export async function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: ArrayBuffer): Promise<Test> {
 
   return parentTest.test('compare buffers', (t) => {
 
@@ -15,7 +15,13 @@ export function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: Arr
 
     // End the comparison prematurely if the buffer lengths differ.
 
-    if (found.byteLength !== wanted.byteLength) return t.end();
+    if (found.byteLength !== wanted.byteLength) {
+
+      t.end();
+
+      return;
+
+    }
 
     const a = new Uint8Array(found);
     const b = new Uint8Array(wanted);
@@ -44,24 +50,24 @@ export function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: Arr
 }
 
 // LINT: This is benchmark code, not library code. This does not run as part of the test suite.
-/* tslint:disable:no-console only-arrow-functions no-invalid-this */
+/* tslint:disable:no-any no-unsafe-any no-console only-arrow-functions no-invalid-this */
 export function logBench(suite: Suite) {
 
   return suite
 
-    .on('start', function() {
+    .on('start', function(this: any) {
 
       console.log(`\nStarting benchmark: ${this.name}`);
 
     })
 
-    .on('cycle', (ev) => {
+    .on('cycle', (ev: Benchmark.Event) => {
 
       console.log(String(ev.target));
 
     })
 
-    .on('complete', function() {
+    .on('complete', function(this: any) {
 
       const name = this.name as string;
       const fastest = this.filter('fastest');
@@ -72,7 +78,7 @@ export function logBench(suite: Suite) {
     });
 
 }
-/* tslint:enable:no-console only-arrow-functions no-invalid-this */
+/* tslint:enable:no-any no-unsafe-any no-console only-arrow-functions no-invalid-this */
 
 export function readFileBuffer(path: string): ArrayBuffer {
 
@@ -82,10 +88,11 @@ export function readFileBuffer(path: string): ArrayBuffer {
 
 }
 
-export function runTestCheck<TArgs>(parentTest: Test, property: Property<TArgs>, options?: CheckOptions): Promise<Test> {
+export async function runTestCheck<TArgs>(parentTest: Test, property: Property<TArgs>,
+                                          options?: CheckOptions): Promise<Test> {
 
   return parentTest.test('testcheck', (t) => {
-    
+
     const out = check(property, options);
 
     t.equal(out.result, true, `property check failed ${JSON.stringify(out)}`);

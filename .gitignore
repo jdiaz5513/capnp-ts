@@ -46,3 +46,4 @@ jspm_packages
 # Build output
 lib
 lib-test
+.tmp

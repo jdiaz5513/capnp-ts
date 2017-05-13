@@ -39,6 +39,12 @@ src := $(shell find src -name *.ts -print)
 test := $(shell find test -name *.ts -print)
 test_spec := $(shell find test -name *.spec.ts -print)
 
+tsconfig := tsconfig.json configs/base.json
+tsconfig_lib := configs/base.json configs/lib.json
+tsconfig_lib_test := configs/base.json configs/lib-test.json
+
+tslint_config := tslint.json test/tslint.json
+
 ##############
 # output files
 
@@ -62,6 +68,7 @@ benchmark: $(lib_test)
 	@echo ==================
 	@echo
 	node lib-test/benchmark/index.js
+	@echo
 
 .PHONY: build
 build: $(lib)
@@ -76,7 +83,9 @@ ci: coverage
 	@echo uploading coverage report
 	@echo =========================
 	@echo
-	$(codecov) $(CODECOV_FLAGS)
+	@echo codecov $(CODECOV_FLAGS)
+	@$(codecov) $(CODECOV_FLAGS)
+	@echo
 
 .PHONY: clean
 clean:
@@ -84,7 +93,8 @@ clean:
 	@echo cleaning
 	@echo ========
 	@echo
-	rm -rf .nyc-output coverage lib lib-test
+	rm -rf .nyc-output .tmp coverage lib lib-test
+	@echo
 
 .PHONY: coverage
 coverage: TAP_FLAGS += --cov --nyc-arg='-x=lib-test/**/*'
@@ -93,15 +103,21 @@ coverage: test
 	@echo generating coverage report
 	@echo ==========================
 	@echo
-	$(tap) --coverage-report=lcov
+	@echo tap --coverage-report=lcov
+	@$(tap) --coverage-report=lcov
+	@echo
 
 .PHONY: lint
+lint: $(tslint_config)
 lint: node_modules
 	@echo
 	@echo running linter
 	@echo ==============
 	@echo
-	$(tslint) $(TSLINT_FLAGS) src/**/*.ts
+	@echo tslint $(TSLINT_FLAGS) -c tslint.json 'src/**/*.ts'
+	@$(tslint) $(TSLINT_FLAGS) -c tslint.json src/**/*.ts
+	@echo tslint $(TSLINT_FLAGS) -c test/tslint.json 'test/**/*.ts'
+	@$(tslint) $(TSLINT_FLAGS) -c test/tslint.json test/**/*.ts
 
 .PHONY: prebuild
 prebuild: lint
@@ -110,7 +126,6 @@ prebuild: lint
 prepublish: build
 
 .PHONY: test
-test: lint
 test: node_modules
 test: $(lib_test)
 	@echo
@@ -118,6 +133,7 @@ test: $(lib_test)
 	@echo =================
 	@echo
 	@$(tap) $(TAP_FLAGS) $(lib_test_spec)
+	@echo
 
 .PHONY: watch
 watch: node_modules
@@ -125,7 +141,8 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	$(nodemon) -e ts --watch src --watch test --watch Makefile --watch package.json --exec 'npm test'
+	@$(nodemon) -e ts --watch src -w test -w Makefile -w package.json -x 'npm test'
+	@echo	
 
 ###############
 # build targets
@@ -143,22 +160,35 @@ watch: node_modules
 
 # $(lib): $(capnp_out)
 $(lib): $(src)
+$(lib): $(tsconfig_lib)
 $(lib): node_modules
 	@echo
 	@echo compiling capnp-ts library
 	@echo ==========================
-	@echo	
-	$(tsc) $(TSC_FLAGS)
+	@echo
+	@echo tsc $(TSC_FLAGS) -p configs/lib.json
+	@$(tsc) $(TSC_FLAGS) -p configs/lib.json
+	@echo
 
 $(lib_test): $(lib)
 $(lib_test): $(test)
+$(lib_test): $(tsconfig_lib_test)
 $(lib_test): node_modules
 	@echo
 	@echo compiling tests
 	@echo ===============
 	@echo
-	$(tsc) $(TSC_FLAGS) --outDir lib-test --rootDir test --sourceMap test/index.ts
+	@echo tsc $(TSC_FLAGS) -p configs/lib-test.json
+	@$(tsc) $(TSC_FLAGS) -p configs/lib-test.json
+	@echo
+
+lib: $(lib)
+	@touch lib
+
+lib-test: $(lib_test)
+	@touch lib-test
 
 node_modules: package.json
 	npm install
 	@touch node_modules
+	@echo
