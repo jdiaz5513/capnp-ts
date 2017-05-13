@@ -96,7 +96,7 @@ export class Int64 extends Uint64 {
 
       this.buffer[i] = lo & 0xff;
 
-      lo = i === 4 ? hi : lo >>> 8;
+      lo = i === 3 ? hi : lo >>> 8;
 
     }
 

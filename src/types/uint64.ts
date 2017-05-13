@@ -16,6 +16,8 @@ trace('load');
  *
  * You may convert this to a primitive number by calling `toNumber()` but be wary of precision loss!
  *
+ * Note that overflow is not implemented, so negative numbers passed into `setValue()` will be negated first.
+ *
  * The value passed in as the source buffer is expected to be in little-endian format.
  */
 
@@ -133,7 +135,7 @@ export class Uint64 {
     for (let i = 0; i < 8; i++) {
 
       this.buffer[i] = lo & 0xff;
-      lo = i === 4 ? hi : lo >>> 8;
+      lo = i === 3 ? hi : lo >>> 8;
 
     }
 
@@ -192,7 +194,7 @@ export class Uint64 {
 
   toDataView() {
 
-    return new DataView(this.buffer);
+    return new DataView(this.buffer.buffer);
 
   }
 
