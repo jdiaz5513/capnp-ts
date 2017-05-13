@@ -1,7 +1,8 @@
 import {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
+import {check, CheckOptions, Property} from 'testcheck';
 
-import {pad} from '../../lib/util';
+import {bufferToHex, pad} from '../../lib/util';
 import {Test} from './tap';
 
 export {default as tap} from './tap';
@@ -23,10 +24,10 @@ export function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: Arr
 
       if (a[i] !== b[i]) {
 
-        t.fail(`bytes are not equal at offset 0x${pad(i.toString(16), 8)} (found: ${pad(a[i].toString(16), 2)}, ` +
-               `wanted: ${pad(b[i].toString(16), 2)})`);
+        t.fail(`bytes are not equal at offset 0x${pad(i.toString(16), 8)} (found: ${bufferToHex(found)}, wanted: ` +
+               `${bufferToHex(wanted)})`);
 
-        // Don't bother checking the rest.
+        // Don't check any of the other bytes or else we might flood with failures.
 
         t.end();
 
@@ -78,5 +79,19 @@ export function readFileBuffer(path: string): ArrayBuffer {
   const b = readFileSync(path);
 
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+
+}
+
+export function runTestCheck<TArgs>(parentTest: Test, property: Property<TArgs>, options?: CheckOptions): Promise<Test> {
+
+  return parentTest.test('testcheck', (t) => {
+    
+    const out = check(property, options);
+
+    t.equal(out.result, true, `property check failed ${JSON.stringify(out)}`);
+
+    t.end();
+
+  });
 
 }
