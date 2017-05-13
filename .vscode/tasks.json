@@ -26,6 +26,9 @@
       "taskName": "coverage"
     },
     {
+      "taskName": "lib-test"
+    },
+    {
       "taskName": "lint"
     },
     {
