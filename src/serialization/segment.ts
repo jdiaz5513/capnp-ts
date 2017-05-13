@@ -7,7 +7,7 @@ import initTrace from 'debug';
 import {MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN} from '../constants';
 import {SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW} from '../errors';
 import {Int64, Uint64} from '../types';
-import {checkSizeOverflow, format, padToWord} from '../util';
+import {format, padToWord} from '../util';
 import {Message} from './message';
 import {Pointer} from './pointers';
 
@@ -31,6 +31,8 @@ export class Segment implements DataView {
 
   byteOffset: number;
 
+  readonly [Symbol.toStringTag] = 'Segment' as 'DataView';
+
   readonly id: number;
 
   readonly message: Message;
@@ -48,7 +50,6 @@ export class Segment implements DataView {
     this.byteLength = byteLength;
 
   }
-
 
   /**
    * Attempt to allocate the requested number of bytes in this segment. If this segment is full this method will return
@@ -70,7 +71,7 @@ export class Segment implements DataView {
 
     const byteOffset = segment.byteLength;
 
-    segment.byteLength = checkSizeOverflow(segment.byteLength + byteLength);
+    segment.byteLength = segment.byteLength + byteLength;
 
     trace('Allocated %x bytes in %s (requested segment: %s).', byteLength, this, segment);
 
