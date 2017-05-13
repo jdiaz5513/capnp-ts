@@ -1,8 +1,10 @@
+/* tslint:disable:no-unsafe-any no-any */
+
 import {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
 
 import * as capnp from '../../lib';
-import {bufferToHex, decodeUtf8, encodeUtf8, pad} from '../../lib/util';
+import {decodeUtf8} from '../../lib/util';
 import {AddressBook} from '../integration/serialization-demo';
 import {logBench, readFileBuffer} from '../util';
 
@@ -18,9 +20,9 @@ const deeplyNested = new Suite('iteration over deeply nested lists')
 
     const addressBook = JSON.parse(decodeUtf8(jsonBuffer));
 
-    addressBook.people.forEach((person) => {
+    addressBook.people.forEach((person: any) => {
 
-      person.phones.forEach((phone) => {
+      person.phones.forEach((phone: any) => {
 
         phone.number.toUpperCase();
 
@@ -34,9 +36,9 @@ const deeplyNested = new Suite('iteration over deeply nested lists')
 
     const addressBook = JSON.parse(jsonString);
 
-    addressBook.people.forEach((person) => {
+    addressBook.people.forEach((person: any) => {
 
-      person.phones.forEach((phone) => {
+      person.phones.forEach((phone: any) => {
 
         phone.number.toUpperCase();
 
