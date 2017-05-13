@@ -7,8 +7,8 @@
 
 import initTrace from 'debug';
 
-import {MAX_INT32, MAX_SEGMENT_LENGTH, MAX_UINT32} from './constants';
-import {RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_SIZE_OVERFLOW, RANGE_UINT32_OVERFLOW} from './errors';
+import {MAX_INT32, MAX_UINT32} from './constants';
+import {RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_UINT32_OVERFLOW} from './errors';
 
 const trace = initTrace('capnp:util');
 trace('load');
@@ -16,36 +16,15 @@ trace('load');
 // Set up custom debug formatters.
 
 /* tslint:disable:no-string-literal */
+/* istanbul ignore next */
 initTrace.formatters['h'] = (v: any) => v.toString('hex');
+/* istanbul ignore next */
 initTrace.formatters['x'] = (v: any) => `0x${v.toString(16)}`;
+/* istanbul ignore next */
 initTrace.formatters['a'] = (v: any) => `0x${pad(v.toString(16), 8)}`;
+/* istanbul ignore next */
 initTrace.formatters['X'] = (v: any) => `0x${v.toString(16).toUpperCase()}`;
 /* tslint:enable:no-string-literal */
-
-/**
- * Enables the mixin pattern on a class by allowing the class to implement multiple parent classes; call
- * `applyMixins()` on the subclass to add all of the prototype methods to it. Prototype methods with conflicting names
- * are overridden from left to right.
- *
- * @export
- * @param {*} derivedCtor The subclass to extend.
- * @param {any[]} baseCtors An array of parent classes to inherit from.
- * @returns {void}
- */
-
-export function applyMixins(derivedCtor: any, baseCtors: any[]) {
-
-  baseCtors.forEach((baseCtor) => {
-
-    Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
-
-      derivedCtor.prototype[name] = baseCtor.prototype[name];
-
-    });
-
-  });
-
-}
 
 /**
  * Dump a hex string from the given buffer.
@@ -91,23 +70,6 @@ export function checkUint32(value: number): number {
 }
 
 /**
- * Throw an error if the provided size (in bytes) is greater than the allowed limit, or return the same number
- * otherwise.
- *
- * @export
- * @param {number} size The size to check.
- * @returns {number} The same size, if it is valid.
- */
-
-export function checkSizeOverflow(size: number): number {
-
-  if (size > MAX_SEGMENT_LENGTH) throw new RangeError(format(RANGE_SIZE_OVERFLOW, size));
-
-  return size;
-
-}
-
-/**
  * Decode a UTF-8 encoded byte array into a JavaScript string (UCS-2).
  *
  * @export
@@ -129,8 +91,6 @@ export function decodeUtf8(src: Uint8Array): string {
   let c = 0;
   let d = 0;
 
-  // Unlike other implementations out there on the net, this one has no `Math`, `%`, `*`, or `/` operations. :)
-
   while (i < l) {
 
     a = src[i++];
@@ -141,38 +101,30 @@ export function decodeUtf8(src: Uint8Array): string {
 
     } else if ((a & 0b11100000) === 0b11000000) {
 
-      if (i + 1 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+      if (i >= l) throw new RangeError(RANGE_INVALID_UTF8);
 
       b = src[i++];
 
-      if ((b & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
-
-      cp = ((b & 0b00111111) << 5) | (a & 0x00011111);
+      cp = ((a & 0b00011111) << 6) | (b & 0b00111111);
 
     } else if ((a & 0b11110000) === 0b11100000) {
+
+      if (i + 1 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      b = src[i++];
+      c = src[i++];
+
+      cp = ((a & 0b00001111) << 12) | ((b & 0b00111111) << 6) | (c & 0b00111111);
+
+    } else if ((a & 0b11111000) === 0b11110000) {
 
       if (i + 2 >= l) throw new RangeError(RANGE_INVALID_UTF8);
 
       b = src[i++];
       c = src[i++];
-
-      if ((b & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
-      if ((c & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
-
-      cp = ((c & 0b00111111) << 10) | ((b & 0b00111111) << 4) | (a & 0x00001111);
-
-    } else if ((a & 0b11111000) === 0b11110000) {
-
-      if (i + 3 >= l) throw new RangeError(RANGE_INVALID_UTF8);
-
-      b = src[i++];
-      c = src[i++];
       d = src[i++];
 
-      if ((b & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
-      if ((c & 0b11000000) !== 0b10000000) throw new RangeError(RANGE_INVALID_UTF8);
-
-      cp = ((d & 0b00111111) << 15) | ((c & 0b00111111) << 9) | ((b & 0b00111111) << 3) | (a & 0x00001111);
+      cp = ((a & 0b00000111) << 18) | ((b & 0b00111111) << 12) | ((c & 0b00111111) << 6) | (d & 0b00111111);
 
     } else {
 
@@ -180,23 +132,22 @@ export function decodeUtf8(src: Uint8Array): string {
 
     }
 
-    if (cp < 0) throw new RangeError(RANGE_INVALID_UTF8);
-
-    if (cp <= 0xD7ff || (cp >= 0xe000 && cp <= 0xffff)) {
+    if (cp <= 0xd7ff || (cp >= 0xe000 && cp <= 0xffff)) {
 
       dst += String.fromCharCode(cp);
 
     } else {
 
-      cp -= 0x010000;
+      // We must reach into the astral plane and construct the surrogate pair!
 
-      const lo = (cp & 0x03ff) + 0xdc00;
+      cp -= 0x00010000;
+
       const hi = (cp >>> 10) + 0xd800;
+      const lo = (cp & 0x03ff) + 0xdc00;
 
-      if (lo < 0xdc00 || lo > 0xdfff) throw new RangeError(RANGE_INVALID_UTF8);
       if (hi < 0xd800 || hi > 0xdbff) throw new RangeError(RANGE_INVALID_UTF8);
 
-      dst += String.fromCharCode(lo, hi);
+      dst += String.fromCharCode(hi, lo);
 
     }
 
@@ -232,24 +183,31 @@ export function encodeUtf8(src: string): Uint8Array {
 
     } else if (c <= 0x07ff) {
 
-      dst[j++] = 0xc0 | (c >>> 6);
-      dst[j++] = 0x80 | (c & 0x3f);
+      dst[j++] = 0b11000000 | (c >>> 6);
+      dst[j++] = 0b10000000 | ((c >>> 0) & 0b00111111);
 
-    } else if (c <= 0xffff) {
+    } else if (c <= 0xd7ff || c >= 0xe000) {
 
-      dst[j++] = 0xe0 | (c >>> 12);
-      dst[j++] = 0x80 | ((c >>> 6) & 0x3f);
-      dst[j++] = 0x80 | (c & 0x3f);
+      dst[j++] = 0b11100000 | (c >>> 12);
+      dst[j++] = 0b10000000 | ((c >>> 6) & 0b00111111);
+      dst[j++] = 0b10000000 | ((c >>> 0) & 0b00111111);
 
     } else {
 
-      let k = 4;
+      // Make sure the surrogate pair is complete.
+      /* istanbul ignore next */
+      if (i + 1 >= l) throw new RangeError(RANGE_INVALID_UTF8);
 
-      while (c >> (6 * k)) k++;
+      // I cast thee back into the astral plane.
 
-      dst[j++] = ((0xff00 >>> k) & 0xff) | (c >>> (6 * --k));
+      const hi = c - 0xd800;
+      const lo = src.charCodeAt(++i) - 0xdc00;
+      const cp = ((hi << 10) | lo) + 0x00010000;
 
-      while (k--) dst[j++] = 0x80 | ((c >>> (6 * k)) & 0x3f);
+      dst[j++] = 0b11110000 | (cp >>> 18);
+      dst[j++] = 0b10000000 | ((cp >>> 12) & 0b00111111);
+      dst[j++] = 0b10000000 | ((cp >>> 6) & 0b00111111);
+      dst[j++] = 0b10000000 | ((cp >>> 0) & 0b00111111);
 
     }
 
@@ -429,24 +387,6 @@ export function format(s: string, ...args: any[]) {
 }
 
 /**
- * Return a new DataView backed by the same ArrayBuffer but with a new byteOffset and byteLength. Will throw if the new
- * DataView extends outside the ArrayBuffer bounds.
- *
- * @param {DataView} dataView The DataView to extend.
- * @param {number | undefined} relByteOffset The new byteOffset relative to the current one.
- * @param {number | undefined} byteLength THe new byteLength, or `undefined` to use the same length.
- * @returns {DataView} The new DataView.
- */
-
-export function extendDataView(dataView: DataView, relByteOffset = 0, byteLength?: number) {
-
-  // The DataView constructor does bounds checking for us. :)
-
-  return new DataView(dataView.buffer, dataView.byteOffset + relByteOffset, byteLength || dataView.byteLength);
-
-}
-
-/**
  * Return the thing that was passed in. Yaaaaawn.
  *
  * @export
@@ -458,34 +398,6 @@ export function extendDataView(dataView: DataView, relByteOffset = 0, byteLength
 export function identity<T>(x: T) {
 
   return x;
-
-}
-
-/**
- * Copy `n` bytes from the `src` DataView to `dst`.
- *
- * @param {DataView} dst The destination DataView.
- * @param {DataView} src The source DataView.
- * @param {number | undefined} n Number of bytes to copy. If undefined, will copy all of `src`.
- * @returns {void}
- */
-
-export function memcpy(dst: DataView, src: DataView, n?: number): void {
-
-  trace('Copying %d bytes from %s to %s.', n, src, dst);
-
-  // Use Int32Arrays to copy from one ArrayBuffer to the other (so far appears to be the fastest way).
-
-  const d = new Int32Array(dst.buffer, dst.byteOffset, dst.byteLength);
-  const s = new Int32Array(src.buffer, src.byteOffset, n || src.byteLength);
-
-  d.set(s);
-
-}
-
-export function noop(): void {
-
-  // do nothing!
 
 }
 
