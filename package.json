@@ -18,6 +18,7 @@
     "codecov": "^2.2.0",
     "nodemon": "^1.11.0",
     "tap": "^10.3.2",
+    "testcheck": "^1.0.0-rc.2",
     "ts-node": "^3.0.2",
     "tslint": "^5.1.0",
     "tslint-eslint-rules": "^4.0.0",
