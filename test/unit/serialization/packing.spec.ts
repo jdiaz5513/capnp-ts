@@ -22,8 +22,31 @@ const TAG_DATA = [
   {tag: 0b00111111, weight: 6, word: [0x41, 0x53, 0x53, 0x48, 0x41, 0x54, 0x00, 0x00]},
 ];
 
-const TEST_PACKED = readFileBuffer('test/data/test-packed.bin');
-const TEST_UNPACKED = readFileBuffer('test/data/test-unpacked.bin');
+// NOTE: for these tests to work `PACK_SPAN_THRESHOLD` must be set to `2`.
+
+const PACKING_DATA = [
+  {
+    name: 'flat',
+    packed: readFileBuffer('test/data/flat-packed.bin'),
+    unpacked: readFileBuffer('test/data/flat.bin'),
+  },
+  {
+    name: 'span',
+    packed: readFileBuffer('test/data/span-packed.bin'),
+    unpacked: readFileBuffer('test/data/span.bin'),
+  },
+  {
+    name: 'test',
+    packed: readFileBuffer('test/data/test-packed.bin'),
+    unpacked: readFileBuffer('test/data/test.bin'),
+  },
+  {
+    name: 'zero',
+    packed: readFileBuffer('test/data/zero-packed.bin'),
+    unpacked: readFileBuffer('test/data/zero.bin'),
+  },
+];
+
 
 tap.test('getHammingWeight()', (t) => {
 
@@ -47,7 +70,11 @@ tap.test('getTagByte()', (t) => {
 
 tap.test('getUnpackedByteLength()', (t) => {
 
-  t.equal(getUnpackedByteLength(TEST_PACKED), TEST_UNPACKED.byteLength);
+  PACKING_DATA.forEach(({name, packed, unpacked}) => {
+
+    t.equal(getUnpackedByteLength(packed), unpacked.byteLength, name);
+
+  });
 
   t.end();
 
@@ -66,7 +93,13 @@ tap.test('getZeroByteCount()', (t) => {
 
 tap.test('pack()', (t) => {
 
-  compareBuffers(t, pack(TEST_UNPACKED), TEST_PACKED);
+  PACKING_DATA.forEach(({name, packed, unpacked}) => {
+
+    compareBuffers(t, pack(unpacked), packed, name);
+
+  });
+
+  t.throws(() => pack(new ArrayBuffer(7)));
 
   t.end();
 
@@ -74,7 +107,11 @@ tap.test('pack()', (t) => {
 
 tap.test('unpack()', (t) => {
 
-  compareBuffers(t, unpack(TEST_PACKED), TEST_UNPACKED);
+  PACKING_DATA.forEach(({name, packed, unpacked}) => {
+
+    compareBuffers(t, unpack(packed), unpacked, name);
+
+  });
 
   t.end();
 

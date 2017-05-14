@@ -2,16 +2,46 @@ import Benchmark, {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
 import {check, CheckOptions, Property} from 'testcheck';
 
-import {bufferToHex, pad} from '../../lib/util';
+import {format, pad} from '../../lib/util';
 import {Test} from './tap';
 
 export {default as tap} from './tap';
 
-export async function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: ArrayBuffer): Promise<Test> {
+function diffHex(found: ArrayBuffer, wanted: ArrayBuffer): string {
 
-  return parentTest.test('compare buffers', (t) => {
+  const a = new Uint8Array(found);
+  const b = new Uint8Array(wanted);
 
-    t.equal(found.byteLength, wanted.byteLength, 'should have the same byte length');
+  for (let i = 0; i < a.byteLength && i < b.byteLength; i++) {
+
+    if (a[i] !== b[i]) {
+
+      return format('addr:%a,found:%s,wanted:%s', i, pad(a[i].toString(16), 2), pad(b[i].toString(16), 2));
+
+    }
+
+  }
+
+  if (a.byteLength > b.byteLength) {
+
+    return format('addr:%a,found:%s,wanted:EOF', b.byteLength, pad(a[b.byteLength].toString(16), 2));
+
+  } else if (b.byteLength > a.byteLength) {
+
+    return format('addr:%a,found:EOF,wanted:%s', a.byteLength, pad(b[a.byteLength].toString(16), 2));
+
+  }
+
+  return 'equal';
+
+}
+
+export async function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: ArrayBuffer,
+                                     name='should have the same buffer contents'): Promise<Test> {
+
+  return parentTest.test(name, (t) => {
+
+    t.equal(found.byteLength, wanted.byteLength, `should have the same byte length (diff=${diffHex(found, wanted)}).`);
 
     // End the comparison prematurely if the buffer lengths differ.
 
@@ -30,8 +60,7 @@ export async function compareBuffers(parentTest: Test, found: ArrayBuffer, wante
 
       if (a[i] !== b[i]) {
 
-        t.fail(`bytes are not equal at offset 0x${pad(i.toString(16), 8)} (found: ${bufferToHex(found)}, wanted: ` +
-               `${bufferToHex(wanted)})`);
+        t.fail(`bytes are not equal (${diffHex(found, wanted)})`);
 
         // Don't check any of the other bytes or else we might flood with failures.
 
@@ -89,9 +118,10 @@ export function readFileBuffer(path: string): ArrayBuffer {
 }
 
 export async function runTestCheck<TArgs>(parentTest: Test, property: Property<TArgs>,
-                                          options?: CheckOptions): Promise<Test> {
+                                          options?: CheckOptions,
+                                          name='should satisfy property check'): Promise<Test> {
 
-  return parentTest.test('testcheck', (t) => {
+  return parentTest.test(name, (t) => {
 
     const out = check(property, options);
 

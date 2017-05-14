@@ -84,10 +84,10 @@ export const NATIVE_LITTLE_ENDIAN = tmpWord.getUint8(0) === 0x02;
  * This little detail is left up to the implementation because it can be tuned for performance. Setting this to a higher
  * value may help with messages that contain a ton of text/data.
  *
- * It is imperative to never set this too low or else BAD THINGS. You have been warned.
+ * It is imperative to never set this below 1 or else BAD THINGS. You have been warned.
  */
 
-export const PACK_SPAN_THRESHOLD = 8;
+export const PACK_SPAN_THRESHOLD = 2;
 
 /**
  * How far to travel into a nested pointer structure during a deep copy; when this limit is exhausted the copy

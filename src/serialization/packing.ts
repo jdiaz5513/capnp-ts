@@ -170,8 +170,10 @@ export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f:
 }
 
 /**
- * Pack a Cap'n Proto message into a compressed format. This will efficiently compress zero bytes (which are common in
- * idiomatic Cap'n Proto messages) into a compact form.
+ * Pack a section of a Cap'n Proto message into a compressed format. This will efficiently compress zero bytes (which
+ * are common in idiomatic Cap'n Proto messages) into a compact form.
+ *
+ * For stream-framed messages this is called once for the frame header and once again for each segment in the message.
  *
  * The returned array buffer is trimmed to the exact size of the packed message with a single copy operation at the end.
  * This should be decent on CPU time but does require quite a lot of memory (a normal array is filled up with each
@@ -262,6 +264,8 @@ export function pack(unpacked: ArrayBuffer): ArrayBuffer {
 
         // See if we need to bail now.
 
+        spanThreshold -= zeroCount;
+
         if (spanThreshold <= 0 || spanWordLength >= 0xff) {
 
           // Alright, time to get packing again. Write the number of words we skipped to the beginning of the span.
@@ -282,8 +286,6 @@ export function pack(unpacked: ArrayBuffer): ArrayBuffer {
           dst.push(a, b, c, d, e, f, g, h);
 
           spanWordLength++;
-
-          spanThreshold -= zeroCount;
 
         }
 
@@ -323,6 +325,18 @@ export function pack(unpacked: ArrayBuffer): ArrayBuffer {
       dst.push(0);
 
     }
+
+  }
+
+  // We're done. If we were writing a span let's finish it.
+
+  if (lastTag === PackedTag.ZERO) {
+
+    dst.push(spanWordLength);
+
+  } else if (lastTag === PackedTag.SPAN) {
+
+    dst[spanTagOffset] = spanWordLength;
 
   }
 

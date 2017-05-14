@@ -31,13 +31,14 @@ tap := $(node_bin)/tap
 #############
 # input files
 
-capnp_in := $(shell find src -name *.capnp -print)
-capnp_in += $(shell find test -name *.capnp -print)
+capnp_in := $(shell find src -name '*.capnp' -print)
+capnp_in += $(shell find test -name '*.capnp' -print)
 
-src := $(shell find src -name *.ts -print)
+src := $(shell find src -name '*.ts' -print)
 
-test := $(shell find test -name *.ts -print)
-test_spec := $(shell find test -name *.spec.ts -print)
+test := $(shell find test -name '*.ts' -print)
+test_data := $(shell find test/data -name '*' -print)
+test_spec := $(shell find test -name '*.spec.ts' -print)
 
 tsconfig := tsconfig.json configs/base.json
 tsconfig_lib := configs/base.json configs/lib.json
@@ -141,7 +142,7 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	@$(nodemon) -e ts --watch src -w test -w Makefile -w package.json -x 'npm test'
+	@$(nodemon) -e ts -w src -w test -w Makefile -w package.json -x 'npm test'
 	@echo	
 
 ###############
@@ -172,6 +173,7 @@ $(lib): node_modules
 
 $(lib_test): $(lib)
 $(lib_test): $(test)
+$(lib_test): $(test_data)
 $(lib_test): $(tsconfig_lib_test)
 $(lib_test): node_modules
 	@echo
