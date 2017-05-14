@@ -5,8 +5,8 @@
 * [X] ~~*Get address book read test working.*~~
 * [X] ~~*Add basic performance benchmark.*~~
 * [X] ~~*Add CI (travis?).*~~
-* [ ] Hit 100% coverage.
 * [ ] Implement entire Struct and List API.
+* [ ] Hit 100% coverage.
 * [ ] Consider monorepo structure (`capnp-ts`, `capnpc-ts`, `capnp-ts-websocket-demo`, `capnp-ts-xhr-demo`).
 * [ ] Implement/test schema compiler.
 * [ ] Flesh out readme.

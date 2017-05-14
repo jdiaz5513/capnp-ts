@@ -273,6 +273,8 @@ export class Segment implements DataView {
 
   replaceBuffer(buffer: ArrayBuffer): void {
 
+    if (this.buffer === buffer) return;
+
     if (buffer.byteLength < this.byteLength) throw new Error(SEG_REPLACEMENT_BUFFER_TOO_SMALL);
 
     this._dv = new DataView(buffer);

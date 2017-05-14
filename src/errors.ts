@@ -76,6 +76,7 @@ export const RANGE_UINT32_OVERFLOW = '32-bit unsigned integer overflow detected.
 
 export const SEG_BUFFER_NOT_ALLOCATED = 'allocate() needs to be called at least once before getting a buffer.';
 export const SEG_GET_NON_ZERO_SINGLE = 'Attempted to get a segment other than 0 (%d) from a single segment arena.';
+export const SEG_ID_OUT_OF_BOUNDS = 'Attempted to get an out-of-bounds segment (%d).';
 export const SEG_NOT_WORD_ALIGNED = 'Segment buffer length %d is not a multiple of 8.';
 export const SEG_REPLACEMENT_BUFFER_TOO_SMALL =
   'Attempted to replace a segment buffer with one that is smaller than the allocated space.';
