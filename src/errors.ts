@@ -37,9 +37,12 @@ export const NOT_IMPLEMENTED = '%s is not implemented.';
 //
 // Look, this is probably the hardest part of the code. Cut some slack here! You probably found a bug.
 
+export const PTR_ADOPT_WRONG_MESSAGE = 'Attempted to adopt %s into a pointer in a different message %s.';
+export const PTR_ALREADY_ADOPTED = 'Attempted to adopt %s more than once.';
 export const PTR_COMPOSITE_SIZE_UNDEFINED =
   'Attempted to set a composite list without providing a composite element size.';
 export const PTR_DEPTH_LIMIT_EXCEEDED = 'Nesting depth limit exceeded for %s.';
+export const PTR_DISOWN_COMPOSITE_STRUCT = 'Attempted to disown a struct member from a composite list (%s).';
 export const PTR_INIT_COMPOSITE_STRUCT = 'Attempted to initialize a struct member from a composite list (%s).';
 export const PTR_INVALID_FAR_TARGET = 'Target of a far pointer (%s) is another far pointer.';
 export const PTR_INVALID_LIST_SIZE = 'Invalid list element size: %x.';

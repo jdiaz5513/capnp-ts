@@ -10,6 +10,7 @@ export {
 
   CompositeList,
   List,
+  Orphan,
   PointerType,
   Pointer,
   Struct,
