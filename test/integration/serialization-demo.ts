@@ -14,9 +14,7 @@ import * as capnp from '../../lib';
 export class AddressBook extends capnp.Struct {
 
   static readonly _displayName = 'AddressBook';
-
   static readonly _id = '17808451228488270372';
-
   static readonly _size = new capnp.ObjectSize(0, 1);
 
   adoptPeople(value: capnp.Orphan<capnp.CompositeList<Person>>): void {
@@ -37,7 +35,7 @@ export class AddressBook extends capnp.Struct {
 
     if (list._isNull()) {
 
-      this.initPeople(0);   // no default
+      list._initList(0);   // no default
 
     } else {
 
@@ -51,7 +49,7 @@ export class AddressBook extends capnp.Struct {
 
   hasPeople(): boolean {
 
-    return this._getPointer(0)._isNull();
+    return !this._getPointer(0)._isNull();
 
   }
 
@@ -96,11 +94,31 @@ class Person_Employment extends capnp.Struct {
   static SCHOOL = 2;
   static SELF_EMPLOYED = 3;
 
+  getEmployer(): string {
+
+    this._testWhich('employment', this.which(), 1);
+
+    return this._getText(3);
+
+  }
+
   getSchool(): string {
 
     this._testWhich('employment', this.which(), 2);
 
     return this._getText(3);
+
+  }
+
+  init(): void {
+
+    this.setUnemployed();
+
+  }
+
+  isEmployer(): boolean {
+
+    return this.which() === 1;
 
   }
 
@@ -110,22 +128,57 @@ class Person_Employment extends capnp.Struct {
 
   }
 
+  isSelfEmployed(): boolean {
+
+    return this.which() === 3;
+
+  }
+
   isUnemployed(): boolean {
 
     return this.which() === 0;
 
   }
 
+  hasEmployer(): boolean {
+
+    this._testWhich('employment', this.which(), 1);
+
+    return !this._getPointer(3)._isNull();
+
+  }
+
+  hasSchool(): boolean {
+
+    this._testWhich('employment', this.which(), 2);
+
+    return !this._getPointer(3)._isNull();
+
+  }
+
+  setEmployer(value: string): void {
+
+    this._setUint16(4, 1);
+    this._setText(3, value);
+
+  }
+
   setSchool(value: string): void {
 
-    this._setUint16(4, Person_Employment.SCHOOL);
+    this._setUint16(4, 2);
     this._setText(3, value);
+
+  }
+
+  setSelfEmployed(): void {
+
+    this._setUint16(4, 3);
 
   }
 
   setUnemployed(): void {
 
-    this._setUint16(4, Person_Employment.UNEMPLOYED);
+    this._setUint16(4, 0);
 
   }
 
@@ -180,9 +233,15 @@ export class Person extends capnp.Struct {
   static readonly Employment = Person_Employment;
   static readonly PhoneNumber = Person_PhoneNumber;
 
-  static toString() {
+  adoptPhones(value: capnp.Orphan<capnp.CompositeList<Person_PhoneNumber>>): void {
 
-    return 'Person';
+    this._getPointer(2).adopt(value);
+
+  }
+
+  disownPhones(): capnp.Orphan<capnp.CompositeList<Person_PhoneNumber>> {
+
+    return this.getPhones().disown();
 
   }
 
@@ -214,9 +273,44 @@ export class Person extends capnp.Struct {
 
     const list = capnp.CompositeList.fromPointer(Person_PhoneNumber, this._getPointer(2));
 
-    list._validate(capnp.PointerType.LIST, capnp.ListElementSize.COMPOSITE, Person_PhoneNumber._size);
+    if (list._isNull()) {
+
+      list._initList(0);
+
+    } else {
+
+      list._validate(capnp.PointerType.LIST, capnp.ListElementSize.COMPOSITE, Person_PhoneNumber._size);
+
+    }
 
     return list;
+
+  }
+
+  hasEmail(): boolean {
+
+    return !this._getPointer(1)._isNull();
+
+  }
+
+  hasName(): boolean {
+
+    return !this._getPointer(0)._isNull();
+
+  }
+
+  hasPhones(): boolean {
+
+    return !this._getPointer(2)._isNull();
+
+  }
+
+  initEmployment(): Person_Employment {
+
+    const e = this.getEmployment();
+    e.init();
+
+    return e;
 
   }
 
@@ -245,6 +339,12 @@ export class Person extends capnp.Struct {
   setName(value: string): void {
 
     this._setText(0, value);
+
+  }
+
+  setPhones(value: capnp.CompositeList<Person_PhoneNumber>): void {
+
+    this._getPointer(2)._copyFrom(value);
 
   }
 
