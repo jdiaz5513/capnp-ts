@@ -9,6 +9,7 @@ import {
 import {format} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
+import {Segment} from '../segment';
 import {Pointer} from './pointer';
 import {PointerType} from './pointer-type';
 
@@ -19,9 +20,9 @@ trace('load');
 // make sure you don't accidentally adopt a pointer of the wrong type.
 
 /**
- * An orphaned pointer. This object itself is a pointer to the original pointer's content, which was left untouched in
- * its original message. The original pointer data is encoded as attributes on the Orphan object, ready to be
- * reconstructed once another pointer is ready to adopt it.
+ * An orphaned pointer. This object itself is technically a pointer to the original pointer's content, which was left
+ * untouched in its original message. The original pointer data is encoded as attributes on the Orphan object, ready to
+ * be reconstructed once another pointer is ready to adopt it.
  *
  * @export
  * @class Orphan
@@ -29,7 +30,7 @@ trace('load');
  * @template T
  */
 
-export class Orphan<T extends Pointer> extends Pointer {
+export class Orphan<T extends Pointer> {
 
   /** @internal */
   _capId?: number;
@@ -46,11 +47,18 @@ export class Orphan<T extends Pointer> extends Pointer {
   /** @internal */
   _type?: PointerType;
 
+  /** @internal */
+  byteOffset: number;
+
+  /** @internal */
+  segment: Segment;
+
   constructor(src: T) {
 
     const c = src._getContent();
 
-    super(c.segment, c.byteOffset);
+    this.segment = c.segment;
+    this.byteOffset = c.byteOffset;
 
     // Read vital info from the src pointer so we can reconstruct it during adoption.
 
