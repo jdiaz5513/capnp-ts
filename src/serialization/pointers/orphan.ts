@@ -18,13 +18,33 @@ trace('load');
 // Technically speaking this class doesn't need to be generic, but the extra type checking enforced by this helps to
 // make sure you don't accidentally adopt a pointer of the wrong type.
 
+/**
+ * An orphaned pointer. This object itself is a pointer to the original pointer's content, which was left untouched in
+ * its original message. The original pointer data is encoded as attributes on the Orphan object, ready to be
+ * reconstructed once another pointer is ready to adopt it.
+ *
+ * @export
+ * @class Orphan
+ * @extends {Pointer}
+ * @template T
+ */
+
 export class Orphan<T extends Pointer> extends Pointer {
 
-  private _capId?: number;
-  private _elementSize?: ListElementSize;
-  private _length?: number;
-  private _size?: ObjectSize;
-  private _type?: PointerType;
+  /** @internal */
+  _capId?: number;
+
+  /** @internal */
+  _elementSize?: ListElementSize;
+
+  /** @internal */
+  _length?: number;
+
+  /** @internal */
+  _size?: ObjectSize;
+
+  /** @internal */
+  _type?: PointerType;
 
   constructor(src: T) {
 
@@ -69,7 +89,15 @@ export class Orphan<T extends Pointer> extends Pointer {
 
   }
 
-  adopt(dst: T): void {
+  /**
+   * Adopt (move) this orphan into the target pointer location. This will allocate far pointers in `dst` as needed.
+   *
+   * @internal
+   * @param {T} dst The destination pointer.
+   * @returns {void}
+   */
+
+  _moveTo(dst: T): void {
 
     if (this._type === undefined) throw new Error(format(PTR_ALREADY_ADOPTED, this));
 

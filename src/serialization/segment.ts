@@ -80,6 +80,42 @@ export class Segment implements DataView {
   }
 
   /**
+   * Quickly copy a word (8 bytes) from `srcSegment` into this one at the given offset.
+   *
+   * @param {number} byteOffset The offset to write the word to.
+   * @param {Segment} srcSegment The segment to copy the word from.
+   * @param {number} srcByteOffset The offset from the start of `srcSegment` to copy from.
+   * @returns {void}
+   */
+
+  copyWord(byteOffset: number, srcSegment: Segment, srcByteOffset: number): void {
+
+    const value = srcSegment._dv.getFloat64(srcByteOffset, NATIVE_LITTLE_ENDIAN);
+
+    this._dv.setFloat64(byteOffset, value, NATIVE_LITTLE_ENDIAN);
+
+  }
+
+  /**
+   * Quickly copy words from `srcSegment` into this one.
+   *
+   * @param {number} byteOffset The offset to start copying into.
+   * @param {Segment} srcSegment The segment to copy from.
+   * @param {number} srcByteOffset The start offset to copy from.
+   * @param {number} wordLength The number of words to copy.
+   * @returns {void}
+   */
+
+  copyWords(byteOffset: number, srcSegment: Segment, srcByteOffset: number, wordLength: number): void {
+
+    const src = new Float64Array(this.buffer, byteOffset, wordLength);
+    const dst = new Float64Array(srcSegment.buffer, srcByteOffset, wordLength);
+
+    dst.set(src);
+
+  }
+
+  /**
    * Quickly fill a number of words in the buffer with zeroes.
    *
    * @param {number} byteOffset The first byte to set to zero.

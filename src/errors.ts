@@ -37,6 +37,7 @@ export const NOT_IMPLEMENTED = '%s is not implemented.';
 //
 // Look, this is probably the hardest part of the code. Cut some slack here! You probably found a bug.
 
+export const PTR_ADOPT_COMPOSITE_STRUCT = 'Attempted to adopt a struct into a composite list (%s).';
 export const PTR_ADOPT_WRONG_MESSAGE = 'Attempted to adopt %s into a pointer in a different message %s.';
 export const PTR_ALREADY_ADOPTED = 'Attempted to adopt %s more than once.';
 export const PTR_COMPOSITE_SIZE_UNDEFINED =

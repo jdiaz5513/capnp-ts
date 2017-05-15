@@ -19,13 +19,39 @@ export class AddressBook extends capnp.Struct {
 
   static readonly _size = new capnp.ObjectSize(0, 1);
 
+  adoptPeople(value: capnp.Orphan<capnp.CompositeList<Person>>): void {
+
+    this._getPointer(0).adopt(value);
+
+  }
+
+  disownPeople(): capnp.Orphan<capnp.CompositeList<Person>> {
+
+    return this.getPeople().disown();
+
+  }
+
   getPeople(): capnp.CompositeList<Person> {
 
     const list = capnp.CompositeList.fromPointer(Person, this._getPointer(0));
 
-    list._validate(capnp.PointerType.LIST, capnp.ListElementSize.COMPOSITE, Person._size);
+    if (list._isNull()) {
+
+      this.initPeople(0);   // no default
+
+    } else {
+
+      list._validate(capnp.PointerType.LIST, capnp.ListElementSize.COMPOSITE, Person._size);
+
+    }
 
     return list;
+
+  }
+
+  hasPeople(): boolean {
+
+    return this._getPointer(0)._isNull();
 
   }
 
@@ -36,6 +62,12 @@ export class AddressBook extends capnp.Struct {
     list._initList(length);
 
     return list;
+
+  }
+
+  setPeople(value: capnp.CompositeList<Person>): void {
+
+    this._getPointer(0)._copyFrom(value);
 
   }
 

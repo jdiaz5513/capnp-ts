@@ -7,6 +7,8 @@ import initTrace from 'debug';
 import {MAX_DEPTH, NATIVE_LITTLE_ENDIAN} from '../../constants';
 import {
   NOT_IMPLEMENTED,
+  PTR_ADOPT_COMPOSITE_STRUCT,
+  PTR_DISOWN_COMPOSITE_STRUCT,
   PTR_INIT_COMPOSITE_STRUCT,
   PTR_INVALID_UNION_ACCESS,
   PTR_STRUCT_DATA_OUT_OF_BOUNDS,
@@ -16,6 +18,8 @@ import {Int64, Uint64} from '../../types';
 import {format} from '../../util';
 import {ObjectSize} from '../object-size';
 import {Segment} from '../segment';
+import {Data} from './data';
+import {Orphan} from './orphan';
 import {Pointer} from './pointer';
 import {Text} from './text';
 
@@ -86,11 +90,9 @@ export class Struct extends Pointer {
 
       c.byteOffset -= 8;
 
-      const size = c._getStructSize();
-
       // Move forward to the content section and seek ahead by `_compositeIndex` multiples of the struct's total size.
 
-      c.byteOffset += 8 + this._compositeIndex * size.getByteLength();
+      c.byteOffset += 8 + this._compositeIndex * c._getStructSize().padToWord().getByteLength();
 
     }
 
@@ -140,6 +142,22 @@ export class Struct extends Pointer {
 
   }
 
+  adopt(src: Orphan<this>): void {
+
+    if (this._compositeIndex !== undefined) throw new Error(format(PTR_ADOPT_COMPOSITE_STRUCT, this));
+
+    super.adopt(src);
+
+  }
+
+  disown(): Orphan<this> {
+
+    if (this._compositeIndex !== undefined) throw new Error(format(PTR_DISOWN_COMPOSITE_STRUCT, this));
+
+    return super.disown();
+
+  }
+
   /**
    * Convert this struct to a struct of the provided class. Particularly useful when casting to nested group types.
    *
@@ -179,6 +197,12 @@ export class Struct extends Pointer {
 
     const defaultValue = defaultMask.getUint8(0);
     return ((v ^ defaultValue) & bitMask) !== 0;
+
+  }
+
+  protected _getData(index: number): Data {
+
+    return Data.fromPointer(this._getPointer(index));
 
   }
 
@@ -672,6 +696,12 @@ export class Struct extends Pointer {
     }
 
     ds.segment.setInt8(ds.byteOffset + byteOffset, value);
+
+  }
+
+  protected _setPointer(index: number, value: Pointer): void {
+
+    this._getPointer(index)._copyFrom(value);
 
   }
 

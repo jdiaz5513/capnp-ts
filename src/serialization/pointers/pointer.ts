@@ -24,6 +24,7 @@ import {bufferToHex, format, padToWord} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
 import {Segment} from '../segment';
+import {Orphan} from './orphan';
 import {PointerAllocationResult} from './pointer-allocation-result';
 import {PointerType} from './pointer-type';
 
@@ -829,6 +830,35 @@ export class Pointer {
       }
 
     }
+
+  }
+
+  /**
+   * Adopt an orphaned pointer, making this pointer point to the orphaned content without copying it.
+   *
+   * @param {Orphan<this>} src The orphan to adopt.
+   * @returns {void}
+   */
+
+  adopt(src: Orphan<this>): void {
+
+    src._moveTo(this);
+
+  }
+
+  /**
+   * Convert this pointer to an Orphan, zeroing out the pointer and leaving its content untouched. If the content is no
+   * longer needed, call `disown()` on the orphaned pointer to erase the contents as well.
+   *
+   * Call `adopt()` on the orphan with the new target pointer location to move it back into the message; the orphan
+   * object is then invalidated after adoption (can only adopt once!).
+   *
+   * @returns {Orphan<this>} An orphaned pointer.
+   */
+
+  disown(): Orphan<this> {
+
+    return new Orphan(this);
 
   }
 
