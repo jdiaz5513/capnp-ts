@@ -3,6 +3,7 @@
  */
 
 export {CompositeList} from './composite-list';
+export {Data} from './data';
 export {List} from './list';
 export {Orphan} from './orphan';
 export {PointerAllocationResult} from './pointer-allocation-result';

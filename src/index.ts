@@ -9,11 +9,13 @@ export {
   ObjectSize,
 
   CompositeList,
+  Data,
   List,
   Orphan,
   PointerType,
   Pointer,
   Struct,
+  Text,
 
   getBitMask,
   getFloat32Mask,
