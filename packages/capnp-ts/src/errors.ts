@@ -22,6 +22,8 @@ export const INVARIANT_UNREACHABLE_CODE = 'Unreachable code detected.';
 //
 // Now who told you it would be a good idea to fuzz the inputs? You just made the program sad.
 
+export const MSG_INVALID_FRAME_HEADER =
+  'Attempted to parse an invalid message frame header; are you sure this is a Cap\'n Proto message?';
 export const MSG_NO_SEGMENTS_IN_ARENA = 'Attempted to preallocate a message with no segments in the arena.';
 export const MSG_PACK_NOT_WORD_ALIGNED = 'Attempted to pack a message that was not word-aligned.';
 export const MSG_SEGMENT_OUT_OF_BOUNDS = 'Segment ID %X is out of bounds for message %s.';

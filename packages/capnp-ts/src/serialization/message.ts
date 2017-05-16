@@ -5,7 +5,12 @@
 import initTrace from 'debug';
 
 import {DEFAULT_BUFFER_SIZE} from '../constants';
-import {MSG_NO_SEGMENTS_IN_ARENA, MSG_SEGMENT_OUT_OF_BOUNDS, MSG_SEGMENT_TOO_SMALL} from '../errors';
+import {
+  MSG_INVALID_FRAME_HEADER,
+  MSG_NO_SEGMENTS_IN_ARENA,
+  MSG_SEGMENT_OUT_OF_BOUNDS,
+  MSG_SEGMENT_TOO_SMALL,
+} from '../errors';
 import {format, pad, padToWord, repeat} from '../util';
 import {Arena, MultiSegmentArena, SingleSegmentArena} from './arena';
 import {pack, unpack} from './packing';
@@ -135,6 +140,8 @@ export class Message {
 
     let byteOffset = 4 + segmentCount * 4;
     byteOffset += byteOffset % 8;
+
+    if (byteOffset + segmentCount * 4 > message.byteLength) throw new Error(MSG_INVALID_FRAME_HEADER);
 
     for (let i = 0; i < segmentCount; i++) {
 
