@@ -12,7 +12,6 @@
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
   "devDependencies": {
     "benchmark": "^2.1.4",
-    "capnp-ts-test-util": "0.0.1",
     "tap": "^10.3.2",
     "testcheck": "^1.0.0-rc.2"
   },
