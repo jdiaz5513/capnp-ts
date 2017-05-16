@@ -31,17 +31,27 @@ export const DEFAULT_DEPTH_LIMIT = 64;
 
 export const DEFAULT_TRAVERSE_LIMIT = 64 << 20;   // 64 MiB
 
+/**
+ * When allocating array buffers dynamically (while packing or in certain Arena implementations) the previous buffer's
+ * size is multiplied by this number to determine the next buffer's size. This is chosen to keep both time spent
+ * reallocating and wasted memory to a minimum.
+ *
+ * Smaller numbers would save memory at the expense of CPU time.
+ */
+
+export const GROWTH_FACTOR = 1.5;
+
 /** A bitmask applied to obtain the size of a list pointer. */
 
-export const LIST_SIZE_MASK = 0b00000000000000000000000000000111;
+export const LIST_SIZE_MASK = 0x00000007;
 
 /** The maximum value for a 32-bit integer. */
 
-export const MAX_INT32 = 0x7FFFFFFF;
+export const MAX_INT32 = 0x7fffffff;
 
 /** The maximum value for a 32-bit unsigned integer. */
 
-export const MAX_UINT32 = 0xFFFFFFFF;
+export const MAX_UINT32 = 0xffffffff;
 
 /** The largest integer that can be precisely represented in JavaScript. */
 
@@ -50,6 +60,10 @@ export const MAX_SAFE_INTEGER = 9007199254740991;
 /** Maximum limit on the number of segments in a message stream. */
 
 export const MAX_STREAM_SEGMENTS = 512;
+
+/** The smallest integer that can be precisely represented in JavaScript. */
+
+export const MIN_SAFE_INTEGER = -9007199254740991;
 
 /** Minimum growth increment for a SingleSegmentArena. */
 
@@ -64,6 +78,18 @@ export const MIN_SINGLE_SEGMENT_GROWTH = 4096;
 export const NATIVE_LITTLE_ENDIAN = tmpWord.getUint8(0) === 0x02;
 
 /**
+ * When packing a message, this is the number of zero bytes required after a SPAN (0xff) tag is written to the packed
+ * message before the span is terminated.
+ *
+ * This little detail is left up to the implementation because it can be tuned for performance. Setting this to a higher
+ * value may help with messages that contain a ton of text/data.
+ *
+ * It is imperative to never set this below 1 or else BAD THINGS. You have been warned.
+ */
+
+export const PACK_SPAN_THRESHOLD = 2;
+
+/**
  * How far to travel into a nested pointer structure during a deep copy; when this limit is exhausted the copy
  * operation will throw an error.
  */
@@ -72,11 +98,11 @@ export const POINTER_COPY_LIMIT = 32;
 
 /** A bitmask for looking up the double-far flag on a far pointer. */
 
-export const POINTER_DOUBLE_FAR_MASK = 0b00000000000000000000000000000100;
+export const POINTER_DOUBLE_FAR_MASK = 0x00000004;
 
 /** A bitmask for looking up the pointer type. */
 
-export const POINTER_TYPE_MASK = 0b00000000000000000000000000000011;
+export const POINTER_TYPE_MASK = 0x00000003;
 
 /** Used for some 64-bit conversions, equal to Math.pow(2, 32). */
 

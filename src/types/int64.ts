@@ -32,7 +32,7 @@ export class Int64 extends Uint64 {
 
     if (noCopy) return new this(new Uint8Array(source.buffer, source.byteOffset + offset, 8));
 
-    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteOffset + offset + 8)));
+    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteLength + offset + 8)));
 
   }
 
@@ -96,7 +96,7 @@ export class Int64 extends Uint64 {
 
       this.buffer[i] = lo & 0xff;
 
-      lo = i === 4 ? hi : lo >>> 8;
+      lo = i === 3 ? hi : lo >>> 8;
 
     }
 

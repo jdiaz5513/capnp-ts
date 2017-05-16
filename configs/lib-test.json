@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "../lib-test",
+    "rootDir": "../test"
+  },
+  "extends": "./base",
+  "include": [
+    "../test/**/*.ts"
+  ]
+}

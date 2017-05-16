@@ -28,7 +28,7 @@ export class CompositeList<T extends Struct> extends List<T> {
 
   static fromPointer<T extends Struct>(CompositeClass: StructCtor<T>, pointer: Pointer): CompositeList<T> {
 
-    pointer._checkPointerType(PointerType.LIST, ListElementSize.COMPOSITE);
+    pointer._validate(PointerType.LIST, ListElementSize.COMPOSITE);
 
     return this._fromPointerUnchecked(CompositeClass, pointer);
 

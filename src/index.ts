@@ -3,7 +3,20 @@
  */
 
 export {
+
+  ListElementSize,
+  Message,
+  ObjectSize,
+
   CompositeList,
+  Data,
+  List,
+  Orphan,
+  PointerType,
+  Pointer,
+  Struct,
+  Text,
+
   getBitMask,
   getFloat32Mask,
   getFloat64Mask,
@@ -15,7 +28,5 @@ export {
   getUint32Mask,
   getUint64Mask,
   getUint8Mask,
-  Message,
-  ObjectSize,
-  Struct,
+
 } from './serialization';

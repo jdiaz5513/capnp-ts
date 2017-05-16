@@ -12,14 +12,19 @@ import {
   PTR_INVALID_LIST_SIZE,
   PTR_INVALID_POINTER_TYPE,
   PTR_OFFSET_OUT_OF_BOUNDS,
+  PTR_WRONG_COMPOSITE_DATA_SIZE,
+  PTR_WRONG_COMPOSITE_PTR_SIZE,
   PTR_WRONG_LIST_TYPE,
   PTR_WRONG_POINTER_TYPE,
+  PTR_WRONG_STRUCT_DATA_SIZE,
+  PTR_WRONG_STRUCT_PTR_SIZE,
   TYPE_COMPOSITE_SIZE_UNDEFINED,
 } from '../../errors';
-import {bufferToHex, format} from '../../util';
+import {bufferToHex, format, padToWord} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
 import {Segment} from '../segment';
+import {Orphan} from './orphan';
 import {PointerAllocationResult} from './pointer-allocation-result';
 import {PointerType} from './pointer-type';
 
@@ -59,9 +64,58 @@ export class Pointer {
 
     if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
 
+    if (byteOffset < 0 || byteOffset > segment.byteLength - 8) {
+
+      throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
+
+    }
+
     this.segment = segment;
     this.byteOffset = byteOffset;
     this._depthLimit = depthLimit;
+
+  }
+
+  /**
+   * Get the total number of bytes required to hold a list of the provided size with the given length, rounded up to the
+   * nearest word.
+   *
+   * @internal
+   * @param {ListElementSize} elementSize A number describing the size of the list elements.
+   * @param {number} length The length of the list.
+   * @param {ObjectSize} [compositeSize] The size of each element in a composite list; required if
+   * `elementSize === ListElementSize.COMPOSITE`.
+   * @returns {number} The number of bytes required to hold an element of that size, or `NaN` if that is undefined.
+   */
+
+  static _getListByteLength(elementSize: ListElementSize, length: number, compositeSize?: ObjectSize): number {
+
+    switch (elementSize) {
+
+      case ListElementSize.BIT:
+
+        return padToWord(length + 7 >>> 3);
+
+      case ListElementSize.BYTE:
+      case ListElementSize.BYTE_2:
+      case ListElementSize.BYTE_4:
+      case ListElementSize.BYTE_8:
+      case ListElementSize.POINTER:
+      case ListElementSize.VOID:
+
+        return padToWord(this._getListElementByteLength(elementSize) * length);
+
+      case ListElementSize.COMPOSITE:
+
+        if (compositeSize === undefined) throw new Error(PTR_INVALID_LIST_SIZE);
+
+        return length * padToWord(compositeSize.getByteLength());
+
+      default:
+
+        throw new Error(PTR_INVALID_LIST_SIZE);
+
+    }
 
   }
 
@@ -127,42 +181,44 @@ export class Pointer {
 
   _add(offset: number): Pointer {
 
-    const byteOffset = this.byteOffset + offset;
-
-    if (byteOffset < 0 || byteOffset >= this.segment.byteLength) {
-
-      throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
-
-    }
-
     return new Pointer(this.segment, this.byteOffset + offset, this._depthLimit);
 
   }
 
   /**
-   * Read some bits off a list pointer to make sure it has the right pointer type.
+   * Replace this pointer with a deep copy of the pointer at `src` and all of its contents.
    *
-   * @internal
-   * @param {PointerType} pointerType The expected pointer type.
-   * @param {ListElementSize} [elementSize] For list pointers, the expected element size.
+   * @param {Pointer} src The pointer to copy.
    * @returns {void}
    */
 
-  _checkPointerType(pointerType: PointerType, elementSize?: ListElementSize): void {
+  _copyFrom(src: Pointer): void {
 
-    if (this._isNull()) return;
+    if (src._isNull()) {
 
-    const p = this._followFars();
+      this._erase();
 
-    const A = p.segment.getUint32(p.byteOffset) & POINTER_TYPE_MASK;
+      return;
 
-    if (A !== pointerType) throw new Error(format(PTR_WRONG_POINTER_TYPE, this, pointerType));
+    }
 
-    if (elementSize !== undefined) {
+    switch (src._getTargetPointerType()) {
 
-      const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
+      case PointerType.STRUCT:
 
-      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, elementSize));
+        this._copyFromStruct(src);
+
+        break;
+
+      case PointerType.LIST:
+
+        this._copyFromList(src);
+
+        break;
+
+      default:
+
+        throw new Error(format(PTR_INVALID_POINTER_TYPE, this._getTargetPointerType()));
 
     }
 
@@ -180,6 +236,8 @@ export class Pointer {
    */
 
   _erase(): void {
+
+    if (this._isNull()) return;
 
     // First deal with the contents.
 
@@ -251,6 +309,19 @@ export class Pointer {
 
     }
 
+    this._erasePointer();
+
+  }
+
+  /**
+   * Set the pointer (and far pointer landing pads, if applicable) to zero. Does not touch the pointer's content.
+   *
+   * @internal
+   * @returns {void}
+   */
+
+  _erasePointer(): void {
+
     if (this._getPointerType() === PointerType.FAR) {
 
       const landingPad = this._followFar();
@@ -315,6 +386,12 @@ export class Pointer {
 
   }
 
+  _getCapabilityId(): number {
+
+    return this.segment.getUint32(this.byteOffset + 4);
+
+  }
+
   /**
    * Obtain the location of this pointer's content, following far pointers as needed.
    *
@@ -361,7 +438,7 @@ export class Pointer {
 
   _getListElementSize(): ListElementSize {
 
-    return this.segment.getUint32(this.byteOffset) & LIST_SIZE_MASK;
+    return this.segment.getUint32(this.byteOffset + 4) & LIST_SIZE_MASK;
 
   }
 
@@ -450,6 +527,38 @@ export class Pointer {
   }
 
   /**
+   * Get a pointer to this pointer's composite list tag word, following far pointers as needed.
+   *
+   * @internal
+   * @returns {Pointer} A pointer to the list's composite tag word.
+   */
+
+  _getTargetCompositeListTag(): Pointer {
+
+    const c = this._getContent();
+
+    // The composite list tag is always one word before the content.
+
+    c.byteOffset -= 8;
+
+    return c;
+
+  }
+
+  /**
+   * Get the object size for the target composite list, following far pointers as needed.
+   *
+   * @internal
+   * @returns {ObjectSize} An object describing the size of each struct in the list.
+   */
+
+  _getTargetCompositeListSize(): ObjectSize {
+
+    return this._getTargetCompositeListTag()._getStructSize();
+
+  }
+
+  /**
    * Get the size of the list elements referenced by this pointer, following far pointers if necessary.
    *
    * @internal
@@ -479,11 +588,7 @@ export class Pointer {
 
       // The content is prefixed by a tag word; it's a struct pointer whose offset contains the list's length.
 
-      const c = this._getContent();
-
-      c.byteOffset -= 8;
-
-      return c._getOffsetWords();
+      return this._getTargetCompositeListTag()._getOffsetWords();
 
     }
 
@@ -543,7 +648,6 @@ export class Pointer {
    * Quickly check to see if the pointer is "null". A "null" pointer is a zero word, equivalent to an empty struct
    * pointer.
    *
-   * @internal
    * @returns {boolean} `true` if the pointer is "null".
    */
 
@@ -646,6 +750,118 @@ export class Pointer {
 
   }
 
+  /**
+   * Read some bits off a list pointer to make sure it has the right pointer data.
+   *
+   * @param {PointerType} pointerType The expected pointer type.
+   * @param {ListElementSize} [elementSize] For list pointers, the expected element size. Leave this
+   * undefined for struct pointers.
+   * @param {ObjectSize} [objectSize] For structs this is the expected size of the struct. For composite lists this is
+   * the expected size of each struct in the list.
+   * @returns {void}
+   */
+
+  _validate(pointerType: PointerType, elementSize?: ListElementSize, objectSize?: ObjectSize): void {
+
+    if (this._isNull()) return;
+
+    const p = this._followFars();
+
+    // Check the pointer type.
+
+    const A = p.segment.getUint32(p.byteOffset) & POINTER_TYPE_MASK;
+
+    if (A !== pointerType) throw new Error(format(PTR_WRONG_POINTER_TYPE, this, pointerType));
+
+    // Check the list element size, if provided.
+
+    if (elementSize !== undefined) {
+
+      const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
+
+      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, elementSize));
+
+    }
+
+    // Check the object size, if provided.
+
+    if (objectSize !== undefined) {
+
+      objectSize = objectSize.padToWord();
+
+      switch (pointerType) {
+
+        case PointerType.STRUCT:
+
+          const C = p.segment.getUint16(p.byteOffset + 4);
+          const D = p.segment.getUint16(p.byteOffset + 6);
+
+          const dataWordLength = objectSize.getDataWordLength();
+          const pointerLength = objectSize.pointerLength;
+
+          if (C !== dataWordLength) throw new Error(format(PTR_WRONG_STRUCT_DATA_SIZE, this, dataWordLength));
+
+          if (D !== pointerLength) throw new Error(format(PTR_WRONG_STRUCT_PTR_SIZE, this, pointerLength));
+
+          break;
+
+        case PointerType.LIST:
+
+          const actualSize = this._getTargetCompositeListSize();
+
+          if (actualSize.dataByteLength !== objectSize.dataByteLength) {
+
+            throw new Error(format(PTR_WRONG_COMPOSITE_DATA_SIZE, this, actualSize.dataByteLength));
+
+          }
+
+          if (actualSize.pointerLength !== objectSize.pointerLength) {
+
+            throw new Error(format(PTR_WRONG_COMPOSITE_PTR_SIZE, this, actualSize.pointerLength));
+
+          }
+
+          break;
+
+        default:
+
+          throw new Error(PTR_INVALID_POINTER_TYPE);
+
+      }
+
+    }
+
+  }
+
+  /**
+   * Adopt an orphaned pointer, making this pointer point to the orphaned content without copying it.
+   *
+   * @param {Orphan<this>} src The orphan to adopt.
+   * @returns {void}
+   */
+
+  adopt(src: Orphan<this>): void {
+
+    src._moveTo(this);
+
+  }
+
+  /**
+   * Convert this pointer to an Orphan, zeroing out the pointer and leaving its content untouched. If the content is no
+   * longer needed, call `disown()` on the orphaned pointer to erase the contents as well.
+   *
+   * Call `adopt()` on the orphan with the new target pointer location to move it back into the message; the orphan
+   * object is then invalidated after adoption (can only adopt once!).
+   *
+   * @returns {Orphan<this>} An orphaned pointer.
+   */
+
+  disown(): Orphan<this> {
+
+    return new Orphan(this);
+
+  }
+
   dump() {
 
     return bufferToHex(this.segment.buffer.slice(this.byteOffset, this.byteOffset + 8));
@@ -658,7 +874,21 @@ export class Pointer {
 
   }
 
-  protected _initPointer(contentSegment: Segment, contentOffset: number): PointerAllocationResult {
+  /**
+   * Set this pointer up to point at the data in the content segment. If the content segment is not the same as the
+   * pointer's segment, this will allocate and write far pointers as needed. Nothing is written otherwise.
+   *
+   * The return value includes a pointer to write the pointer's actual data to (the eventual far target), and the offset
+   * value (in words) to use for that pointer. In the case of double-far pointers this will always be zero.
+   *
+   * @internal
+   * @param {Segment} contentSegment The segment containing this pointer's content.
+   * @param {number} contentOffset The offset within the content segment for the beginning of this pointer's content.
+   * @returns {PointerAllocationResult} An object containing a pointer (where the pointer data should be written), and
+   * the value to use as the offset for that pointer.
+   */
+
+  _initPointer(contentSegment: Segment, contentOffset: number): PointerAllocationResult {
 
     if (this.segment !== contentSegment) {
 
@@ -702,6 +932,136 @@ export class Pointer {
     trace('Initializing intra-segment pointer %s -> %a.', this, contentOffset);
 
     return new PointerAllocationResult(this, (contentOffset - this.byteOffset - 8) / 8);
+
+  }
+
+  private _copyFromList(src: Pointer): void {
+
+    if (this._depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
+
+    const dst = this;
+    const srcContent = src._getContent();
+    const srcElementSize = src._getTargetListElementSize();
+    const srcLength = src._getTargetListLength();
+    let srcCompositeSize;
+    let srcStructByteLength;
+    let dstContent;
+
+    if (srcElementSize === ListElementSize.POINTER) {
+
+      dstContent = dst.segment.allocate(src._getTargetCompositeListSize().getByteLength() * srcLength);
+
+      // Recursively copy each pointer in the list.
+
+      for (let i = 0; i < srcLength; i++) {
+
+        const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + (i << 3), src._depthLimit - 1);
+        const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + (i << 3), dst._depthLimit - 1);
+
+        dstPtr._copyFrom(srcPtr);
+
+      }
+
+      // Initialize the pointer.
+
+    } else if (srcElementSize === ListElementSize.COMPOSITE) {
+
+      srcCompositeSize = src._getTargetCompositeListSize().padToWord();
+      srcStructByteLength = srcCompositeSize.getByteLength();
+
+      dstContent = dst.segment.allocate(srcCompositeSize.getByteLength() * srcLength + 8);
+
+      // Copy the tag word.
+
+      dstContent.segment.copyWord(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset - 8);
+
+      dstContent.byteOffset += 8;
+
+      // Copy the entire contents, including all pointers. This should be more efficient than making `srcLength`
+      // copies to skip the pointer sections, and we're about to rewrite all those pointers anyway.
+
+      // PERF: Skip this step if the composite struct only contains pointers.
+      if (srcCompositeSize.dataByteLength > 0) {
+
+        const wordLength = srcCompositeSize.getWordLength() * srcLength;
+
+        dstContent.segment.copyWords(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset, wordLength);
+
+      }
+
+      // Recursively copy all the pointers in each struct.
+
+      for (let i = 0; i < srcLength; i++) {
+
+        for (let j = 0; j < srcCompositeSize.pointerLength; j++) {
+
+          const offset = i * srcStructByteLength + srcCompositeSize.dataByteLength + (j << 3);
+
+          const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._depthLimit - 1);
+          const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset, dst._depthLimit - 1);
+
+          dstPtr._copyFrom(srcPtr);
+
+        }
+
+      }
+
+    } else {
+
+      const byteLength = padToWord(srcElementSize === ListElementSize.BIT
+        ? srcLength + 7 >>> 3
+        : Pointer._getListElementByteLength(srcElementSize));
+      const wordLength = byteLength >>> 3;
+
+      dstContent = dst.segment.allocate(byteLength);
+
+      // Copy all of the list contents word-by-word.
+
+      dstContent.segment.copyWords(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset, wordLength);
+
+    }
+
+    // Initialize the list pointer.
+
+    const res = this._initPointer(dstContent.segment, dstContent.byteOffset);
+    res.pointer._setListPointer(res.offsetWords, srcElementSize, srcLength, srcCompositeSize);
+
+  }
+
+  private _copyFromStruct(src: Pointer): void {
+
+    if (this._depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
+
+    const dst = this;
+    const srcContent = src._getContent();
+    const srcSize = src._getTargetStructSize();
+    const srcDataWordLength = srcSize.getDataWordLength();
+
+    // Allocate space for the destination content.
+
+    const dstContent = dst.segment.allocate(srcSize.getByteLength());
+
+    // Copy the data section.
+
+    dstContent.segment.copyWords(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset, srcDataWordLength);
+
+    // Copy the pointer section.
+
+    for (let i = 0; i < srcSize.pointerLength; i++) {
+
+      const offset = srcSize.dataByteLength + i * 8;
+
+      const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._depthLimit - 1);
+      const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset, dst._depthLimit - 1);
+
+      dstPtr._copyFrom(srcPtr);
+
+    }
+
+    // Initialize the struct pointer.
+
+    const res = src._initPointer(dstContent.segment, dstContent.byteOffset);
+    res.pointer._setStructPointer(res.offsetWords, srcSize);
 
   }
 

@@ -4,31 +4,59 @@
 
 import initTrace from 'debug';
 
-import {NOT_IMPLEMENTED} from '../../errors';
-import {format} from '../../util';
+import {DEFAULT_BUFFER_SIZE} from '../../constants';
+import {SEG_ID_OUT_OF_BOUNDS} from '../../errors';
+import {format, padToWord} from '../../util';
 import {Segment} from '../segment';
 import {Arena} from './arena';
+import {ArenaAllocationResult} from './arena-allocation-result';
 
 const trace = initTrace('capnp:arean:multi');
 trace('load');
 
 export class MultiSegmentArena extends Arena {
 
-  allocate(_minSize: number, _segments: {[id: number]: Segment}): [number, ArrayBuffer] {
+  private readonly _buffers: ArrayBuffer[];
 
-    throw new Error(format(NOT_IMPLEMENTED, 'MultiSegmentArena.prototype.allocate'));
+  constructor(buffers: ArrayBuffer[] = []) {
+
+    super();
+
+    this._buffers = buffers;
 
   }
 
-  getBuffer(_id: number): ArrayBuffer {
+  allocate(minSize: number, segments: Segment[]): ArenaAllocationResult {
 
-    throw new Error(format(NOT_IMPLEMENTED, 'MultiSegmentArena.prototype.getBuffer'));
+    // First try to find an existing segment with enough space.
+
+    for (let i = 0; i < segments.length; i++) {
+
+      const s = segments[i];
+      if (s.hasCapacity(minSize)) return new ArenaAllocationResult(i, s.buffer);
+
+    }
+
+    // Okay, let's make a new segment.
+
+    const b = new ArrayBuffer(padToWord(Math.max(minSize, DEFAULT_BUFFER_SIZE)));
+    this._buffers.push(b);
+
+    return new ArenaAllocationResult(this._buffers.length - 1, b);
+
+  }
+
+  getBuffer(id: number): ArrayBuffer {
+
+    if (id < 0 || id >= this._buffers.length) throw new Error(format(SEG_ID_OUT_OF_BOUNDS, id));
+
+    return this._buffers[id];
 
   }
 
   getNumSegments(): number {
 
-    throw new Error(format(NOT_IMPLEMENTED, 'MultiSegmentArena.prototype.getNumSegments'));
+    return this._buffers.length;
 
   }
 
