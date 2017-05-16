@@ -98,7 +98,7 @@ lib += $($(1)_lib)
 lib_test += $($(1)_lib_test)
 lib_test_spec += $($(1)_lib_test_spec)
 package_json += $($(1))/package.json
-package_node_modules += $($(1))/node_modules
+node_modules += $($(1))/node_modules
 src += $($(1)_src)
 
 # library target
@@ -107,6 +107,7 @@ src += $($(1)_src)
 $($(1)_lib): $($(1)_src)
 $($(1)_lib): $(tsconfig)
 $($(1)_lib): $(node_modules)
+$($(1)_lib): node_modules
 	@echo
 	@echo compiling package
 	@echo $($(1)_name)
@@ -123,6 +124,7 @@ $($(1)_lib_test): $($(1)_test)
 $($(1)_lib_test): $($(1)_test_data)
 $($(1)_lib_test): $(tsconfig)
 $($(1)_lib_test): $(node_modules)
+$($(1)_lib_test): node_modules
 	@echo
 	@echo compiling tests
 	@echo $($(1)_name)
@@ -270,8 +272,16 @@ watch: node_modules
 
 $(capnp_ts_lib_test): $(capnp_ts_test_data)
 
-$(package_node_modules): $(package_json)
-$(package_node_modules): node_modules
+$(lerna): package.json
+	@echo
+	@echo setting up lerna
+	@echo ================
+	@echo
+	npm install lerna
+	@echo
+
+$(node_modules): $(package_json)
+$(node_modules): node_modules
 	@echo
 	@echo installing and linking packages
 	@echo ===============================
@@ -282,6 +292,10 @@ $(package_node_modules): node_modules
 	@echo
 
 node_modules: package.json
+	@echo
+	@echo installing build dependencies
+	@echo =============================
+	@echo
 	npm install
 	@touch node_modules
 	@echo
