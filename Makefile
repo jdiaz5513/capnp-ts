@@ -23,6 +23,7 @@ node_bin := node_modules/.bin
 
 capnp := capnp
 codecov := $(node_bin)/codecov
+lerna := $(node_bin)/lerna
 nodemon := $(node_bin)/nodemon
 tsc := $(node_bin)/tsc
 tslint := $(node_bin)/tslint
@@ -38,8 +39,9 @@ capnp_ts := packages/capnp-ts
 
 capnp_in := $(shell find packages -name '*.capnp' -print)
 
-node_modules := node_modules
-node_modules += $(capnp_ts)/node_modules
+node_modules := $(capnp_ts)/node_modules
+
+package_json := $(shell find packages -name 'package.json' -print)
 
 src := $(shell find $(capnp_ts)/src -name '*.ts' -print)
 
@@ -157,7 +159,7 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	@$(nodemon) -e ts -e capnp -w packages -w Makefile -x 'npm test'
+	@$(nodemon) -e ts,capnp -w $(capnp_ts)/src -w $(capnp_ts)/test -w Makefile -x 'npm test'
 	@echo	
 
 ###############
@@ -180,11 +182,6 @@ $(capnp_ts)/lib: $(lib)
 $(capnp_ts)/lib-test: $(lib_test)
 	@touch lib-test
 
-$(capnp_ts)/node_modules: $(capnp_ts)/package.json
-	cd $(capnp_ts) && npm install
-	@touch $(capnp_ts)/node_modules
-	@echo
-
 # $(lib): $(capnp_out)
 $(lib): $(src)
 $(lib): $(tsconfig)
@@ -201,13 +198,24 @@ $(lib_test): $(lib)
 $(lib_test): $(test)
 $(lib_test): $(test_data)
 $(lib_test): $(tsconfig)
-$(lib_test): node_modules
+$(lib_test): $(node_modules)
 	@echo
 	@echo compiling tests
 	@echo ===============
 	@echo
 	@echo tsc $(TSC_FLAGS) -p configs/capnp-ts/tsconfig-lib-test.json
 	@$(tsc) $(TSC_FLAGS) -p configs/capnp-ts/tsconfig-lib-test.json
+	@echo
+
+$(node_modules): $(package_json)
+$(node_modules): node_modules
+	@echo
+	@echo installing and linking packages
+	@echo ===============================
+	@echo
+	@echo lerna bootstrap
+	@$(lerna) bootstrap
+	@touch $(node_modules)
 	@echo
 
 node_modules: package.json
