@@ -9,6 +9,8 @@
   "extends": "./configs/tsconfig-base",
   "include": [
     "packages/capnp-ts/src/**/*.ts",
-    "packages/capnp-ts/test/**/*.ts"
+    "packages/capnp-ts/test/**/*.ts",
+    "packages/capnpc-ts/src/**/*.ts",
+    "packages/capnpc-ts/test/**/*.ts"
   ]
 }
