@@ -11,12 +11,18 @@
   },
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
   "devDependencies": {
+    "@types/benchmark": "^1.0.30",
     "@types/debug": "0.0.29",
+    "@types/node": "^7.0.18",
+    "benchmark": "^2.1.4",
+    "codecov": "^2.2.0",
     "nodemon": "^1.11.0",
     "tap": "^10.3.2",
+    "testcheck": "^1.0.0-rc.2",
     "ts-node": "^3.0.2",
     "tslint": "^5.1.0",
     "tslint-eslint-rules": "^4.0.0",
+    "tslint-language-service": "^0.9.3",
     "typescript": "^2.3.0"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
@@ -33,7 +39,11 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "scripts": {
+    "benchmark": "make benchmark",
     "build": "make build",
+    "ci": "make ci",
+    "coverage": "make coverage",
+    "lint": "make lint",
     "prebuild": "make prebuild",
     "prepublish": "make prepublish",
     "test": "make test",

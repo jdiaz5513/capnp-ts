@@ -3,16 +3,12 @@
  */
 
 // LINT: a lot of the util functions need the any type.
-/* tslint:disable:no-any */
+/* tslint:disable:no-any no-unsafe-any */
 
 import initTrace from 'debug';
-import {TextDecoder, TextEncoder} from 'utf8-encoding';
-// LINT: this module doesn't export its typings correctly :(
-/* tslint:disable-next-line:no-import-side-effect */
-import './types/utf8-encoding';
 
-import {MAX_INT32, MAX_SEGMENT_LENGTH, MAX_UINT32} from './constants';
-import {RANGE_INT32_OVERFLOW, RANGE_SIZE_OVERFLOW, RANGE_UINT32_OVERFLOW} from './errors';
+import {MAX_INT32, MAX_UINT32} from './constants';
+import {RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_UINT32_OVERFLOW} from './errors';
 
 const trace = initTrace('capnp:util');
 trace('load');
@@ -20,36 +16,15 @@ trace('load');
 // Set up custom debug formatters.
 
 /* tslint:disable:no-string-literal */
+/* istanbul ignore next */
 initTrace.formatters['h'] = (v: any) => v.toString('hex');
+/* istanbul ignore next */
 initTrace.formatters['x'] = (v: any) => `0x${v.toString(16)}`;
+/* istanbul ignore next */
 initTrace.formatters['a'] = (v: any) => `0x${pad(v.toString(16), 8)}`;
+/* istanbul ignore next */
 initTrace.formatters['X'] = (v: any) => `0x${v.toString(16).toUpperCase()}`;
 /* tslint:enable:no-string-literal */
-
-/**
- * Enables the mixin pattern on a class by allowing the class to implement multiple parent classes; call
- * `applyMixins()` on the subclass to add all of the prototype methods to it. Prototype methods with conflicting names
- * are overridden from left to right.
- *
- * @export
- * @param {*} derivedCtor The subclass to extend.
- * @param {any[]} baseCtors An array of parent classes to inherit from.
- * @returns {void}
- */
-
-export function applyMixins(derivedCtor: any, baseCtors: any[]) {
-
-  baseCtors.forEach((baseCtor) => {
-
-    Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
-
-      derivedCtor.prototype[name] = baseCtor.prototype[name];
-
-    });
-
-  });
-
-}
 
 /**
  * Dump a hex string from the given buffer.
@@ -95,26 +70,152 @@ export function checkUint32(value: number): number {
 }
 
 /**
- * Throw an error if the provided size (in bytes) is greater than the allowed limit, or return the same number
- * otherwise.
+ * Decode a UTF-8 encoded byte array into a JavaScript string (UCS-2).
  *
  * @export
- * @param {number} size The size to check.
- * @returns {number} The same size, if it is valid.
+ * @param {Uint8Array} src A utf-8 encoded byte array.
+ * @returns {string} A string representation of the byte array.
  */
 
-export function checkSizeOverflow(size: number): number {
+export function decodeUtf8(src: Uint8Array): string {
 
-  if (size > MAX_SEGMENT_LENGTH) throw new RangeError(format(RANGE_SIZE_OVERFLOW, size));
+  // This ain't for the faint of heart, kids. If you suffer from seizures, heart palpitations, or have had a history of
+  // stroke you may want to look away now.
 
-  return size;
+  const l = src.byteLength;
+  let dst = '';
+  let i = 0;
+  let cp = 0;
+  let a = 0;
+  let b = 0;
+  let c = 0;
+  let d = 0;
+
+  while (i < l) {
+
+    a = src[i++];
+
+    if ((a & 0b10000000) === 0) {
+
+      cp = a;
+
+    } else if ((a & 0b11100000) === 0b11000000) {
+
+      if (i >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      b = src[i++];
+
+      cp = ((a & 0b00011111) << 6) | (b & 0b00111111);
+
+    } else if ((a & 0b11110000) === 0b11100000) {
+
+      if (i + 1 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      b = src[i++];
+      c = src[i++];
+
+      cp = ((a & 0b00001111) << 12) | ((b & 0b00111111) << 6) | (c & 0b00111111);
+
+    } else if ((a & 0b11111000) === 0b11110000) {
+
+      if (i + 2 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      b = src[i++];
+      c = src[i++];
+      d = src[i++];
+
+      cp = ((a & 0b00000111) << 18) | ((b & 0b00111111) << 12) | ((c & 0b00111111) << 6) | (d & 0b00111111);
+
+    } else {
+
+      throw new RangeError(RANGE_INVALID_UTF8);
+
+    }
+
+    if (cp <= 0xd7ff || (cp >= 0xe000 && cp <= 0xffff)) {
+
+      dst += String.fromCharCode(cp);
+
+    } else {
+
+      // We must reach into the astral plane and construct the surrogate pair!
+
+      cp -= 0x00010000;
+
+      const hi = (cp >>> 10) + 0xd800;
+      const lo = (cp & 0x03ff) + 0xdc00;
+
+      if (hi < 0xd800 || hi > 0xdbff) throw new RangeError(RANGE_INVALID_UTF8);
+
+      dst += String.fromCharCode(hi, lo);
+
+    }
+
+  }
+
+  return dst;
 
 }
 
-const _decoder = new TextDecoder();
-const _encoder = new TextEncoder();
-export const decodeUtf8 = _decoder.decode.bind(_decoder);
-export const encodeUtf8 = _encoder.encode.bind(_encoder);
+/**
+ * Encode a JavaScript string (UCS-2) to a UTF-8 encoded string inside a Uint8Array.
+ *
+ * Note that the underlying buffer for the array will likely be larger than the actual contents; ignore the extra bytes.
+ *
+ * @export
+ * @param {string} src The input string.
+ * @returns {Uint8Array} A UTF-8 encoded buffer with the string's contents.
+ */
+
+export function encodeUtf8(src: string): Uint8Array {
+
+  const l = src.length;
+  const dst = new Uint8Array(new ArrayBuffer(l * 4));
+  let j = 0;
+
+  for (let i = 0; i < l; i++) {
+
+    const c = src.charCodeAt(i);
+
+    if (c <= 0x7f) {
+
+      dst[j++] = c;
+
+    } else if (c <= 0x07ff) {
+
+      dst[j++] = 0b11000000 | (c >>> 6);
+      dst[j++] = 0b10000000 | ((c >>> 0) & 0b00111111);
+
+    } else if (c <= 0xd7ff || c >= 0xe000) {
+
+      dst[j++] = 0b11100000 | (c >>> 12);
+      dst[j++] = 0b10000000 | ((c >>> 6) & 0b00111111);
+      dst[j++] = 0b10000000 | ((c >>> 0) & 0b00111111);
+
+    } else {
+
+      // Make sure the surrogate pair is complete.
+      /* istanbul ignore next */
+      if (i + 1 >= l) throw new RangeError(RANGE_INVALID_UTF8);
+
+      // I cast thee back into the astral plane.
+
+      const hi = c - 0xd800;
+      const lo = src.charCodeAt(++i) - 0xdc00;
+      const cp = ((hi << 10) | lo) + 0x00010000;
+
+      dst[j++] = 0b11110000 | (cp >>> 18);
+      dst[j++] = 0b10000000 | ((cp >>> 12) & 0b00111111);
+      dst[j++] = 0b10000000 | ((cp >>> 6) & 0b00111111);
+      dst[j++] = 0b10000000 | ((cp >>> 0) & 0b00111111);
+
+    }
+
+  }
+
+  return dst.subarray(0, j);
+
+}
 
 /**
  * Produce a `printf`-style string. Nice for providing arguments to `assert` without paying the cost for string
@@ -286,42 +387,6 @@ export function format(s: string, ...args: any[]) {
 }
 
 /**
- * Return a new DataView backed by the same ArrayBuffer but with a new byteOffset and byteLength. Will throw if the new
- * DataView extends outside the ArrayBuffer bounds.
- *
- * @param {DataView} dataView The DataView to extend.
- * @param {number | undefined} relByteOffset The new byteOffset relative to the current one.
- * @param {number | undefined} byteLength THe new byteLength, or `undefined` to use the same length.
- * @returns {DataView} The new DataView.
- */
-
-export function extendDataView(dataView: DataView, relByteOffset = 0, byteLength?: number) {
-
-  // The DataView constructor does bounds checking for us. :)
-
-  return new DataView(dataView.buffer, dataView.byteOffset + relByteOffset, byteLength || dataView.byteLength);
-
-}
-
-/**
- * Compute the Hamming weight (number of bits set) of a number. Useful for dealing with tag bytes in the packing
- * algorithm. Using this with floating point numbers will void your warranty.
- *
- * @param {number} x A real integer.
- * @returns {number} The hamming weight (integer).
- */
-
-export function getHammingWeight(x: number) {
-
-  // Thanks, HACKMEM!
-
-  let w = x - ((x >> 1) & 0x55555555);
-  w = (w & 0x33333333) + ((w >> 2) & 0x33333333);
-  return ((w + (w >> 4) & 0x0f0f0f0f) * 0x01010101) >> 24;
-
-}
-
-/**
  * Return the thing that was passed in. Yaaaaawn.
  *
  * @export
@@ -333,34 +398,6 @@ export function getHammingWeight(x: number) {
 export function identity<T>(x: T) {
 
   return x;
-
-}
-
-/**
- * Copy `n` bytes from the `src` DataView to `dst`.
- *
- * @param {DataView} dst The destination DataView.
- * @param {DataView} src The source DataView.
- * @param {number | undefined} n Number of bytes to copy. If undefined, will copy all of `src`.
- * @returns {void}
- */
-
-export function memcpy(dst: DataView, src: DataView, n?: number): void {
-
-  trace('Copying %d bytes from %s to %s.', n, src, dst);
-
-  // Use Int32Arrays to copy from one ArrayBuffer to the other (so far appears to be the fastest way).
-
-  const d = new Int32Array(dst.buffer, dst.byteOffset, dst.byteLength);
-  const s = new Int32Array(src.buffer, src.byteOffset, n || src.byteLength);
-
-  d.set(s);
-
-}
-
-export function noop(): void {
-
-  // do nothing!
 
 }
 

@@ -44,6 +44,6 @@ jspm_packages
 *.tgz
 
 # Build output
-coverage
 lib
 lib-test
+.tmp

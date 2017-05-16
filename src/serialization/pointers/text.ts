@@ -17,7 +17,7 @@ export class Text extends List<string> {
 
   static fromPointer(pointer: Pointer): Text {
 
-    pointer._checkPointerType(PointerType.LIST, ListElementSize.BYTE);
+    pointer._validate(PointerType.LIST, ListElementSize.BYTE);
 
     return this._fromPointerUnchecked(pointer);
 

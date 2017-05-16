@@ -1,0 +1,1 @@
+import './serialization-demo.spec';
