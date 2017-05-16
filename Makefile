@@ -28,36 +28,47 @@ tsc := $(node_bin)/tsc
 tslint := $(node_bin)/tslint
 tap := $(node_bin)/tap
 
+##########
+# packages
+
+capnp_ts := packages/capnp-ts
+
 #############
 # input files
 
-capnp_in := $(shell find src -name '*.capnp' -print)
-capnp_in += $(shell find test -name '*.capnp' -print)
+capnp_in := $(shell find packages -name '*.capnp' -print)
 
-src := $(shell find src -name '*.ts' -print)
+node_modules := node_modules
+node_modules += $(capnp_ts)/node_modules
 
-test := $(shell find test -name '*.ts' -print)
-test_data := $(shell find test/data -name '*' -print)
-test_spec := $(shell find test -name '*.spec.ts' -print)
+src := $(shell find $(capnp_ts)/src -name '*.ts' -print)
 
-tsconfig := tsconfig.json configs/base.json
-tsconfig_lib := configs/base.json configs/lib.json
-tsconfig_lib_test := configs/base.json configs/lib-test.json
+test := $(shell find $(capnp_ts)/test -name '*.ts' -print)
 
-tslint_config := tslint.json test/tslint.json
+test_data := $(shell find $(capnp_ts)/test/data -name '*' -print)
+
+test_spec := $(shell find $(capnp_ts)/test -name '*.spec.ts' -print)
+
+tsconfig := $(shell find . -name 'tsconfig*.json' -print)
+
+tslint_config := $(shell find . -name 'tslint*.json' -print)
 
 ##############
 # output files
 
 capnp_out := $(patsubst %.capnp,%.ts,$(capnp_in))
 
-lib := $(patsubst src/%.ts,lib/%.d.ts,$(src))
-lib += $(patsubst src/%.ts,lib/%.js,$(src))
-lib += $(patsubst src/%.ts,lib/%.js.map,$(src))
+lib := $(patsubst %.ts,%.d.ts,$(src))
+lib += $(patsubst %.ts,%.js,$(src))
+lib += $(patsubst %.ts,%.js.map,$(src))
+lib := $(subst /src/,/lib/,$(lib))
 
-lib_test := $(patsubst test/%.ts,lib-test/%.js,$(test))
-lib_test += $(patsubst test/%.ts,lib-test/%.js.map,$(test))
-lib_test_spec := $(patsubst test/%.ts,lib-test/%.js,$(test_spec))
+lib_test := $(patsubst %.ts,%.js,$(test))
+lib_test += $(patsubst %.ts,%.js.map,$(test))
+lib_test := $(subst /test/,/lib-test/,$(lib_test))
+
+lib_test_spec := $(patsubst %.ts,%.js,$(test_spec))
+lib_test_spec := $(subst /test/,/lib-test/,$(lib_test_spec))
 
 ################
 # build commands
@@ -68,7 +79,7 @@ benchmark: $(lib_test)
 	@echo running benchmarks
 	@echo ==================
 	@echo
-	node lib-test/benchmark/index.js
+	node $(capnp_ts)/lib-test/benchmark/index.js
 	@echo
 
 .PHONY: build
@@ -94,11 +105,11 @@ clean:
 	@echo cleaning
 	@echo ========
 	@echo
-	rm -rf .nyc-output .tmp coverage lib lib-test
+	rm -rf .nyc_output .tmp $(capnp_ts)/coverage $(capnp_ts)/lib $(capnp_ts)/lib-test
 	@echo
 
 .PHONY: coverage
-coverage: TAP_FLAGS += --cov --nyc-arg='-x=lib-test/**/*'
+coverage: TAP_FLAGS += --cov --nyc-arg='-x=$(capnp_ts)/lib-test/**/*'
 coverage: test
 	@echo
 	@echo generating coverage report
@@ -108,6 +119,10 @@ coverage: test
 	@$(tap) --coverage-report=lcov
 	@echo
 
+.PHONY: debug
+debug:
+	@echo $(lib)
+
 .PHONY: lint
 lint: $(tslint_config)
 lint: node_modules
@@ -115,10 +130,10 @@ lint: node_modules
 	@echo running linter
 	@echo ==============
 	@echo
-	@echo tslint $(TSLINT_FLAGS) -c tslint.json 'src/**/*.ts'
-	@$(tslint) $(TSLINT_FLAGS) -c tslint.json src/**/*.ts
-	@echo tslint $(TSLINT_FLAGS) -c test/tslint.json 'test/**/*.ts'
-	@$(tslint) $(TSLINT_FLAGS) -c test/tslint.json test/**/*.ts
+	@echo tslint $(TSLINT_FLAGS) -c tslint.json '$(capnp_ts)/src/**/*.ts'
+	@$(tslint) $(TSLINT_FLAGS) -c tslint.json $(capnp_ts)/src/**/*.ts
+	@echo tslint $(TSLINT_FLAGS) -c $(capnp_ts)/test/tslint.json '$(capnp_ts)/test/**/*.ts'
+	@$(tslint) $(TSLINT_FLAGS) -c $(capnp_ts)/test/tslint.json $(capnp_ts)/test/**/*.ts
 
 .PHONY: prebuild
 prebuild: lint
@@ -142,7 +157,7 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	@$(nodemon) -e ts -w src -w test -w Makefile -w package.json -x 'npm test'
+	@$(nodemon) -e ts -e capnp -w packages -w Makefile -x 'npm test'
 	@echo	
 
 ###############
@@ -159,36 +174,41 @@ watch: node_modules
 # 	@# capnp compile -o bin/capnpc-ts $< > $@
 # 	touch $@
 
+$(capnp_ts)/lib: $(lib)
+	@touch lib
+
+$(capnp_ts)/lib-test: $(lib_test)
+	@touch lib-test
+
+$(capnp_ts)/node_modules: $(capnp_ts)/package.json
+	cd $(capnp_ts) && npm install
+	@touch $(capnp_ts)/node_modules
+	@echo
+
 # $(lib): $(capnp_out)
 $(lib): $(src)
-$(lib): $(tsconfig_lib)
-$(lib): node_modules
+$(lib): $(tsconfig)
+$(lib): $(node_modules)
 	@echo
 	@echo compiling capnp-ts library
 	@echo ==========================
 	@echo
-	@echo tsc $(TSC_FLAGS) -p configs/lib.json
-	@$(tsc) $(TSC_FLAGS) -p configs/lib.json
+	@echo tsc $(TSC_FLAGS) -p configs/capnp-ts/tsconfig-lib.json
+	@$(tsc) $(TSC_FLAGS) -p configs/capnp-ts/tsconfig-lib.json
 	@echo
 
 $(lib_test): $(lib)
 $(lib_test): $(test)
 $(lib_test): $(test_data)
-$(lib_test): $(tsconfig_lib_test)
+$(lib_test): $(tsconfig)
 $(lib_test): node_modules
 	@echo
 	@echo compiling tests
 	@echo ===============
 	@echo
-	@echo tsc $(TSC_FLAGS) -p configs/lib-test.json
-	@$(tsc) $(TSC_FLAGS) -p configs/lib-test.json
+	@echo tsc $(TSC_FLAGS) -p configs/capnp-ts/tsconfig-lib-test.json
+	@$(tsc) $(TSC_FLAGS) -p configs/capnp-ts/tsconfig-lib-test.json
 	@echo
-
-lib: $(lib)
-	@touch lib
-
-lib-test: $(lib_test)
-	@touch lib-test
 
 node_modules: package.json
 	npm install
