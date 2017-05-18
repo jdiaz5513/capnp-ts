@@ -11,10 +11,12 @@ export {
   CompositeList,
   Data,
   List,
+  ListCtor,
   Orphan,
   PointerType,
   Pointer,
   Struct,
+  StructCtor,
   Text,
 
   getBitMask,

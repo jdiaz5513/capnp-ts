@@ -12,11 +12,8 @@ trace('load');
 
 export class Uint16List extends List<number> {
 
-  _initList(length: number): void {
-
-    super._initList(ListElementSize.BYTE_2, length);
-
-  }
+  static readonly _displayName = `List<Uint16>`;
+  static readonly _size = ListElementSize.BYTE_2;
 
   get(index: number): number {
 

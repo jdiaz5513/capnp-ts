@@ -10,6 +10,7 @@ import {
   PTR_ADOPT_COMPOSITE_STRUCT,
   PTR_DISOWN_COMPOSITE_STRUCT,
   PTR_INIT_COMPOSITE_STRUCT,
+  PTR_INIT_NON_GROUP,
   PTR_INVALID_UNION_ACCESS,
   PTR_STRUCT_DATA_OUT_OF_BOUNDS,
   PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
@@ -19,8 +20,10 @@ import {format} from '../../util';
 import {ObjectSize} from '../object-size';
 import {Segment} from '../segment';
 import {Data} from './data';
+import {List, ListCtor} from './list';
 import {Orphan} from './orphan';
-import {Pointer} from './pointer';
+import {Pointer, PointerCtor} from './pointer';
+import {PointerType} from './pointer-type';
 import {Text} from './text';
 
 const trace = initTrace('capnp:struct');
@@ -41,7 +44,9 @@ export interface StructCtor<T extends Struct> {
 
 export class Struct extends Pointer {
 
-  static readonly _displayName = 'Struct';
+  static readonly _displayName: string = 'Struct';
+
+  _initGroup?: () => void;
 
   private readonly _compositeIndex?: number;
 
@@ -100,6 +105,15 @@ export class Struct extends Pointer {
 
   }
 
+  _initGroupAs<T extends Struct>(GroupClass: StructCtor<T>): T {
+
+    const g = new GroupClass(this.segment, this.byteOffset, this._depthLimit, this._compositeIndex);
+    if (g._initGroup === undefined) throw new Error(PTR_INIT_NON_GROUP);
+    g._initGroup();
+    return g;
+
+  }
+
   /**
    * Initialize this struct with the provided object size. This will allocate new space for the struct contents, ideally
    * in the same segment as this pointer.
@@ -118,6 +132,16 @@ export class Struct extends Pointer {
     const res = this._initPointer(c.segment, c.byteOffset);
 
     res.pointer._setStructPointer(res.offsetWords, size);
+
+  }
+
+  _initStructAt<T extends Struct>(index: number, StructClass: StructCtor<T>): T {
+
+    const s = this._getPointerAs(index, StructClass);
+
+    s._initStruct(StructClass._size);
+
+    return s;
 
   }
 
@@ -352,6 +376,26 @@ export class Struct extends Pointer {
 
   }
 
+  protected _getList<T>(index: number, ListClass: ListCtor<T, List<T>>): List<T> {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    if (l._isNull()) {
+
+      l._initList(ListClass._size, 0, ListClass._compositeSize);
+
+    }
+
+    return l;
+
+  }
+
   protected _getPointer(index: number): Pointer {
 
     this._checkPointerBounds(index);
@@ -361,6 +405,18 @@ export class Struct extends Pointer {
     ps.byteOffset += index * 8;
 
     return new Pointer(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+  }
+
+  protected _getPointerAs<T extends Pointer>(index: number, PointerClass: PointerCtor<T>): T {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    return new PointerClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
 
   }
 
@@ -389,6 +445,24 @@ export class Struct extends Pointer {
     }
 
     return this._getTargetStructSize();
+
+  }
+
+  protected _getStruct<T extends Struct>(index: number, StructClass: StructCtor<T>): T {
+
+    const s = this._getPointerAs(index, StructClass);
+
+    if (s._isNull()) {
+
+      s._initStruct(StructClass._size);
+
+    } else {
+
+      s._validate(PointerType.STRUCT, undefined, StructClass._size);
+
+    }
+
+    return s;
 
   }
 
@@ -479,6 +553,22 @@ export class Struct extends Pointer {
     if (defaultMask === undefined) return ds.segment.getUint8(ds.byteOffset + byteOffset);
 
     return ds.segment.getUint8(ds.byteOffset + byteOffset) ^ defaultMask.getUint8(0);
+
+  }
+
+  protected _initList<T>(index: number, ListClass: ListCtor<T, List<T>>, length: number): List<T> {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    l._initList(ListClass._size, length, ListClass._compositeSize);
+
+    return l;
 
   }
 

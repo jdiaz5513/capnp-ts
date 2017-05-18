@@ -13,11 +13,8 @@ trace('load');
 
 export class Int64List extends List<Int64> {
 
-  _initList(length: number): void {
-
-    super._initList(ListElementSize.BYTE_8, length);
-
-  }
+  static readonly _displayName: string = 'List<Int64>';
+  static readonly _size = ListElementSize.BYTE_8;
 
   get(index: number): Int64 {
 

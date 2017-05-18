@@ -5,72 +5,38 @@
 import initTrace from 'debug';
 
 import {ListElementSize} from '../list-element-size';
-import {Segment} from '../segment';
-import {List} from './list';
-import {Pointer} from './pointer';
-import {PointerType} from './pointer-type';
+import {List, ListCtor} from './list';
 import {Struct, StructCtor} from './struct';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
-export class CompositeList<T extends Struct> extends List<T> {
+export function CompositeList<T extends Struct>(CompositeClass: StructCtor<T>): ListCtor<T, List<T>> {
 
-  private readonly _CompositeClass: StructCtor<T>;
+  return class extends List<T> {
 
-  constructor(CompositeClass: StructCtor<T>, segment: Segment, byteOffset: number, depthLimit?: number) {
+    static readonly _compositeSize = CompositeClass._size;
+    static readonly _displayName = `List<${CompositeClass._displayName}>`;
+    static readonly _size = ListElementSize.COMPOSITE;
 
-    super(segment, byteOffset, depthLimit);
+    get(index: number): T {
 
-    this._CompositeClass = CompositeClass;
+      return new CompositeClass(this.segment, this.byteOffset, this._depthLimit - 1, index);
 
-  }
+    }
 
-  static fromPointer<T extends Struct>(CompositeClass: StructCtor<T>, pointer: Pointer): CompositeList<T> {
+    set(index: number, value: T): void {
 
-    pointer._validate(PointerType.LIST, ListElementSize.COMPOSITE);
+      this.get(index)._copyStruct(value);
 
-    return this._fromPointerUnchecked(CompositeClass, pointer);
+    }
 
-  }
+    toString(): string {
 
-  protected static _fromPointerUnchecked<T extends Struct>(CompositeClass: StructCtor<T>,
-                                                           pointer: Pointer): CompositeList<T> {
+      return `Composite_${super.toString()},cls:${CompositeClass.toString()}`;
 
-    return new this(CompositeClass, pointer.segment, pointer.byteOffset, pointer._depthLimit);
+    }
 
-  }
-
-  toString(): string {
-
-    return `Composite_${super.toString()},cls:${this._CompositeClass.toString()}`;
-
-  }
-
-  /**
-   * Initialize this composite list with the given length. This will allocate new space for the list, ideally in the
-   * same segment as this pointer.
-   *
-   * @param {number} length The number of elements in the list.
-   * @returns {void}
-   */
-
-  _initList(length: number): void {
-
-    super._initList(ListElementSize.COMPOSITE, length, this._CompositeClass._size);
-
-  }
-
-  get(index: number): T {
-
-    return new this._CompositeClass(this.segment, this.byteOffset, this._depthLimit - 1, index);
-
-  }
-
-  set(index: number, value: T): void {
-
-    this.get(index)._copyStruct(value);
-
-  }
+  };
 
 }

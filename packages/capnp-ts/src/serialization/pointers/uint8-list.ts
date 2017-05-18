@@ -12,11 +12,8 @@ trace('load');
 
 export class Uint8List extends List<number> {
 
-  _initList(length: number): void {
-
-    super._initList(ListElementSize.BYTE, length);
-
-  }
+  static readonly _displayName = `List<Uint8>`;
+  static readonly _size = ListElementSize.BYTE;
 
   get(index: number): number {
 

@@ -12,11 +12,8 @@ trace('load');
 
 export class Uint32List extends List<number> {
 
-  _initList(length: number): void {
-
-    super._initList(ListElementSize.BYTE_4, length);
-
-  }
+  static readonly _displayName = `List<Uint32>`;
+  static readonly _size = ListElementSize.BYTE_4;
 
   get(index: number): number {
 

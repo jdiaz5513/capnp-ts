@@ -14,8 +14,8 @@ import {
 import {format, pad, padToWord, repeat} from '../util';
 import {Arena, MultiSegmentArena, SingleSegmentArena} from './arena';
 import {pack, unpack} from './packing';
-import {PointerType} from './pointers';
-import {Struct, StructCtor} from './pointers';
+import {PointerType, Struct} from './pointers';
+import {StructCtor} from './pointers/struct';
 import {Segment} from './segment';
 
 const trace = initTrace('capnp:message');

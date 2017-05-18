@@ -8,12 +8,27 @@ import {PTR_COMPOSITE_SIZE_UNDEFINED, PTR_INVALID_LIST_SIZE} from '../../errors'
 import {format, identity} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
+import {Segment} from '../segment';
 import {Pointer} from './pointer';
 
 const trace = initTrace('capnp:list');
 trace('load');
 
+export interface ListCtor<T, U extends List<T>> {
+
+  readonly _compositeSize?: ObjectSize;
+  readonly _displayName: string;
+  readonly _size: ListElementSize;
+
+  new(segment: Segment, byteOffset: number, depthLimit?: number): U;
+
+}
+
 export class List<T> extends Pointer {
+
+  static readonly _compositeSize?: ObjectSize;
+  static readonly _displayName: string = 'List<Generic>';
+  static readonly _size: ListElementSize;
 
   every(callbackFn: (this: void, value: T, index: number) => boolean): boolean {
 

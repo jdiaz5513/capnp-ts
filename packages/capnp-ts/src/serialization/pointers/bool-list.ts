@@ -12,6 +12,9 @@ trace('load');
 
 export class BoolList extends List<boolean> {
 
+  static readonly _displayName = 'List<boolean>';
+  static readonly _size = ListElementSize.BIT;
+
   _initList(length: number): void {
 
     super._initList(ListElementSize.BIT, length);
@@ -42,7 +45,7 @@ export class BoolList extends List<boolean> {
 
   toString(): string {
 
-    return `Uint8_${super.toString()}`;
+    return `Bool_${super.toString()}`;
 
   }
 

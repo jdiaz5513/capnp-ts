@@ -31,6 +31,14 @@ import {PointerType} from './pointer-type';
 const trace = initTrace('capnp:pointer');
 trace('load');
 
+export interface PointerCtor<T extends Pointer> {
+
+  readonly _displayName: string;
+
+  new(segment: Segment, byteOffset: number, depthLimit?: number): T;
+
+}
+
 /**
  * A pointer referencing a single byte location in a segment. This is typically used for Cap'n Proto pointers, but is
  * also sometimes used to reference an offset to a pointer's content or tag words.
@@ -40,6 +48,8 @@ trace('load');
  */
 
 export class Pointer {
+
+  static readonly _displayName: string = 'Pointer';
 
   /**
    * A number that is decremented as nested pointers are traversed. When this hits zero errors will be thrown.

@@ -47,6 +47,7 @@ export const PTR_COMPOSITE_SIZE_UNDEFINED =
 export const PTR_DEPTH_LIMIT_EXCEEDED = 'Nesting depth limit exceeded for %s.';
 export const PTR_DISOWN_COMPOSITE_STRUCT = 'Attempted to disown a struct member from a composite list (%s).';
 export const PTR_INIT_COMPOSITE_STRUCT = 'Attempted to initialize a struct member from a composite list (%s).';
+export const PTR_INIT_NON_GROUP = 'Attempted to initialize a group field with a non-group struct class.';
 export const PTR_INVALID_FAR_TARGET = 'Target of a far pointer (%s) is another far pointer.';
 export const PTR_INVALID_LIST_SIZE = 'Invalid list element size: %x.';
 export const PTR_INVALID_POINTER_TYPE = 'Invalid pointer type: %x.';
