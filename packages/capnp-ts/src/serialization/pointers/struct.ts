@@ -16,6 +16,7 @@ import {
 } from '../../errors';
 import {Int64, Uint64} from '../../types';
 import {format} from '../../util';
+import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
 import {Segment} from '../segment';
 import {Data} from './data';
@@ -214,8 +215,21 @@ export class Struct extends Pointer {
 
   protected _getData(index: number): Data {
 
-    return Data.fromPointer(this._getPointer(index));
+    this._checkPointerBounds(index);
 
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    if (l._isNull()) {
+
+      l._initList(ListElementSize.BYTE, 0);
+
+    }
+
+    return l;
   }
 
   protected _getDataSection(): Pointer {
@@ -364,7 +378,7 @@ export class Struct extends Pointer {
 
   }
 
-  protected _getList<T>(index: number, ListClass: ListCtor<T, List<T>>): List<T> {
+  protected _getList<T>(index: number, ListClass: ListCtor<T>): List<T> {
 
     this._checkPointerBounds(index);
 
@@ -544,7 +558,23 @@ export class Struct extends Pointer {
 
   }
 
-  protected _initList<T>(index: number, ListClass: ListCtor<T, List<T>>, length: number): List<T> {
+  protected _initData(index: number, length: number): Data {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    l._initList(ListElementSize.BYTE, length);
+
+    return l;
+
+  }
+
+  protected _initList<T>(index: number, ListClass: ListCtor<T>, length: number): List<T> {
 
     this._checkPointerBounds(index);
 
