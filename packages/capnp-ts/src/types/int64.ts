@@ -72,6 +72,19 @@ export class Int64 extends Uint64 {
 
   }
 
+  negate() {
+
+    for (let b = this.buffer, carry = 1, i = 0; i < 8; i++) {
+
+      const v = (b[i] ^ 0xff) + carry;
+
+      b[i] = v & 0xff;
+      carry = v >> 8;
+
+    }
+
+  }
+
   setValue(loWord: number, hiWord?: number) {
 
     let negate = false;
@@ -100,7 +113,7 @@ export class Int64 extends Uint64 {
 
     }
 
-    if (negate) this._2scomp();
+    if (negate) this.negate();
 
   }
 
@@ -151,19 +164,6 @@ export class Int64 extends Uint64 {
     }
 
     return negate ? -x : x;
-
-  }
-
-  private _2scomp() {
-
-    for (let b = this.buffer, carry = 1, i = 0; i < 8; i++) {
-
-      const v = (b[i] ^ 0xff) + carry;
-
-      b[i] = v & 0xff;
-      carry = v >> 8;
-
-    }
 
   }
 
