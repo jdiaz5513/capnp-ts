@@ -17,7 +17,7 @@ tap.test('write address book', (t) => {
 
   const people = addressBook.initPeople(2);
 
-  t.type(people, capnp.CompositeList);
+  t.type(people, AddressBook._People);
 
   const alice = people.get(0);
 
@@ -31,7 +31,7 @@ tap.test('write address book', (t) => {
 
   const alicePhones = alice.initPhones(1);
 
-  t.type(alicePhones, capnp.CompositeList);
+  t.type(alicePhones, Person._Phones);
 
   alicePhones.get(0).setNumber('555-1212');
   alicePhones.get(0).setType(Person.PhoneNumber.Type.MOBILE);
@@ -54,7 +54,7 @@ tap.test('write address book', (t) => {
 
   const bobPhones = bob.initPhones(2);
 
-  t.type(bobPhones, capnp.CompositeList);
+  t.type(bobPhones, Person._Phones);
 
   bobPhones.get(0).setNumber('555-4567');
   bobPhones.get(0).setType(Person.PhoneNumber.Type.HOME);

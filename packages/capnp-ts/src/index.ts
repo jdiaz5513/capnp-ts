@@ -13,6 +13,7 @@ export {
   List,
   ListCtor,
   Orphan,
+  PointerList,
   PointerType,
   Pointer,
   Struct,
@@ -32,3 +33,10 @@ export {
   getUint8Mask,
 
 } from './serialization';
+
+export {
+
+  Int64,
+  Uint64,
+
+} from './types';

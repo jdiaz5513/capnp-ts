@@ -11,7 +11,7 @@ import {Struct, StructCtor} from './struct';
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
-export function CompositeList<T extends Struct>(CompositeClass: StructCtor<T>): ListCtor<T, List<T>> {
+export function CompositeList<T extends Struct>(CompositeClass: StructCtor<T>): ListCtor<T> {
 
   return class extends List<T> {
 

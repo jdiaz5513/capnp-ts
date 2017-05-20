@@ -19,7 +19,7 @@ export class AddressBook extends capnp.Struct {
   static readonly _id = 'f724540a01e98224';
   static readonly _size = new capnp.ObjectSize(0, 1);
 
-  static _People: capnp.ListCtor<Person, capnp.List<Person>>;
+  static _People: capnp.ListCtor<Person>;
 
   adoptPeople(value: capnp.Orphan<capnp.List<Person>>): void {
 
@@ -61,6 +61,7 @@ export class AddressBook extends capnp.Struct {
 
 declare namespace Person_PhoneNumber_Type {
 
+  export const _displayName = 'Type';
   export const _id = '98bef1051277b9df';
 
 }
@@ -221,7 +222,7 @@ export class Person extends capnp.Struct {
   static readonly Employment = Person_Employment;
   static readonly PhoneNumber = Person_PhoneNumber;
 
-  static _Phones: capnp.ListCtor<Person_PhoneNumber, capnp.List<Person_PhoneNumber>>;
+  static _Phones: capnp.ListCtor<Person_PhoneNumber>;
 
   adoptPhones(value: capnp.Orphan<capnp.List<Person_PhoneNumber>>): void {
 
@@ -324,3 +325,4 @@ export class Person extends capnp.Struct {
 }
 
 AddressBook._People = capnp.CompositeList(Person);
+Person._Phones = capnp.CompositeList(Person_PhoneNumber);

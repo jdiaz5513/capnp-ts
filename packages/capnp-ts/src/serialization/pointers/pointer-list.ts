@@ -11,7 +11,7 @@ import {Pointer, PointerCtor} from './pointer';
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
-export function PointerList<T extends Pointer>(PointerClass: PointerCtor<T>): ListCtor<T, List<T>> {
+export function PointerList<T extends Pointer>(PointerClass: PointerCtor<T>): ListCtor<T> {
 
   return class extends List<T> {
 

@@ -14,13 +14,13 @@ import {Pointer} from './pointer';
 const trace = initTrace('capnp:list');
 trace('load');
 
-export interface ListCtor<T, U extends List<T>> {
+export interface ListCtor<T> {
 
   readonly _compositeSize?: ObjectSize;
   readonly _displayName: string;
   readonly _size: ListElementSize;
 
-  new(segment: Segment, byteOffset: number, depthLimit?: number): U;
+  new(segment: Segment, byteOffset: number, depthLimit?: number): List<T>;
 
 }
 
