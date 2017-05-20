@@ -10,7 +10,6 @@ import {
   PTR_ADOPT_COMPOSITE_STRUCT,
   PTR_DISOWN_COMPOSITE_STRUCT,
   PTR_INIT_COMPOSITE_STRUCT,
-  PTR_INIT_NON_GROUP,
   PTR_INVALID_UNION_ACCESS,
   PTR_STRUCT_DATA_OUT_OF_BOUNDS,
   PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
@@ -45,8 +44,6 @@ export interface StructCtor<T extends Struct> {
 export class Struct extends Pointer {
 
   static readonly _displayName: string = 'Struct';
-
-  _initGroup?: () => void;
 
   private readonly _compositeIndex?: number;
 
@@ -102,15 +99,6 @@ export class Struct extends Pointer {
     }
 
     return c;
-
-  }
-
-  _initGroupAs<T extends Struct>(GroupClass: StructCtor<T>): T {
-
-    const g = new GroupClass(this.segment, this.byteOffset, this._depthLimit, this._compositeIndex);
-    if (g._initGroup === undefined) throw new Error(PTR_INIT_NON_GROUP);
-    g._initGroup();
-    return g;
 
   }
 
