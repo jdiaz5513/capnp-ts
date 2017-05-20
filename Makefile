@@ -17,6 +17,27 @@ TAP_FLAGS ?= -j8
 TSC_FLAGS ?=
 TSLINT_FLAGS ?= -t stylish --type-check --project tsconfig.json
 
+######################
+# aggregate file lists
+
+# compiled library files
+lib :=
+
+# compiled test files
+lib_test :=
+
+# test spec files
+lib_test_spec :=
+
+# package.json for each package
+package_json :=
+
+# all node_modules
+node_modules :=
+
+# all source files
+src :=
+
 ###########
 # templates
 
@@ -121,7 +142,6 @@ $($(1)_lib): node_modules
 
 $($(1)_lib_test): $($(1)_lib)
 $($(1)_lib_test): $($(1)_test)
-$($(1)_lib_test): $($(1)_test_data)
 $($(1)_lib_test): $(tsconfig)
 $($(1)_lib_test): $(node_modules)
 $($(1)_lib_test): node_modules
@@ -149,26 +169,28 @@ tsc := $(node_bin)/tsc
 tslint := $(node_bin)/tslint
 tap := $(node_bin)/tap
 
-##########
-# packages
-
-$(foreach pkg,$(PACKAGES),$(eval $(call package_template,$(pkg))))
-
 ##################
 # misc input files
 
 capnp_in := $(shell find packages -name '*.capnp' -print)
 
+capnp_out := $(patsubst %.capnp,%.ts,$(capnp_in))
+
 tsconfig := $(shell find . -name 'tsconfig*.json' -print)
 
 tslint_config := $(shell find . -name 'tslint*.json' -print)
 
+##########
+# packages
+
+$(foreach pkg,$(PACKAGES),$(eval $(call package_template,$(pkg))))
+
 ###################
 # misc output files
 
-capnp_out := $(patsubst %.capnp,%.ts,$(capnp_in))
-
 capnp_ts_test_data := $(shell find $(capnp_ts)/test/data -name '*' -print)
+
+capnp_ts_lib_test: capnp_ts_test_data
 
 ################
 # build commands
@@ -253,7 +275,7 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	@$(nodemon) -e ts,capnp -w $(capnp_ts)/src -w $(capnp_ts)/test -w Makefile -x 'npm test'
+	@$(nodemon) -e ts,capnp -w $(capnp_ts)/src -w $(capnp_ts)/test -w $(capnpc_ts)/src -w $(capnpc_ts)/test -w Makefile -x 'npm test'
 	@echo	
 
 ##############
