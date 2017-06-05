@@ -1,5 +1,6 @@
 import Benchmark, {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
+import * as path from 'path';
 import {check, CheckOptions, Property} from 'testcheck';
 
 import {format, pad} from '../../lib/util';
@@ -109,9 +110,9 @@ export function logBench(suite: Suite) {
 }
 /* tslint:enable:no-any no-unsafe-any no-console only-arrow-functions no-invalid-this */
 
-export function readFileBuffer(path: string): ArrayBuffer {
+export function readFileBuffer(filePath: string): ArrayBuffer {
 
-  const b = readFileSync(path);
+  const b = readFileSync(path.join(__dirname, '../../', filePath));
 
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 

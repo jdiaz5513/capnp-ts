@@ -1,0 +1,6 @@
+{
+  "extends": "../../../configs/tslint-base.json",
+  "rules": {
+    "no-floating-promises": false
+  }
+}
