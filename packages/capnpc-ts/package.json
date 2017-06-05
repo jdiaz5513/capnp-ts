@@ -1,0 +1,32 @@
+{
+  "author": "jdiaz5513",
+  "bin": {
+    "capnpc-ts": "./bin/capnpc-ts.js"
+  },
+  "bugs": {
+    "url": "https://github.com/jdiaz5513/capnp-ts/issues"
+  },
+  "dependencies": {
+    "capnp-ts": "0.0.1",
+    "tslib": "^1.7.0"
+  },
+  "description": "Cap'n Proto schema compilter for capnp-ts.",
+  "devDependencies": {
+    "tap": "^10.3.2"
+  },
+  "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
+  "keywords": [
+    "capnp",
+    "rpc",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "lib/index",
+  "name": "capnpc-ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
+  },
+  "typings": "lib/index",
+  "version": "0.0.1"
+}

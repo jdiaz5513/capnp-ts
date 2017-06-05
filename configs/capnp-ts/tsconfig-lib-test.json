@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "../../packages/capnp-ts/lib-test",
+    "rootDir": "../../packages/capnp-ts/test"
+  },
+  "extends": "../tsconfig-base",
+  "include": [
+    "../../packages/capnp-ts/test/**/*.ts"
+  ]
+}
