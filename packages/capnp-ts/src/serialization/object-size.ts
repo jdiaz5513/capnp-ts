@@ -4,7 +4,7 @@
 
 import initTrace from 'debug';
 
-import {padToWord} from '../util';
+import {format, padToWord} from '../util';
 
 const trace = initTrace('capnp:object-size');
 trace('load');
@@ -54,6 +54,12 @@ export class ObjectSize {
   padToWord(): ObjectSize {
 
     return new ObjectSize(padToWord(this.dataByteLength), this.pointerLength);
+
+  }
+
+  toString(): string {
+
+    return format('ObjectSize_dw:%x,pc:%x', this.getDataWordLength(), this.pointerLength);
 
   }
 
