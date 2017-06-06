@@ -57,6 +57,12 @@ export class AddressBook extends capnp.Struct {
 
   }
 
+  toString() {
+
+    return `AddressBook_${super.toString()}`;
+
+  }
+
 }
 
 declare namespace Person_PhoneNumber_Type {
@@ -171,6 +177,12 @@ class Person_Employment extends capnp.Struct {
 
   }
 
+  toString(): string {
+
+    return `Person_Employment_${super.toString()}`;
+
+  }
+
   which(): number {
 
     return this._getUint16(4);
@@ -208,6 +220,12 @@ class Person_PhoneNumber extends capnp.Struct {
   setType(value: Person_PhoneNumber_Type): void {
 
     this._setUint16(0, value);
+
+  }
+
+  toString(): string {
+
+    return `Person_PhoneNumber_${super.toString()}`;
 
   }
 
@@ -319,6 +337,12 @@ export class Person extends capnp.Struct {
   setPhones(value: capnp.List<Person_PhoneNumber>): void {
 
     this._getPointer(2)._copyFrom(value);
+
+  }
+
+  toString(): string {
+
+    return `Person_${super.toString()}`;
 
   }
 
