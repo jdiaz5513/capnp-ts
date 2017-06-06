@@ -5,6 +5,7 @@
 import initTrace from 'debug';
 
 import {MAX_SAFE_INTEGER, VAL32} from '../constants';
+import {pad} from '../util';
 import {Uint64} from './uint64';
 
 const trace = initTrace('capnp:int64');
@@ -43,6 +44,44 @@ export class Int64 extends Uint64 {
     ret.setValue(source);
 
     return ret;
+
+  }
+
+  /**
+   * Parse a hexadecimal string in **big endian format** as an Int64 value.
+   *
+   * The value will be negative if the string is either preceded with a `-` sign, or already in the negative 2's
+   * complement form.
+   *
+   * @static
+   * @param {string} source The source string.
+   * @returns {Int64} The string parsed as a 64-bit signed integer.
+   */
+
+  static fromHexString(source: string): Int64 {
+
+    if (source.substr(0, 2) === '0x') source = source.substr(2);
+
+    if (source.length < 1) return Int64.fromNumber(0);
+
+    const neg = source[0] === '-';
+
+    if (neg) source = source.substr(1);
+
+    source = pad(source, 16);
+
+    if (source.length !== 16) throw new RangeError('Source string must contain at most 16 hexadecimal digits.');
+
+    const bytes = source.toLowerCase().replace(/[^\da-f]/g, '');
+    const buf = new Uint8Array(new ArrayBuffer(8));
+
+    for (let i = 0; i < 8; i ++) buf[7 - i] = parseInt(bytes.substr(i * 2, 2), 16);
+
+    const val = new Int64(buf);
+
+    if (neg) val.negate();
+
+    return val;
 
   }
 
