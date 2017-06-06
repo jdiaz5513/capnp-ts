@@ -55,10 +55,10 @@ export const PTR_INVALID_UNION_ACCESS =
   'Attempted to access getter on %s for union field %s that is not currently set (wanted: %d, found: %d).';
 export const PTR_OFFSET_OUT_OF_BOUNDS = 'Pointer offset %a is out of bounds for underlying buffer.';
 export const PTR_STRUCT_DATA_OUT_OF_BOUNDS =
-  'Attempted to access out-of-bounds struct data (struct: %s, %d bytes at %x).';
+  'Attempted to access out-of-bounds struct data (struct: %s, %d bytes at %a).';
 export const PTR_STRUCT_POINTER_OUT_OF_BOUNDS =
   'Attempted to access out-of-bounds struct pointer (%s, index: %d, length: %d).';
-export const PTR_WRONG_LIST_TYPE = 'Attempted to convert pointer %s to a list of type %s.';
+export const PTR_WRONG_LIST_TYPE = 'Cannot convert %s to a %s list.';
 export const PTR_WRONG_POINTER_TYPE = 'Attempted to convert pointer %s to a %s type.';
 export const PTR_WRONG_COMPOSITE_DATA_SIZE =
   'Attempted to convert %s to a composite list with the wrong data size (found: %d).';
