@@ -77,6 +77,18 @@ export class Uint64 {
 
   }
 
+  equals(other: Uint64): boolean {
+
+    for (let i = 0; i < 8; i++) {
+
+      if (this.buffer[i] !== other.buffer[i]) return false;
+
+    }
+
+    return true;
+
+  }
+
   inspect() {
 
     let hex = '';

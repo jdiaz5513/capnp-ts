@@ -93,6 +93,12 @@ export class Int64 extends Uint64 {
 
   }
 
+  equals(other: Int64): boolean {
+
+    return super.equals(other);
+
+  }
+
   inspect() {
 
     let hex = '';
