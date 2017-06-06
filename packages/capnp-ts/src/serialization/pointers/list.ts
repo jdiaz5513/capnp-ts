@@ -61,6 +61,22 @@ export class List<T> extends Pointer {
 
   }
 
+  find(callbackFn: (this: void, value: T, index: number) => boolean): T | undefined {
+
+    const length = this.getLength();
+
+    for (let i = 0; i < length; i++) {
+
+      const value = this.get(i);
+
+      if (callbackFn(value, i)) return value;
+
+    }
+
+    return undefined;
+
+  }
+
   forEach(callbackFn: (this: void, value: T, index: number) => void): void {
 
     const length = this.getLength();
