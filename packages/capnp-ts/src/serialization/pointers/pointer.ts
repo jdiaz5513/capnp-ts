@@ -366,9 +366,9 @@ export class Pointer {
   _followFar(): Pointer {
 
     const targetSegment = this.segment.message.getSegment(this.segment.getUint32(this.byteOffset + 4));
-    const targetOffset = this.segment.getUint32(this.byteOffset) >>> 3;
+    const targetWordOffset = this.segment.getUint32(this.byteOffset) >>> 3;
 
-    return new Pointer(targetSegment, targetOffset, this._depthLimit - 1);
+    return new Pointer(targetSegment, targetWordOffset * 8, this._depthLimit - 1);
 
   }
 
@@ -422,7 +422,15 @@ export class Pointer {
 
     const target = this._followFars();
 
-    return new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
+    const p = new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
+
+    if (target._getPointerType() === PointerType.LIST && target._getListElementSize() === ListElementSize.COMPOSITE) {
+
+      p.byteOffset += 8;
+
+    }
+
+    return p;
 
   }
 
@@ -789,7 +797,7 @@ export class Pointer {
 
       const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
 
-      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, elementSize));
+      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, ListElementSize[elementSize]));
 
     }
 

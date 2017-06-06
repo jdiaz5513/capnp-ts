@@ -15,7 +15,7 @@ import {
   PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
 } from '../../errors';
 import {Int64, Uint64} from '../../types';
-import {format} from '../../util';
+import {format, padToWord} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
 import {Segment} from '../segment';
@@ -89,11 +89,11 @@ export class Struct extends Pointer {
 
     if (this._compositeIndex !== undefined) {
 
-      // Read the object size from the tag word first.
+      // Seek backwards by one word so we can read the struct size off the tag word.
 
       c.byteOffset -= 8;
 
-      // Move forward to the content section and seek ahead by `_compositeIndex` multiples of the struct's total size.
+      // Seek ahead by `_compositeIndex` multiples of the struct's total size.
 
       c.byteOffset += 8 + this._compositeIndex * c._getStructSize().padToWord().getByteLength();
 
@@ -426,7 +426,7 @@ export class Struct extends Pointer {
 
     const ps = this._getContent();
 
-    ps.byteOffset += this._getSize().dataByteLength;
+    ps.byteOffset += padToWord(this._getSize().dataByteLength);
 
     return ps;
 

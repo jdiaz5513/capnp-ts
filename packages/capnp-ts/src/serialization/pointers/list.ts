@@ -182,8 +182,6 @@ export class List<T> extends Pointer {
 
         trace('Wrote composite tag word %s for %s.', c, this);
 
-        c.byteOffset += 8;
-
         break;
 
       case ListElementSize.VOID:
