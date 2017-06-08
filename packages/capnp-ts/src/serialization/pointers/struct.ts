@@ -929,9 +929,11 @@ export class Struct extends Pointer {
 
   private _checkDataBounds(byteOffset: number, byteLength: number): void {
 
-    if (byteOffset < 0 || byteLength < 0 || byteOffset + byteLength > this._getStructDataWords() * 8) {
+    const dataByteLength = this._getSize().dataByteLength;
 
-      throw new Error(format(PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset));
+    if (byteOffset < 0 || byteLength < 0 || byteOffset + byteLength > dataByteLength) {
+
+      throw new Error(format(PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset, dataByteLength));
 
     }
 
@@ -939,9 +941,11 @@ export class Struct extends Pointer {
 
   private _checkPointerBounds(index: number): void {
 
-    if (index < 0 || index >= this._getSize().pointerLength) {
+    const pointerLength = this._getSize().pointerLength;
 
-      throw new Error(format(PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, this._getSize().pointerLength));
+    if (index < 0 || index >= pointerLength) {
+
+      throw new Error(format(PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, pointerLength));
 
     }
 
