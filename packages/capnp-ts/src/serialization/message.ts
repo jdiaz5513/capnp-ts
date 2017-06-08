@@ -63,6 +63,12 @@ export class Message {
 
   }
 
+  static fromBuffer(unpacked: ArrayBufferView): Message {
+
+    return this.fromArrayBuffer(unpacked.buffer.slice(unpacked.byteOffset, unpacked.byteOffset + unpacked.byteLength));
+
+  }
+
   /**
    * Read a message from a packed array buffer. This packed buffer must contain segment framing headers.
    *
@@ -77,6 +83,12 @@ export class Message {
   static fromPackedArrayBuffer(packed: ArrayBuffer): Message {
 
     return this.fromArrayBuffer(unpack(packed));
+
+  }
+
+  static fromPackedBuffer(packed: ArrayBufferView): Message {
+
+    return this.fromPackedArrayBuffer(packed.buffer.slice(packed.byteOffset, packed.byteOffset + packed.byteLength));
 
   }
 
