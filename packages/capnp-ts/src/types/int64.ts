@@ -101,19 +101,7 @@ export class Int64 extends Uint64 {
 
   inspect() {
 
-    let hex = '';
-
-    for (let i = 7; i >= 0; i--) {
-
-      let v = this.buffer[i].toString(16);
-
-      if (v.length === 1) v = '0' + v;
-
-      hex += v;
-
-    }
-
-    return `[Int64 ${this.toString(10)} 0x${hex}]`;
+    return `[Int64 ${this.toString(10)} 0x${this.toHexString()}]`;
 
   }
 
@@ -159,6 +147,37 @@ export class Int64 extends Uint64 {
     }
 
     if (negate) this.negate();
+
+  }
+
+  toHexString(): string {
+
+    const b = this.buffer;
+    const negate = b[0] & 0x80;
+
+    if (negate) this.negate();
+
+    let hex = '';
+
+    for (let i = 7; i >= 0; i--) {
+
+      let v = b[i].toString(16);
+
+      if (v.length === 1) v = '0' + v;
+
+      hex += v;
+
+    }
+
+    if (negate) {
+
+      this.negate();
+
+      hex = '-' + hex;
+
+    }
+
+    return hex;
 
   }
 

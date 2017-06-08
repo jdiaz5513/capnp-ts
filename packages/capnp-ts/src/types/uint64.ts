@@ -6,6 +6,7 @@ import initTrace from 'debug';
 
 import {MAX_SAFE_INTEGER, VAL32} from '../constants';
 import {RANGE_INT64_UNDERFLOW} from '../errors';
+import {pad} from '../util';
 
 const trace = initTrace('capnp:uint64');
 trace('load');
@@ -59,6 +60,35 @@ export class Uint64 {
 
   }
 
+  /**
+   * Parse a hexadecimal string in **big endian format** as a Uint64 value.
+   *
+   * @static
+   * @param {string} source The source string.
+   * @returns {Uint64} The string parsed as a 64-bit unsigned integer.
+   */
+
+  static fromHexString(source: string): Uint64 {
+
+    if (source.substr(0, 2) === '0x') source = source.substr(2);
+
+    if (source.length < 1) return Uint64.fromNumber(0);
+
+    if (source[0] === '-') throw new RangeError('Source must not be negative.');
+
+    source = pad(source, 16);
+
+    if (source.length !== 16) throw new RangeError('Source string must contain at most 16 hexadecimal digits.');
+
+    const bytes = source.toLowerCase().replace(/[^\da-f]/g, '');
+    const buf = new Uint8Array(new ArrayBuffer(8));
+
+    for (let i = 0; i < 8; i ++) buf[7 - i] = parseInt(bytes.substr(i * 2, 2), 16);
+
+    return new Uint64(buf);
+
+  }
+
   static fromNumber(source: number): Uint64 {
 
     const ret = new this(new Uint8Array(8));
@@ -91,19 +121,7 @@ export class Uint64 {
 
   inspect() {
 
-    let hex = '';
-
-    for (let i = 7; i >= 0; i--) {
-
-      let v = this.buffer[i].toString(16);
-
-      if (v.length === 1) v = '0' + v;
-
-      hex += v;
-
-    }
-
-    return `[Uint64 ${this.toString(10)} 0x${hex}]`;
+    return `[Uint64 ${this.toString(10)} 0x${this.toHexString()}]`;
 
   }
 
@@ -210,9 +228,27 @@ export class Uint64 {
 
   }
 
+  toHexString(): string {
+
+    let hex = '';
+
+    for (let i = 7; i >= 0; i--) {
+
+      let v = this.buffer[i].toString(16);
+
+      if (v.length === 1) v = '0' + v;
+
+      hex += v;
+
+    }
+
+    return hex;
+
+  }
+
   toString(radix?: number) {
 
-    return this.valueOf().toString(radix);
+    return this.toNumber(true).toString(radix);
 
   }
 
