@@ -61,6 +61,8 @@ export class Segment implements DataView {
 
   allocate(byteLength: number): Pointer {
 
+    trace('allocate(%d)', byteLength);
+
     let segment: Segment = this;
 
     byteLength = padToWord(byteLength);
@@ -274,6 +276,8 @@ export class Segment implements DataView {
 
   hasCapacity(byteLength: number): boolean {
 
+    trace('hasCapacity(%d)', byteLength);
+
     // capacity - allocated >= requested
 
     return this.buffer.byteLength - this.byteLength >= byteLength;
@@ -308,6 +312,8 @@ export class Segment implements DataView {
    */
 
   replaceBuffer(buffer: ArrayBuffer): void {
+
+    trace('replaceBuffer(%p)', buffer);
 
     if (this.buffer === buffer) return;
 
