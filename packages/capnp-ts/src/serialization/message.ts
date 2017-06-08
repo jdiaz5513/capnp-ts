@@ -4,14 +4,9 @@
 
 import initTrace from 'debug';
 
-import {DEFAULT_BUFFER_SIZE} from '../constants';
-import {
-  MSG_INVALID_FRAME_HEADER,
-  MSG_NO_SEGMENTS_IN_ARENA,
-  MSG_SEGMENT_OUT_OF_BOUNDS,
-  MSG_SEGMENT_TOO_SMALL,
-} from '../errors';
-import {format, pad, padToWord, repeat} from '../util';
+import * as C from '../constants';
+import * as E from '../errors';
+import {dumpBuffer, format, padToWord} from '../util';
 import {Arena, MultiSegmentArena, SingleSegmentArena} from './arena';
 import {pack, unpack} from './packing';
 import {PointerType, Struct} from './pointers';
@@ -141,7 +136,7 @@ export class Message {
     let byteOffset = 4 + segmentCount * 4;
     byteOffset += byteOffset % 8;
 
-    if (byteOffset + segmentCount * 4 > message.byteLength) throw new Error(MSG_INVALID_FRAME_HEADER);
+    if (byteOffset + segmentCount * 4 > message.byteLength) throw new Error(E.MSG_INVALID_FRAME_HEADER);
 
     for (let i = 0; i < segmentCount; i++) {
 
@@ -172,7 +167,7 @@ export class Message {
 
     } else if (res.id < 0 || res.id > this._segments.length) {
 
-      throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, res.id, this));
+      throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, res.id, this));
 
     } else {
 
@@ -205,29 +200,7 @@ export class Message {
       const {buffer, byteLength} = this._segments[i];
       const b = new Uint8Array(buffer, 0, byteLength);
 
-      for (let j = 0; j < b.byteLength; j += 16) {
-
-        r += `\n${pad(j.toString(16), 8)}: `;
-        let s = '';
-        let k;
-
-        for (k = 0; k < 16; k++) {
-
-          if (j + k >= b.byteLength) break;
-
-          const v = b[j + k];
-
-          r += `${pad(v.toString(16), 2)} `;
-
-          s += v > 32 && v < 255 ? String.fromCharCode(v) : '·';
-
-          if (k === 7) r += ' ';
-
-        }
-
-        r += `${repeat((17 - k) * 3, ' ')}${s}`;
-
-      }
+      r += dumpBuffer(b);
 
     }
 
@@ -278,7 +251,7 @@ export class Message {
 
       if (arenaSegments === 0) {
 
-        this.allocateSegment(DEFAULT_BUFFER_SIZE);
+        this.allocateSegment(C.DEFAULT_BUFFER_SIZE);
 
       } else {
 
@@ -288,7 +261,7 @@ export class Message {
 
       }
 
-      if (!this._segments[0].hasCapacity(8)) throw new Error(MSG_SEGMENT_TOO_SMALL);
+      if (!this._segments[0].hasCapacity(8)) throw new Error(E.MSG_SEGMENT_TOO_SMALL);
 
       // This will leave room for the root pointer.
 
@@ -298,7 +271,7 @@ export class Message {
 
     }
 
-    if (id < 0 || id >= segmentLength) throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, this, id));
+    if (id < 0 || id >= segmentLength) throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, this, id));
 
     return this._segments[id];
 
@@ -396,7 +369,7 @@ export class Message {
 
     const numSegments = this._arena.getNumSegments();
 
-    if (numSegments < 1) throw new Error(MSG_NO_SEGMENTS_IN_ARENA);
+    if (numSegments < 1) throw new Error(E.MSG_NO_SEGMENTS_IN_ARENA);
 
     this._segments = new Array(numSegments);
 

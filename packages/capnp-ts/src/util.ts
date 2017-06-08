@@ -7,24 +7,11 @@
 
 import initTrace from 'debug';
 
-import {MAX_INT32, MAX_UINT32} from './constants';
+import {MAX_BUFFER_DUMP_BYTES, MAX_INT32, MAX_UINT32} from './constants';
 import {RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_UINT32_OVERFLOW} from './errors';
 
 const trace = initTrace('capnp:util');
 trace('load');
-
-// Set up custom debug formatters.
-
-/* tslint:disable:no-string-literal */
-/* istanbul ignore next */
-initTrace.formatters['h'] = (v: any) => v.toString('hex');
-/* istanbul ignore next */
-initTrace.formatters['x'] = (v: any) => `0x${v.toString(16)}`;
-/* istanbul ignore next */
-initTrace.formatters['a'] = (v: any) => `0x${pad(v.toString(16), 8)}`;
-/* istanbul ignore next */
-initTrace.formatters['X'] = (v: any) => `0x${v.toString(16).toUpperCase()}`;
-/* tslint:enable:no-string-literal */
 
 /**
  * Dump a hex string from the given buffer.
@@ -154,6 +141,52 @@ export function decodeUtf8(src: Uint8Array): string {
   }
 
   return dst;
+
+}
+
+export function dumpBuffer(buffer: ArrayBuffer | ArrayBufferView): string {
+
+  const b = buffer instanceof ArrayBuffer
+    ? new Uint8Array(buffer)
+    : new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+
+  const byteLength = Math.min(b.byteLength, MAX_BUFFER_DUMP_BYTES);
+
+  let r = format('\n=== buffer[%d] ===', byteLength);
+
+  for (let j = 0; j < byteLength; j += 16) {
+
+    r += `\n${pad(j.toString(16), 8)}: `;
+    let s = '';
+    let k;
+
+    for (k = 0; k < 16; k++) {
+
+      if (j + k >= byteLength) break;
+
+      const v = b[j + k];
+
+      r += `${pad(v.toString(16), 2)} `;
+
+      s += v > 32 && v < 255 ? String.fromCharCode(v) : '·';
+
+      if (k === 7) r += ' ';
+
+    }
+
+    r += `${repeat((17 - k) * 3, ' ')}${s}`;
+
+  }
+
+  r += '\n';
+
+  if (byteLength !== b.byteLength) {
+
+    r += format('=== (truncated %d bytes) ===\n', b.byteLength - byteLength);
+
+  }
+
+  return r;
 
 }
 
@@ -452,3 +485,16 @@ export function repeat(times: number, str: string) {
   return out;
 
 }
+
+// Set up custom debug formatters.
+
+/* tslint:disable:no-string-literal */
+/* istanbul ignore next */
+initTrace.formatters['h'] = (v: any) => v.toString('hex');
+/* istanbul ignore next */
+initTrace.formatters['x'] = (v: any) => `0x${v.toString(16)}`;
+/* istanbul ignore next */
+initTrace.formatters['a'] = (v: any) => `0x${pad(v.toString(16), 8)}`;
+/* istanbul ignore next */
+initTrace.formatters['X'] = (v: any) => `0x${v.toString(16).toUpperCase()}`;
+/* tslint:enable:no-string-literal */

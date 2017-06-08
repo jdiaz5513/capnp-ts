@@ -13,6 +13,7 @@
 
 # Milestone: 0.2.0 (code quality)
 
+* [ ] Implement `toJSON`/`fromJSON`.
 * [ ] Add JSDocs for the entire public API.
 * [ ] Check for unused methods (find references on each exported symbol/method).
 * [ ] Check for unused error strings.
