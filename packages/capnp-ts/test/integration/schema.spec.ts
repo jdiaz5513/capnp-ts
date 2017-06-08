@@ -13,17 +13,17 @@ const SCHEMA_FILE_ID = capnp.Int64.fromHexString('a93fc509624c72d9');
 tap.test('schema roundtrip', (t) => {
 
   const message = capnp.Message.fromArrayBuffer(SCHEMA_MESSAGE);
-  const cgr = message.getRoot(CodeGeneratorRequest);
+  const req = message.getRoot(CodeGeneratorRequest);
 
-  t.type(cgr, CodeGeneratorRequest);
+  t.type(req, CodeGeneratorRequest);
 
-  const capnpVersion = cgr.getCapnpVersion();
+  const capnpVersion = req.getCapnpVersion();
 
   t.equal(capnpVersion.getMajor(), 0);
   t.equal(capnpVersion.getMinor(), 6);
   t.equal(capnpVersion.getMicro(), 0);
 
-  const requestedFiles = cgr.getRequestedFiles();
+  const requestedFiles = req.getRequestedFiles();
 
   t.equal(requestedFiles.getLength(), 1);
 
