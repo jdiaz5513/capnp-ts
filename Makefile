@@ -291,7 +291,7 @@ watch: node_modules
 # 	@echo =======================
 # 	@echo
 # 	@# capnp compile -o bin/capnpc-ts $< > $@
-# 	touch $@
+# 	@/usr/bin/touch $@
 
 $(capnp_ts_lib_test): $(capnp_ts_test_data)
 
@@ -311,7 +311,7 @@ $(node_modules): node_modules
 	@echo
 	@echo lerna bootstrap
 	@$(lerna) bootstrap
-	@touch $(node_modules)
+	@/usr/bin/touch $(node_modules)
 	@echo
 
 node_modules: package.json
@@ -321,5 +321,5 @@ node_modules: package-lock.json
 	@echo =============================
 	@echo
 	npm install
-	@touch node_modules
+	@/usr/bin/touch node_modules
 	@echo
