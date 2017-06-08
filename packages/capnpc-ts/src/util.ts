@@ -1,6 +1,9 @@
 import {Int64, Uint64} from 'capnp-ts/lib/types';
 import {pad} from 'capnp-ts/lib/util';
+import initTrace from 'debug';
 import * as R from 'ramda';
+
+// Yep, this is silly. :)
 
 interface Hex2Dec {
   decToHex(d: string): string;
@@ -8,6 +11,21 @@ interface Hex2Dec {
 }
 /* tslint:disable-next-line:no-var-requires */
 const {decToHex} = require('hex2dec') as Hex2Dec;
+
+const trace = initTrace('capnpc:util');
+trace('load');
+
+export function c2s(s: string): string {
+
+  return splitCamel(s).map((x) => x.toUpperCase()).join('_');
+
+}
+
+export function c2t(s: string) {
+
+  return s.substr(0, 1).toUpperCase() + s.substr(1);
+
+}
 
 export function d2h(d: string): string {
 
@@ -92,17 +110,5 @@ export function splitCamel(s: string): string[] {
     return a;
 
   }, [], s.split(''));
-
-}
-
-export function c2t(s: string) {
-
-  return s.substr(0, 1).toUpperCase() + s.substr(1);
-
-}
-
-export function c2s(s: string): string {
-
-  return splitCamel(s).map((x) => x.toUpperCase()).join('_');
 
 }

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as R from 'ramda';
 
-import {c2s, c2t, d2h} from '../../util';
+import {c2s, c2t, d2h} from '../util';
 import {Field, Node, Primitive, Type, Value} from './interface';
 import {
   ICodeGeneratorRequest,

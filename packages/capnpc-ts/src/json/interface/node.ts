@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 
-import {c2t} from '../../../util';
+import {c2t} from '../../util';
 import {IField, INode, Node_Which} from '../types';
 import {Slot} from './slot';
 

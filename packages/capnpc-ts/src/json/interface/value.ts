@@ -1,6 +1,6 @@
 import {pad} from 'capnp-ts/lib/util';
 
-import {decToHexBytes, decToInt64} from '../../../util';
+import {decToHexBytes, decToInt64} from '../../util';
 import {IValue, Value_Which} from '../types';
 
 export const Value = {
