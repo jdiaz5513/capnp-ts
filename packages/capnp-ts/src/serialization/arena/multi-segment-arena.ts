@@ -62,7 +62,7 @@ export class MultiSegmentArena extends Arena {
 
   toString() {
 
-    return format('MultiSegmentArena_segments:%d');
+    return format('MultiSegmentArena_segments:%d', this.getNumSegments());
 
   }
 
