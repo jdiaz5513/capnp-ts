@@ -91,6 +91,18 @@ export class List<T> extends Pointer {
 
   }
 
+  /**
+   * Get the length of this list.
+   *
+   * @returns {number} The number of elements in this list.
+   */
+
+  getLength(): number {
+
+    return this._getTargetListLength();
+
+  }
+
   map<U>(callbackFn: (this: void, value: T, index: number) => U): U[] {
 
     const length = this.getLength();
@@ -143,6 +155,18 @@ export class List<T> extends Pointer {
     }
 
     return false;
+
+  }
+
+  toArray(): T[] {
+
+    return this.map(identity);
+
+  }
+
+  toString(): string {
+
+    return `List_${super.toString()}`;
 
   }
 
@@ -217,30 +241,6 @@ export class List<T> extends Pointer {
     const res = this._initPointer(c.segment, c.byteOffset);
 
     res.pointer._setListPointer(res.offsetWords, elementSize, length, compositeSize);
-
-  }
-
-  /**
-   * Get the length of this list.
-   *
-   * @returns {number} The number of elements in this list.
-   */
-
-  getLength(): number {
-
-    return this._getTargetListLength();
-
-  }
-
-  toArray(): T[] {
-
-    return this.map(identity);
-
-  }
-
-  toString(): string {
-
-    return `List_${super.toString()}`;
 
   }
 
