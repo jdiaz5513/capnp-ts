@@ -397,17 +397,17 @@ export class Segment implements DataView {
   /**
    * Write an int64 value to the specified offset.
    *
-   * @param {number} addr The offset from the beginning of the buffer.
+   * @param {number} byteOffset The offset from the beginning of the buffer.
    * @param {Int64} val The value to store.
    * @returns {void}
    */
 
-  setInt64(addr: number, val: Int64): void {
+  setInt64(byteOffset: number, val: Int64): void {
 
-    this._dv.setUint8(addr, val.buffer[0]);
-    this._dv.setUint8(addr + 1, val.buffer[1]);
-    this._dv.setUint8(addr + 2, val.buffer[2]);
-    this._dv.setUint8(addr + 3, val.buffer[3]);
+    this._dv.setUint8(byteOffset, val.buffer[0]);
+    this._dv.setUint8(byteOffset + 1, val.buffer[1]);
+    this._dv.setUint8(byteOffset + 2, val.buffer[2]);
+    this._dv.setUint8(byteOffset + 3, val.buffer[3]);
 
   }
 
@@ -415,13 +415,13 @@ export class Segment implements DataView {
    * Write a uint16 value to the specified offset.
    *
    * @param {number} byteOffset The offset from the beginning of the buffer.
-   * @param {number} value The value to store.
+   * @param {number} val The value to store.
    * @returns {void}
    */
 
-  setUint16(byteOffset: number, value: number): void {
+  setUint16(byteOffset: number, val: number): void {
 
-    this._dv.setUint16(byteOffset, value, true);
+    this._dv.setUint16(byteOffset, val, true);
 
   }
 
@@ -429,13 +429,13 @@ export class Segment implements DataView {
    * Write a uint32 value to the specified offset.
    *
    * @param {number} byteOffset The offset from the beginning of the buffer.
-   * @param {number} value The value to store.
+   * @param {number} val The value to store.
    * @returns {void}
    */
 
-  setUint32(byteOffset: number, value: number): void {
+  setUint32(byteOffset: number, val: number): void {
 
-    this._dv.setUint32(byteOffset, value, true);
+    this._dv.setUint32(byteOffset, val, true);
 
   }
 
@@ -444,16 +444,16 @@ export class Segment implements DataView {
    * TODO: benchmark other ways to perform this write operation.
    *
    * @param {number} byteOffset The offset from the beginning of the buffer.
-   * @param {Uint64} value The value to store.
+   * @param {Uint64} val The value to store.
    * @returns {void}
    */
 
-  setUint64(byteOffset: number, value: Uint64): void {
+  setUint64(byteOffset: number, val: Uint64): void {
 
-    this._dv.setUint8(byteOffset + 0, value.buffer[0]);
-    this._dv.setUint8(byteOffset + 1, value.buffer[1]);
-    this._dv.setUint8(byteOffset + 2, value.buffer[2]);
-    this._dv.setUint8(byteOffset + 3, value.buffer[3]);
+    this._dv.setUint8(byteOffset + 0, val.buffer[0]);
+    this._dv.setUint8(byteOffset + 1, val.buffer[1]);
+    this._dv.setUint8(byteOffset + 2, val.buffer[2]);
+    this._dv.setUint8(byteOffset + 3, val.buffer[3]);
 
   }
 
@@ -461,13 +461,13 @@ export class Segment implements DataView {
    * Write a uint8 (byte) value to the specified offset.
    *
    * @param {number} byteOffset The offset from the beginning of the buffer.
-   * @param {number} value The value to store.
+   * @param {number} val The value to store.
    * @returns {void}
    */
 
-  setUint8(byteOffset: number, value: number): void {
+  setUint8(byteOffset: number, val: number): void {
 
-    this._dv.setUint8(byteOffset, value);
+    this._dv.setUint8(byteOffset, val);
 
   }
 
