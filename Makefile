@@ -54,6 +54,7 @@ $(eval $(call package_template_2,$(subst -,_,$(1))))
 $(eval $(call package_template_3,$(subst -,_,$(1))))
 $(eval $(call package_template_4,$(subst -,_,$(1))))
 $(eval $(call package_template_5,$(subst -,_,$(1))))
+$(eval $(call package_template_6,$(subst -,_,$(1))))
 
 endef
 
@@ -122,6 +123,10 @@ package_json += $($(1))/package.json
 package_json += $($(1))/package-lock.json
 node_modules += $($(1))/node_modules
 src += $($(1)_src)
+
+endef
+
+define package_template_6
 
 # library target
 
