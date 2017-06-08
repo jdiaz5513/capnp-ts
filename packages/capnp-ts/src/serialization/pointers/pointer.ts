@@ -74,7 +74,16 @@ export class Pointer {
 
     if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
 
-    if (byteOffset < 0 || byteOffset > segment.byteLength - 8) {
+    // Make sure we keep track of all pointer allocations; there's a limit per message (prevent DoS).
+
+    segment.message.onCreatePointer(this);
+
+    // NOTE: It's okay to have a pointer to the end of the segment; you'll see this when creating pointers to the
+    // beginning of the content of a newly-allocated composite list with zero elements. Unlike other language
+    // implementations buffer over/underflows are not a big issue since all buffer access is bounds checked in native
+    // code anyway.
+
+    if (byteOffset < 0 || byteOffset > segment.byteLength) {
 
       throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
 

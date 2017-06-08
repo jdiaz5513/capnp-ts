@@ -22,6 +22,8 @@ export class Message {
 
   private _segments: Segment[];
 
+  private _traversalLimit: number;
+
   /**
    * Creates a new Message, optionally using a provided arena for segment allocation.
    *
@@ -35,6 +37,7 @@ export class Message {
 
     this._arena = arena;
     this._segments = [];
+    this._traversalLimit = C.DEFAULT_TRAVERSE_LIMIT;
 
     trace('Instantiated message %s.', this);
 
@@ -294,6 +297,28 @@ export class Message {
     trace('Initialized root pointer %s for %s.', root, this);
 
     return root;
+
+  }
+
+  /**
+   * Track the allocation of a new Pointer object.
+   *
+   * This will decrement an internal counter tracking how many bytes have been traversed in the message so far. After
+   * a certain limit, this method will throw an error in order to prevent a certain class of DoS attacks.
+   *
+   * @param {object} pointer The pointer being allocated.
+   * @returns {void}
+   */
+
+  onCreatePointer(pointer: object) {
+
+    this._traversalLimit -= 8;
+
+    if (this._traversalLimit <= 0) {
+
+      throw new Error(format(E.PTR_TRAVERSAL_LIMIT_EXCEEDED, pointer));
+
+    }
 
   }
 
