@@ -19,10 +19,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-using Cxx = import "/capnp/c++.capnp";
+using TS = import "./ts.capnp";
 
 @0xa93fc509624c72d9;
-$Cxx.namespace("capnp::schema");
+$TS.importPath("../index");
 
 using Id = UInt64;
 # The globally-unique ID of a file, type, or annotation.

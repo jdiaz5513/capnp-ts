@@ -40,6 +40,8 @@ export class Text extends List<string> {
 
     if (index !== 0) trace('Called get() on %s with a strange index (%d).', this, index);
 
+    if (this._isNull()) return '';
+
     const c = this._getContent();
 
     // Remember to exclude the NUL byte.

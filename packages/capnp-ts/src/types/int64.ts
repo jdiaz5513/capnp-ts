@@ -5,6 +5,7 @@
 import initTrace from 'debug';
 
 import {MAX_SAFE_INTEGER, VAL32} from '../constants';
+import {pad} from '../util';
 import {Uint64} from './uint64';
 
 const trace = initTrace('capnp:int64');
@@ -46,6 +47,44 @@ export class Int64 extends Uint64 {
 
   }
 
+  /**
+   * Parse a hexadecimal string in **big endian format** as an Int64 value.
+   *
+   * The value will be negative if the string is either preceded with a `-` sign, or already in the negative 2's
+   * complement form.
+   *
+   * @static
+   * @param {string} source The source string.
+   * @returns {Int64} The string parsed as a 64-bit signed integer.
+   */
+
+  static fromHexString(source: string): Int64 {
+
+    if (source.substr(0, 2) === '0x') source = source.substr(2);
+
+    if (source.length < 1) return Int64.fromNumber(0);
+
+    const neg = source[0] === '-';
+
+    if (neg) source = source.substr(1);
+
+    source = pad(source, 16);
+
+    if (source.length !== 16) throw new RangeError('Source string must contain at most 16 hexadecimal digits.');
+
+    const bytes = source.toLowerCase().replace(/[^\da-f]/g, '');
+    const buf = new Uint8Array(new ArrayBuffer(8));
+
+    for (let i = 0; i < 8; i ++) buf[7 - i] = parseInt(bytes.substr(i * 2, 2), 16);
+
+    const val = new Int64(buf);
+
+    if (neg) val.negate();
+
+    return val;
+
+  }
+
   static fromUint8Array(source: Uint8Array, offset = 0, noCopy = false): Int64 {
 
     if (noCopy) return new this(source.subarray(offset, offset + 8));
@@ -54,21 +93,28 @@ export class Int64 extends Uint64 {
 
   }
 
+  equals(other: Int64): boolean {
+
+    return super.equals(other);
+
+  }
+
   inspect() {
 
-    let hex = '';
+    return `[Int64 ${this.toString(10)} 0x${this.toHexString()}]`;
 
-    for (let i = 7; i >= 0; i--) {
+  }
 
-      let v = this.buffer[i].toString(16);
+  negate() {
 
-      if (v.length === 1) v = '0' + v;
+    for (let b = this.buffer, carry = 1, i = 0; i < 8; i++) {
 
-      hex += v;
+      const v = (b[i] ^ 0xff) + carry;
+
+      b[i] = v & 0xff;
+      carry = v >> 8;
 
     }
-
-    return `[Int64 ${this.toString(10)} 0x${hex}]`;
 
   }
 
@@ -100,7 +146,38 @@ export class Int64 extends Uint64 {
 
     }
 
-    if (negate) this._2scomp();
+    if (negate) this.negate();
+
+  }
+
+  toHexString(): string {
+
+    const b = this.buffer;
+    const negate = b[0] & 0x80;
+
+    if (negate) this.negate();
+
+    let hex = '';
+
+    for (let i = 7; i >= 0; i--) {
+
+      let v = b[i].toString(16);
+
+      if (v.length === 1) v = '0' + v;
+
+      hex += v;
+
+    }
+
+    if (negate) {
+
+      this.negate();
+
+      hex = '-' + hex;
+
+    }
+
+    return hex;
 
   }
 
@@ -151,19 +228,6 @@ export class Int64 extends Uint64 {
     }
 
     return negate ? -x : x;
-
-  }
-
-  private _2scomp() {
-
-    for (let b = this.buffer, carry = 1, i = 0; i < 8; i++) {
-
-      const v = (b[i] ^ 0xff) + carry;
-
-      b[i] = v & 0xff;
-      carry = v >> 8;
-
-    }
 
   }
 

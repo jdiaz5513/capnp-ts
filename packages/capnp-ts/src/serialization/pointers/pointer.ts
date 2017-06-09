@@ -31,6 +31,14 @@ import {PointerType} from './pointer-type';
 const trace = initTrace('capnp:pointer');
 trace('load');
 
+export interface PointerCtor<T extends Pointer> {
+
+  readonly _displayName: string;
+
+  new(segment: Segment, byteOffset: number, depthLimit?: number): T;
+
+}
+
 /**
  * A pointer referencing a single byte location in a segment. This is typically used for Cap'n Proto pointers, but is
  * also sometimes used to reference an offset to a pointer's content or tag words.
@@ -40,6 +48,8 @@ trace('load');
  */
 
 export class Pointer {
+
+  static readonly _displayName: string = 'Pointer';
 
   /**
    * A number that is decremented as nested pointers are traversed. When this hits zero errors will be thrown.
@@ -64,7 +74,16 @@ export class Pointer {
 
     if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
 
-    if (byteOffset < 0 || byteOffset > segment.byteLength - 8) {
+    // Make sure we keep track of all pointer allocations; there's a limit per message (prevent DoS).
+
+    segment.message.onCreatePointer(this);
+
+    // NOTE: It's okay to have a pointer to the end of the segment; you'll see this when creating pointers to the
+    // beginning of the content of a newly-allocated composite list with zero elements. Unlike other language
+    // implementations buffer over/underflows are not a big issue since all buffer access is bounds checked in native
+    // code anyway.
+
+    if (byteOffset < 0 || byteOffset > segment.byteLength) {
 
       throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
 
@@ -356,9 +375,9 @@ export class Pointer {
   _followFar(): Pointer {
 
     const targetSegment = this.segment.message.getSegment(this.segment.getUint32(this.byteOffset + 4));
-    const targetOffset = this.segment.getUint32(this.byteOffset) >>> 3;
+    const targetWordOffset = this.segment.getUint32(this.byteOffset) >>> 3;
 
-    return new Pointer(targetSegment, targetOffset, this._depthLimit - 1);
+    return new Pointer(targetSegment, targetWordOffset * 8, this._depthLimit - 1);
 
   }
 
@@ -412,7 +431,15 @@ export class Pointer {
 
     const target = this._followFars();
 
-    return new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
+    const p = new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
+
+    if (target._getPointerType() === PointerType.LIST && target._getListElementSize() === ListElementSize.COMPOSITE) {
+
+      p.byteOffset += 8;
+
+    }
+
+    return p;
 
   }
 
@@ -779,7 +806,7 @@ export class Pointer {
 
       const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
 
-      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, elementSize));
+      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, ListElementSize[elementSize]));
 
     }
 

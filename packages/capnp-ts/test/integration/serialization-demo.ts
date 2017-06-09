@@ -19,33 +19,23 @@ export class AddressBook extends capnp.Struct {
   static readonly _id = 'f724540a01e98224';
   static readonly _size = new capnp.ObjectSize(0, 1);
 
-  adoptPeople(value: capnp.Orphan<capnp.CompositeList<Person>>): void {
+  static _People: capnp.ListCtor<Person>;
+
+  adoptPeople(value: capnp.Orphan<capnp.List<Person>>): void {
 
     this._getPointer(0).adopt(value);
 
   }
 
-  disownPeople(): capnp.Orphan<capnp.CompositeList<Person>> {
+  disownPeople(): capnp.Orphan<capnp.List<Person>> {
 
     return this.getPeople().disown();
 
   }
 
-  getPeople(): capnp.CompositeList<Person> {
+  getPeople(): capnp.List<Person> {
 
-    const list = capnp.CompositeList.fromPointer(Person, this._getPointer(0));
-
-    if (list._isNull()) {
-
-      list._initList(0);   // no default
-
-    } else {
-
-      list._validate(capnp.PointerType.LIST, capnp.ListElementSize.COMPOSITE, Person._size);
-
-    }
-
-    return list;
+    return this._getList(0, AddressBook._People);
 
   }
 
@@ -55,19 +45,21 @@ export class AddressBook extends capnp.Struct {
 
   }
 
-  initPeople(length: number): capnp.CompositeList<Person> {
+  initPeople(length: number): capnp.List<Person> {
 
-    const list = capnp.CompositeList.fromPointer(Person, this._getPointer(0));
-
-    list._initList(length);
-
-    return list;
+    return this._initList(0, AddressBook._People, length);
 
   }
 
-  setPeople(value: capnp.CompositeList<Person>): void {
+  setPeople(value: capnp.List<Person>): void {
 
     this._getPointer(0)._copyFrom(value);
+
+  }
+
+  toString() {
+
+    return `AddressBook_${super.toString()}`;
 
   }
 
@@ -75,6 +67,7 @@ export class AddressBook extends capnp.Struct {
 
 declare namespace Person_PhoneNumber_Type {
 
+  export const _displayName = 'Type';
   export const _id = '98bef1051277b9df';
 
 }
@@ -96,6 +89,12 @@ class Person_Employment extends capnp.Struct {
   static SCHOOL = 2;
   static SELF_EMPLOYED = 3;
 
+  _initGroup = () => {
+
+    this._setUint16(4, 0);
+
+  }
+
   getEmployer(): string {
 
     this._testWhich('employment', this.which(), 1);
@@ -109,12 +108,6 @@ class Person_Employment extends capnp.Struct {
     this._testWhich('employment', this.which(), 2);
 
     return this._getText(3);
-
-  }
-
-  init(): void {
-
-    this.setUnemployed();
 
   }
 
@@ -184,6 +177,12 @@ class Person_Employment extends capnp.Struct {
 
   }
 
+  toString(): string {
+
+    return `Person_Employment_${super.toString()}`;
+
+  }
+
   which(): number {
 
     return this._getUint16(4);
@@ -224,6 +223,12 @@ class Person_PhoneNumber extends capnp.Struct {
 
   }
 
+  toString(): string {
+
+    return `Person_PhoneNumber_${super.toString()}`;
+
+  }
+
 }
 
 export class Person extends capnp.Struct {
@@ -235,13 +240,15 @@ export class Person extends capnp.Struct {
   static readonly Employment = Person_Employment;
   static readonly PhoneNumber = Person_PhoneNumber;
 
-  adoptPhones(value: capnp.Orphan<capnp.CompositeList<Person_PhoneNumber>>): void {
+  static _Phones: capnp.ListCtor<Person_PhoneNumber>;
+
+  adoptPhones(value: capnp.Orphan<capnp.List<Person_PhoneNumber>>): void {
 
     this._getPointer(2).adopt(value);
 
   }
 
-  disownPhones(): capnp.Orphan<capnp.CompositeList<Person_PhoneNumber>> {
+  disownPhones(): capnp.Orphan<capnp.List<Person_PhoneNumber>> {
 
     return this.getPhones().disown();
 
@@ -271,21 +278,9 @@ export class Person extends capnp.Struct {
 
   }
 
-  getPhones(): capnp.CompositeList<Person_PhoneNumber> {
+  getPhones(): capnp.List<Person_PhoneNumber> {
 
-    const list = capnp.CompositeList.fromPointer(Person_PhoneNumber, this._getPointer(2));
-
-    if (list._isNull()) {
-
-      list._initList(0);
-
-    } else {
-
-      list._validate(capnp.PointerType.LIST, capnp.ListElementSize.COMPOSITE, Person_PhoneNumber._size);
-
-    }
-
-    return list;
+    return this._getList(2, Person._Phones);
 
   }
 
@@ -310,19 +305,14 @@ export class Person extends capnp.Struct {
   initEmployment(): Person_Employment {
 
     const e = this.getEmployment();
-    e.init();
-
+    e._initGroup();
     return e;
 
   }
 
-  initPhones(length: number): capnp.CompositeList<Person_PhoneNumber> {
+  initPhones(length: number): capnp.List<Person_PhoneNumber> {
 
-    const list = capnp.CompositeList.fromPointer(Person_PhoneNumber, this._getPointer(2));
-
-    list._initList(length);
-
-    return list;
+    return this._initList(2, Person._Phones, length);
 
   }
 
@@ -344,10 +334,19 @@ export class Person extends capnp.Struct {
 
   }
 
-  setPhones(value: capnp.CompositeList<Person_PhoneNumber>): void {
+  setPhones(value: capnp.List<Person_PhoneNumber>): void {
 
     this._getPointer(2)._copyFrom(value);
 
   }
 
+  toString(): string {
+
+    return `Person_${super.toString()}`;
+
+  }
+
 }
+
+AddressBook._People = capnp.CompositeList(Person);
+Person._Phones = capnp.CompositeList(Person_PhoneNumber);

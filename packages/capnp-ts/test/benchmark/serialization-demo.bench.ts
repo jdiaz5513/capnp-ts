@@ -2,6 +2,7 @@
 
 import {Suite} from 'benchmark';
 import {readFileSync} from 'fs';
+import * as path from 'path';
 
 import * as capnp from '../../lib';
 import {decodeUtf8} from '../../lib/util';
@@ -9,7 +10,7 @@ import {AddressBook} from '../integration/serialization-demo';
 import {logBench, readFileBuffer} from '../util';
 
 const jsonBuffer = new Uint8Array(readFileBuffer('test/data/serialization-demo.json'));
-const jsonString = readFileSync('test/data/serialization-demo.json', 'utf-8');
+const jsonString = readFileSync(path.join(__dirname, '../../', 'test/data/serialization-demo.json'), 'utf-8');
 const messageData = readFileBuffer('test/data/serialization-demo.bin');
 // Let's preprocess it so we have just the raw segment data.
 const messageSegment = capnp.Message.getFramedSegments(messageData)[0];

@@ -12,6 +12,7 @@ import {
   getUint64Mask,
   getUint8Mask,
 } from '../../../lib/serialization/mask';
+import {Int64, Uint64} from '../../../lib/types';
 import {compareBuffers, tap} from '../../util';
 
 type MaskArray = Array<{mask: number[], val: number}>;
@@ -158,13 +159,35 @@ tap.test('getBitMask()', (t) => {
 
 });
 
+tap.test('getInt64Mask()', (t) => {
+
+  INT_64_MASKS.forEach(({mask, val}) => {
+
+    compareBuffers(t, getInt64Mask(Int64.fromNumber(val)).buffer, new Uint8Array(mask).buffer);
+
+  });
+
+  t.end();
+
+});
+
+tap.test('getUint64Mask()', (t) => {
+
+  UINT_64_MASKS.forEach(({mask, val}) => {
+
+    compareBuffers(t, getUint64Mask(Uint64.fromNumber(val)).buffer, new Uint8Array(mask).buffer);
+
+  });
+
+  t.end();
+
+});
+
 makeMaskTest('getFloat32Mask()', getFloat32Mask, FLOAT_32_MASKS);
 makeMaskTest('getFloat64Mask()', getFloat64Mask, FLOAT_64_MASKS);
 makeMaskTest('getInt16Mask()', getInt16Mask, INT_16_MASKS);
 makeMaskTest('getInt32Mask()', getInt32Mask, INT_32_MASKS);
-makeMaskTest('getInt64Mask()', getInt64Mask, INT_64_MASKS);
 makeMaskTest('getInt8Mask()', getInt8Mask, INT_8_MASKS);
 makeMaskTest('getUint16Mask()', getUint16Mask, UINT_16_MASKS);
 makeMaskTest('getUint32Mask()', getUint32Mask, UINT_32_MASKS);
-makeMaskTest('getUint64Mask()', getUint64Mask, UINT_64_MASKS);
 makeMaskTest('getUint8Mask()', getUint8Mask, UINT_8_MASKS);

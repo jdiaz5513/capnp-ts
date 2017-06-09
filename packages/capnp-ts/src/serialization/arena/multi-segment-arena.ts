@@ -11,7 +11,7 @@ import {Segment} from '../segment';
 import {Arena} from './arena';
 import {ArenaAllocationResult} from './arena-allocation-result';
 
-const trace = initTrace('capnp:arean:multi');
+const trace = initTrace('capnp:arena:multi');
 trace('load');
 
 export class MultiSegmentArena extends Arena {
@@ -62,7 +62,7 @@ export class MultiSegmentArena extends Arena {
 
   toString() {
 
-    return format('MultiSegmentArena_segments:%d');
+    return format('MultiSegmentArena_segments:%d', this.getNumSegments());
 
   }
 

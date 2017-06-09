@@ -8,6 +8,7 @@
     "@types/benchmark": "^1.0.30",
     "@types/debug": "0.0.29",
     "@types/node": "^7.0.18",
+    "@types/ramda": "0.0.9",
     "codecov": "^2.2.0",
     "lerna": "^2.0.0-rc.4",
     "nodemon": "^1.11.0",

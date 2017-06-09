@@ -15,12 +15,15 @@ import {
   PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
 } from '../../errors';
 import {Int64, Uint64} from '../../types';
-import {format} from '../../util';
+import {format, padToWord} from '../../util';
+import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
 import {Segment} from '../segment';
 import {Data} from './data';
+import {List, ListCtor} from './list';
 import {Orphan} from './orphan';
-import {Pointer} from './pointer';
+import {Pointer, PointerCtor} from './pointer';
+import {PointerType} from './pointer-type';
 import {Text} from './text';
 
 const trace = initTrace('capnp:struct');
@@ -41,7 +44,7 @@ export interface StructCtor<T extends Struct> {
 
 export class Struct extends Pointer {
 
-  static readonly _displayName = 'Struct';
+  static readonly _displayName: string = 'Struct';
 
   private readonly _compositeIndex?: number;
 
@@ -86,11 +89,11 @@ export class Struct extends Pointer {
 
     if (this._compositeIndex !== undefined) {
 
-      // Read the object size from the tag word first.
+      // Seek backwards by one word so we can read the struct size off the tag word.
 
       c.byteOffset -= 8;
 
-      // Move forward to the content section and seek ahead by `_compositeIndex` multiples of the struct's total size.
+      // Seek ahead by `_compositeIndex` multiples of the struct's total size.
 
       c.byteOffset += 8 + this._compositeIndex * c._getStructSize().padToWord().getByteLength();
 
@@ -118,6 +121,16 @@ export class Struct extends Pointer {
     const res = this._initPointer(c.segment, c.byteOffset);
 
     res.pointer._setStructPointer(res.offsetWords, size);
+
+  }
+
+  _initStructAt<T extends Struct>(index: number, StructClass: StructCtor<T>): T {
+
+    const s = this._getPointerAs(index, StructClass);
+
+    s._initStruct(StructClass._size);
+
+    return s;
 
   }
 
@@ -202,8 +215,21 @@ export class Struct extends Pointer {
 
   protected _getData(index: number): Data {
 
-    return Data.fromPointer(this._getPointer(index));
+    this._checkPointerBounds(index);
 
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    if (l._isNull()) {
+
+      l._initList(ListElementSize.BYTE, 0);
+
+    }
+
+    return l;
   }
 
   protected _getDataSection(): Pointer {
@@ -352,6 +378,26 @@ export class Struct extends Pointer {
 
   }
 
+  protected _getList<T>(index: number, ListClass: ListCtor<T>): List<T> {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    if (l._isNull()) {
+
+      l._initList(ListClass._size, 0, ListClass._compositeSize);
+
+    }
+
+    return l;
+
+  }
+
   protected _getPointer(index: number): Pointer {
 
     this._checkPointerBounds(index);
@@ -364,11 +410,23 @@ export class Struct extends Pointer {
 
   }
 
+  protected _getPointerAs<T extends Pointer>(index: number, PointerClass: PointerCtor<T>): T {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    return new PointerClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+  }
+
   protected _getPointerSection(): Pointer {
 
     const ps = this._getContent();
 
-    ps.byteOffset += this._getSize().dataByteLength;
+    ps.byteOffset += padToWord(this._getSize().dataByteLength);
 
     return ps;
 
@@ -389,6 +447,24 @@ export class Struct extends Pointer {
     }
 
     return this._getTargetStructSize();
+
+  }
+
+  protected _getStruct<T extends Struct>(index: number, StructClass: StructCtor<T>): T {
+
+    const s = this._getPointerAs(index, StructClass);
+
+    if (s._isNull()) {
+
+      s._initStruct(StructClass._size);
+
+    } else {
+
+      s._validate(PointerType.STRUCT, undefined, StructClass._size);
+
+    }
+
+    return s;
 
   }
 
@@ -479,6 +555,38 @@ export class Struct extends Pointer {
     if (defaultMask === undefined) return ds.segment.getUint8(ds.byteOffset + byteOffset);
 
     return ds.segment.getUint8(ds.byteOffset + byteOffset) ^ defaultMask.getUint8(0);
+
+  }
+
+  protected _initData(index: number, length: number): Data {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    l._initList(ListElementSize.BYTE, length);
+
+    return l;
+
+  }
+
+  protected _initList<T>(index: number, ListClass: ListCtor<T>, length: number): List<T> {
+
+    this._checkPointerBounds(index);
+
+    const ps = this._getPointerSection();
+
+    ps.byteOffset += index * 8;
+
+    const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    l._initList(ListClass._size, length, ListClass._compositeSize);
+
+    return l;
 
   }
 
@@ -821,9 +929,11 @@ export class Struct extends Pointer {
 
   private _checkDataBounds(byteOffset: number, byteLength: number): void {
 
-    if (byteOffset < 0 || byteLength < 0 || byteOffset + byteLength > this._getStructDataWords() * 8) {
+    const dataByteLength = this._getSize().dataByteLength;
 
-      throw new Error(format(PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset));
+    if (byteOffset < 0 || byteLength < 0 || byteOffset + byteLength > dataByteLength) {
+
+      throw new Error(format(PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset, dataByteLength));
 
     }
 
@@ -831,9 +941,11 @@ export class Struct extends Pointer {
 
   private _checkPointerBounds(index: number): void {
 
-    if (index < 0 || index >= this._getSize().pointerLength) {
+    const pointerLength = this._getSize().pointerLength;
 
-      throw new Error(format(PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, this._getSize().pointerLength));
+    if (index < 0 || index >= pointerLength) {
+
+      throw new Error(format(PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, pointerLength));
 
     }
 

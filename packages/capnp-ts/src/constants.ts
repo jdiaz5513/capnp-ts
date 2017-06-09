@@ -45,6 +45,10 @@ export const GROWTH_FACTOR = 1.5;
 
 export const LIST_SIZE_MASK = 0x00000007;
 
+/** Maximum number of bytes to dump at once when dumping array buffers to string. */
+
+export const MAX_BUFFER_DUMP_BYTES = 16364;
+
 /** The maximum value for a 32-bit integer. */
 
 export const MAX_INT32 = 0x7fffffff;

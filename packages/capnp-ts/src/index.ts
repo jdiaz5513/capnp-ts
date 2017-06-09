@@ -11,10 +11,13 @@ export {
   CompositeList,
   Data,
   List,
+  ListCtor,
   Orphan,
+  PointerList,
   PointerType,
   Pointer,
   Struct,
+  StructCtor,
   Text,
 
   getBitMask,
@@ -30,3 +33,10 @@ export {
   getUint8Mask,
 
 } from './serialization';
+
+export {
+
+  Int64,
+  Uint64,
+
+} from './types';
