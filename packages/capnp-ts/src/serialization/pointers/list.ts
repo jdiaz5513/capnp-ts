@@ -8,12 +8,27 @@ import {PTR_COMPOSITE_SIZE_UNDEFINED, PTR_INVALID_LIST_SIZE} from '../../errors'
 import {format, identity} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
+import {Segment} from '../segment';
 import {Pointer} from './pointer';
 
 const trace = initTrace('capnp:list');
 trace('load');
 
+export interface ListCtor<T> {
+
+  readonly _compositeSize?: ObjectSize;
+  readonly _displayName: string;
+  readonly _size: ListElementSize;
+
+  new(segment: Segment, byteOffset: number, depthLimit?: number): List<T>;
+
+}
+
 export class List<T> extends Pointer {
+
+  static readonly _compositeSize?: ObjectSize;
+  static readonly _displayName: string = 'List<Generic>';
+  static readonly _size: ListElementSize;
 
   every(callbackFn: (this: void, value: T, index: number) => boolean): boolean {
 
@@ -46,6 +61,22 @@ export class List<T> extends Pointer {
 
   }
 
+  find(callbackFn: (this: void, value: T, index: number) => boolean): T | undefined {
+
+    const length = this.getLength();
+
+    for (let i = 0; i < length; i++) {
+
+      const value = this.get(i);
+
+      if (callbackFn(value, i)) return value;
+
+    }
+
+    return undefined;
+
+  }
+
   forEach(callbackFn: (this: void, value: T, index: number) => void): void {
 
     const length = this.getLength();
@@ -57,6 +88,18 @@ export class List<T> extends Pointer {
   get(_index: number): T {
 
     throw new TypeError();
+
+  }
+
+  /**
+   * Get the length of this list.
+   *
+   * @returns {number} The number of elements in this list.
+   */
+
+  getLength(): number {
+
+    return this._getTargetListLength();
 
   }
 
@@ -115,6 +158,18 @@ export class List<T> extends Pointer {
 
   }
 
+  toArray(): T[] {
+
+    return this.map(identity);
+
+  }
+
+  toString(): string {
+
+    return `List_${super.toString()}`;
+
+  }
+
   /**
    * Initialize this list with the given element size and length. This will allocate new space for the list, ideally in
    * the same segment as this pointer.
@@ -167,8 +222,6 @@ export class List<T> extends Pointer {
 
         trace('Wrote composite tag word %s for %s.', c, this);
 
-        c.byteOffset += 8;
-
         break;
 
       case ListElementSize.VOID:
@@ -188,30 +241,6 @@ export class List<T> extends Pointer {
     const res = this._initPointer(c.segment, c.byteOffset);
 
     res.pointer._setListPointer(res.offsetWords, elementSize, length, compositeSize);
-
-  }
-
-  /**
-   * Get the length of this list.
-   *
-   * @returns {number} The number of elements in this list.
-   */
-
-  getLength(): number {
-
-    return this._getTargetListLength();
-
-  }
-
-  toArray(): T[] {
-
-    return this.map(identity);
-
-  }
-
-  toString(): string {
-
-    return `List_${super.toString()}`;
 
   }
 

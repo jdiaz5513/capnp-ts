@@ -49,14 +49,14 @@ export function getBitMask(value: boolean, bitOffset: number): DataView {
 
 }
 
-export function getInt64Mask(x: number): DataView {
+export function getInt64Mask(x: Int64): DataView {
 
-  return Int64.fromNumber(x).toDataView();
+  return x.toDataView();
 
 }
 
-export function getUint64Mask(x: number): DataView {
+export function getUint64Mask(x: Uint64): DataView {
 
-  return Uint64.fromNumber(x).toDataView();
+  return x.toDataView();
 
 }

@@ -13,6 +13,7 @@
 
 # Milestone: 0.2.0 (code quality)
 
+* [ ] Implement `toJSON`/`fromJSON`.
 * [ ] Add JSDocs for the entire public API.
 * [ ] Check for unused methods (find references on each exported symbol/method).
 * [ ] Check for unused error strings.
@@ -40,6 +41,8 @@
 
 # Milestone: 0.5.0 (performance)
 
+* [ ] Refactor pointer API to take target pointer constructor as a parameter (`Struct._getPointerSectionAs()`).
+* [ ] Hunt down all `new` calls and justify them.
 * [ ] Use const enums.
 * [ ] Get rid of all known slow things (`instanceof`, `for in`, `eval`, `try`, `catch`).
 * [ ] Consider fast optimizations to avoid division (`>>> 3` vs `/ 8`).
