@@ -155,16 +155,21 @@ export class Message {
 
   allocateSegment(byteLength: number): Segment {
 
-    trace('Need to allocate %x bytes from the arena for %s.', byteLength, this);
+    trace('need to allocate %x bytes from the arena for %s', byteLength, this);
 
     const res = this._arena.allocate(byteLength, this._segments);
+    let s: Segment;
 
     if (res.id === this._segments.length) {
 
       // Note how we're only allowing new segments in if they're exactly the next one in the array. There is no logical
       // reason for segments to be created out of order.
 
-      this._segments.push(new Segment(res.id, this, res.buffer));
+      s = new Segment(res.id, this, res.buffer);
+
+      trace('adding new segment %s', s);
+
+      this._segments.push(s);
 
     } else if (res.id < 0 || res.id > this._segments.length) {
 
@@ -172,11 +177,15 @@ export class Message {
 
     } else {
 
-      this._segments[res.id].replaceBuffer(res.buffer);
+      s = this._segments[res.id];
+
+      trace('replacing segment %s with buffer (len:%d)', s, res.buffer.byteLength);
+
+      s.replaceBuffer(res.buffer);
 
     }
 
-    return this._segments[res.id];
+    return s;
 
   }
 
