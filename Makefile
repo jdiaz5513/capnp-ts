@@ -120,7 +120,7 @@ lib += $($(1)_lib)
 lib_test += $($(1)_lib_test)
 lib_test_spec += $($(1)_lib_test_spec)
 package_json += $($(1))/package.json
-package_json += $($(1))/package-lock.json
+# package_json += $($(1))/package-lock.json
 node_modules += $($(1))/node_modules
 src += $($(1)_src)
 
@@ -282,7 +282,7 @@ watch: node_modules
 	@echo =====================
 	@echo
 	@$(nodemon) -e ts,capnp -w $(capnp_ts)/src -w $(capnp_ts)/test -w $(capnpc_ts)/src -w $(capnpc_ts)/test -w Makefile -x 'npm test'
-	@echo	
+	@echo
 
 ##############
 # misc targets
@@ -320,7 +320,7 @@ $(node_modules): node_modules
 	@echo
 
 node_modules: package.json
-node_modules: package-lock.json
+# node_modules: package-lock.json
 	@echo
 	@echo installing build dependencies
 	@echo =============================

@@ -39,8 +39,8 @@ export function createConstProperty(node: s.Node): ts.PropertyDeclaration {
 
 }
 
-export function createExpressionBlock(expressions: ts.Expression[], returns: boolean,
-                                      allowSingleLine: boolean): ts.Block {
+export function createExpressionBlock(
+  expressions: ts.Expression[], returns: boolean, allowSingleLine: boolean): ts.Block {
 
   const statements = expressions.map(
     (e, i) => i === expressions.length - 1 && returns ? ts.createReturn(e) : ts.createStatement(e));
@@ -49,12 +49,13 @@ export function createExpressionBlock(expressions: ts.Expression[], returns: boo
 
 }
 
-export function createMethodDeclaration(name: string, parameters: ts.ParameterDeclaration[],
-                                        type: ts.TypeNode | undefined, expressions: ts.Expression[],
-                                        allowSingleLine = true): ts.MethodDeclaration {
+export function createMethod(
+  name: string, parameters: ts.ParameterDeclaration[], type: ts.TypeNode | undefined, expressions: ts.Expression[],
+  allowSingleLine = true): ts.MethodDeclaration {
 
-  return ts.createMethodDeclaration(__, __, __, name, __, __, parameters, type,
-                                    createExpressionBlock(expressions, type !== VOID_TYPE, allowSingleLine));
+  return ts.createMethod(
+    __, __, __, name, __, __, parameters, type, createExpressionBlock(
+      expressions, type !== VOID_TYPE, allowSingleLine));
 
 }
 
