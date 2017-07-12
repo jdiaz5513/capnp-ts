@@ -141,6 +141,8 @@ export class Message {
 
       const byteLength = dv.getUint32(4 + i * 4, true) * 8;
 
+      if (byteOffset + byteLength > message.byteLength) throw new Error(E.MSG_INVALID_FRAME_HEADER);
+
       segments[i] = message.slice(byteOffset, byteOffset + byteLength);
 
       byteOffset += byteLength;
