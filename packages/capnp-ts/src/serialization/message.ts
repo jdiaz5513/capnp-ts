@@ -201,11 +201,11 @@ export class Message {
 
     let r = '';
 
-    if (this._segments.length === 0) return '\n================\nNo Segments\n================\n';
+    if (this._segments.length === 0) return '================\nNo Segments\n================\n';
 
     for (let i = 0; i < this._segments.length; i++) {
 
-      r += `\n================\nSegment #${i}\n================\n`;
+      r += `================\nSegment #${i}\n================\n`;
 
       const {buffer, byteLength} = this._segments[i];
       const b = new Uint8Array(buffer, 0, byteLength);
@@ -213,8 +213,6 @@ export class Message {
       r += dumpBuffer(b);
 
     }
-
-    r += '\n';
 
     return r;
 
