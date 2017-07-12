@@ -93,22 +93,6 @@ export class Message {
   }
 
   /**
-   * Read a message from a single packed segment.
-   *
-   * Use of this method is not idiomatic but may prove useful in certain scenarios.
-   *
-   * @static
-   * @param {ArrayBuffer} packed A packed segment _without_ a framing header.
-   * @returns {Message} A new message instance.
-   */
-
-  static fromPackedUnframedBuffer(packed: ArrayBuffer): Message {
-
-    return this.fromSegmentBuffer((unpack(packed)));
-
-  }
-
-  /**
    * Create a new message from an array buffer containing a single unpacked segment. Great for reading canonical
    * messages without a framing header.
    *
@@ -157,6 +141,8 @@ export class Message {
 
       const byteLength = dv.getUint32(4 + i * 4, true) * 8;
 
+      if (byteOffset + byteLength > message.byteLength) throw new Error(E.MSG_INVALID_FRAME_HEADER);
+
       segments[i] = message.slice(byteOffset, byteOffset + byteLength);
 
       byteOffset += byteLength;
@@ -169,16 +155,21 @@ export class Message {
 
   allocateSegment(byteLength: number): Segment {
 
-    trace('Need to allocate %x bytes from the arena for %s.', byteLength, this);
+    trace('need to allocate %x bytes from the arena for %s', byteLength, this);
 
     const res = this._arena.allocate(byteLength, this._segments);
+    let s: Segment;
 
     if (res.id === this._segments.length) {
 
       // Note how we're only allowing new segments in if they're exactly the next one in the array. There is no logical
       // reason for segments to be created out of order.
 
-      this._segments.push(new Segment(res.id, this, res.buffer));
+      s = new Segment(res.id, this, res.buffer);
+
+      trace('adding new segment %s', s);
+
+      this._segments.push(s);
 
     } else if (res.id < 0 || res.id > this._segments.length) {
 
@@ -186,11 +177,15 @@ export class Message {
 
     } else {
 
-      this._segments[res.id].replaceBuffer(res.buffer);
+      s = this._segments[res.id];
+
+      trace('replacing segment %s with buffer (len:%d)', s, res.buffer.byteLength);
+
+      s.replaceBuffer(res.buffer);
 
     }
 
-    return this._segments[res.id];
+    return s;
 
   }
 
@@ -206,11 +201,11 @@ export class Message {
 
     let r = '';
 
-    if (this._segments.length === 0) return '\n================\nNo Segments\n================\n';
+    if (this._segments.length === 0) return '================\nNo Segments\n================\n';
 
     for (let i = 0; i < this._segments.length; i++) {
 
-      r += `\n================\nSegment #${i}\n================\n`;
+      r += `================\nSegment #${i}\n================\n`;
 
       const {buffer, byteLength} = this._segments[i];
       const b = new Uint8Array(buffer, 0, byteLength);
@@ -218,8 +213,6 @@ export class Message {
       r += dumpBuffer(b);
 
     }
-
-    r += '\n';
 
     return r;
 
@@ -286,7 +279,7 @@ export class Message {
 
     }
 
-    if (id < 0 || id >= segmentLength) throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, this, id));
+    if (id < 0 || id >= segmentLength) throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, id, this));
 
     return this._segments[id];
 

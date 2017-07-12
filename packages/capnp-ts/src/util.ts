@@ -162,13 +162,13 @@ export function dumpBuffer(buffer: ArrayBuffer | ArrayBufferView): string {
 
     for (k = 0; k < 16; k++) {
 
-      if (j + k >= byteLength) break;
-
       const v = b[j + k];
 
       r += `${pad(v.toString(16), 2)} `;
 
-      s += v > 32 && v < 255 ? String.fromCharCode(v) : '·';
+      // Printable ASCII range.
+
+      s += v > 31 && v < 255 ? String.fromCharCode(v) : '·';
 
       if (k === 7) r += ' ';
 
