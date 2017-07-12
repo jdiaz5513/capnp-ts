@@ -93,22 +93,6 @@ export class Message {
   }
 
   /**
-   * Read a message from a single packed segment.
-   *
-   * Use of this method is not idiomatic but may prove useful in certain scenarios.
-   *
-   * @static
-   * @param {ArrayBuffer} packed A packed segment _without_ a framing header.
-   * @returns {Message} A new message instance.
-   */
-
-  static fromPackedUnframedBuffer(packed: ArrayBuffer): Message {
-
-    return this.fromSegmentBuffer((unpack(packed)));
-
-  }
-
-  /**
    * Create a new message from an array buffer containing a single unpacked segment. Great for reading canonical
    * messages without a framing header.
    *
