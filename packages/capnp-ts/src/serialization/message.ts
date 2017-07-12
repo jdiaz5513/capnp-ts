@@ -279,7 +279,7 @@ export class Message {
 
     }
 
-    if (id < 0 || id >= segmentLength) throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, this, id));
+    if (id < 0 || id >= segmentLength) throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, id, this));
 
     return this._segments[id];
 
