@@ -26,18 +26,7 @@ export class MultiSegmentArena extends Arena {
 
   }
 
-  allocate(minSize: number, segments: Segment[]): ArenaAllocationResult {
-
-    // First try to find an existing segment with enough space.
-
-    for (let i = 0; i < segments.length; i++) {
-
-      const s = segments[i];
-      if (s.hasCapacity(minSize)) return new ArenaAllocationResult(i, s.buffer);
-
-    }
-
-    // Okay, let's make a new segment.
+  allocate(minSize: number, _segments: Segment[]): ArenaAllocationResult {
 
     const b = new ArrayBuffer(padToWord(Math.max(minSize, DEFAULT_BUFFER_SIZE)));
     this._buffers.push(b);
