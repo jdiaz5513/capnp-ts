@@ -8,7 +8,7 @@ import {
   createClassExtends,
   createConcreteListProperty,
   createConstProperty,
-  createMethodDeclaration,
+  createMethod,
   createNestedNodeProperty,
   createUnionConstProperty,
   createValueExpression,
@@ -387,7 +387,7 @@ export function generateStructFieldMethods(
 
     if (union) expressions.unshift(setDiscriminant);
 
-    members.push(createMethodDeclaration(`adopt${properName}`, parameters, VOID_TYPE, expressions));
+    members.push(createMethod(`adopt${properName}`, parameters, VOID_TYPE, expressions));
 
   }
 
@@ -397,7 +397,7 @@ export function generateStructFieldMethods(
     const getter = ts.createCall(ts.createPropertyAccess(THIS, `get${properName}`), __, []);
     const expressions = [ts.createCall(ts.createPropertyAccess(getter, 'disown'), __, [])];
 
-    members.push(createMethodDeclaration(`disown${properName}`, [], orphanType, expressions));
+    members.push(createMethod(`disown${properName}`, [], orphanType, expressions));
 
   }
 
@@ -414,7 +414,7 @@ export function generateStructFieldMethods(
 
     }
 
-    members.push(createMethodDeclaration(`get${properName}`, [], jsTypeReference, expressions));
+    members.push(createMethod(`get${properName}`, [], jsTypeReference, expressions));
 
   }
 
@@ -425,7 +425,7 @@ export function generateStructFieldMethods(
     // !this._getPointer(8)._isNull();
     const expressions = [ts.createLogicalNot(ts.createCall(ts.createPropertyAccess(getPointer, '_isNull'), __, []))];
 
-    members.push(createMethodDeclaration(`has${properName}`, [], BOOLEAN_TYPE, expressions));
+    members.push(createMethod(`has${properName}`, [], BOOLEAN_TYPE, expressions));
 
   }
 
@@ -439,7 +439,7 @@ export function generateStructFieldMethods(
 
     if (union) expressions.unshift(setDiscriminant);
 
-    members.push(createMethodDeclaration(`init${properName}`, parameters, jsTypeReference, expressions));
+    members.push(createMethod(`init${properName}`, parameters, jsTypeReference, expressions));
 
   }
 
@@ -450,7 +450,7 @@ export function generateStructFieldMethods(
     const right = discriminantValueLiteral;
     const expressions = [ts.createBinary(left, ts.SyntaxKind.EqualsEqualsEqualsToken, right)];
 
-    members.push(createMethodDeclaration(`is${properName}`, [], BOOLEAN_TYPE, expressions));
+    members.push(createMethod(`is${properName}`, [], BOOLEAN_TYPE, expressions));
 
   }
 
@@ -462,7 +462,7 @@ export function generateStructFieldMethods(
 
     if (union) expressions.unshift(setDiscriminant);
 
-    members.push(createMethodDeclaration(`set${properName}`, parameters, VOID_TYPE, expressions));
+    members.push(createMethod(`set${properName}`, parameters, VOID_TYPE, expressions));
 
   }
 
@@ -522,7 +522,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node):
   const toStringExpression = ts.createBinary(
     ts.createLiteral(`${fullClassName}_`), ts.SyntaxKind.PlusToken, ts.createCall(
       ts.createIdentifier('super.toString'), __, []));
-  members.push(createMethodDeclaration('toString', [], STRING_TYPE, [toStringExpression], true));
+  members.push(createMethod('toString', [], STRING_TYPE, [toStringExpression], true));
 
   if (hasUnnamedUnion) {
 
@@ -530,7 +530,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node):
     const whichExpression = ts.createCall(
       ts.createPropertyAccess(
         THIS, '_getUint16'), __, [ts.createNumericLiteral((discriminantOffset * 2).toString())]);
-    members.push(createMethodDeclaration('which', [], ts.createTypeReferenceNode(`${fullClassName}_Which`, __),
+    members.push(createMethod('which', [], ts.createTypeReferenceNode(`${fullClassName}_Which`, __),
                                           [whichExpression], true));
 
   }

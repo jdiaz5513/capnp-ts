@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "declaration": true,
     "outDir": "../../packages/capnpc-ts/lib",
     "rootDir": "../../packages/capnpc-ts/src"
   },

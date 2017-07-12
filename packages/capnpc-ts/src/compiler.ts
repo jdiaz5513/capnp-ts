@@ -68,7 +68,7 @@ export function transpileAll(ctx: CodeGeneratorContext): void {
 
       const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
 
-      if (diagnostic.file) {
+      if (diagnostic.file && diagnostic.start) {
 
         const {line, character} = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
         /* tslint:disable-next-line */
@@ -97,7 +97,7 @@ export function writeTsFiles(ctx: CodeGeneratorContext): void {
 
     trace('writing %s', f.tsPath);
 
-    fs.writeFileSync(f.tsPath, compile(f), 'utf-8');
+    fs.writeFileSync(f.tsPath, compile(f), {encoding: 'utf-8'});
 
   });
 
