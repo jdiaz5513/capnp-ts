@@ -309,7 +309,7 @@ $(node_modules): node_modules
 	@echo ===============================
 	@echo
 	@echo lerna bootstrap
-	@$(lerna) bootstrap
+	@$(lerna) bootstrap -- --frozen-lockfile
 	@/usr/bin/touch $(node_modules)
 	@echo
 
