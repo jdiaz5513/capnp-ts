@@ -7,3 +7,10 @@ node_js:
   - "6"
   - "4"
 script: npm run ci
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    - packages/capnp-ts/node_modules
+    - packages/capnpc-ts/node_modules
