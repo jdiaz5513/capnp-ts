@@ -281,7 +281,7 @@ watch: node_modules
 	@echo starting test watcher
 	@echo =====================
 	@echo
-	@$(nodemon) -e ts,capnp -w $(capnp_ts)/src -w $(capnp_ts)/test -w $(capnpc_ts)/src -w $(capnpc_ts)/test -w Makefile -x 'npm test'
+	@$(nodemon) -e ts,capnp -w $(capnp_ts)/src -w $(capnp_ts)/test -w $(capnpc_ts)/src -w $(capnpc_ts)/test -w Makefile -x 'yarn test'
 	@echo
 
 ##############
@@ -300,13 +300,7 @@ watch: node_modules
 
 $(capnp_ts_lib_test): $(capnp_ts_test_data)
 
-$(lerna): package.json
-	@echo
-	@echo setting up lerna
-	@echo ================
-	@echo
-	npm install lerna
-	@echo
+$(lerna): node_modules
 
 $(node_modules): $(package_json)
 $(node_modules): node_modules
@@ -325,6 +319,6 @@ node_modules: package.json
 	@echo installing build dependencies
 	@echo =============================
 	@echo
-	npm install
+	yarn --frozen-lockfile
 	@/usr/bin/touch node_modules
 	@echo
