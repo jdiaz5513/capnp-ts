@@ -59,7 +59,7 @@ export class ObjectSize {
 
   toString(): string {
 
-    return format('ObjectSize_dw:%x,pc:%x', this.getDataWordLength(), this.pointerLength);
+    return format('ObjectSize_dw:%d,pc:%d', this.getDataWordLength(), this.pointerLength);
 
   }
 
