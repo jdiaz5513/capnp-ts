@@ -12,8 +12,9 @@ before_install:
   - export PATH="$HOME/.yarn/bin:$PATH"
 install:
   - yarn --frozen-lockfile
+  - yarn run bootstrap -- --frozen-lockfile
 
-script: npm run ci
+script: yarn run ci
 
 cache:
   yarn: true
