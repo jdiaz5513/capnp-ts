@@ -35,8 +35,10 @@ function test(src, dest, coverage) {
         options.push('--cov', '--nyc-arg=-x=**/lib-test/**/*');
       }
       // lodash is used for Node 4 compatibility
-      var result = spawnSync('./node_modules/.bin/tap', options.concat(_.map(files, function (file) {
+      var result = spawnSync('./node_modules/.bin/tap', options.concat(_.filter(_.map(files, function (file) {
         return file.path;
+      }), function (path) {
+        return path.endsWith('.spec.js');
       })), { stdio: 'inherit' });
       if (result.status != 0) {
         throw new Error('Process exited with non-zero status: ' + result.status);
@@ -46,7 +48,7 @@ function test(src, dest, coverage) {
 
 gulp.task('test:capnp', ['build:capnp'], function () {
   return test(
-    './packages/capnp-ts/test/**/*.spec.ts',
+    './packages/capnp-ts/test/**/*.ts',
     'packages/capnp-ts/lib-test',
     false
   );
@@ -56,7 +58,7 @@ gulp.task('test', ['test:capnp']);
 
 gulp.task('test-cov:capnp', ['build:capnp'], function () {
   return test(
-    './packages/capnp-ts/test/**/*.spec.ts',
+    './packages/capnp-ts/test/**/*.ts',
     'packages/capnp-ts/lib-test',
     true
   );
