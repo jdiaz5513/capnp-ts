@@ -1,16 +1,16 @@
 ```
-      ██████╗ █████╗ ██████╗ ██╗███╗   ██╗    
-     ██╔════╝██╔══██╗██╔══██╗██║████╗  ██║    
-     ██║     ███████║██████╔╝╚═╝██╔██╗ ██║    
-     ██║     ██╔══██║██╔═══╝    ██║╚██╗██║    
-     ╚██████╗██║  ██║██║        ██║ ╚████║    
-      ╚═════╝╚═╝  ╚═╝╚═╝        ╚═╝  ╚═══╝    
- ██████╗ ██████╗  ██████╗ ████████╗ ██████╗ 
+      ██████╗ █████╗ ██████╗ ██╗███╗   ██╗
+     ██╔════╝██╔══██╗██╔══██╗██║████╗  ██║
+     ██║     ███████║██████╔╝╚═╝██╔██╗ ██║
+     ██║     ██╔══██║██╔═══╝    ██║╚██╗██║
+     ╚██████╗██║  ██║██║        ██║ ╚████║
+      ╚═════╝╚═╝  ╚═╝╚═╝        ╚═╝  ╚═══╝
+ ██████╗ ██████╗  ██████╗ ████████╗ ██████╗
  ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗
  ██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║
  ██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║
  ██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝
- ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝ 
+ ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝
 
                          infinitely
                            faster!
@@ -32,7 +32,7 @@ This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) 
   - [Usage with JavaScript](#usage-with-javascript)
   - [Usage in a Web Browser](#usage-in-a-web-browser)
 - [Building](#building)
-  - [Build Targets](#build-targets)
+  - [Build Tasks](#build-tasks)
 - [Testing](#testing)
 - [Team](#team)
 
@@ -117,68 +117,74 @@ Using a tool like [webpack](https://webpack.js.org/) one should be able to bundl
 
 A deliberate effort was made to avoid using nodejs specific features (at the expense of performance) to maintain compatibility with browser environments.
 
-**Note that this has not yet been tested.**
+**Note that this library has not yet been tested in a web browser.**
 
-In the future a special nodejs version of the library may be released 
+> In the future a special nodejs version of the library may be released to take advantage of `Buffer` which gives access to unsafe malloc style allocation (as opposed to calloc style allocation in `ArrayBuffer` which always zeroes out the memory).
 
 ## Building
 
 Before building the source you will need a few prerequisites:
 
 - [**nodejs**](https://nodejs.org/en/) (latest LTS or 8.x.x is recommended)
-- [**make**](https://www.gnu.org/software/make/)
-  - Ubuntu/Debian:
-    ```shell
-    sudo apt-get install build-essential
-    ```
-  - macOS: [install the Xcode command line tools](https://developer.apple.com/library/content/technotes/tn2339/_index.html)
-  - Windows: **not yet supported!**
+- [**yarn**](https://yarnpkg.com/en/)
 
 > [nvm](https://github.com/creationix/nvm) is highly recommended for managing multiple nodejs versions.
 
-### Build Targets
+Run `yarn install` to install the initial set of build packages before continuing.
 
-Nearly everything build related is managed through the **Makefile**. The following targets are available as a convenience:
+### Build Tasks
 
-#### `make build` (default target)
+The following package scripts are available for build tasks.
+
+Using npm:
+
+```shell
+npm run build
+```
+
+Or (preferred) using [gulp-cli](https://github.com/gulpjs/gulp-cli):
+
+```shell
+gulp build
+```
+
+---
+
+#### `build`
 
 Compiles the typescript sources and test files.
 
-#### `make benchmark`
+#### `benchmark`
 
 Runs all available benchmarks in `packages/capnp-ts/test/benchmark`.
 
-#### `make capnp-compile`
+#### `capnp-compile`
 
-Compiles all `.capnp` files into Typescript source. This is done automatically by `build` and should only be run manually if you're making changes to the `.capnp` schema files.
+Compiles all `.capnp` files into TypeScript source.
 
-#### `make ci`
+#### `ci`
 
 Used by Travis for continuous integration testing; do not run locally.
 
-#### `make clean`
-
-Cleans all build output and linked modules (`**/lib/**/*` and `**/lib-test/**/*`).
-
-#### `make coverage`
+#### `coverage`
 
 Generates a coverage report and opens it in a new web browser tab.
 
-#### `make lint`
+#### `lint`
 
 Runs `tslint` and prints out any linter violations.
 
-#### `make test`
+#### `test`
 
 Runs the test suite and prints out a human-readable test result.
 
-#### `make watch`
+#### `watch`
 
 Runs the test suite in a loop, recompiling any changes to the source as it is saved to disk.
 
 ## Testing
 
-Tests are written using [node-tap]() and are located in the `test/` subdirectory for each package. The goal for this repository is to reach 100% coverage on critical code. Exceptions may be made (e.g. for benchmark code) using special istanbul comments:
+Tests are written using [node-tap](http://www.node-tap.org/) and are located in the `test/` subdirectory for each package. The goal for this repository is to reach 100% coverage on critical code. Exceptions may be made (e.g. for benchmark code) using special istanbul comments:
 
 ```javascript
 /* istanbul ignore next */    // ignore the next statement/block
