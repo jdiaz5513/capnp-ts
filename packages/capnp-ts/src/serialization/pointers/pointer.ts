@@ -1036,7 +1036,7 @@ export class Pointer {
 
       const byteLength = padToWord(srcElementSize === ListElementSize.BIT
         ? srcLength + 7 >>> 3
-        : Pointer._getListElementByteLength(srcElementSize));
+        : Pointer._getListElementByteLength(srcElementSize) * srcLength);
       const wordLength = byteLength >>> 3;
 
       dstContent = dst.segment.allocate(byteLength);
