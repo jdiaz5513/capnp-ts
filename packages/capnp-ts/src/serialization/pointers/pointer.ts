@@ -1003,8 +1003,6 @@ export class Pointer {
 
       dstContent.segment.copyWord(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset - 8);
 
-      dstContent.byteOffset += 8;
-
       // Copy the entire contents, including all pointers. This should be more efficient than making `srcLength`
       // copies to skip the pointer sections, and we're about to rewrite all those pointers anyway.
 
@@ -1013,7 +1011,7 @@ export class Pointer {
 
         const wordLength = srcCompositeSize.getWordLength() * srcLength;
 
-        dstContent.segment.copyWords(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset, wordLength);
+        dstContent.segment.copyWords(dstContent.byteOffset + 8, srcContent.segment, srcContent.byteOffset, wordLength);
 
       }
 
@@ -1026,7 +1024,7 @@ export class Pointer {
           const offset = i * srcStructByteLength + srcCompositeSize.dataByteLength + (j << 3);
 
           const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._depthLimit - 1);
-          const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset, dst._depthLimit - 1);
+          const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset + 8, dst._depthLimit - 1);
 
           dstPtr._copyFrom(srcPtr);
 
