@@ -6,6 +6,8 @@
 
 - Code ninja: [jdiaz5513](https://github.com/jdiaz5513)
 
+- Code ninja: [ishitatsuyuki](https://github.com/ishitatsuyuki)
+
 ## SPECIAL THANKS
 
 - Microsoft's dev team (VSCode, TypeScript)
