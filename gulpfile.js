@@ -12,15 +12,15 @@ function build(src, dest) {
     .pipe(gulp.dest(dest));
 }
 
-gulp.task('build:capnp', function () {
+gulp.task('build:capnp-ts', function () {
   return build('./packages/capnp-ts/src/**/*.ts', 'packages/capnp-ts/lib');
 });
 
-gulp.task('build:capnpc', ['build:capnp'], function () {
+gulp.task('build:capnpc-ts', ['build:capnp-ts'], function () {
   return build('./packages/capnpc-ts/src/**/*.ts', 'packages/capnpc-ts/lib');
 });
 
-gulp.task('build', ['build:capnp', 'build:capnpc']);
+gulp.task('build', ['build:capnp-ts', 'build:capnpc-ts']);
 
 function test(src, dest, coverage) {
   var tsProject = ts.createProject('configs/tsconfig-base.json');
@@ -43,7 +43,7 @@ function test(src, dest, coverage) {
     }));
 }
 
-gulp.task('test:capnp', ['build:capnp'], function () {
+gulp.task('test:capnp-ts', ['build:capnp-ts'], function () {
   return test(
     './packages/capnp-ts/test/**/*.ts',
     'packages/capnp-ts/lib-test',
@@ -51,7 +51,7 @@ gulp.task('test:capnp', ['build:capnp'], function () {
   );
 });
 
-gulp.task('test:capnpc', ['build:capnpc'], function () {
+gulp.task('test:capnpc-ts', ['build:capnpc-ts'], function () {
   return test(
     './packages/capnpc-ts/test/**/*.ts',
     'packages/capnpc-ts/lib-test',
@@ -59,9 +59,9 @@ gulp.task('test:capnpc', ['build:capnpc'], function () {
   );
 });
 
-gulp.task('test', ['test:capnp', 'test:capnpc']);
+gulp.task('test', ['test:capnp-ts', 'test:capnpc-ts']);
 
-gulp.task('test-cov:capnp', ['build:capnp'], function () {
+gulp.task('test-cov:capnp-ts', ['build:capnp-ts'], function () {
   return test(
     './packages/capnp-ts/test/**/*.ts',
     'packages/capnp-ts/lib-test',
@@ -69,7 +69,7 @@ gulp.task('test-cov:capnp', ['build:capnp'], function () {
   );
 });
 
-gulp.task('test-cov:capnpc', ['build:capnpc'], function () {
+gulp.task('test-cov:capnpc-ts', ['build:capnpc-ts'], function () {
   return test(
     './packages/capnpc-ts/test/**/*.ts',
     'packages/capnpc-ts/lib-test',
@@ -77,7 +77,7 @@ gulp.task('test-cov:capnpc', ['build:capnpc'], function () {
   );
 });
 
-gulp.task('test-cov', ['test-cov:capnp', 'test-cov:capnpc']);
+gulp.task('test-cov', ['test-cov:capnp-ts', 'test-cov:capnpc-ts']);
 
 gulp.task('coverage', ['test-cov'], function () {
   var result = spawnSync('./node_modules/.bin/tap', ['--coverage-report=lcov'], { stdio: 'inherit' });
@@ -86,7 +86,7 @@ gulp.task('coverage', ['test-cov'], function () {
   }
 })
 
-gulp.task('benchmark:capnp', function () {
+gulp.task('benchmark:capnp-ts', function () {
   var tsProject = ts.createProject('configs/tsconfig-base.json');
   return gulp.src('./packages/capnp-ts/test/benchmark/**/*.ts')
     .pipe(tsProject())
@@ -101,7 +101,7 @@ gulp.task('benchmark:capnp', function () {
     });
 });
 
-gulp.task('benchmark', ['benchmark:capnp']);
+gulp.task('benchmark', ['benchmark:capnp-ts']);
 
 gulp.task('lint', function () {
   var program = realTslint.Linter.createProgram('tsconfig.json');
