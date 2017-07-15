@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var ts = require('gulp-typescript');
@@ -34,10 +33,9 @@ function test(src, dest, coverage) {
       if (coverage) {
         options.push('--cov', '--nyc-arg=-x=**/lib-test/**/*');
       }
-      // lodash is used for Node 4 compatibility
-      var result = spawnSync('./node_modules/.bin/tap', options.concat(_.filter(_.map(files, function (file) {
+      var result = spawnSync('./node_modules/.bin/tap', options.concat(files.map(function (file) {
         return file.path;
-      }), function (path) {
+      }).filter(function (path) {
         return path.endsWith('.spec.js');
       })), { stdio: 'inherit' });
       if (result.status != 0) {
