@@ -1,3 +1,7 @@
+/**
+ * @author ishitatsuyuki
+ */
+
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
