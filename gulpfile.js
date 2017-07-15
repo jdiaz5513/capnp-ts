@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var gutil = require('gulp-util');
+var sourcemaps = require('gulp-sourcemaps');
 var ts = require('gulp-typescript');
 var tslint = require('gulp-tslint');
 var realTslint = require('tslint');
@@ -8,7 +9,9 @@ var spawnSync = require('child_process').spawnSync;
 function build(src, dest) {
   var tsProject = ts.createProject('configs/tsconfig-base.json', { declaration: true });
   return gulp.src(src)
+    .pipe(sourcemaps.init())
     .pipe(tsProject())
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(dest));
 }
 
@@ -25,7 +28,9 @@ gulp.task('build', ['build:capnp-ts', 'build:capnpc-ts']);
 function test(src, dest, coverage) {
   var tsProject = ts.createProject('configs/tsconfig-base.json');
   return gulp.src(src)
+    .pipe(sourcemaps.init())
     .pipe(tsProject())
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(dest))
     .pipe(gutil.buffer(function (err, files) {
       var options = ['-J'];
@@ -35,6 +40,7 @@ function test(src, dest, coverage) {
       var result = spawnSync('./node_modules/.bin/tap', options.concat(files.map(function (file) {
         return file.path;
       }).filter(function (path) {
+        // This filters not only unrelated files, but also sourcemaps
         return path.endsWith('.spec.js');
       })), { stdio: 'inherit' });
       if (result.status != 0) {
@@ -89,7 +95,9 @@ gulp.task('coverage', ['test-cov'], function () {
 gulp.task('benchmark:capnp-ts', function () {
   var tsProject = ts.createProject('configs/tsconfig-base.json');
   return gulp.src('./packages/capnp-ts/test/benchmark/**/*.ts')
+    .pipe(sourcemaps.init())
     .pipe(tsProject())
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('packages/capnp-ts/lib-test'))
     .on('finish', function () {
       var result = spawnSync(process.execPath,
