@@ -94,7 +94,7 @@ gulp.task('coverage', ['test-cov'], function () {
   if (result.status != 0) {
     throw new Error('Process exited with non-zero status: ' + result.status);
   }
-})
+});
 
 gulp.task('benchmark:capnp-ts', function () {
   var tsProject = ts.createProject('configs/tsconfig-base.json');
@@ -119,8 +119,8 @@ gulp.task('lint', function () {
   var program = realTslint.Linter.createProgram('tsconfig.json');
   return gulp.src('packages/*/src/**/*.ts')
     .pipe(tslint({ program }));
-})
+});
 
 gulp.task('watch', function () {
-  return gulp.watch('packages/**/*', ['test']);
-})
+  return gulp.watch('packages/*/{src,test}/**/*', ['test']);
+});
