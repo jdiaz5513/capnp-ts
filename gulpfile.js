@@ -16,12 +16,11 @@ gulp.task('build:capnp', function () {
   return build('./packages/capnp-ts/src/**/*.ts', 'packages/capnp-ts/lib');
 });
 
-gulp.task('build:capnpc', function () {
-  // Stub, schema are not compiled yet
+gulp.task('build:capnpc', ['build:capnp'], function () {
   return build('./packages/capnpc-ts/src/**/*.ts', 'packages/capnpc-ts/lib');
 });
 
-gulp.task('build', ['build:capnp'/*, 'build:capnpc'*/]);
+gulp.task('build', ['build:capnp', 'build:capnpc']);
 
 function test(src, dest, coverage) {
   var tsProject = ts.createProject('configs/tsconfig-base.json');
@@ -52,7 +51,15 @@ gulp.task('test:capnp', ['build:capnp'], function () {
   );
 });
 
-gulp.task('test', ['test:capnp']);
+gulp.task('test:capnpc', ['build:capnpc'], function () {
+  return test(
+    './packages/capnpc-ts/test/**/*.ts',
+    'packages/capnpc-ts/lib-test',
+    false
+  );
+});
+
+gulp.task('test', ['test:capnp', 'test:capnpc']);
 
 gulp.task('test-cov:capnp', ['build:capnp'], function () {
   return test(
@@ -62,7 +69,15 @@ gulp.task('test-cov:capnp', ['build:capnp'], function () {
   );
 });
 
-gulp.task('test-cov', ['test-cov:capnp']);
+gulp.task('test-cov:capnpc', ['build:capnpc'], function () {
+  return test(
+    './packages/capnpc-ts/test/**/*.ts',
+    'packages/capnpc-ts/lib-test',
+    true
+  );
+});
+
+gulp.task('test-cov', ['test-cov:capnp', 'test-cov:capnpc']);
 
 gulp.task('coverage', ['test-cov'], function () {
   var result = spawnSync('./node_modules/.bin/tap', ['--coverage-report=lcov'], { stdio: 'inherit' });
