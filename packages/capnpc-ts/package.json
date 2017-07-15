@@ -8,16 +8,16 @@
   },
   "dependencies": {
     "capnp-ts": "0.0.1",
-    "hex2dec": "1.0.1",
-    "ramda": "0.24.1",
-    "tslib": "1.7.1",
-    "typescript": "2.4.1"
+    "hex2dec": "^1.0.1",
+    "ramda": "^0.24.1",
+    "tslib": "^1.7.1",
+    "typescript": "^2.4.1"
   },
   "description": "Cap'n Proto schema compilter for capnp-ts.",
   "devDependencies": {
-    "@types/ramda": "0.0.11",
-    "source-map-support": "0.4.15",
-    "tap": "10.7.0"
+    "@types/ramda": "^0.24.3",
+    "source-map-support": "^0.4.15",
+    "tap": "^10.7.0"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [

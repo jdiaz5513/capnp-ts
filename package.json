@@ -7,17 +7,22 @@
   "devDependencies": {
     "@types/benchmark": "1.0.30",
     "@types/debug": "0.0.29",
-    "@types/node": "7.0.18",
-    "@types/ramda": "0.0.9",
-    "codecov": "2.2.0",
-    "lerna": "2.0.0",
-    "nodemon": "1.11.0",
-    "tap": "10.7.0",
-    "ts-node": "3.0.2",
-    "tslint": "5.1.0",
-    "tslint-eslint-rules": "4.0.0",
-    "tslint-language-service": "0.9.3",
-    "typescript": "2.4.1"
+    "@types/node": "^8.0.11",
+    "@types/ramda": "^0.24.3",
+    "codecov": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-sourcemap": "^1.0.1",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-tslint": "^8.1.1",
+    "gulp-typescript": "^3.2.0",
+    "gulp-util": "^3.0.8",
+    "lerna": "^2.0.0",
+    "tap": "^10.7.0",
+    "ts-node": "^3.2.0",
+    "tslint": "^5.5.0",
+    "tslint-eslint-rules": "^4.1.1",
+    "tslint-language-service": "^0.9.6",
+    "typescript": "^2.4.1"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [
@@ -34,14 +39,16 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "scripts": {
-    "benchmark": "make benchmark",
-    "build": "make build",
-    "ci": "make ci",
-    "coverage": "make coverage",
-    "lint": "make lint",
-    "test": "make test",
-    "watch": "make watch"
+    "bootstrap": "lerna bootstrap",
+    "benchmark": "gulp benchmark",
+    "build": "gulp build",
+    "ci": "gulp lint && gulp coverage && codecov --disable=gcov",
+    "coverage": "gulp coverage",
+    "lint": "gulp lint",
+    "test": "gulp test",
+    "watch": "gulp watch"
   },
   "typings": "lib/index",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "dependencies": {}
 }
