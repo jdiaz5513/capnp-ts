@@ -1,16 +1,16 @@
 ```
-      ██████╗ █████╗ ██████╗ ██╗███╗   ██╗    
-     ██╔════╝██╔══██╗██╔══██╗██║████╗  ██║    
-     ██║     ███████║██████╔╝╚═╝██╔██╗ ██║    
-     ██║     ██╔══██║██╔═══╝    ██║╚██╗██║    
-     ╚██████╗██║  ██║██║        ██║ ╚████║    
-      ╚═════╝╚═╝  ╚═╝╚═╝        ╚═╝  ╚═══╝    
- ██████╗ ██████╗  ██████╗ ████████╗ ██████╗ 
+      ██████╗ █████╗ ██████╗ ██╗███╗   ██╗
+     ██╔════╝██╔══██╗██╔══██╗██║████╗  ██║
+     ██║     ███████║██████╔╝╚═╝██╔██╗ ██║
+     ██║     ██╔══██║██╔═══╝    ██║╚██╗██║
+     ╚██████╗██║  ██║██║        ██║ ╚████║
+      ╚═════╝╚═╝  ╚═╝╚═╝        ╚═╝  ╚═══╝
+ ██████╗ ██████╗  ██████╗ ████████╗ ██████╗
  ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗
  ██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║
  ██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║
  ██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝
- ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝ 
+ ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝
 
                          infinitely
                            faster!
@@ -32,7 +32,7 @@ This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) 
   - [Usage with JavaScript](#usage-with-javascript)
   - [Usage in a Web Browser](#usage-in-a-web-browser)
 - [Building](#building)
-  - [Build Targets](#build-targets)
+  - [Build Tasks](#build-tasks)
 - [Testing](#testing)
 - [Team](#team)
 
@@ -44,9 +44,11 @@ This repository is managed as a monorepo composed of separate packages.
 |:--------|:--------|:-------------|
 | [`capnp-ts`](/packages/capnp-ts) | [![npm](https://img.shields.io/npm/v/capnp-ts.svg?maxAge=2592000)](https://www.npmjs.com/package/capnp-ts) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnp-ts.svg?path=packages/capnp-ts)](https://david-dm.org/jdiaz5513/capnp-ts?path=packages/capnp-ts) |
 | [`capnpc-ts`](/packages/capnpc-ts) | [![npm](https://img.shields.io/npm/v/capnpc-ts.svg?maxAge=2592000)](https://www.npmjs.com/package/capnpc-ts) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnpc-ts.svg?path=packages/capnpc-ts)](https://david-dm.org/jdiaz5513/capnpc-ts?path=packages/capnpc-ts) |
+| [`capnpc-js`](/packages/capnpc-js) | [![npm](https://img.shields.io/npm/v/capnpc-js.svg?maxAge=2592000)](https://www.npmjs.com/package/capnpc-js) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnpc-js.svg?path=packages/capnpc-js)](https://david-dm.org/jdiaz5513/capnpc-js?path=packages/capnpc-js) |
 
 - `capnp-ts` is the core Cap'n Proto library for Typescript. It is a required import for all compiled schema files, and the starting point for reading/writing a Cap'n Proto message.
-- `capnpc-ts` is the schema compiler. It is intended to be invoked by the [`capnp`](https://capnproto.org/capnp-tool.html) tool.
+- `capnpc-ts` is the schema compiler plugin for TypeScript. It is intended to be invoked by the [`capnp`](https://capnproto.org/capnp-tool.html) tool.
+- `capnpc-js` is the schema compiler plugin for JavaScript. It is intended to be invoked by the [`capnp`](https://capnproto.org/capnp-tool.html) tool.
 
 ## Project Status
 
@@ -72,7 +74,9 @@ npm install --save capnp-ts
 You may want the schema compiler as well (can also be installed locally):
 
 ```shell
-npm install -g capnpc-ts
+npm install -g capnpc-ts # For TypeScript
+# OR
+npm install -g capnpc-js # For JavaScript
 ```
 
 The schema compiler is a [Cap'n Proto plugin](https://capnproto.org/otherlang.html#how-to-write-compiler-plugins) and requires the `capnpc` binary in order to do anything useful; follow the [Cap'n Proto installation instructions](https://capnproto.org/install.html) to install it on your system.
@@ -81,13 +85,18 @@ The schema compiler is a [Cap'n Proto plugin](https://capnproto.org/otherlang.ht
 
 ## Usage
 
-Run the following to compile a schema file into Typescript source code:
+Run the following to compile a schema file into TypeScript source code:
 
 ```shell
 capnpc -ots path/to/myschema.capnp
 ```
 
-Running that command will create a file named `path/to/myschema.capnp.ts`.
+Or for JavaScript:
+```shell
+capnpc -ojs path/to/myschema.capnp
+```
+
+Running that command will create a file named `path/to/myschema.capnp.ts` (or `.js`).
 
 > This assumes `capnpc-ts` was installed globally and is available from `$PATH`. If not, change the `-o` option to something like `-onode_modules/.bin/capnpc-ts` so it points to your local `capnpc-ts` install.
 
@@ -109,7 +118,19 @@ export function loadMessage(buffer: ArrayBuffer): MyStruct {
 
 ### Usage with JavaScript
 
-JavaScript is not **yet** fully supported; the `capnp-ts` library itself can be imported as ES5 JavaScript, but the schema compiler is not yet able to transpile the emitted TypeScript schema file into JavaScript. One may do so manually, if feeling particularly adventurous.
+```javascript
+const capnp = require('capnp-ts');
+
+const MyStruct = require('./myschema.capnp').MyStruct;
+
+function loadMessage(buffer) {
+
+  const message = capnp.Message.fromArrayBuffer(buffer);
+
+  return message.getRoot(MyStruct);
+
+}
+```
 
 ### Usage in a Web Browser
 
@@ -117,68 +138,75 @@ Using a tool like [webpack](https://webpack.js.org/) one should be able to bundl
 
 A deliberate effort was made to avoid using nodejs specific features (at the expense of performance) to maintain compatibility with browser environments.
 
-**Note that this has not yet been tested.**
+**Note that this library has not yet been tested in a web browser.**
 
-In the future a special nodejs version of the library may be released 
+> In the future a special nodejs version of the library may be released to take advantage of `Buffer` which gives access to unsafe malloc style allocation (as opposed to calloc style allocation in `ArrayBuffer` which always zeroes out the memory).
 
 ## Building
 
 Before building the source you will need a few prerequisites:
 
 - [**nodejs**](https://nodejs.org/en/) (latest LTS or 8.x.x is recommended)
-- [**make**](https://www.gnu.org/software/make/)
-  - Ubuntu/Debian:
-    ```shell
-    sudo apt-get install build-essential
-    ```
-  - macOS: [install the Xcode command line tools](https://developer.apple.com/library/content/technotes/tn2339/_index.html)
-  - Windows: **not yet supported!**
+- [**yarn**](https://yarnpkg.com/en/)
 
 > [nvm](https://github.com/creationix/nvm) is highly recommended for managing multiple nodejs versions.
 
-### Build Targets
+Run `yarn install` to install the initial set of build packages before continuing.
 
-Nearly everything build related is managed through the **Makefile**. The following targets are available as a convenience:
+### Build Tasks
 
-#### `make build` (default target)
+The following package scripts are available for build tasks.
+
+Using npm:
+
+```shell
+npm run build
+```
+
+Or (preferred) using [gulp-cli](https://github.com/gulpjs/gulp-cli):
+
+```shell
+npm install --global gulp-cli # If you don't already have gulp-cli
+gulp build
+```
+
+---
+
+#### `build`
 
 Compiles the typescript sources and test files.
 
-#### `make benchmark`
+#### `benchmark`
 
 Runs all available benchmarks in `packages/capnp-ts/test/benchmark`.
 
-#### `make capnp-compile`
+#### `capnp-compile`
 
-Compiles all `.capnp` files into Typescript source. This is done automatically by `build` and should only be run manually if you're making changes to the `.capnp` schema files.
+Compiles all `.capnp` files into TypeScript source.
 
-#### `make ci`
+#### `ci`
 
 Used by Travis for continuous integration testing; do not run locally.
 
-#### `make clean`
-
-Cleans all build output and linked modules (`**/lib/**/*` and `**/lib-test/**/*`).
-
-#### `make coverage`
+#### `coverage`
 
 Generates a coverage report and opens it in a new web browser tab.
 
-#### `make lint`
+#### `lint`
 
 Runs `tslint` and prints out any linter violations.
 
-#### `make test`
+#### `test`
 
 Runs the test suite and prints out a human-readable test result.
 
-#### `make watch`
+#### `watch`
 
 Runs the test suite in a loop, recompiling any changes to the source as it is saved to disk.
 
 ## Testing
 
-Tests are written using [node-tap]() and are located in the `test/` subdirectory for each package. The goal for this repository is to reach 100% coverage on critical code. Exceptions may be made (e.g. for benchmark code) using special istanbul comments:
+Tests are written using [node-tap](http://www.node-tap.org/) and are located in the `test/` subdirectory for each package. The goal for this repository is to reach 100% coverage on critical code. Exceptions may be made (e.g. for benchmark code) using special istanbul comments:
 
 ```javascript
 /* istanbul ignore next */    // ignore the next statement/block

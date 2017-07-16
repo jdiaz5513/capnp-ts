@@ -87,6 +87,8 @@ export class Orphan<T extends Pointer> {
 
       default:
 
+        // COVERAGE: Unreachable code.
+        /* istanbul ignore next */
         throw new Error(PTR_INVALID_POINTER_TYPE);
 
     }
@@ -118,6 +120,7 @@ export class Orphan<T extends Pointer> {
 
       case PointerType.STRUCT:
 
+        /* istanbul ignore next */
         if (this._size === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
         res.pointer._setStructPointer(res.offsetWords, this._size);
@@ -126,6 +129,7 @@ export class Orphan<T extends Pointer> {
 
       case PointerType.LIST:
 
+        /* istanbul ignore next */
         if (this._length === undefined || this._elementSize === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
         res.pointer._setListPointer(res.offsetWords, this._elementSize, this._length, this._size);
@@ -134,12 +138,14 @@ export class Orphan<T extends Pointer> {
 
       case PointerType.OTHER:
 
+        /* istanbul ignore next */
         if (this._capId === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
         res.pointer._setInterfacePointer(this._capId);
 
         break;
 
+      /* istanbul ignore next */
       default:
 
         throw new Error(PTR_INVALID_POINTER_TYPE);
@@ -156,6 +162,7 @@ export class Orphan<T extends Pointer> {
 
       case PointerType.STRUCT:
 
+        /* istanbul ignore next */
         if (this._size === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
         this.segment.fillZeroWords(this.byteOffset, this._size.getWordLength());
@@ -164,6 +171,7 @@ export class Orphan<T extends Pointer> {
 
       case PointerType.LIST:
 
+        /* istanbul ignore next */
         if (this._length === undefined || this._elementSize === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
         const byteLength = Pointer._getListByteLength(this._elementSize, this._length, this._size);

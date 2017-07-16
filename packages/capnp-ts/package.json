@@ -6,7 +6,7 @@
   "dependencies": {
     "debug": "^2.6.3",
     "format": "^0.2.2",
-    "tslib": "^1.7.0",
+    "tslib": "^1.7.1",
     "utf8-encoding": "^0.1.2"
   },
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",

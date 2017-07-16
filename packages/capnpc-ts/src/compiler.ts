@@ -59,7 +59,7 @@ export function writeTsFiles(ctx: CodeGeneratorContext): void {
 
     trace('writing %s', f.tsPath);
 
-    fs.writeFileSync(f.tsPath, compile(f), 'utf-8');
+    fs.writeFileSync(f.tsPath, compile(f), {encoding: 'utf-8'});
 
   });
 

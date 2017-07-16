@@ -4,5 +4,6 @@
     "packages/*",
     "js-examples"
   ],
+  "npmClient": "yarn",
   "version": "0.0.1"
 }

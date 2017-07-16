@@ -60,7 +60,7 @@ export function transpileAll(ctx: capnpc_ts.CodeGeneratorContext): void {
 
       const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
 
-      if (diagnostic.file) {
+      if (diagnostic.file && diagnostic.start) {
 
         const {line, character} = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
         /* tslint:disable-next-line */

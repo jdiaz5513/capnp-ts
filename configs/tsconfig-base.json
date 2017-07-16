@@ -13,7 +13,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "pretty": true,
-    "sourceMap": true,
     "strict": true,
     "stripInternal": true,
     "target": "es5"

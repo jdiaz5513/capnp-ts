@@ -1,20 +1,26 @@
+dist: trusty
+sudo: false
 language: node_js
 node_js:
   - "node"
   - "8"
-  - "7"
   - "6"
-  - "5"
   - "4"
-script: npm run ci
 
-# We'll need this gcc config down the road to support building the capnpc binary.
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s
+  - export PATH="$HOME/.yarn/bin:$PATH"
+install:
+  - yarn --frozen-lockfile
+  - yarn run bootstrap -- --frozen-lockfile
 
-env:
-  - CXX=g++-4.8
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.8
+script: yarn run ci
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    - js-examples/node_modules
+    - packages/capnp-ts/node_modules
+    - packages/capnpc-ts/node_modules
+    - packages/capnpc-js/node_modules
