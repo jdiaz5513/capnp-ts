@@ -7,8 +7,6 @@
     "**/CVS": true,
     "**/.DS_Store": true,
     ".nyc_output": true,
-    "coverage": true,
-    "packages/**/lib": true,
-    "packages/**/lib-test": true
+    "coverage": true
   }
 }

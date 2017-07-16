@@ -5,8 +5,7 @@ import * as ts from 'typescript';
 
 import {CodeGeneratorContext} from './code-generator-context';
 import {CodeGeneratorFileContext} from './code-generator-file-context';
-import {COMPILE_OPTIONS, SOURCE_COMMENT} from './constants';
-import * as E from './errors';
+import {SOURCE_COMMENT} from './constants';
 import {loadRequestedFile, lookupNode} from './file';
 import {
   generateCapnpImport,
@@ -49,43 +48,6 @@ export function printSourceFiles(ctx: CodeGeneratorContext): string[] {
   trace('printSourceFiles()');
 
   return ctx.files.map(compile);
-
-}
-
-export function transpileAll(ctx: CodeGeneratorContext): void {
-
-  trace('transpileAll()');
-
-  const program = ts.createProgram(ctx.files.map((f) => f.tsPath), COMPILE_OPTIONS);
-  const emitResult = program.emit();
-
-  if (emitResult.emitSkipped) {
-
-    trace('emit failed');
-
-    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-    allDiagnostics.forEach((diagnostic) => {
-
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-
-      if (diagnostic.file) {
-
-        const {line, character} = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-        /* tslint:disable-next-line */
-        console.log(`${diagnostic.file.fileName}:${line + 1}:${character + 1} ${message}`);
-
-      } else {
-
-        /* tslint:disable-next-line */
-        console.log(`==> ${message}`);
-
-      }
-
-    });
-
-    throw new Error(E.GEN_TS_EMIT_FAILED);
-
-  }
 
 }
 

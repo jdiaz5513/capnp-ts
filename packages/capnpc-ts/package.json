@@ -7,14 +7,18 @@
     "url": "https://github.com/jdiaz5513/capnp-ts/issues"
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "capnp-ts": "0.0.1",
     "hex2dec": "^1.0.1",
     "ramda": "^0.23.0",
     "tslib": "^1.7.0",
-    "typescript": "^2.3.4"
+    "typescript": "<2.4.0"
   },
-  "description": "Cap'n Proto schema compilter for capnp-ts.",
+  "description": "Cap'n Proto schema compiler for TypeScript.",
   "devDependencies": {
+    "@types/bluebird": "^3.5.7",
+    "@types/debug": "0.0.29",
+    "@types/node": "^7.0.18",
     "@types/ramda": "0.0.11",
     "source-map-support": "^0.4.15",
     "tap": "^10.3.2"

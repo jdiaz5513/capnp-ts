@@ -1,22 +1,22 @@
 {
-  "author": "jdiaz5513",
+  "author": "efokschaner",
+  "bin": {
+    "capnpc-js": "./bin/capnpc-js.js"
+  },
   "bugs": {
     "url": "https://github.com/jdiaz5513/capnp-ts/issues"
   },
   "dependencies": {
+    "capnpc-ts": "0.0.1",
     "debug": "^2.6.3",
-    "format": "^0.2.2",
-    "tslib": "^1.7.0",
-    "utf8-encoding": "^0.1.2"
+    "typescript": "<2.4.0"
   },
-  "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
+  "description": "Cap'n Proto schema compiler for JavaScript.",
   "devDependencies": {
-    "@types/benchmark": "^1.0.30",
     "@types/debug": "0.0.29",
     "@types/node": "^7.0.18",
-    "benchmark": "^2.1.4",
-    "tap": "^10.3.2",
-    "testcheck": "^1.0.0-rc.2"
+    "source-map-support": "^0.4.15",
+    "tap": "^10.3.2"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [
@@ -26,7 +26,7 @@
   ],
   "license": "MIT",
   "main": "lib/index",
-  "name": "capnp-ts",
+  "name": "capnpc-js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
