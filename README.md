@@ -32,6 +32,7 @@ This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) 
   - [Usage with JavaScript](#usage-with-javascript)
   - [Usage in a Web Browser](#usage-in-a-web-browser)
 - [Building](#building)
+  - [Initial Setup](#initial-setup)
   - [Build Tasks](#build-tasks)
 - [Testing](#testing)
 - [Team](#team)
@@ -128,7 +129,16 @@ Before building the source you will need a few prerequisites:
 
 > [nvm](https://github.com/creationix/nvm) is highly recommended for managing multiple nodejs versions.
 
-Run `yarn install` to install the initial set of build packages before continuing.
+### Initial Setup
+
+Run the following commands to set up the **node_modules** directories for the monorepo and each package:
+
+```shell
+yarn install
+npm run bootstrap
+```
+
+Bootstrap only needs to be run once; run `yarn install` again any time the packages are updated.
 
 ### Build Tasks
 
