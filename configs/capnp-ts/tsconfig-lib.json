@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "../../packages/capnp-ts/lib",
+    "rootDir": "../../packages/capnp-ts/src"
+  },
+  "extends": "../tsconfig-base",
+  "include": [
+    "../../packages/capnp-ts/src/**/*.ts"
+  ]
+}
