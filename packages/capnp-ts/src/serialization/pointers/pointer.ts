@@ -658,6 +658,67 @@ export class Pointer {
   }
 
   /**
+   * Set this pointer up to point at the data in the content segment. If the content segment is not the same as the
+   * pointer's segment, this will allocate and write far pointers as needed. Nothing is written otherwise.
+   *
+   * The return value includes a pointer to write the pointer's actual data to (the eventual far target), and the offset
+   * value (in words) to use for that pointer. In the case of double-far pointers this will always be zero.
+   *
+   * @internal
+   * @param {Segment} contentSegment The segment containing this pointer's content.
+   * @param {number} contentOffset The offset within the content segment for the beginning of this pointer's content.
+   * @returns {PointerAllocationResult} An object containing a pointer (where the pointer data should be written), and
+   * the value to use as the offset for that pointer.
+   */
+
+  _initPointer(contentSegment: Segment, contentOffset: number): PointerAllocationResult {
+
+    if (this.segment !== contentSegment) {
+
+      // Need a far pointer.
+
+      trace('Initializing far pointer %s -> %s.', this, contentSegment);
+
+      if (!contentSegment.hasCapacity(8)) {
+
+        // GAH! Not enough space in this pointer's segment for a landing pad so we need a double far pointer.
+
+        const landingPad = this.segment.allocate(16);
+
+        trace('GAH! Initializing double-far pointer in %s from %s -> %s.', this, contentSegment, landingPad);
+
+        this._setFarPointer(true, landingPad.byteOffset / 8, landingPad.segment.id);
+        landingPad._setFarPointer(false, contentOffset / 8, contentSegment.id);
+
+        landingPad.byteOffset += 8;
+
+        return new PointerAllocationResult(landingPad, 0);
+
+      }
+
+      // Allocate a far pointer landing pad in the target segment.
+
+      const landingPad = contentSegment.allocate(8);
+
+      if (landingPad.segment.id !== contentSegment.id) {
+
+        throw new Error(INVARIANT_UNREACHABLE_CODE);
+
+      }
+
+      this._setFarPointer(false, landingPad.byteOffset / 8, landingPad.segment.id);
+
+      return new PointerAllocationResult(landingPad, (contentOffset - landingPad.byteOffset + 8) / 8);
+
+    }
+
+    trace('Initializing intra-segment pointer %s -> %a.', this, contentOffset);
+
+    return new PointerAllocationResult(this, (contentOffset - this.byteOffset - 8) / 8);
+
+  }
+
+  /**
    * Check if the pointer is a double-far pointer.
    *
    * @internal
@@ -780,6 +841,7 @@ export class Pointer {
   /**
    * Read some bits off a list pointer to make sure it has the right pointer data.
    *
+   * @internal
    * @param {PointerType} pointerType The expected pointer type.
    * @param {ListElementSize} [elementSize] For list pointers, the expected element size. Leave this
    * undefined for struct pointers.
@@ -901,67 +963,6 @@ export class Pointer {
 
   }
 
-  /**
-   * Set this pointer up to point at the data in the content segment. If the content segment is not the same as the
-   * pointer's segment, this will allocate and write far pointers as needed. Nothing is written otherwise.
-   *
-   * The return value includes a pointer to write the pointer's actual data to (the eventual far target), and the offset
-   * value (in words) to use for that pointer. In the case of double-far pointers this will always be zero.
-   *
-   * @internal
-   * @param {Segment} contentSegment The segment containing this pointer's content.
-   * @param {number} contentOffset The offset within the content segment for the beginning of this pointer's content.
-   * @returns {PointerAllocationResult} An object containing a pointer (where the pointer data should be written), and
-   * the value to use as the offset for that pointer.
-   */
-
-  _initPointer(contentSegment: Segment, contentOffset: number): PointerAllocationResult {
-
-    if (this.segment !== contentSegment) {
-
-      // Need a far pointer.
-
-      trace('Initializing far pointer %s -> %s.', this, contentSegment);
-
-      if (!contentSegment.hasCapacity(8)) {
-
-        // GAH! Not enough space in this pointer's segment for a landing pad so we need a double far pointer.
-
-        const landingPad = this.segment.allocate(16);
-
-        trace('GAH! Initializing double-far pointer in %s from %s -> %s.', this, contentSegment, landingPad);
-
-        this._setFarPointer(true, landingPad.byteOffset / 8, landingPad.segment.id);
-        landingPad._setFarPointer(false, contentOffset / 8, contentSegment.id);
-
-        landingPad.byteOffset += 8;
-
-        return new PointerAllocationResult(landingPad, 0);
-
-      }
-
-      // Allocate a far pointer landing pad in the target segment.
-
-      const landingPad = contentSegment.allocate(8);
-
-      if (landingPad.segment.id !== contentSegment.id) {
-
-        throw new Error(INVARIANT_UNREACHABLE_CODE);
-
-      }
-
-      this._setFarPointer(false, landingPad.byteOffset / 8, landingPad.segment.id);
-
-      return new PointerAllocationResult(landingPad, (contentOffset - landingPad.byteOffset + 8) / 8);
-
-    }
-
-    trace('Initializing intra-segment pointer %s -> %a.', this, contentOffset);
-
-    return new PointerAllocationResult(this, (contentOffset - this.byteOffset - 8) / 8);
-
-  }
-
   private _copyFromList(src: Pointer): void {
 
     if (this._depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
@@ -1002,8 +1003,6 @@ export class Pointer {
 
       dstContent.segment.copyWord(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset - 8);
 
-      dstContent.byteOffset += 8;
-
       // Copy the entire contents, including all pointers. This should be more efficient than making `srcLength`
       // copies to skip the pointer sections, and we're about to rewrite all those pointers anyway.
 
@@ -1012,7 +1011,7 @@ export class Pointer {
 
         const wordLength = srcCompositeSize.getWordLength() * srcLength;
 
-        dstContent.segment.copyWords(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset, wordLength);
+        dstContent.segment.copyWords(dstContent.byteOffset + 8, srcContent.segment, srcContent.byteOffset, wordLength);
 
       }
 
@@ -1025,7 +1024,7 @@ export class Pointer {
           const offset = i * srcStructByteLength + srcCompositeSize.dataByteLength + (j << 3);
 
           const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._depthLimit - 1);
-          const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset, dst._depthLimit - 1);
+          const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset + 8, dst._depthLimit - 1);
 
           dstPtr._copyFrom(srcPtr);
 
@@ -1037,7 +1036,7 @@ export class Pointer {
 
       const byteLength = padToWord(srcElementSize === ListElementSize.BIT
         ? srcLength + 7 >>> 3
-        : Pointer._getListElementByteLength(srcElementSize));
+        : Pointer._getListElementByteLength(srcElementSize) * srcLength);
       const wordLength = byteLength >>> 3;
 
       dstContent = dst.segment.allocate(byteLength);

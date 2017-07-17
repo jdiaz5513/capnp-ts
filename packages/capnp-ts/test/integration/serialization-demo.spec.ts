@@ -129,3 +129,33 @@ tap.test('read address book', (t) => {
   t.end();
 
 });
+
+tap.test('copy pointers from other message', (t) => {
+
+  const message1 = new capnp.Message();
+  const addressBook1 = message1.initRoot(AddressBook);
+  const people1 = addressBook1.initPeople(2);
+  const alice1 = people1.get(1);
+
+  alice1.setName('Alice');
+  alice1.setEmail('alice@example.com');
+  alice1.setId(456);
+
+  const message2 = new capnp.Message();
+  const addressBook2 = message2.initRoot(AddressBook);
+
+  addressBook2.setPeople(people1);
+
+  const people2 = addressBook2.getPeople();
+  const alice2 = people2.get(1);
+
+  t.equal(people2.getLength(), 2);
+  t.equal(alice2.getName(), 'Alice');
+  t.equal(alice2.getEmail(), 'alice@example.com');
+  t.equal(alice2.getId(), 456);
+
+  console.log(message2.dump());
+
+  t.end();
+
+});
