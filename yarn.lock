@@ -1454,9 +1454,9 @@ gulp-tslint@^8.1.1:
     map-stream "~0.0.7"
     through "~2.3.8"
 
-gulp-typescript@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/gulp-typescript/-/gulp-typescript-3.2.0.tgz#8ddf7be658d130188381f65a6e580c552b64c196"
+gulp-typescript@3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/gulp-typescript/-/gulp-typescript-3.2.1.tgz#52cd77e9c6844e3b9a8bddd88e884ceb46a5db79"
   dependencies:
     gulp-util "~3.0.7"
     source-map "~0.5.3"
