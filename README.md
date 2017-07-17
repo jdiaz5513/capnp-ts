@@ -77,8 +77,6 @@ npm install -g capnpc-ts
 
 The schema compiler is a [Cap'n Proto plugin](https://capnproto.org/otherlang.html#how-to-write-compiler-plugins) and requires the `capnpc` binary in order to do anything useful; follow the [Cap'n Proto installation instructions](https://capnproto.org/install.html) to install it on your system.
 
-> NOTE: At some point in the future the `capnpc-ts` package may build the `capnpc` binary as a native dependency, making this step somewhat unnecessary.
-
 ## Usage
 
 Run the following to compile a schema file into Typescript source code:
