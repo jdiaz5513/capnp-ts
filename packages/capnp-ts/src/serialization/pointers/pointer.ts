@@ -1074,6 +1074,11 @@ export class Pointer {
 
     }
 
+    // Don't touch dst if it's already initialized as a composite list pointer. With composite struct pointers there's
+    // no pointer to copy here and we've already copied the contents.
+
+    if ((src as {_compositeIndex?: number})._compositeIndex !== undefined) return;
+
     // Initialize the struct pointer.
 
     const res = src._initPointer(dstContent.segment, dstContent.byteOffset);
