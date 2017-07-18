@@ -154,8 +154,6 @@ tap.test('copy pointers from other message', (t) => {
   t.equal(alice2.getEmail(), 'alice@example.com');
   t.equal(alice2.getId(), 456);
 
-  console.log(message2.dump());
-
   t.end();
 
 });
