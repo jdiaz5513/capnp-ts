@@ -77,6 +77,8 @@ export class Orphan<T extends Pointer> {
         this._length = src._getTargetListLength();
         this._elementSize = src._getTargetListElementSize();
 
+        if (this._elementSize === ListElementSize.COMPOSITE) this._size = src._getTargetCompositeListSize();
+
         break;
 
       case PointerType.OTHER:
@@ -172,7 +174,13 @@ export class Orphan<T extends Pointer> {
       case PointerType.LIST:
 
         /* istanbul ignore next */
-        if (this._length === undefined || this._elementSize === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
+        if (
+          (this._length === undefined || this._elementSize === undefined) ||
+          (this._elementSize === ListElementSize.COMPOSITE && this._size === undefined)) {
+
+          throw new Error(INVARIANT_UNREACHABLE_CODE);
+
+        }
 
         const byteLength = Pointer._getListByteLength(this._elementSize, this._length, this._size);
         this.segment.fillZeroWords(this.byteOffset, byteLength);
