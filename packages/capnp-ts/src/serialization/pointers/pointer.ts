@@ -110,12 +110,14 @@ export class Pointer {
 
         return padToWord(this._getListElementByteLength(elementSize) * length);
 
+      /* istanbul ignore next */
       case ListElementSize.COMPOSITE:
 
         if (compositeSize === undefined) throw new Error(format(E.PTR_INVALID_LIST_SIZE, NaN));
 
         return length * padToWord(compositeSize.getByteLength());
 
+      /* istanbul ignore next */
       default:
 
         throw new Error(E.PTR_INVALID_LIST_SIZE);
@@ -137,6 +139,7 @@ export class Pointer {
 
     switch (elementSize) {
 
+      /* istanbul ignore next */
       case ListElementSize.BIT:
 
         return NaN;
@@ -158,16 +161,19 @@ export class Pointer {
 
         return 8;
 
+      /* istanbul ignore next */
       case ListElementSize.COMPOSITE:
 
         // Caller has to figure it out based on the tag word.
 
         return NaN;
 
+      /* istanbul ignore next */
       case ListElementSize.VOID:
 
         return 0;
 
+      /* istanbul ignore next */
       default:
 
         throw new Error(format(E.PTR_INVALID_LIST_SIZE, elementSize));
