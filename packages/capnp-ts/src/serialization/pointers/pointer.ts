@@ -205,13 +205,11 @@ export class Pointer {
 
   _copyFrom(src: Pointer): void {
 
-    if (src._isNull()) {
+    // Make sure we erase this pointer's contents before moving on. If src is null, that's all we do.
 
-      this._erase();
+    this._erase();    // noop if null
 
-      return;
-
-    }
+    if (src._isNull()) return;
 
     switch (src._getTargetPointerType()) {
 
