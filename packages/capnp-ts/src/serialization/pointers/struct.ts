@@ -143,7 +143,10 @@ export class Struct extends Pointer {
 
   _copyStruct(_src: Struct): void {
 
-    throw new Error(format(NOT_IMPLEMENTED, 'Struct.prototype.copyStruct'));
+    // The struct copy operation is actually implemented in Pointer since there is no need to know the details of the
+    // struct in order to copy it.
+
+    this._copyFrom(_src);
 
   }
 
