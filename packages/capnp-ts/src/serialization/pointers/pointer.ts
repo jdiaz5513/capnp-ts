@@ -5,21 +5,7 @@
 import initTrace from 'debug';
 
 import {LIST_SIZE_MASK, MAX_DEPTH, POINTER_DOUBLE_FAR_MASK, POINTER_TYPE_MASK} from '../../constants';
-import {
-  INVARIANT_UNREACHABLE_CODE,
-  PTR_DEPTH_LIMIT_EXCEEDED,
-  PTR_INVALID_FAR_TARGET,
-  PTR_INVALID_LIST_SIZE,
-  PTR_INVALID_POINTER_TYPE,
-  PTR_OFFSET_OUT_OF_BOUNDS,
-  PTR_WRONG_COMPOSITE_DATA_SIZE,
-  PTR_WRONG_COMPOSITE_PTR_SIZE,
-  PTR_WRONG_LIST_TYPE,
-  PTR_WRONG_POINTER_TYPE,
-  PTR_WRONG_STRUCT_DATA_SIZE,
-  PTR_WRONG_STRUCT_PTR_SIZE,
-  TYPE_COMPOSITE_SIZE_UNDEFINED,
-} from '../../errors';
+import * as E from '../../errors';
 import {bufferToHex, format, padToWord} from '../../util';
 import {ListElementSize} from '../list-element-size';
 import {ObjectSize} from '../object-size';
@@ -72,7 +58,7 @@ export class Pointer {
 
   constructor(segment: Segment, byteOffset: number, depthLimit = MAX_DEPTH) {
 
-    if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
+    if (depthLimit === 0) throw new Error(format(E.PTR_DEPTH_LIMIT_EXCEEDED, this));
 
     // Make sure we keep track of all pointer allocations; there's a limit per message (prevent DoS).
 
@@ -85,7 +71,7 @@ export class Pointer {
 
     if (byteOffset < 0 || byteOffset > segment.byteLength) {
 
-      throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
+      throw new Error(format(E.PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
 
     }
 
@@ -126,13 +112,13 @@ export class Pointer {
 
       case ListElementSize.COMPOSITE:
 
-        if (compositeSize === undefined) throw new Error(PTR_INVALID_LIST_SIZE);
+        if (compositeSize === undefined) throw new Error(format(E.PTR_INVALID_LIST_SIZE, NaN));
 
         return length * padToWord(compositeSize.getByteLength());
 
       default:
 
-        throw new Error(PTR_INVALID_LIST_SIZE);
+        throw new Error(E.PTR_INVALID_LIST_SIZE);
 
     }
 
@@ -184,7 +170,7 @@ export class Pointer {
 
       default:
 
-        throw new Error(format(PTR_INVALID_LIST_SIZE, elementSize));
+        throw new Error(format(E.PTR_INVALID_LIST_SIZE, elementSize));
 
     }
 
@@ -237,7 +223,7 @@ export class Pointer {
 
       default:
 
-        throw new Error(format(PTR_INVALID_POINTER_TYPE, this._getTargetPointerType()));
+        throw new Error(format(E.PTR_INVALID_POINTER_TYPE, this._getTargetPointerType()));
 
     }
 
@@ -324,7 +310,7 @@ export class Pointer {
 
       default:
 
-        throw new Error(format(PTR_INVALID_POINTER_TYPE, this._getTargetPointerType()));
+        throw new Error(format(E.PTR_INVALID_POINTER_TYPE, this._getTargetPointerType()));
 
     }
 
@@ -638,7 +624,7 @@ export class Pointer {
 
     const t = this._followFars()._getPointerType();
 
-    if (t === PointerType.FAR) throw new Error(format(PTR_INVALID_FAR_TARGET, this));
+    if (t === PointerType.FAR) throw new Error(format(E.PTR_INVALID_FAR_TARGET, this));
 
     return t;
 
@@ -702,7 +688,7 @@ export class Pointer {
 
       if (landingPad.segment.id !== contentSegment.id) {
 
-        throw new Error(INVARIANT_UNREACHABLE_CODE);
+        throw new Error(E.INVARIANT_UNREACHABLE_CODE);
 
       }
 
@@ -804,7 +790,7 @@ export class Pointer {
 
     if (size === ListElementSize.COMPOSITE) {
 
-      if (compositeSize === undefined) throw new TypeError(TYPE_COMPOSITE_SIZE_UNDEFINED);
+      if (compositeSize === undefined) throw new TypeError(E.TYPE_COMPOSITE_SIZE_UNDEFINED);
 
       D *= compositeSize.getWordLength();
 
@@ -860,7 +846,7 @@ export class Pointer {
 
     const A = p.segment.getUint32(p.byteOffset) & POINTER_TYPE_MASK;
 
-    if (A !== pointerType) throw new Error(format(PTR_WRONG_POINTER_TYPE, this, pointerType));
+    if (A !== pointerType) throw new Error(format(E.PTR_WRONG_POINTER_TYPE, this, pointerType));
 
     // Check the list element size, if provided.
 
@@ -868,7 +854,7 @@ export class Pointer {
 
       const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
 
-      if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, this, ListElementSize[elementSize]));
+      if (C !== elementSize) throw new Error(format(E.PTR_WRONG_LIST_TYPE, this, ListElementSize[elementSize]));
 
     }
 
@@ -888,9 +874,9 @@ export class Pointer {
           const dataWordLength = objectSize.getDataWordLength();
           const pointerLength = objectSize.pointerLength;
 
-          if (C !== dataWordLength) throw new Error(format(PTR_WRONG_STRUCT_DATA_SIZE, this, dataWordLength));
+          if (C !== dataWordLength) throw new Error(format(E.PTR_WRONG_STRUCT_DATA_SIZE, this, dataWordLength));
 
-          if (D !== pointerLength) throw new Error(format(PTR_WRONG_STRUCT_PTR_SIZE, this, pointerLength));
+          if (D !== pointerLength) throw new Error(format(E.PTR_WRONG_STRUCT_PTR_SIZE, this, pointerLength));
 
           break;
 
@@ -900,13 +886,13 @@ export class Pointer {
 
           if (actualSize.dataByteLength !== objectSize.dataByteLength) {
 
-            throw new Error(format(PTR_WRONG_COMPOSITE_DATA_SIZE, this, actualSize.dataByteLength));
+            throw new Error(format(E.PTR_WRONG_COMPOSITE_DATA_SIZE, this, actualSize.dataByteLength));
 
           }
 
           if (actualSize.pointerLength !== objectSize.pointerLength) {
 
-            throw new Error(format(PTR_WRONG_COMPOSITE_PTR_SIZE, this, actualSize.pointerLength));
+            throw new Error(format(E.PTR_WRONG_COMPOSITE_PTR_SIZE, this, actualSize.pointerLength));
 
           }
 
@@ -914,7 +900,7 @@ export class Pointer {
 
         default:
 
-          throw new Error(PTR_INVALID_POINTER_TYPE);
+          throw new Error(E.PTR_INVALID_POINTER_TYPE);
 
       }
 
@@ -965,7 +951,7 @@ export class Pointer {
 
   private _copyFromList(src: Pointer): void {
 
-    if (this._depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
+    if (this._depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
 
     const dst = this;
     const srcContent = src._getContent();
@@ -1056,7 +1042,7 @@ export class Pointer {
 
   private _copyFromStruct(src: Pointer): void {
 
-    if (this._depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
+    if (this._depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
 
     const dst = this;
     const srcContent = src._getContent();

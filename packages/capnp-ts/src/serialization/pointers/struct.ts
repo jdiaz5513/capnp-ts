@@ -5,15 +5,7 @@
 import initTrace from 'debug';
 
 import {MAX_DEPTH, NATIVE_LITTLE_ENDIAN} from '../../constants';
-import {
-  NOT_IMPLEMENTED,
-  PTR_ADOPT_COMPOSITE_STRUCT,
-  PTR_DISOWN_COMPOSITE_STRUCT,
-  PTR_INIT_COMPOSITE_STRUCT,
-  PTR_INVALID_UNION_ACCESS,
-  PTR_STRUCT_DATA_OUT_OF_BOUNDS,
-  PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
-} from '../../errors';
+import * as E from '../../errors';
 import {Int64, Uint64} from '../../types';
 import {format, padToWord} from '../../util';
 import {ListElementSize} from '../list-element-size';
@@ -114,7 +106,7 @@ export class Struct extends Pointer {
 
   _initStruct(size: ObjectSize): void {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(PTR_INIT_COMPOSITE_STRUCT, this));
+    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_INIT_COMPOSITE_STRUCT, this));
 
     const c = this.segment.allocate(size.getByteLength());
 
@@ -157,7 +149,7 @@ export class Struct extends Pointer {
 
   adopt(src: Orphan<this>): void {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(PTR_ADOPT_COMPOSITE_STRUCT, this));
+    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_ADOPT_COMPOSITE_STRUCT, this));
 
     super.adopt(src);
 
@@ -165,7 +157,7 @@ export class Struct extends Pointer {
 
   disown(): Orphan<this> {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(PTR_DISOWN_COMPOSITE_STRUCT, this));
+    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_DISOWN_COMPOSITE_STRUCT, this));
 
     return super.disown();
 
@@ -923,7 +915,7 @@ export class Struct extends Pointer {
 
   protected _testWhich(name: string, found: number, wanted: number): void {
 
-    if (found !== wanted) throw new Error(format(PTR_INVALID_UNION_ACCESS, this, name, found, wanted));
+    if (found !== wanted) throw new Error(format(E.PTR_INVALID_UNION_ACCESS, this, name, found, wanted));
 
   }
 
@@ -933,7 +925,7 @@ export class Struct extends Pointer {
 
     if (byteOffset < 0 || byteLength < 0 || byteOffset + byteLength > dataByteLength) {
 
-      throw new Error(format(PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset, dataByteLength));
+      throw new Error(format(E.PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset, dataByteLength));
 
     }
 
@@ -945,7 +937,7 @@ export class Struct extends Pointer {
 
     if (index < 0 || index >= pointerLength) {
 
-      throw new Error(format(PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, pointerLength));
+      throw new Error(format(E.PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, pointerLength));
 
     }
 
