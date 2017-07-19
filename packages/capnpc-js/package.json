@@ -9,14 +9,14 @@
   "dependencies": {
     "capnpc-ts": "0.0.1",
     "debug": "^2.6.3",
-    "typescript": "<2.4.0"
+    "typescript": "^2.4.1"
   },
   "description": "Cap'n Proto schema compiler for JavaScript.",
   "devDependencies": {
     "@types/debug": "0.0.29",
     "@types/node": "^7.0.18",
     "source-map-support": "^0.4.15",
-    "tap": "^10.3.2"
+    "tap": "^10.7.0"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [

@@ -38,7 +38,7 @@
     "bootstrap": "lerna bootstrap --hoist",
     "benchmark": "gulp benchmark",
     "build": "gulp build",
-    "ci": "gulp lint && gulp coverage && codecov --disable=gcov",
+    "ci": "gulp lint && gulp coverage && codecov --disable=gcov && cd js-examples && ./test.sh",
     "coverage": "gulp coverage",
     "lerna": "lerna",
     "lint": "gulp lint",

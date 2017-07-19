@@ -8,7 +8,7 @@ set -exuo pipefail
 capnpc -o node_modules/.bin/capnpc-js addressbook.capnp
 node addressbook.js write | node addressbook.js read
 node addressbook.js dwrite | node addressbook.js dread
-rm addressbook.capnp.js
+rm -f addressbook.capnp.js addressbook.capnp.ts
 
 # Calculator example not yet implemented
 # capnpc -oc++ calculator.capnp

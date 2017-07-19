@@ -14,7 +14,8 @@
   "keywords": [
     "capnp",
     "rpc",
-    "typescript"
+    "typescript",
+    "example"
   ],
   "license": "MIT",
   "name": "capnproto-ts/js-examples",

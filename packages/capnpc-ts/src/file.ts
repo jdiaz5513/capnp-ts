@@ -150,8 +150,6 @@ export function loadRequestedFile(
   ctx.file = file;
   ctx.nodes = req.getNodes().toArray();
   ctx.tsPath = filename + '.ts';
-  ctx.jsPath = filename + '.js';
-  ctx.sourceMapPath = filename + '.js.map';
   ctx.sourceFile = ts.createSourceFile(ctx.tsPath, '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
   ctx.concreteLists = [];
   ctx.generatedNodeIds = [];

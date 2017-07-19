@@ -1,9 +1,12 @@
 import initTrace from 'debug';
+
+import * as fs from 'fs';
+
 import * as ts from 'typescript';
 
 import * as capnpc_ts from 'capnpc-ts';
 
-const trace = initTrace('capnpc-js');
+const trace = initTrace('capnpc');
 trace('load');
 
 /**
@@ -11,7 +14,7 @@ trace('load');
  *
  * TODO: This should be configurable somehow?
  *
- * efokschaner - I'm thinking "no" actually; here's my rationale.
+ * efokschaner - I'm thinking this is pretty low priority, here's my rationale.
  * Our top priority should be source readability from this layer.
  * Reasonable compatibility should be second.
  * The output of this tool should be thought of as source-code grade javascript
@@ -20,7 +23,7 @@ trace('load');
  * needs they have.
  */
 const COMPILE_OPTIONS: ts.CompilerOptions = {
-  module: ts.ModuleKind.ES2015,
+  module: ts.ModuleKind.None,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
   noEmitOnError: true,
   noFallthroughCasesInSwitch: true,
@@ -29,33 +32,44 @@ const COMPILE_OPTIONS: ts.CompilerOptions = {
   noUnusedParameters: true,
   preserveConstEnums: true,
   removeComments: false,
-  sourceMap: true,
+  sourceMap: false,
   strict: true,
   stripInternal: true,
-  target: ts.ScriptTarget.ES2015
+  target: ts.ScriptTarget.ES2015,
 };
 
 export async function main() {
   return capnpc_ts.run().then((ctx) => {
-    return transpileAll(ctx);
+    transpileAll(ctx);
   }).thenReturn().tapCatch((reason) => {
     // tslint:disable-next-line:no-console
     console.error(reason);
+    process.exit(1);
   });
 }
 
 export function transpileAll(ctx: capnpc_ts.CodeGeneratorContext): void {
 
-  trace('transpileAll()');
+  trace('transpileAll()', ctx.files);
 
-  const program = ts.createProgram(ctx.files.map((f) => f.tsPath), COMPILE_OPTIONS);
+  const tsFilePaths = ctx.files.map((f) => f.tsPath);
+
+  const program = ts.createProgram(tsFilePaths, COMPILE_OPTIONS);
+
   const emitResult = program.emit();
 
-  if (emitResult.emitSkipped) {
+  if (!emitResult.emitSkipped) {
+
+    trace('emit succeeded');
+
+    tsFilePaths.forEach(fs.unlinkSync);
+
+  } else {
 
     trace('emit failed');
 
     const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+
     allDiagnostics.forEach((diagnostic) => {
 
       const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
@@ -63,12 +77,13 @@ export function transpileAll(ctx: capnpc_ts.CodeGeneratorContext): void {
       if (diagnostic.file && diagnostic.start) {
 
         const {line, character} = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-        /* tslint:disable-next-line */
+
+        /* tslint:disable-next-line:no-console */
         console.log(`${diagnostic.file.fileName}:${line + 1}:${character + 1} ${message}`);
 
       } else {
 
-        /* tslint:disable-next-line */
+        /* tslint:disable-next-line:no-console */
         console.log(`==> ${message}`);
 
       }

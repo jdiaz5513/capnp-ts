@@ -19,6 +19,7 @@ export async function main(): Promise<void> {
   return run().thenReturn().tapCatch((reason) => {
     // tslint:disable-next-line:no-console
     console.error(reason);
+    process.exit(1);
   });
 }
 
@@ -48,29 +49,19 @@ export async function run(): Bluebird<CodeGeneratorContext> {
 
     })).then(() => {
 
-      const reqBuffer = new Buffer(chunks.reduce((l, chunk) => l + chunk.byteLength, -1));
+      const reqBuffer = new Buffer(chunks.reduce((l, chunk) => l + chunk.byteLength, 0));
 
       let i = 0;
 
-      chunks.forEach((chunk, j) => {
+      chunks.forEach((chunk) => {
 
-        if (j === chunks.length - 1) {
-
-          // Exclude the EOF byte.
-
-          chunk.copy(reqBuffer, i, 0, chunk.byteLength - 1);
-
-        } else {
-
-          chunk.copy(reqBuffer, i);
-
-        }
+        chunk.copy(reqBuffer, i);
 
         i += chunk.byteLength;
 
       });
 
-      trace(reqBuffer);
+      trace('reqBuffer (length: %d)', reqBuffer.length, reqBuffer);
 
       const message = capnp.Message.fromBuffer(reqBuffer);
 
