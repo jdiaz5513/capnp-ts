@@ -1,5 +1,5 @@
 {
-  "author": "efokschaner",
+  "author": "jdiaz5513",
   "bin": {
     "capnpc-js": "./bin/capnpc-js.js"
   },

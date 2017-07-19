@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@types/benchmark@1.0.30":
+"@types/benchmark@^1.0.30":
   version "1.0.30"
   resolved "https://registry.yarnpkg.com/@types/benchmark/-/benchmark-1.0.30.tgz#f6bea0baceb178155968b9984f94546f63677592"
 
@@ -2760,7 +2760,7 @@ sort-keys@^2.0.0:
   dependencies:
     is-plain-obj "^1.0.0"
 
-source-map-support@^0.4.0, source-map-support@^0.4.3:
+source-map-support@^0.4.0, source-map-support@^0.4.15, source-map-support@^0.4.3:
   version "0.4.15"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.4.15.tgz#03202df65c06d2bd8c7ec2362a193056fef8d3b1"
   dependencies:
