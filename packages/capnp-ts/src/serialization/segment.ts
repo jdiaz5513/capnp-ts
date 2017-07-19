@@ -110,8 +110,8 @@ export class Segment implements DataView {
 
   copyWords(byteOffset: number, srcSegment: Segment, srcByteOffset: number, wordLength: number): void {
 
-    const src = new Float64Array(this.buffer, byteOffset, wordLength);
-    const dst = new Float64Array(srcSegment.buffer, srcByteOffset, wordLength);
+    const dst = new Float64Array(this.buffer, byteOffset, wordLength);
+    const src = new Float64Array(srcSegment.buffer, srcByteOffset, wordLength);
 
     dst.set(src);
 

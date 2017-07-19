@@ -32,6 +32,7 @@ This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) 
   - [Usage with JavaScript](#usage-with-javascript)
   - [Usage in a Web Browser](#usage-in-a-web-browser)
 - [Building](#building)
+  - [Initial Setup](#initial-setup)
   - [Build Tasks](#build-tasks)
 - [Testing](#testing)
 - [Team](#team)
@@ -80,8 +81,6 @@ npm install -g capnpc-js # For JavaScript
 ```
 
 The schema compiler is a [Cap'n Proto plugin](https://capnproto.org/otherlang.html#how-to-write-compiler-plugins) and requires the `capnpc` binary in order to do anything useful; follow the [Cap'n Proto installation instructions](https://capnproto.org/install.html) to install it on your system.
-
-> NOTE: At some point in the future the `capnpc-ts` package may build the `capnpc` binary as a native dependency, making this step somewhat unnecessary.
 
 ## Usage
 
@@ -151,7 +150,9 @@ Before building the source you will need a few prerequisites:
 
 > [nvm](https://github.com/creationix/nvm) is highly recommended for managing multiple nodejs versions.
 
-Run `yarn install` to install the initial set of build packages before continuing.
+### Initial Setup
+
+Run `yarn install` to set up the **node_modules** directories for the monorepo and each package.
 
 ### Build Tasks
 

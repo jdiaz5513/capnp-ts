@@ -160,7 +160,7 @@ export function dumpBuffer(buffer: ArrayBuffer | ArrayBufferView): string {
     let s = '';
     let k;
 
-    for (k = 0; k < 16; k++) {
+    for (k = 0; k < 16 && j + k < b.byteLength; k++) {
 
       const v = b[j + k];
 
