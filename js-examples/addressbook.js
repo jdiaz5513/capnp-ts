@@ -23,13 +23,14 @@
 // THE SOFTWARE.
 
 const capnp = require('capnp-ts');
-const {
-  AddressBook,
-  Person,
-  Person_Employment,
-  Person_PhoneNumber,
-  Person_PhoneNumber_Type
-} = require('./addressbook.capnp.js');
+const addressbookSchemas = require('./addressbook.capnp.js');
+
+// No destructuring assignment in node 4.0
+const AddressBook = addressbookSchemas.AddressBook;
+const Person = addressbookSchemas.Person;
+const Person_Employment = addressbookSchemas.Person_Employment;
+const Person_PhoneNumber = addressbookSchemas.Person_PhoneNumber;
+const Person_PhoneNumber_Type = addressbookSchemas.Person_PhoneNumber_Type;
 
 function writePackedMessageToStream(writeStream, message) {
   const arrayBuffer = message.toPackedArrayBuffer();
