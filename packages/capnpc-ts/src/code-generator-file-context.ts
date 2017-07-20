@@ -14,8 +14,6 @@ import * as ts from 'typescript';
 
 export class CodeGeneratorFileContext {
 
-  jsPath: string;
-  sourceMapPath: string;
   tsPath: string;
   concreteLists: Array<[string, s.Field]>;
   file: s.CodeGeneratorRequest_RequestedFile;

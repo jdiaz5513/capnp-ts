@@ -8,6 +8,8 @@
 
 - Code ninja: [ishitatsuyuki](https://github.com/ishitatsuyuki)
 
+- Code ninja: [efokschaner](https://github.com/efokschaner)
+
 ## SPECIAL THANKS
 
 - Microsoft's dev team (VSCode, TypeScript)

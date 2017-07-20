@@ -8,11 +8,11 @@ node_js:
   - "4"
 
 before_install:
+  - bash ci/install-capnproto.sh
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s
-  - export PATH="$HOME/.yarn/bin:$PATH"
+  - export PATH="$HOME/opt/bin:$HOME/.yarn/bin:$PATH"
 install:
   - yarn --frozen-lockfile
-  - yarn run bootstrap -- --frozen-lockfile
 
 script: yarn run ci
 
@@ -20,5 +20,7 @@ cache:
   yarn: true
   directories:
     - node_modules
+    - js-examples/node_modules
     - packages/capnp-ts/node_modules
     - packages/capnpc-ts/node_modules
+    - packages/capnpc-js/node_modules

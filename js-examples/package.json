@@ -1,0 +1,28 @@
+{
+  "author": "jdiaz5513",
+  "bugs": {
+    "url": "https://github.com/jdiaz5513/capnp-ts/issues"
+  },
+  "dependencies": {
+    "capnp-ts": "0.0.1"
+  },
+  "description": "Example of using capnproto-ts in a JavaScript project.",
+  "devDependencies": {
+    "capnpc-js": "0.0.1"
+  },
+  "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
+  "keywords": [
+    "capnp",
+    "rpc",
+    "typescript",
+    "example"
+  ],
+  "license": "MIT",
+  "name": "capnproto-ts/js-examples",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
+  },
+  "version": "0.0.1"
+}

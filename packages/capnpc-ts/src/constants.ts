@@ -45,26 +45,6 @@ export const ConcreteListType = {
   [s.Type.UINT8]: 'capnp.Uint8List',
 };
 
-/**
- * The equivalent of tsconfig.json used when compiling the emitted .ts file to .js.
- *
- * TODO: This should be configurable somehow?
- */
-
-export const COMPILE_OPTIONS: ts.CompilerOptions = {
-  declaration: true,
-  module: ts.ModuleKind.UMD,
-  noEmitOnError: true,
-  noFallthroughCasesInSwitch: true,
-  noImplicitReturns: true,
-  noUnusedLocals: true,
-  noUnusedParameters: true,
-  sourceMap: true,
-  strict: true,
-  stripInternal: true,
-  target: ts.ScriptTarget.ES5,
-};
-
 /** export */
 
 export const EXPORT = ts.createToken(ts.SyntaxKind.ExportKeyword);

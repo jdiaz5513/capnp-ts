@@ -45,9 +45,11 @@ This repository is managed as a monorepo composed of separate packages.
 |:--------|:--------|:-------------|
 | [`capnp-ts`](/packages/capnp-ts) | [![npm](https://img.shields.io/npm/v/capnp-ts.svg?maxAge=2592000)](https://www.npmjs.com/package/capnp-ts) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnp-ts.svg?path=packages/capnp-ts)](https://david-dm.org/jdiaz5513/capnp-ts?path=packages/capnp-ts) |
 | [`capnpc-ts`](/packages/capnpc-ts) | [![npm](https://img.shields.io/npm/v/capnpc-ts.svg?maxAge=2592000)](https://www.npmjs.com/package/capnpc-ts) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnpc-ts.svg?path=packages/capnpc-ts)](https://david-dm.org/jdiaz5513/capnpc-ts?path=packages/capnpc-ts) |
+| [`capnpc-js`](/packages/capnpc-js) | [![npm](https://img.shields.io/npm/v/capnpc-js.svg?maxAge=2592000)](https://www.npmjs.com/package/capnpc-js) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnpc-js.svg?path=packages/capnpc-js)](https://david-dm.org/jdiaz5513/capnpc-js?path=packages/capnpc-js) |
 
 - `capnp-ts` is the core Cap'n Proto library for Typescript. It is a required import for all compiled schema files, and the starting point for reading/writing a Cap'n Proto message.
-- `capnpc-ts` is the schema compiler. It is intended to be invoked by the [`capnp`](https://capnproto.org/capnp-tool.html) tool.
+- `capnpc-ts` is the schema compiler plugin for TypeScript. It is intended to be invoked by the [`capnp`](https://capnproto.org/capnp-tool.html) tool.
+- `capnpc-js` is the schema compiler plugin for JavaScript. It is intended to be invoked by the [`capnp`](https://capnproto.org/capnp-tool.html) tool.
 
 ## Project Status
 
@@ -73,20 +75,27 @@ npm install --save capnp-ts
 You may want the schema compiler as well (can also be installed locally):
 
 ```shell
-npm install -g capnpc-ts
+npm install -g capnpc-ts # For TypeScript
+# OR
+npm install -g capnpc-js # For JavaScript
 ```
 
 The schema compiler is a [Cap'n Proto plugin](https://capnproto.org/otherlang.html#how-to-write-compiler-plugins) and requires the `capnpc` binary in order to do anything useful; follow the [Cap'n Proto installation instructions](https://capnproto.org/install.html) to install it on your system.
 
 ## Usage
 
-Run the following to compile a schema file into Typescript source code:
+Run the following to compile a schema file into TypeScript source code:
 
 ```shell
 capnpc -ots path/to/myschema.capnp
 ```
 
-Running that command will create a file named `path/to/myschema.capnp.ts`.
+Or for JavaScript:
+```shell
+capnpc -ojs path/to/myschema.capnp
+```
+
+Running that command will create a file named `path/to/myschema.capnp.ts` (or `.js`).
 
 > This assumes `capnpc-ts` was installed globally and is available from `$PATH`. If not, change the `-o` option to something like `-onode_modules/.bin/capnpc-ts` so it points to your local `capnpc-ts` install.
 
@@ -108,7 +117,19 @@ export function loadMessage(buffer: ArrayBuffer): MyStruct {
 
 ### Usage with JavaScript
 
-JavaScript is not **yet** fully supported; the `capnp-ts` library itself can be imported as ES5 JavaScript, but the schema compiler is not yet able to transpile the emitted TypeScript schema file into JavaScript. One may do so manually, if feeling particularly adventurous.
+```javascript
+const capnp = require('capnp-ts');
+
+const MyStruct = require('./myschema.capnp').MyStruct;
+
+function loadMessage(buffer) {
+
+  const message = capnp.Message.fromArrayBuffer(buffer);
+
+  return message.getRoot(MyStruct);
+
+}
+```
 
 ### Usage in a Web Browser
 
@@ -131,14 +152,7 @@ Before building the source you will need a few prerequisites:
 
 ### Initial Setup
 
-Run the following commands to set up the **node_modules** directories for the monorepo and each package:
-
-```shell
-yarn install
-npm run bootstrap
-```
-
-Bootstrap only needs to be run once; run `yarn install` again any time the packages are updated.
+Run `yarn install` to set up the **node_modules** directories for the monorepo and each package.
 
 ### Build Tasks
 
@@ -153,6 +167,7 @@ npm run build
 Or (preferred) using [gulp-cli](https://github.com/gulpjs/gulp-cli):
 
 ```shell
+npm install --global gulp-cli # If you don't already have gulp-cli
 gulp build
 ```
 
