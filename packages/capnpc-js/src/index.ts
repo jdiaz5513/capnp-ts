@@ -12,12 +12,7 @@ trace('load');
 /**
  * The equivalent of tsconfig.json used when compiling the emitted .ts file to .js.
  *
- * TODO: This should be configurable somehow?
- *
- * efokschaner - I'm thinking this is pretty low priority, here's my rationale.
- * Our top priority should be source readability from this layer.
- * Reasonable compatibility should be second.
- * The output of this tool should be thought of as source-code grade javascript
+ * The output of this tool should aim to be readable, documented javascript
  * for the developers consuming it. They can (and probably already do) transpile
  * the JS further to meet whatever ES version / module system / minification
  * needs they have.

@@ -334,6 +334,7 @@ export function generateStructFieldMethods(
         ts.createPropertyAccess(THIS, '_getList'),
         __,
         [offsetLiteral, listClassIdentifier]);
+      has = true;
       init = ts.createCall(
         ts.createPropertyAccess(THIS, '_initList'),
         __,
