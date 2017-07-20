@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "../../packages/capnpc-js/lib-test",
+    "rootDir": "../../packages/capnpc-js/test"
+  },
+  "extends": "../tsconfig-base",
+  "include": [
+    "../../packages/capnpc-js/test/**/*.ts"
+  ]
+}

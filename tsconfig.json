@@ -10,6 +10,8 @@
   "include": [
     "packages/capnp-ts/src/**/*.ts",
     "packages/capnp-ts/test/**/*.ts",
+    "packages/capnpc-js/src/**/*.ts",
+    "packages/capnpc-js/test/**/*.ts",
     "packages/capnpc-ts/src/**/*.ts",
     "packages/capnpc-ts/test/**/*.ts"
   ]

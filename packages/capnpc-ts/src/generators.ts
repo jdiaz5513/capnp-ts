@@ -196,6 +196,7 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
 
 }
 
+const listLengthParameterName = 'length';
 
 export function generateStructFieldMethods(
   ctx: CodeGeneratorFileContext, members: ts.ClassElement[], node: s.Node, field: s.Field): void {
@@ -325,11 +326,19 @@ export function generateStructFieldMethods(
 
       }
 
+      const listClassIdentifier = ts.createIdentifier(listClass);
+
       adopt = true;
       disown = true;
       get = ts.createCall(
-        ts.createPropertyAccess(
-          THIS, '_getList'), __, [offsetLiteral, ts.createIdentifier(listClass)]);
+        ts.createPropertyAccess(THIS, '_getList'),
+        __,
+        [offsetLiteral, listClassIdentifier]);
+      has = true;
+      init = ts.createCall(
+        ts.createPropertyAccess(THIS, '_initList'),
+        __,
+        [offsetLiteral, listClassIdentifier, ts.createIdentifier(listLengthParameterName)]);
       set = copyFromValue;
 
       break;
@@ -374,6 +383,8 @@ export function generateStructFieldMethods(
       break;
 
     default:
+
+      // TODO Maybe this should be an error?
 
       break;
 
@@ -433,7 +444,7 @@ export function generateStructFieldMethods(
   if (init) {
 
     const parameters = whichType === s.Type.DATA || whichType === s.Type.LIST
-      ? [ts.createParameter(__, __, __, 'length', __, NUMBER_TYPE, __)]
+      ? [ts.createParameter(__, __, __, listLengthParameterName, __, NUMBER_TYPE, __)]
       : [];
     const expressions = [init];
 
@@ -455,12 +466,24 @@ export function generateStructFieldMethods(
   }
 
   // setFoo(value: FooType): void { ... }
-  if (set) {
+  if (set || union) {
 
-    const parameters = [ts.createParameter(__, __, __, VALUE, __, jsTypeReference, __)];
-    const expressions = [set];
+    const expressions = [];
+    const parameters = [];
 
-    if (union) expressions.unshift(setDiscriminant);
+    if (set) {
+
+      expressions.unshift(set);
+
+      parameters.unshift(ts.createParameter(__, __, __, VALUE, __, jsTypeReference, __));
+
+    }
+
+    if (union) {
+
+      expressions.unshift(setDiscriminant);
+
+    }
 
     members.push(createMethod(`set${properName}`, parameters, VOID_TYPE, expressions));
 

@@ -25,6 +25,11 @@ gulp.task('build:capnpc-ts:lib', ['build:capnp-ts:lib'], function () {
   return build('configs/capnpc-ts/tsconfig-lib.json');
 });
 
+/** Build the capnpc-js schema compiler. */
+gulp.task('build:capnpc-js:lib', ['build:capnp-ts:lib', 'build:capnpc-ts:lib'], function () {
+  return build('configs/capnpc-js/tsconfig-lib.json');
+});
+
 /** Build tests for capnp-ts. */
 gulp.task('build:capnp-ts:test', ['build:capnp-ts:lib'], function () {
   return build('configs/capnp-ts/tsconfig-lib-test.json');
@@ -35,11 +40,16 @@ gulp.task('build:capnpc-ts:test', ['build:capnpc-ts:lib'], function () {
   return build('configs/capnpc-ts/tsconfig-lib-test.json');
 });
 
+/** Build tests for capnpc-js. */
+gulp.task('build:capnpc-js:test', ['build:capnpc-js:lib'], function () {
+  return build('configs/capnpc-js/tsconfig-lib-test.json');
+});
+
 /** Main build task (does not build tests). */
-gulp.task('build', ['build:capnp-ts:lib', 'build:capnpc-ts:lib']);
+gulp.task('build', ['build:capnp-ts:lib', 'build:capnpc-ts:lib', 'build:capnpc-js:lib']);
 
 /** Build all tests. */
-gulp.task('build-test', ['build:capnp-ts:test', 'build:capnpc-ts:test']);
+gulp.task('build-test', ['build:capnp-ts:test', 'build:capnpc-ts:test', 'build:capnpc-js:test']);
 
 function test(src, coverage) {
   var options = glob.sync(src).concat('-J');
@@ -62,11 +72,16 @@ gulp.task('test:capnpc-ts', ['build:capnpc-ts:test'], function () {
   return test('packages/capnpc-ts/lib-test/**/*.spec.js', false);
 });
 
+/** Run tests for the capnpc-js schema compiler. */
+gulp.task('test:capnpc-js', ['build:capnpc-js:test'], function () {
+  return test('packages/capnpc-js/lib-test/**/*.spec.js', false);
+});
+
 /** Run all tests. */
-gulp.task('test', ['test:capnp-ts', 'test:capnpc-ts']);
+gulp.task('test', ['test:capnp-ts', 'test:capnpc-ts', 'test:capnpc-ts']);
 
 /** Run all tests with test coverage. */
-gulp.task('test-cov', ['build:capnp-ts:test', 'build:capnpc-ts:test'], function () {
+gulp.task('test-cov', ['build:capnp-ts:test', 'build:capnpc-ts:test', 'build:capnpc-js:test'], function () {
   return test('packages/*/lib-test/**/*.spec.js', true);
 });
 

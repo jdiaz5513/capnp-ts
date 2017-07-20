@@ -1,5 +1,10 @@
+import * as Bluebird from 'bluebird';
 import * as capnp from 'capnp-ts';
 import * as s from 'capnp-ts/lib/std/schema.capnp';
+
+import {CodeGeneratorContext} from './code-generator-context';
+export {CodeGeneratorContext} from './code-generator-context';
+
 import initTrace from 'debug';
 
 import {loadRequest, writeTsFiles} from './compiler';
@@ -7,60 +12,70 @@ import {loadRequest, writeTsFiles} from './compiler';
 const trace = initTrace('capnpc');
 trace('load');
 
-const chunks: Buffer[] = [];
+import * as E from './errors';
+export let errors = E;
 
-export function main() {
-
-  process.stdin.on('data', (chunk: Buffer) => {
-
-    trace('reading data chunk (%d bytes)', chunk.byteLength);
-
-    chunks.push(chunk);
-
+export async function main(): Promise<void> {
+  return run().thenReturn().tapCatch((reason) => {
+    // tslint:disable-next-line:no-console
+    console.error(reason);
+    process.exit(1);
   });
+}
 
-  process.stdin.on('end', () => {
+export async function run(): Bluebird<CodeGeneratorContext> {
 
-    trace('read complete');
+  return Bluebird.try(() => {
 
-    const reqBuffer = new Buffer(chunks.reduce((l, chunk) => l + chunk.byteLength, -1));
+    const chunks: Buffer[] = [];
 
-    let i = 0;
+    process.stdin.on('data', (chunk: Buffer) => {
 
-    chunks.forEach((chunk, j) => {
+      trace('reading data chunk (%d bytes)', chunk.byteLength);
 
-      if (j === chunks.length - 1) {
-
-        // Exclude the EOF byte.
-
-        chunk.copy(reqBuffer, i, 0, chunk.byteLength - 1);
-
-      } else {
-
-        chunk.copy(reqBuffer, i);
-
-      }
-
-      i += chunk.byteLength;
+      chunks.push(chunk);
 
     });
 
-    trace(reqBuffer);
+    return (new Bluebird<void>((resolve) => {
 
-    const message = capnp.Message.fromBuffer(reqBuffer);
+      process.stdin.on('end', () => {
 
-    trace('message: %s', message.dump());
+        trace('read complete');
 
-    const req = message.getRoot(s.CodeGeneratorRequest);
+        resolve();
 
-    trace('%s', req);
+      });
 
-    const ctx = loadRequest(req);
+    })).then(() => {
 
-    writeTsFiles(ctx);
-    // NOTE: Uncomment this to enable transpilation to JS, kinda broken right now.
-    // transpileAll(ctx);
+      const reqBuffer = new Buffer(chunks.reduce((l, chunk) => l + chunk.byteLength, 0));
 
+      let i = 0;
+
+      chunks.forEach((chunk) => {
+
+        chunk.copy(reqBuffer, i);
+
+        i += chunk.byteLength;
+
+      });
+
+      trace('reqBuffer (length: %d)', reqBuffer.length, reqBuffer);
+
+      const message = capnp.Message.fromBuffer(reqBuffer);
+
+      trace('message: %s', message.dump());
+
+      const req = message.getRoot(s.CodeGeneratorRequest);
+
+      trace('%s', req);
+
+      const ctx = loadRequest(req);
+
+      writeTsFiles(ctx);
+
+      return ctx;
+    });
   });
-
 }
