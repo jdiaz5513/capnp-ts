@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+"use strict";
+
 const capnp = require('capnp-ts');
 const addressbookSchemas = require('./addressbook.capnp.js');
 
