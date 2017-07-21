@@ -19,7 +19,7 @@
 
 ```
 
-![travis ci](https://travis-ci.org/jdiaz5513/capnp-ts.svg?branch=master) [![codecov](https://codecov.io/gh/jdiaz5513/capnp-ts/branch/master/graph/badge.svg)](https://codecov.io/gh/jdiaz5513/capnp-ts)
+[![Build Status](https://travis-ci.org/jdiaz5513/capnp-ts.svg?branch=master)](https://travis-ci.org/jdiaz5513/capnp-ts) [![codecov](https://codecov.io/gh/jdiaz5513/capnp-ts/branch/master/graph/badge.svg)](https://codecov.io/gh/jdiaz5513/capnp-ts)
 
 This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) serialization protocol. Start with the [Cap'n Proto Introduction](https://capnproto.org/index.html) for more detailed information on what this is about.
 
