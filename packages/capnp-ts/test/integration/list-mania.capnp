@@ -56,4 +56,6 @@ struct ListManiaStruct {
 
   void @0 :Void;
 
+  self @1 :ListMania;
+
 }

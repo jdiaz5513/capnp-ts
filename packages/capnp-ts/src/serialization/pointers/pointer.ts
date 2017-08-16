@@ -225,6 +225,7 @@ export class Pointer {
 
         break;
 
+      /* istanbul ignore next */
       default:
 
         throw new Error(format(E.PTR_INVALID_POINTER_TYPE, this._getTargetPointerType()));

@@ -12,9 +12,22 @@ import {ListMania} from './list-mania.capnp';
 
 tap.test('loop de loop', (t) => {
 
-  // TODO: Interfaces are not implemented yet.
+  t.doesNotThrow(() => {
 
-  t.pass();
+    const m = new capnp.Message();
+    const listMania = m.initRoot(ListMania);
+
+    listMania.initCompositeList(1);
+
+    const compositeList = listMania.getCompositeList();
+    // TODO: Interfaces are not implemented yet.
+    // const interfaceList = listMania.getInterfaceList();
+
+    compositeList.get(0).setSelf(listMania);
+    compositeList.set(0, compositeList.get(0));
+    compositeList.get(0).setSelf(listMania);
+
+  });
 
   t.end();
 
@@ -60,8 +73,6 @@ tap.test('1 of each list', (t) => {
     const uint32List = listMania.getUint32List();
     const uint64List = listMania.getUint64List();
     const voidList = listMania.getVoidList();
-
-    compositeList.set(0, compositeList.get(0));
 
     boolList.disown().dispose();
     compositeList.disown().dispose();

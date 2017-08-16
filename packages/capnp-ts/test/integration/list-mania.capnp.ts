@@ -118,7 +118,13 @@ export class ListManiaInterface extends capnp.Struct {
 export class ListManiaStruct extends capnp.Struct {
     static readonly _displayName = "ListManiaStruct";
     static readonly _id = "9e1eb66286605522";
-    static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(0, 0);
+    static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(0, 1);
+    adoptSelf(value: capnp.Orphan<ListMania>): void { this._getPointer(0).adopt(value); }
+    disownSelf(): capnp.Orphan<ListMania> { return this.getSelf().disown(); }
+    getSelf(): ListMania { return this._getStruct(0, ListMania); }
+    hasSelf(): boolean { return !this._getPointer(0)._isNull(); }
+    initSelf(): ListMania { return this._initStructAt(0, ListMania); }
+    setSelf(value: ListMania): void { this._getPointer(0)._copyFrom(value); }
     toString(): string { return "ListManiaStruct_" + super.toString(); }
 }
 ListMania._CompositeList = capnp.CompositeList(ListManiaStruct);
