@@ -66,12 +66,12 @@ tap.test('1 of each list', (t) => {
     const boolList = listMania.getBoolList();
     const compositeList = listMania.getCompositeList();
     const dataList = listMania.getDataList();
-    const float32List = listMania.getCompositeList();
+    const float32List = listMania.getFloat32List();
     const float64List = listMania.getFloat64List();
     const int8List = listMania.getInt8List();
     const int16List = listMania.getInt16List();
-    const int32List = listMania.getCompositeList();
-    const int64List = listMania.getCompositeList();
+    const int32List = listMania.getInt32List();
+    const int64List = listMania.getInt64List();
     const interfaceList = listMania.getInterfaceList();
     const textList = listMania.getTextList();
     const uint8List = listMania.getUint8List();
@@ -79,6 +79,21 @@ tap.test('1 of each list', (t) => {
     const uint32List = listMania.getUint32List();
     const uint64List = listMania.getUint64List();
     const voidList = listMania.getVoidList();
+
+    // Write some junk data to test erasure after disposal.
+
+    boolList.set(0, true);
+    float32List.set(0, 1);
+    float64List.set(0, 1);
+    int8List.set(0, 1);
+    int16List.set(0, 1);
+    int32List.set(0, 1);
+    int64List.set(0, capnp.Int64.fromNumber(1));
+    textList.set(0, 'hi');
+    uint8List.set(0, 1);
+    uint16List.set(0, 1);
+    uint32List.set(0, 1);
+    uint64List.set(0, capnp.Uint64.fromNumber(1));
 
     boolList.disown().dispose();
     compositeList.disown().dispose();
@@ -96,6 +111,13 @@ tap.test('1 of each list', (t) => {
     uint32List.disown().dispose();
     uint64List.disown().dispose();
     voidList.disown().dispose();
+
+    // Everything after the root pointer should be zero now.
+
+    t.comment('should zero out disposed orphans');
+
+    const s = m.getSegment(0);
+    for (let i = 8; i < s.byteLength; i += 8) t.ok(s.isWordZero(i));
 
   });
 
