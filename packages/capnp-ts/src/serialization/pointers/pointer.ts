@@ -991,8 +991,6 @@ export class Pointer {
 
       }
 
-      // Initialize the pointer.
-
     } else if (srcElementSize === ListElementSize.COMPOSITE) {
 
       srcCompositeSize = src._getTargetCompositeListSize().padToWord();
@@ -1050,7 +1048,7 @@ export class Pointer {
 
     // Initialize the list pointer.
 
-    const res = this._initPointer(dstContent.segment, dstContent.byteOffset);
+    const res = dst._initPointer(dstContent.segment, dstContent.byteOffset);
     res.pointer._setListPointer(res.offsetWords, srcElementSize, srcLength, srcCompositeSize);
 
   }
@@ -1088,11 +1086,11 @@ export class Pointer {
     // Don't touch dst if it's already initialized as a composite list pointer. With composite struct pointers there's
     // no pointer to copy here and we've already copied the contents.
 
-    if ((src as {_compositeIndex?: number})._compositeIndex !== undefined) return;
+    if ((dst as {_compositeIndex?: number})._compositeIndex !== undefined) return;
 
     // Initialize the struct pointer.
 
-    const res = src._initPointer(dstContent.segment, dstContent.byteOffset);
+    const res = dst._initPointer(dstContent.segment, dstContent.byteOffset);
     res.pointer._setStructPointer(res.offsetWords, srcSize);
 
   }
