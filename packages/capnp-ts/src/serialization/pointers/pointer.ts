@@ -205,6 +205,16 @@ export class Pointer {
 
   _copyFrom(src: Pointer): void {
 
+    // If the pointer is the same then this is a noop.
+
+    if (this.segment === src.segment && this.byteOffset === src.byteOffset) {
+
+      trace('ignoring copy operation from identical pointer %s', src);
+
+      return;
+
+    }
+
     // Make sure we erase this pointer's contents before moving on. If src is null, that's all we do.
 
     this._erase();    // noop if null
