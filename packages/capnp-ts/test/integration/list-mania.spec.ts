@@ -27,6 +27,12 @@ tap.test('loop de loop', (t) => {
     compositeList.set(0, compositeList.get(0));
     compositeList.get(0).setSelf(listMania);
 
+    t.comment('should zero out overwritten regions');
+
+    const s = m.getSegment(0);
+    t.ok(s.isWordZero(0x0a0));
+    t.ok(s.isWordZero(0x118));
+
   });
 
   t.end();
