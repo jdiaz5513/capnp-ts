@@ -132,24 +132,6 @@ export class Struct extends Pointer {
 
   }
 
-  /**
-   * Copy the contents of `src` to this struct. Newer fields in `src` will be omitted, and fields in this struct that
-   * do not exist in `src` will be set to their default values (zeroed out).
-   *
-   * @internal
-   * @param {Struct} _src The source struct to copy.
-   * @returns {void}
-   */
-
-  _copyStruct(_src: Struct): void {
-
-    // The struct copy operation is actually implemented in Pointer since there is no need to know the details of the
-    // struct in order to copy it.
-
-    this._copyFrom(_src);
-
-  }
-
   adopt(src: Orphan<this>): void {
 
     if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_ADOPT_COMPOSITE_STRUCT, this));
