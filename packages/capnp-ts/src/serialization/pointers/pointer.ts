@@ -295,7 +295,7 @@ export class Pointer {
 
           for (let i = 0; i < length; i++) {
 
-            c._add(i * 8)._erase();
+            new Pointer(c.segment, c.byteOffset + i * 8, this._depthLimit - 1)._erase();
 
           }
 
@@ -305,11 +305,25 @@ export class Pointer {
 
         } else if (elementSize === ListElementSize.COMPOSITE) {
 
-          // Read the total length from the tag word.
-          contentWords = c._add(-8)._getOffsetWords();
+          // Read some stuff from the tag word.
+          const tag = c._add(-8);
+          const compositeSize = tag._getStructSize();
+          const compositeByteLength = compositeSize.getByteLength();
+          contentWords = tag._getOffsetWords();
 
           // Kill the tag word.
           c.segment.setWordZero(c.byteOffset - 8);
+
+          // Recursively erase each pointer.
+          for (let i = 0; i < length; i++) {
+
+            for (let j = 0; j < compositeSize.pointerLength; j++) {
+
+              new Pointer(c.segment, c.byteOffset + i * compositeByteLength + j * 8, this._depthLimit - 1)._erase();
+
+            }
+
+          }
 
         }
 
