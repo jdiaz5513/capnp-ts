@@ -192,3 +192,24 @@ tap.test('adoption', (t) => {
   t.end();
 
 });
+
+tap.test('overwrite', (t) => {
+
+  const m = new capnp.Message();
+  const s = m.getSegment(0);
+  const addressBook = m.initRoot(AddressBook);
+  const alice = addressBook.initPeople(1).get(0);
+
+  alice.setName('Alex');
+  alice.setName('Alice');
+
+  t.ok(s.isWordZero(0x40), 'should zero out the old string');
+
+  addressBook.initPeople(1);
+
+  t.ok(s.isWordZero(0x40), 'should zero out every string');
+  t.ok(s.isWordZero(0x48), 'should zero out every string');
+
+  t.end();
+
+});
