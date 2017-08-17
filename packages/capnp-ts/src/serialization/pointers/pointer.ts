@@ -288,7 +288,7 @@ export class Pointer {
 
         const elementSize = this._getTargetListElementSize();
         const length = this._getTargetListLength();
-        let contentWords = length * Pointer._getListElementByteLength(elementSize) / 8;
+        let contentWords = padToWord(length * Pointer._getListElementByteLength(elementSize));
         c = this._getContent();
 
         if (elementSize === ListElementSize.POINTER) {
