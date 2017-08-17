@@ -116,6 +116,10 @@ export class Orphan<T extends Pointer> {
     // TODO: Implement copy semantics when this happens.
     if (this.segment.message !== dst.segment.message) throw new Error(format(PTR_ADOPT_WRONG_MESSAGE, this, dst));
 
+    // Recursively wipe out the destination pointer first.
+
+    dst._erase();
+
     const res = dst._initPointer(this.segment, this.byteOffset);
 
     switch (this._type) {
