@@ -207,4 +207,10 @@ export class Orphan<T extends Pointer> {
 
   }
 
+  toString(): string {
+
+    return format('Orphan_%d@%a,type:%s', this.segment.id, this.byteOffset, this._type);
+
+  }
+
 }
