@@ -108,6 +108,10 @@ export class Struct extends Pointer {
 
     if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_INIT_COMPOSITE_STRUCT, this));
 
+    // Make sure to clear existing contents before overwriting the pointer data (erase is a noop if already empty).
+
+    this._erase();
+
     const c = this.segment.allocate(size.getByteLength());
 
     const res = this._initPointer(c.segment, c.byteOffset);
@@ -545,6 +549,8 @@ export class Struct extends Pointer {
 
     const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
 
+    l._erase();
+
     l._initList(ListElementSize.BYTE, length);
 
     return l;
@@ -560,6 +566,8 @@ export class Struct extends Pointer {
     ps.byteOffset += index * 8;
 
     const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    l._erase();
 
     l._initList(ListClass._size, length, ListClass._compositeSize);
 
