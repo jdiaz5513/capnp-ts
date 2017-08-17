@@ -138,7 +138,11 @@ export class Orphan<T extends Pointer> {
         /* istanbul ignore next */
         if (this._length === undefined || this._elementSize === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
-        res.pointer._setListPointer(res.offsetWords, this._elementSize, this._length, this._size);
+        let offsetWords = res.offsetWords;
+
+        if (this._elementSize === ListElementSize.COMPOSITE) offsetWords--;    // The tag word gets skipped.
+
+        res.pointer._setListPointer(offsetWords, this._elementSize, this._length, this._size);
 
         break;
 
