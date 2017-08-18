@@ -127,7 +127,7 @@ export class Segment implements DataView {
 
   fillZeroWords(byteOffset: number, wordLength: number): void {
 
-    new Float64Array(this.buffer, byteOffset, wordLength * 8).fill(0);
+    new Float64Array(this.buffer, byteOffset, wordLength).fill(0);
 
   }
 

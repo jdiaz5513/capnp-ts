@@ -77,6 +77,8 @@ export class Orphan<T extends Pointer> {
         this._length = src._getTargetListLength();
         this._elementSize = src._getTargetListElementSize();
 
+        if (this._elementSize === ListElementSize.COMPOSITE) this._size = src._getTargetCompositeListSize();
+
         break;
 
       case PointerType.OTHER:
@@ -114,6 +116,10 @@ export class Orphan<T extends Pointer> {
     // TODO: Implement copy semantics when this happens.
     if (this.segment.message !== dst.segment.message) throw new Error(format(PTR_ADOPT_WRONG_MESSAGE, this, dst));
 
+    // Recursively wipe out the destination pointer first.
+
+    dst._erase();
+
     const res = dst._initPointer(this.segment, this.byteOffset);
 
     switch (this._type) {
@@ -132,7 +138,11 @@ export class Orphan<T extends Pointer> {
         /* istanbul ignore next */
         if (this._length === undefined || this._elementSize === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
 
-        res.pointer._setListPointer(res.offsetWords, this._elementSize, this._length, this._size);
+        let offsetWords = res.offsetWords;
+
+        if (this._elementSize === ListElementSize.COMPOSITE) offsetWords--;    // The tag word gets skipped.
+
+        res.pointer._setListPointer(offsetWords, this._elementSize, this._length, this._size);
 
         break;
 
@@ -172,7 +182,13 @@ export class Orphan<T extends Pointer> {
       case PointerType.LIST:
 
         /* istanbul ignore next */
-        if (this._length === undefined || this._elementSize === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
+        if (
+          (this._length === undefined || this._elementSize === undefined) ||
+          (this._elementSize === ListElementSize.COMPOSITE && this._size === undefined)) {
+
+          throw new Error(INVARIANT_UNREACHABLE_CODE);
+
+        }
 
         const byteLength = Pointer._getListByteLength(this._elementSize, this._length, this._size);
         this.segment.fillZeroWords(this.byteOffset, byteLength);
@@ -188,6 +204,12 @@ export class Orphan<T extends Pointer> {
     }
 
     this._type = undefined;
+
+  }
+
+  toString(): string {
+
+    return format('Orphan_%d@%a,type:%s', this.segment.id, this.byteOffset, this._type);
 
   }
 
