@@ -43,6 +43,7 @@ export const ConcreteListType = {
   [s.Type.UINT32]: 'capnp.Uint32List',
   [s.Type.UINT64]: 'capnp.Uint64List',
   [s.Type.UINT8]: 'capnp.Uint8List',
+  [s.Type.VOID]: 'capnp.VoidList',
 };
 
 /** export */

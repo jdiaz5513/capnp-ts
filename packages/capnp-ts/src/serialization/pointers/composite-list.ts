@@ -27,7 +27,7 @@ export function CompositeList<T extends Struct>(CompositeClass: StructCtor<T>): 
 
     set(index: number, value: T): void {
 
-      this.get(index)._copyStruct(value);
+      this.get(index)._copyFrom(value);
 
     }
 

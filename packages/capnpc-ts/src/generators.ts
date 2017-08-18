@@ -140,6 +140,15 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
 
 }
 
+export function generateInterfaceClasses(_ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('Interface generation is not yet implemented.');
+
+  /* tslint:disable-next-line */
+  console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`);
+
+}
+
 export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void {
 
   trace('generateNode(%s, %s)', ctx, node.getId().toHexString());
@@ -169,7 +178,7 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
 
     case s.Node.STRUCT:
 
-      generateStructNode(ctx, node);
+      generateStructNode(ctx, node, false);
 
       break;
 
@@ -185,9 +194,14 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
 
       break;
 
+    case s.Node.INTERFACE:
+
+      generateStructNode(ctx, node, true);
+
+      break;
+
     case s.Node.ANNOTATION:
     case s.Node.FILE:
-    case s.Node.INTERFACE:
     default:
 
       throw new Error(format(E.GEN_NODE_UNKNOWN_TYPE, s.Node_Which[whichNode]));
@@ -323,6 +337,11 @@ export function generateStructFieldMethods(
       if (whichElementType === s.Type.LIST || whichElementType === s.Type.STRUCT) {
 
         listClass = `${fullClassName}._${properName}`;
+
+      } else if (listClass === void(0)) {
+
+        /* istanbul ignore next */
+        throw new Error(format(E.GEN_UNSUPPORTED_LIST_ELEMENT_TYPE, whichElementType));
 
       }
 
@@ -491,52 +510,71 @@ export function generateStructFieldMethods(
 
 }
 
-export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node): void {
+export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, interfaceNode: boolean): void {
 
   trace('generateStructNode(%s) [%s]', node, node.getDisplayName());
 
+  const displayNamePrefix = getDisplayNamePrefix(node);
+  const fullClassName = getFullClassName(node);
+  const nestedNodes = node.getNestedNodes().map((n) => lookupNode(ctx, n)).filter((n) => !n.isConst());
   const nodeId = node.getId();
   const nodeIdHex = nodeId.toHexString();
-  const struct = node.getStruct();
-  const dataWordCount = struct.getDataWordCount();
-  const dataByteLength = dataWordCount * 8;
-  const discriminantCount = struct.getDiscriminantCount();
-  const discriminantOffset = struct.getDiscriminantOffset();
-  const fields = struct.getFields().toArray().sort(compareCodeOrder);
-  const pointerCount = struct.getPointerCount();
-  const hasUnnamedUnion = discriminantCount !== 0;
-  const nestedNodes = node.getNestedNodes().map((n) => lookupNode(ctx, n)).filter((n) => !n.isConst());
+  const struct = node.which() === s.Node.STRUCT ? node.getStruct() : undefined;
+  const unionFields = getUnnamedUnionFields(node).sort(compareCodeOrder);
+
+  const dataWordCount = struct ? struct.getDataWordCount() : 0;
+  const dataByteLength = struct ? dataWordCount * 8 : 0;
+  const discriminantCount = struct ? struct.getDiscriminantCount() : 0;
+  const discriminantOffset = struct ? struct.getDiscriminantOffset() : 0;
+  const fields = struct ? struct.getFields().toArray().sort(compareCodeOrder) : [];
+  const pointerCount = struct ? struct.getPointerCount() : 0;
+
   const concreteLists = fields.filter(needsConcreteListClass).sort(compareCodeOrder);
   const consts = ctx.nodes.filter((n) => n.getScopeId().equals(nodeId) && n.isConst());
-  // const groups = this.nodes.filter(
+  // const groups = ctx.nodes.filter(
   //   (n) => n.getScopeId().equals(nodeId) && n.isStruct() && n.getStruct().getIsGroup());
-  const unionFields = getUnnamedUnionFields(node).sort(compareCodeOrder);
-  const fullClassName = getFullClassName(node);
-  const displayNamePrefix = getDisplayNamePrefix(node);
+  const hasUnnamedUnion = discriminantCount !== 0;
 
   if (hasUnnamedUnion) generateUnnamedUnionEnum(ctx, fullClassName, unionFields);
 
-  const members: ts.ClassElement[] = [
-    // static readonly CONSTANT = 'foo';
-    ...consts.map(createConstProperty),
-    // static readonly WHICH = MyStruct_Which.WHICH;
-    ...unionFields.map((f) => createUnionConstProperty(fullClassName, f)),
-    // static readonly NestedStruct = MyStruct_NestedStruct;
-    ...nestedNodes.map(createNestedNodeProperty),
-    // static readonly _displayName = 'MyStruct';
-    ts.createProperty(__, [STATIC, READONLY], '_displayName', __, __, ts.createLiteral(displayNamePrefix)),
-    // static readonly _id = '4732bab4310f81';
-    ts.createProperty(__, [STATIC, READONLY], '_id', __, __, ts.createLiteral(nodeIdHex)),
-    // static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(8, 8);
-    ts.createProperty(__, [STATIC, READONLY], '_size', __, ts.createTypeReferenceNode(
-      'capnp.ObjectSize', __), ts.createNew(
-        ts.createIdentifier(
-          'capnp.ObjectSize'), __, [
-            ts.createNumericLiteral(dataByteLength.toString()),
-            ts.createNumericLiteral(pointerCount.toString())])),
-    // private static _ConcreteListClass: MyStruct_ConcreteListClass;
-    ...concreteLists.map((f) => createConcreteListProperty(ctx, f)),
-  ];
+  const members: ts.ClassElement[] = [];
+
+  // static readonly CONSTANT = 'foo';
+  members.push(...consts.map(createConstProperty));
+
+  // static readonly WHICH = MyStruct_Which.WHICH;
+  members.push(...unionFields.map((f) => createUnionConstProperty(fullClassName, f)));
+
+  // static readonly NestedStruct = MyStruct_NestedStruct;
+  members.push(...nestedNodes.map(createNestedNodeProperty));
+
+  // static readonly Client = MyInterface_Client;
+  // static readonly Server = MyInterface_Server;
+  // if (interfaceNode) {
+
+  //   members.push(
+  //     ts.createProperty(__, [STATIC, READONLY], 'Client', __, __, ts.createLiteral(`${fullClassName}_Client`)));
+  //   members.push(
+  //     ts.createProperty(__, [STATIC, READONLY], 'Server', __, __, ts.createLiteral(`${fullClassName}_Server`)));
+
+  // }
+
+  // static readonly _displayName = 'MyStruct';
+  members.push(ts.createProperty(__, [STATIC, READONLY], '_displayName', __, __, ts.createLiteral(displayNamePrefix)));
+
+  // static readonly _id = '4732bab4310f81';
+  members.push(ts.createProperty(__, [STATIC, READONLY], '_id', __, __, ts.createLiteral(nodeIdHex)));
+
+  // static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(8, 8);
+  members.push(ts.createProperty(__, [STATIC, READONLY], '_size', __, ts.createTypeReferenceNode(
+    'capnp.ObjectSize', __), ts.createNew(
+      ts.createIdentifier(
+        'capnp.ObjectSize'), __, [
+          ts.createNumericLiteral(dataByteLength.toString()),
+          ts.createNumericLiteral(pointerCount.toString())])));
+
+  // private static _ConcreteListClass: MyStruct_ConcreteListClass;
+  members.push(...concreteLists.map((f) => createConcreteListProperty(ctx, f)));
 
   // getFoo() { ... } initFoo() { ... } setFoo() { ... }
   fields.forEach((f) => generateStructFieldMethods(ctx, members, node, f));
@@ -559,6 +597,14 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node):
   }
 
   const c = ts.createClassDeclaration(__, [EXPORT], fullClassName, __, [createClassExtends('capnp.Struct')], members);
+
+  // Make sure the interface classes are generated first.
+
+  if (interfaceNode) {
+
+      generateInterfaceClasses(ctx, node);
+
+  }
 
   ctx.sourceFile.statements.push(c);
 

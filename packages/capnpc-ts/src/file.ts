@@ -120,7 +120,7 @@ export function getJsType(ctx: CodeGeneratorFileContext, type: s.Type, construct
 
     case s.Type.VOID:
 
-      return 'void';
+      return 'capnp.Void';
 
     default:
 
