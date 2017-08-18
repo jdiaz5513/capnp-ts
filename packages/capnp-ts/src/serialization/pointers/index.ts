@@ -28,3 +28,4 @@ export {Uint16List} from './uint16-list';
 export {Uint32List} from './uint32-list';
 export {Uint64List} from './uint64-list';
 export {Void, VOID} from './void';
+export {VoidList} from './void-list';

@@ -21,3 +21,5 @@ export const GEN_UNKNOWN_STRUCT_FIELD =
   'CAPNPC-TS005 Don\'t know how to generate a struct field of kind %d.';
 export const GEN_UNKNOWN_TYPE =
   'CAPNPC-TS006 Unknown slot type encountered: %d';
+export const GEN_UNSUPPORTED_LIST_ELEMENT_TYPE =
+  'CAPNPC-TS007 Encountered an unsupported list element type: %d';

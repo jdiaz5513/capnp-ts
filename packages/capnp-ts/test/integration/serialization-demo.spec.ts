@@ -154,7 +154,61 @@ tap.test('copy pointers from other message', (t) => {
   t.equal(alice2.getEmail(), 'alice@example.com');
   t.equal(alice2.getId(), 456);
 
-  console.log(message2.dump());
+  t.end();
+
+});
+
+tap.test('adoption', (t) => {
+
+  const m = new capnp.Message();
+  const s = m.getSegment(0);
+  const addressBook = m.initRoot(AddressBook);
+  const people1 = addressBook.initPeople(1);
+  const alice1 = people1.get(0);
+
+  alice1.setName('Alice');
+  alice1.setEmail('alice@example.com');
+  alice1.setId(456);
+
+  const o = addressBook.disownPeople();
+
+  t.ok(s.isWordZero(0x08), 'should null the pointer');
+  t.notOk(s.isWordZero(0x10), 'should not wipe out the composite list tag word');
+  t.notOk(s.isWordZero(0x40), 'should not touch the content');
+  t.ok(people1._isNull(), 'should null the original pointer');
+
+  addressBook.adoptPeople(o);
+
+  const people2 = addressBook.getPeople();
+  const alice2 = people2.get(0);
+
+  t.equal(alice2.getName(), 'Alice');
+  t.equal(alice2.getEmail(), 'alice@example.com');
+  t.equal(alice2.getId(), 456);
+  t.equal(alice1.getId(), 456);
+
+  t.throws(() => addressBook.adoptPeople(o), undefined, 'should not allow multiple adoption');
+
+  t.end();
+
+});
+
+tap.test('overwrite', (t) => {
+
+  const m = new capnp.Message();
+  const s = m.getSegment(0);
+  const addressBook = m.initRoot(AddressBook);
+  const alice = addressBook.initPeople(1).get(0);
+
+  alice.setName('Alex');
+  alice.setName('Alice');
+
+  t.ok(s.isWordZero(0x40), 'should zero out the old string');
+
+  addressBook.initPeople(1);
+
+  t.ok(s.isWordZero(0x40), 'should zero out every string');
+  t.ok(s.isWordZero(0x48), 'should zero out every string');
 
   t.end();
 

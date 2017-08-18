@@ -5,15 +5,7 @@
 import initTrace from 'debug';
 
 import {MAX_DEPTH, NATIVE_LITTLE_ENDIAN} from '../../constants';
-import {
-  NOT_IMPLEMENTED,
-  PTR_ADOPT_COMPOSITE_STRUCT,
-  PTR_DISOWN_COMPOSITE_STRUCT,
-  PTR_INIT_COMPOSITE_STRUCT,
-  PTR_INVALID_UNION_ACCESS,
-  PTR_STRUCT_DATA_OUT_OF_BOUNDS,
-  PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
-} from '../../errors';
+import * as E from '../../errors';
 import {Int64, Uint64} from '../../types';
 import {format, padToWord} from '../../util';
 import {ListElementSize} from '../list-element-size';
@@ -114,7 +106,11 @@ export class Struct extends Pointer {
 
   _initStruct(size: ObjectSize): void {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(PTR_INIT_COMPOSITE_STRUCT, this));
+    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_INIT_COMPOSITE_STRUCT, this));
+
+    // Make sure to clear existing contents before overwriting the pointer data (erase is a noop if already empty).
+
+    this._erase();
 
     const c = this.segment.allocate(size.getByteLength());
 
@@ -140,24 +136,9 @@ export class Struct extends Pointer {
 
   }
 
-  /**
-   * Copy the contents of `src` to this struct. Newer fields in `src` will be omitted, and fields in this struct that
-   * do not exist in `src` will be set to their default values (zeroed out).
-   *
-   * @internal
-   * @param {Struct} _src The source struct to copy.
-   * @returns {void}
-   */
-
-  _copyStruct(_src: Struct): void {
-
-    throw new Error(format(NOT_IMPLEMENTED, 'Struct.prototype.copyStruct'));
-
-  }
-
   adopt(src: Orphan<this>): void {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(PTR_ADOPT_COMPOSITE_STRUCT, this));
+    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_ADOPT_COMPOSITE_STRUCT, this));
 
     super.adopt(src);
 
@@ -165,7 +146,7 @@ export class Struct extends Pointer {
 
   disown(): Orphan<this> {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(PTR_DISOWN_COMPOSITE_STRUCT, this));
+    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_DISOWN_COMPOSITE_STRUCT, this));
 
     return super.disown();
 
@@ -568,6 +549,8 @@ export class Struct extends Pointer {
 
     const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
 
+    l._erase();
+
     l._initList(ListElementSize.BYTE, length);
 
     return l;
@@ -583,6 +566,8 @@ export class Struct extends Pointer {
     ps.byteOffset += index * 8;
 
     const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+
+    l._erase();
 
     l._initList(ListClass._size, length, ListClass._compositeSize);
 
@@ -923,7 +908,7 @@ export class Struct extends Pointer {
 
   protected _testWhich(name: string, found: number, wanted: number): void {
 
-    if (found !== wanted) throw new Error(format(PTR_INVALID_UNION_ACCESS, this, name, found, wanted));
+    if (found !== wanted) throw new Error(format(E.PTR_INVALID_UNION_ACCESS, this, name, found, wanted));
 
   }
 
@@ -933,7 +918,7 @@ export class Struct extends Pointer {
 
     if (byteOffset < 0 || byteLength < 0 || byteOffset + byteLength > dataByteLength) {
 
-      throw new Error(format(PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset, dataByteLength));
+      throw new Error(format(E.PTR_STRUCT_DATA_OUT_OF_BOUNDS, this, byteLength, byteOffset, dataByteLength));
 
     }
 
@@ -945,7 +930,7 @@ export class Struct extends Pointer {
 
     if (index < 0 || index >= pointerLength) {
 
-      throw new Error(format(PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, pointerLength));
+      throw new Error(format(E.PTR_STRUCT_POINTER_OUT_OF_BOUNDS, this, index, pointerLength));
 
     }
 
