@@ -8,8 +8,12 @@
     "codecov": "^2.2.0",
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^2.6.0",
     "gulp-tslint": "^8.1.1",
+    "gulp-typescript": "^3.2.0",
+    "gulp-util": "^3.0.8",
     "lerna": "^2.0.0",
+    "merge-stream": "^1.0.1",
     "tap": "^10.7.0",
     "ts-node": "^3.2.0",
     "tslint": "^5.5.0",
@@ -45,6 +49,5 @@
   },
   "typings": "lib/index",
   "version": "0.0.1",
-  "dependencies": {
-  }
+  "dependencies": {}
 }
