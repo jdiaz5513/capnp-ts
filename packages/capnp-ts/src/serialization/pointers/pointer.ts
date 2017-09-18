@@ -889,18 +889,16 @@ export class Pointer {
   }
 
   /**
-   * Read some bits off a list pointer to make sure it has the right pointer data.
+   * Read some bits off a pointer to make sure it has the right pointer data.
    *
    * @internal
    * @param {PointerType} pointerType The expected pointer type.
    * @param {ListElementSize} [elementSize] For list pointers, the expected element size. Leave this
    * undefined for struct pointers.
-   * @param {ObjectSize} [objectSize] For structs this is the expected size of the struct. For composite lists this is
-   * the expected size of each struct in the list.
    * @returns {void}
    */
 
-  _validate(pointerType: PointerType, elementSize?: ListElementSize, objectSize?: ObjectSize): void {
+  _validate(pointerType: PointerType, elementSize?: ListElementSize): void {
 
     if (this._isNull()) return;
 
@@ -919,54 +917,6 @@ export class Pointer {
       const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
 
       if (C !== elementSize) throw new Error(format(E.PTR_WRONG_LIST_TYPE, this, ListElementSize[elementSize]));
-
-    }
-
-    // Check the object size, if provided.
-
-    if (objectSize !== undefined) {
-
-      objectSize = objectSize.padToWord();
-
-      switch (pointerType) {
-
-        case PointerType.STRUCT:
-
-          const C = p.segment.getUint16(p.byteOffset + 4);
-          const D = p.segment.getUint16(p.byteOffset + 6);
-
-          const dataWordLength = objectSize.getDataWordLength();
-          const pointerLength = objectSize.pointerLength;
-
-          if (C !== dataWordLength) throw new Error(format(E.PTR_WRONG_STRUCT_DATA_SIZE, this, dataWordLength));
-
-          if (D !== pointerLength) throw new Error(format(E.PTR_WRONG_STRUCT_PTR_SIZE, this, pointerLength));
-
-          break;
-
-        case PointerType.LIST:
-
-          const actualSize = this._getTargetCompositeListSize();
-
-          if (actualSize.dataByteLength !== objectSize.dataByteLength) {
-
-            throw new Error(format(E.PTR_WRONG_COMPOSITE_DATA_SIZE, this, actualSize.dataByteLength));
-
-          }
-
-          if (actualSize.pointerLength !== objectSize.pointerLength) {
-
-            throw new Error(format(E.PTR_WRONG_COMPOSITE_PTR_SIZE, this, actualSize.pointerLength));
-
-          }
-
-          break;
-
-        default:
-
-          throw new Error(E.PTR_INVALID_POINTER_TYPE);
-
-      }
 
     }
 
