@@ -32,6 +32,7 @@
   "license": "MIT",
   "main": "lib/index",
   "name": "capnpc-ts",
+  "preferGlobal": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
