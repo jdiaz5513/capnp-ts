@@ -435,20 +435,26 @@ export class Pointer {
 
   _getContent(): Pointer {
 
+    let p: Pointer;
+
     if (this._isDoubleFar()) {
 
       const landingPad = this._followFar();
       const segmentId = landingPad._getFarSegmentId();
 
-      return new Pointer(this.segment.message.getSegment(segmentId), landingPad._getOffsetWords() * 8);
+      p = new Pointer(this.segment.message.getSegment(segmentId), landingPad._getOffsetWords() * 8);
+
+    } else {
+
+      const target = this._followFars();
+      
+      p = new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
 
     }
 
-    const target = this._followFars();
-
-    const p = new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
-
-    if (target._getPointerType() === PointerType.LIST && target._getListElementSize() === ListElementSize.COMPOSITE) {
+    if (
+      this._getTargetPointerType() === PointerType.LIST &&
+      this._getTargetListElementSize() === ListElementSize.COMPOSITE) {
 
       p.byteOffset += 8;
 
