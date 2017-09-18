@@ -31,8 +31,6 @@ tap.test('schema upgrade with legacy data', (t) => {
   v1ListChild.setLegacyId(0x9999);
   v1ListChild.setLegacyName('hihihi');
 
-  console.log(m.dump());
-
   const u2 = m.getRoot(UpgradeV2);
 
   t.comment('should null out the self-reference pointers');
@@ -69,15 +67,11 @@ tap.test('schema upgrade with legacy data', (t) => {
   t.equal(v2Child.getLegacyId(), 0x6666, 'should preserve the child\'s legacy id');
   t.equal(v2Child.getLegacyName(), 'hihi', 'should preserve the child\'s legacy name');
 
-  console.log(m.dump());
   // Make sure that composite lists get resized too.
   const v2ListChild = u2.getSelfReferences().get(0);
 
   t.doesNotThrow(() => {
 
-    console.log(m.dump());
-    console.log(v2ListChild.toString());
-    console.log((v2ListChild as any)._getSize().toString());
     v2ListChild.setNewHotnessId(0xAAAA);
     v2ListChild.setNewHotnessName('HIHIHI');
 
@@ -86,8 +80,6 @@ tap.test('schema upgrade with legacy data', (t) => {
   t.comment('should preserve composite list data');
   t.equal(v2ListChild.getLegacyId(), 0x9999, 'should preserve composite list data');
   t.equal(v2ListChild.getLegacyName(), 'hihihi', 'should preserve composite list data');
-
-  console.log(m.dump());
 
   t.end();
 
