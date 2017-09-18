@@ -231,7 +231,20 @@ export class Message {
 
     const root = new RootStruct(this.getSegment(0), 0);
 
-    root._validate(PointerType.STRUCT, undefined, RootStruct._size);
+    root._validate(PointerType.STRUCT);
+
+    const ts = root._getTargetStructSize();
+
+    // Make sure the underlying pointer is actually big enough to hold the data and pointers as specified in the schema.
+    // If not a shallow copy of the struct contents needs to be made before returning.
+
+    if (ts.dataByteLength < RootStruct._size.dataByteLength || ts.pointerLength < RootStruct._size.pointerLength) {
+
+      trace('need to resize root struct %s', root);
+
+      root._resize(RootStruct._size);
+
+    }
 
     return root;
 
