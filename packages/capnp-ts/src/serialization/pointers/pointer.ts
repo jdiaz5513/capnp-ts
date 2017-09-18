@@ -767,6 +767,35 @@ export class Pointer {
   }
 
   /**
+   * Relocate this pointer to the given destination, ensuring that it points to the same content. This will create far
+   * pointers as needed if the content is in a different segment than the destination. After the relocation this pointer
+   * will be erased and is no longer valid.
+   *
+   * @param {Pointer} dst The desired location for this pointer.
+   * @returns {void}
+   */
+
+  _relocateTo(dst: Pointer): void {
+
+    const target = this._followFars();
+    const lo = target.segment.getUint8(target.byteOffset) & 0x03;   // discard the offset
+    const hi = target.segment.getUint32(target.byteOffset + 4);
+
+    // Make sure anything dst was pointing to is wiped out.
+    dst._erase();
+
+    const res = dst._initPointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
+
+    // Keep the low 2 bits and write the new offset.
+    res.pointer.segment.setUint32(res.pointer.byteOffset, lo | (res.offsetWords << 2));
+    // Keep the high 32 bits intact.
+    res.pointer.segment.setUint32(res.pointer.byteOffset + 4, hi);
+
+    this._erasePointer();
+
+  }
+
+  /**
    * Write a far pointer to this location.
    *
    * @internal
