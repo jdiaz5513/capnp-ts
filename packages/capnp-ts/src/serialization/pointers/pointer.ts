@@ -435,20 +435,26 @@ export class Pointer {
 
   _getContent(): Pointer {
 
+    let p: Pointer;
+
     if (this._isDoubleFar()) {
 
       const landingPad = this._followFar();
       const segmentId = landingPad._getFarSegmentId();
 
-      return new Pointer(this.segment.message.getSegment(segmentId), landingPad._getOffsetWords() * 8);
+      p = new Pointer(this.segment.message.getSegment(segmentId), landingPad._getOffsetWords() * 8);
+
+    } else {
+
+      const target = this._followFars();
+      
+      p = new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
 
     }
 
-    const target = this._followFars();
-
-    const p = new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
-
-    if (target._getPointerType() === PointerType.LIST && target._getListElementSize() === ListElementSize.COMPOSITE) {
+    if (
+      this._getTargetPointerType() === PointerType.LIST &&
+      this._getTargetListElementSize() === ListElementSize.COMPOSITE) {
 
       p.byteOffset += 8;
 
@@ -761,6 +767,35 @@ export class Pointer {
   }
 
   /**
+   * Relocate this pointer to the given destination, ensuring that it points to the same content. This will create far
+   * pointers as needed if the content is in a different segment than the destination. After the relocation this pointer
+   * will be erased and is no longer valid.
+   *
+   * @param {Pointer} dst The desired location for this pointer.
+   * @returns {void}
+   */
+
+  _relocateTo(dst: Pointer): void {
+
+    const target = this._followFars();
+    const lo = target.segment.getUint8(target.byteOffset) & 0x03;   // discard the offset
+    const hi = target.segment.getUint32(target.byteOffset + 4);
+
+    // Make sure anything dst was pointing to is wiped out.
+    dst._erase();
+
+    const res = dst._initPointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
+
+    // Keep the low 2 bits and write the new offset.
+    res.pointer.segment.setUint32(res.pointer.byteOffset, lo | (res.offsetWords << 2));
+    // Keep the high 32 bits intact.
+    res.pointer.segment.setUint32(res.pointer.byteOffset + 4, hi);
+
+    this._erasePointer();
+
+  }
+
+  /**
    * Write a far pointer to this location.
    *
    * @internal
@@ -854,18 +889,16 @@ export class Pointer {
   }
 
   /**
-   * Read some bits off a list pointer to make sure it has the right pointer data.
+   * Read some bits off a pointer to make sure it has the right pointer data.
    *
    * @internal
    * @param {PointerType} pointerType The expected pointer type.
    * @param {ListElementSize} [elementSize] For list pointers, the expected element size. Leave this
    * undefined for struct pointers.
-   * @param {ObjectSize} [objectSize] For structs this is the expected size of the struct. For composite lists this is
-   * the expected size of each struct in the list.
    * @returns {void}
    */
 
-  _validate(pointerType: PointerType, elementSize?: ListElementSize, objectSize?: ObjectSize): void {
+  _validate(pointerType: PointerType, elementSize?: ListElementSize): void {
 
     if (this._isNull()) return;
 
@@ -884,54 +917,6 @@ export class Pointer {
       const C = p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
 
       if (C !== elementSize) throw new Error(format(E.PTR_WRONG_LIST_TYPE, this, ListElementSize[elementSize]));
-
-    }
-
-    // Check the object size, if provided.
-
-    if (objectSize !== undefined) {
-
-      objectSize = objectSize.padToWord();
-
-      switch (pointerType) {
-
-        case PointerType.STRUCT:
-
-          const C = p.segment.getUint16(p.byteOffset + 4);
-          const D = p.segment.getUint16(p.byteOffset + 6);
-
-          const dataWordLength = objectSize.getDataWordLength();
-          const pointerLength = objectSize.pointerLength;
-
-          if (C !== dataWordLength) throw new Error(format(E.PTR_WRONG_STRUCT_DATA_SIZE, this, dataWordLength));
-
-          if (D !== pointerLength) throw new Error(format(E.PTR_WRONG_STRUCT_PTR_SIZE, this, pointerLength));
-
-          break;
-
-        case PointerType.LIST:
-
-          const actualSize = this._getTargetCompositeListSize();
-
-          if (actualSize.dataByteLength !== objectSize.dataByteLength) {
-
-            throw new Error(format(E.PTR_WRONG_COMPOSITE_DATA_SIZE, this, actualSize.dataByteLength));
-
-          }
-
-          if (actualSize.pointerLength !== objectSize.pointerLength) {
-
-            throw new Error(format(E.PTR_WRONG_COMPOSITE_PTR_SIZE, this, actualSize.pointerLength));
-
-          }
-
-          break;
-
-        default:
-
-          throw new Error(E.PTR_INVALID_POINTER_TYPE);
-
-      }
 
     }
 
