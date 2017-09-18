@@ -130,6 +130,71 @@ export class Struct extends Pointer {
 
   }
 
+  /**
+   * Make a shallow copy of this struct's contents and update the pointer to point to the new content. The data and
+   * pointer sections will be resized to the provided size.
+   *
+   * WARNING: This method can cause data loss if `dstSize` is smaller than the original size!
+   *
+   * @param {ObjectSize} dstSize The desired size for the struct contents.
+   * @returns {void}
+   */
+
+  _resize(dstSize: ObjectSize): void {
+
+    const srcSize = this._getSize();
+    const srcContent = this._getContent();
+    const dstContent = this.segment.allocate(dstSize.getByteLength());
+
+    // Only copy the data section for now. The pointer section will need to be rewritten.
+    dstContent.segment.copyWords(
+      dstContent.byteOffset, srcContent.segment, srcContent.byteOffset,
+      Math.min(srcSize.getDataWordLength(), dstSize.getDataWordLength()));
+
+    const res = this._initPointer(dstContent.segment, dstContent.byteOffset);
+
+    res.pointer._setStructPointer(res.offsetWords, dstSize);
+
+    // Iterate through the new pointer section and update the offsets so they point to the right place. This is a bit
+    // more complicated than it appears due to the fact that the original pointers could have been far pointers, and
+    // the new pointers might need to be allocated as far pointers if the segment is full.
+
+    for (let i = 0; i < Math.min(srcSize.pointerLength, dstSize.pointerLength); i++) {
+
+      const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + srcSize.dataByteLength + i * 8);
+      const srcPtrTarget = srcPtr._followFars();
+      const srcPtrContent = srcPtr._getContent();
+      const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + dstSize.dataByteLength + i * 8);
+
+      // For composite lists the offset needs to point to the tag word, not the first element which is what getContent
+      // returns.
+
+      if (
+        srcPtr._getTargetPointerType() === PointerType.LIST &&
+        srcPtr._getTargetListElementSize() === ListElementSize.COMPOSITE) {
+
+        srcPtrContent.byteOffset -= 8;
+
+      }
+
+      const r = dstPtr._initPointer(srcPtrContent.segment, srcPtrContent.byteOffset);
+
+      // Read the old pointer data, but discard the original offset.
+
+      const a = srcPtrTarget.segment.getUint8(srcPtrTarget.byteOffset) & 0x03;
+      const b = srcPtrTarget.segment.getUint32(srcPtrTarget.byteOffset + 4);
+
+      r.pointer.segment.setUint32(r.pointer.byteOffset, a | (r.offsetWords << 2));
+      r.pointer.segment.setUint32(r.pointer.byteOffset + 4, b);
+
+    }
+
+    // Zero out the old data and pointer sections.
+
+    srcContent.segment.fillZeroWords(srcContent.byteOffset, srcSize.getWordLength());
+
+  }
+
   toString() {
 
     return `Struct_${super.toString()}${this._compositeIndex === undefined ? '' : `,ci:${this._compositeIndex}`}`;
@@ -373,6 +438,86 @@ export class Struct extends Pointer {
 
       l._initList(ListClass._size, 0, ListClass._compositeSize);
 
+    } else if (ListClass._compositeSize !== undefined) {
+
+      // If this is a composite list we need to be sure the composite elements are big enough to hold everything as
+      // specified in the schema. If the new schema has added fields we'll need to "resize" (shallow-copy) the list so
+      // it has room for the new fields.
+
+      const srcSize = l._getTargetCompositeListSize();
+      const dstSize = ListClass._compositeSize;
+
+      if (dstSize.dataByteLength > srcSize.dataByteLength || dstSize.pointerLength > srcSize.pointerLength) {
+
+        const srcContent = l._getContent();
+        const srcLength = l._getTargetListLength();
+
+        trace(
+          'resizing composite list %s due to protocol upgrade, new size: %d', l, dstSize.getByteLength() * srcLength);
+
+        // Allocate an extra 8 bytes for the tag.
+        const dstContent = l.segment.allocate(dstSize.getByteLength() * srcLength + 8);
+
+        const res = l._initPointer(dstContent.segment, dstContent.byteOffset);
+
+        res.pointer._setListPointer(res.offsetWords, ListClass._size, srcLength, dstSize);
+
+        // Write the new tag word.
+
+        dstContent._setStructPointer(srcLength, dstSize);
+
+        // Seek ahead past the tag word before copying the content.
+        dstContent.byteOffset += 8;
+
+        for (let i = 0; i < srcLength; i++) {
+
+          const srcElementOffset = srcContent.byteOffset + i * srcSize.getByteLength();
+          const dstElementOffset = dstContent.byteOffset + i * dstSize.getByteLength();
+
+          // Copy the data section.
+
+          dstContent.segment.copyWords(dstElementOffset, srcContent.segment, srcElementOffset, srcSize.getWordLength());
+
+          // Iterate through the pointers and update the offsets so they point to the right place.
+
+          for (let j = 0; j < srcSize.pointerLength; j++) {
+
+            const srcPtr = new Pointer(
+              srcContent.segment, srcElementOffset + srcSize.dataByteLength + j * 8);
+            const dstPtr = new Pointer(
+              dstContent.segment, dstElementOffset + dstSize.dataByteLength + j * 8);
+
+            const srcPtrTarget = srcPtr._followFars();
+            const srcPtrContent = srcPtr._getContent();
+
+            if (
+              srcPtr._getTargetPointerType() === PointerType.LIST &&
+              srcPtr._getTargetListElementSize() === ListElementSize.COMPOSITE) {
+
+              srcPtrContent.byteOffset -= 8;
+
+            }
+
+            const r = dstPtr._initPointer(srcPtrContent.segment, srcPtrContent.byteOffset);
+
+            // Read the old pointer data, but discard the original offset.
+
+            const a = srcPtrTarget.segment.getUint8(srcPtrTarget.byteOffset) & 0x03;
+            const b = srcPtrTarget.segment.getUint32(srcPtrTarget.byteOffset + 4);
+
+            r.pointer.segment.setUint32(r.pointer.byteOffset, a | (r.offsetWords << 2));
+            r.pointer.segment.setUint32(r.pointer.byteOffset + 4, b);
+
+          }
+
+        }
+
+        // Zero out the old content.
+
+        srcContent.segment.fillZeroWords(srcContent.byteOffset, srcSize.getWordLength() * srcLength);
+
+      }
+
     }
 
     return l;
@@ -441,7 +586,21 @@ export class Struct extends Pointer {
 
     } else {
 
-      s._validate(PointerType.STRUCT, undefined, StructClass._size);
+      s._validate(PointerType.STRUCT);
+
+      const ts = s._getTargetStructSize();
+
+      // This can happen when reading a struct that was constructed with an older version of the same schema, and new
+      // fields were added to the struct. A shallow copy of the struct will be made so that there's enough room for the
+      // data and pointer sections. This will unfortunately leave a "hole" of zeroes in the message, but that hole will
+      // at least compress well.
+      if (ts.dataByteLength < StructClass._size.dataByteLength || ts.pointerLength < StructClass._size.pointerLength) {
+
+        trace('need to resize child struct %s', s);
+
+        s._resize(StructClass._size);
+
+      }
 
     }
 
