@@ -144,15 +144,17 @@ export function loadRequestedFile(
   trace('compile(%s, %s)', req, file);
 
   const ctx = new CodeGeneratorFileContext();
-  const filename = file.getFilename();
 
   ctx.req = req;
   ctx.file = file;
   ctx.nodes = req.getNodes().toArray();
-  ctx.tsPath = filename + '.ts';
-  ctx.sourceFile = ts.createSourceFile(ctx.tsPath, '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
   ctx.concreteLists = [];
   ctx.generatedNodeIds = [];
+
+  const schema = lookupNode(ctx, file.getId());
+
+  ctx.tsPath = schema.getDisplayName() + '.ts';
+  ctx.sourceFile = ts.createSourceFile(ctx.tsPath, '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
 
   return ctx;
 
