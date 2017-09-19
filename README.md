@@ -29,6 +29,8 @@ This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) 
 - [Project Status](#project-status)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Compiling Schema Files](#compiling-schema-files)
+  - [Reading ]
   - [Usage with JavaScript](#usage-with-javascript)
   - [Usage in a Web Browser](#usage-in-a-web-browser)
 - [Building](#building)
@@ -72,7 +74,7 @@ Grab the latest library version from npm:
 npm install --save capnp-ts
 ```
 
-You may want the schema compiler as well (can also be installed locally):
+You will need the schema compiler as well (global installation recommended):
 
 ```shell
 npm install -g capnpc-ts # For TypeScript
@@ -84,20 +86,31 @@ The schema compiler is a [Cap'n Proto plugin](https://capnproto.org/otherlang.ht
 
 ## Usage
 
+### Compiling Schema Files
+
 Run the following to compile a schema file into TypeScript source code:
 
 ```shell
-capnpc -ots path/to/myschema.capnp
+capnpc -o ts path/to/myschema.capnp
 ```
 
 Or for JavaScript:
 ```shell
-capnpc -ojs path/to/myschema.capnp
+capnpc -o js path/to/myschema.capnp
 ```
 
 Running that command will create a file named `path/to/myschema.capnp.ts` (or `.js`).
 
-> This assumes `capnpc-ts` was installed globally and is available from `$PATH`. If not, change the `-o` option to something like `-onode_modules/.bin/capnpc-ts` so it points to your local `capnpc-ts` install.
+> These instructions assume `capnpc-ts` was installed globally and is available from `$PATH`. If not, change the `-o` option to something like `-o node_modules/.bin/capnpc-ts` or `-o capnp-ts/packages/capnpc-ts/bin/capnpc-ts.js` so it points to your local `capnpc-ts` install.
+
+To write the compiled source to a different directory:
+```shell
+capnpc -o ts:/tmp/some-dir/ path/to/myschema.capnp
+```
+
+That will generate a file at `/tmp/some-dir/path/to/myschema.capnp.ts`.
+
+### Reading Messages
 
 To read a message, do something like the following:
 
@@ -117,6 +130,10 @@ export function loadMessage(buffer: ArrayBuffer): MyStruct {
 
 ### Usage with JavaScript
 
+JavaScript usage is nearly identical to the TypeScript version, except you won't get all of the type safety and code completion goodness in your editor.
+
+Also, the name `capnp-js` is already reserved on npm from a [previous attempt](https://www.npmjs.com/package/capnp-js) so you'll be importing the exact same module.
+
 ```javascript
 const capnp = require('capnp-ts');
 
@@ -130,6 +147,8 @@ function loadMessage(buffer) {
 
 }
 ```
+
+A larger example is located in the js-examples directory.
 
 ### Usage in a Web Browser
 
