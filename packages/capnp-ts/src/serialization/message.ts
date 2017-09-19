@@ -393,7 +393,32 @@ export class Message {
 
   toPackedArrayBuffer(): ArrayBuffer {
 
-    return pack(this.toArrayBuffer());
+    const streamFrame = pack(this._getStreamFrame());
+
+    // Make sure the first segment is allocated.
+
+    if (this._segments.length === 0) this.getSegment(0);
+
+    // NOTE: A copy operation can be avoided here if we capture the intermediate array and use that directly in the copy
+    // loop below, rather than have `pack()` copy it to an ArrayBuffer just to have to copy it again later. If the
+    // intermediate array can be avoided altogether that's even better!
+    const segments = this._segments.map((s) => pack(s.buffer, 0, padToWord(s.byteLength)));
+
+    const totalLength = streamFrame.byteLength + segments.reduce((l, s) => l + s.byteLength, 0);
+    const out = new Uint8Array(new ArrayBuffer(totalLength));
+    let o = streamFrame.byteLength;
+
+    out.set(new Uint8Array(streamFrame));
+
+    segments.forEach((s) => {
+
+      out.set(new Uint8Array(s), o);
+
+      o += s.byteLength;
+
+    });
+
+    return out.buffer;
 
   }
 
