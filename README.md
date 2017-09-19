@@ -30,7 +30,7 @@ This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) 
 - [Installation](#installation)
 - [Usage](#usage)
   - [Compiling Schema Files](#compiling-schema-files)
-  - [Reading ]
+  - [Reading Messages](#reading-messages)
   - [Usage with JavaScript](#usage-with-javascript)
   - [Usage in a Web Browser](#usage-in-a-web-browser)
 - [Building](#building)
