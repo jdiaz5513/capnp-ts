@@ -23,14 +23,15 @@
 
 This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) serialization protocol. Start with the [Cap'n Proto Introduction](https://capnproto.org/index.html) for more detailed information on what this is about.
 
-> WARNING: THIS IS PRE-ALPHA SOFTWARE. USE AT YOUR OWN RISK. AUTHORS ARE NOT RESPONSIBLE FOR LOSS OF LIMB, LIFE, SANITY, OR RETIREMENT FUNDS DUE TO USE OF THIS SOFTWARE.
+> WARNING: THIS IS ALPHA QUALITY SOFTWARE. USE AT YOUR OWN RISK. AUTHORS ARE NOT RESPONSIBLE FOR LOSS OF LIMB, LIFE, SANITY, OR RETIREMENT FUNDS DUE TO USE OF THIS SOFTWARE.
 
 - [Packages](#packages)
 - [Project Status](#project-status)
 - [Installation](#installation)
+- [Implementation Notes](#implementation-notes)
 - [Usage](#usage)
   - [Compiling Schema Files](#compiling-schema-files)
-  - [Reading ]
+  - [Reading Messages](#reading-messages)
   - [Usage with JavaScript](#usage-with-javascript)
   - [Usage in a Web Browser](#usage-in-a-web-browser)
 - [Building](#building)
@@ -55,12 +56,12 @@ This repository is managed as a monorepo composed of separate packages.
 
 ## Project Status
 
-This project is under active **pre-alpha** development.
+This project is under active **alpha** stage development.
 
 > Until version `1.x.x` lands expect that the top level API **will** change.
 
-- Serialization: **mostly implemented**
-- Schema Compiler: **partially implemented**
+- Serialization: **working, may be missing features**
+- Schema Compiler: **working, may be missing features**
 - [RPC Level 1](https://capnproto.org/rpc.html#protocol-features): **not implemented**
 - [RPC Level 2](https://capnproto.org/rpc.html#protocol-features): **not implemented**
 - [RPC Level 3](https://capnproto.org/rpc.html#protocol-features): **not implemented**
@@ -83,6 +84,14 @@ npm install -g capnpc-js # For JavaScript
 ```
 
 The schema compiler is a [Cap'n Proto plugin](https://capnproto.org/otherlang.html#how-to-write-compiler-plugins) and requires the `capnpc` binary in order to do anything useful; follow the [Cap'n Proto installation instructions](https://capnproto.org/install.html) to install it on your system.
+
+## Implementation Notes
+
+> These notes are provided for people who are familiar with the C++ implementation, or implementations for other languages. Those who are new to Cap'n Proto may skip this section.
+
+This implementation differs in a big way from the C++ reference implementation: there are no separate Builder or Reader classes. All pointers are essentially treated as Builders.
+
+This has some major benefits for simplicity's sake, but there is a bigger reason for this decision (which was not made lightly). Everything is backed by `ArrayBuffer`s and there is no practical way to prevent mutating the data, even in a dedicated Reader class. The result of such mutations could be disastrous, and more importantly there is no way to reap much performance from making things read-only.
 
 ## Usage
 
@@ -132,7 +141,7 @@ export function loadMessage(buffer: ArrayBuffer): MyStruct {
 
 JavaScript usage is nearly identical to the TypeScript version, except you won't get all of the type safety and code completion goodness in your editor.
 
-Also, the name `capnp-js` is already reserved on npm from a [previous attempt](https://www.npmjs.com/package/capnp-js) so you'll be importing the exact same module.
+Also, the name `capnp-js` is already reserved on npm from a [previous attempt by another author](https://www.npmjs.com/package/capnp-js) so you'll be importing `capnp-ts` instead.
 
 ```javascript
 const capnp = require('capnp-ts');
