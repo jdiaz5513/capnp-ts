@@ -1,6 +1,8 @@
 import * as s from 'capnp-ts/lib/std/schema.capnp';
 import initTrace from 'debug';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as mkdirp from 'mkdirp';
 import * as ts from 'typescript';
 
 import {CodeGeneratorContext} from './code-generator-context';
@@ -58,6 +60,8 @@ export function writeTsFiles(ctx: CodeGeneratorContext): void {
   ctx.files.forEach((f) => {
 
     trace('writing %s', f.tsPath);
+
+    mkdirp.sync(path.dirname(f.tsPath));
 
     fs.writeFileSync(f.tsPath, compile(f), {encoding: 'utf-8'});
 
