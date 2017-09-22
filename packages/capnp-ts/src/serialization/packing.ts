@@ -181,14 +181,16 @@ export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f:
  *
  * @export
  * @param {ArrayBuffer} unpacked The message to pack.
+ * @param {number} [byteOffset] Starting byte offset to read bytes from, defaults to 0.
+ * @param {number} [byteLength] Total number of bytes to read, defaults to the remainder of the buffer contents.
  * @returns {ArrayBuffer} A packed version of the message.
  */
 
-export function pack(unpacked: ArrayBuffer): ArrayBuffer {
+export function pack(unpacked: ArrayBuffer, byteOffset?: number, byteLength?: number): ArrayBuffer {
 
   if (unpacked.byteLength % 8 !== 0) throw new Error(MSG_PACK_NOT_WORD_ALIGNED);
 
-  const src = new Uint8Array(unpacked);
+  const src = new Uint8Array(unpacked, byteOffset, byteLength);
 
   // TODO: Maybe we should do this with buffers? This costs more than 8x the final compressed size in temporary RAM.
 
