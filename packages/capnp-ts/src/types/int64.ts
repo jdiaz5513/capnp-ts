@@ -153,7 +153,7 @@ export class Int64 extends Uint64 {
   toHexString(): string {
 
     const b = this.buffer;
-    const negate = b[0] & 0x80;
+    const negate = b[7] & 0x80;
 
     if (negate) this.negate();
 
@@ -194,7 +194,7 @@ export class Int64 extends Uint64 {
   toNumber(allowImprecise?: boolean) {
 
     const b = this.buffer;
-    const negate = b[0] & 0x80;
+    const negate = b[7] & 0x80;
 
     let x = 0;
     let carry = 1;
