@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "capnp-ts": "^0.1.4",
+    "capnp-ts": "^0.1.5",
     "hex2dec": "^1.0.1",
     "mkdirp": "^0.5.1",
     "ramda": "^0.24.1",
@@ -40,5 +40,5 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "typings": "lib/index",
-  "version": "0.1.4"
+  "version": "0.1.5"
 }
