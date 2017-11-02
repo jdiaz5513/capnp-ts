@@ -408,6 +408,10 @@ export class Segment implements DataView {
     this._dv.setUint8(byteOffset + 1, val.buffer[1]);
     this._dv.setUint8(byteOffset + 2, val.buffer[2]);
     this._dv.setUint8(byteOffset + 3, val.buffer[3]);
+    this._dv.setUint8(byteOffset + 4, val.buffer[4]);
+    this._dv.setUint8(byteOffset + 5, val.buffer[5]);
+    this._dv.setUint8(byteOffset + 6, val.buffer[6]);
+    this._dv.setUint8(byteOffset + 7, val.buffer[7]);
 
   }
 
@@ -454,6 +458,10 @@ export class Segment implements DataView {
     this._dv.setUint8(byteOffset + 1, val.buffer[1]);
     this._dv.setUint8(byteOffset + 2, val.buffer[2]);
     this._dv.setUint8(byteOffset + 3, val.buffer[3]);
+    this._dv.setUint8(byteOffset + 4, val.buffer[4]);
+    this._dv.setUint8(byteOffset + 5, val.buffer[5]);
+    this._dv.setUint8(byteOffset + 6, val.buffer[6]);
+    this._dv.setUint8(byteOffset + 7, val.buffer[7]);
 
   }
 
