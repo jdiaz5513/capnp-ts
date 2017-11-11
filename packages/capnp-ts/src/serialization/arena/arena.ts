@@ -10,7 +10,7 @@ import { ArenaAllocationResult } from './arena-allocation-result';
 const trace = initTrace('capnp:arena');
 trace('load');
 
-export abstract class Arena {
+export interface Arena {
 
   /**
    * Allocate at least `minSize` bytes of new memory. The arena implementation may choose to either create a new buffer
@@ -26,7 +26,7 @@ export abstract class Arena {
    * @returns {number} The ID of the newly allocated segment; possibly the ID of an existing segment.
    */
 
-  abstract allocate(minSize: number, segments: Segment[]): ArenaAllocationResult;
+  allocate(minSize: number, segments: Segment[]): ArenaAllocationResult;
 
   /**
    * Get the buffer for a segment with the given ID.
@@ -36,7 +36,7 @@ export abstract class Arena {
    * @returns {ArrayBuffer} The underlying buffer for the segment.
    */
 
-  abstract getBuffer(id: number): ArrayBuffer;
+  getBuffer(id: number): ArrayBuffer;
 
   /**
    * Get the total number of segment buffers that have been allocated in this arena.
@@ -45,6 +45,6 @@ export abstract class Arena {
    * @returns {number} The total number of segments.
    */
 
-  abstract getNumSegments(): number;
+  getNumSegments(): number;
 
 }

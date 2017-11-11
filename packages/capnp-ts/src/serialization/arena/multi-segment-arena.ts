@@ -14,13 +14,11 @@ import { ArenaAllocationResult } from './arena-allocation-result';
 const trace = initTrace('capnp:arena:multi');
 trace('load');
 
-export class MultiSegmentArena extends Arena {
+export class MultiSegmentArena implements Arena {
 
   private readonly _buffers: ArrayBuffer[];
 
   constructor(buffers: ArrayBuffer[] = []) {
-
-    super();
 
     this._buffers = buffers;
 

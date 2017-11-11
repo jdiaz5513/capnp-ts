@@ -14,13 +14,11 @@ import { ArenaAllocationResult } from './arena-allocation-result';
 const trace = initTrace('capnp:arena:single');
 trace('load');
 
-export class SingleSegmentArena extends Arena {
+export class SingleSegmentArena implements Arena {
 
   private _buffer: ArrayBuffer;
 
   constructor(buffer = new ArrayBuffer(DEFAULT_BUFFER_SIZE)) {
-
-    super();
 
     if ((buffer.byteLength & 7) !== 0) throw new Error(format(SEG_NOT_WORD_ALIGNED, buffer.byteLength));
 
