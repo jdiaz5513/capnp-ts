@@ -4,12 +4,12 @@
 
 import initTrace from 'debug';
 
-import {DEFAULT_BUFFER_SIZE, MIN_SINGLE_SEGMENT_GROWTH} from '../../constants';
-import {SEG_GET_NON_ZERO_SINGLE, SEG_NOT_WORD_ALIGNED} from '../../errors';
-import {format, padToWord} from '../../util';
-import {Segment} from '../segment';
-import {Arena} from './arena';
-import {ArenaAllocationResult} from './arena-allocation-result';
+import { DEFAULT_BUFFER_SIZE, MIN_SINGLE_SEGMENT_GROWTH } from '../../constants';
+import { SEG_GET_NON_ZERO_SINGLE, SEG_NOT_WORD_ALIGNED } from '../../errors';
+import { format, padToWord } from '../../util';
+import { Segment } from '../segment';
+import { Arena } from './arena';
+import { ArenaAllocationResult } from './arena-allocation-result';
 
 const trace = initTrace('capnp:arena:single');
 trace('load');
