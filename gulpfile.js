@@ -40,7 +40,7 @@ gulp.task('build', ['build:capnp-ts', 'build:capnpc-ts', 'build:capnpc-js']);
 
 function test(coverage) {
   return gutil.buffer(function (err, files) {
-    var options = ['-J'];
+    var options = ['-J', '-R', 'spec'];
     if (coverage) {
       options.push('--cov', '--nyc-arg=-x=**/lib-test/**/*');
     }
