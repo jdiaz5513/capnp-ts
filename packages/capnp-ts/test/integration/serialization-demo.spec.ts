@@ -3,8 +3,8 @@
  */
 
 import * as capnp from '../../lib';
-import {compareBuffers, readFileBuffer, tap} from '../util';
-import {AddressBook, Person} from './serialization-demo';
+import { compareBuffers, readFileBuffer, tap } from '../util';
+import { AddressBook, Person } from './serialization-demo';
 
 const SERIALIZATION_DEMO = readFileBuffer('test/data/serialization-demo.bin');
 
@@ -17,7 +17,7 @@ tap.test('write address book', (t) => {
 
   const people = addressBook.initPeople(2);
 
-  t.type(people, AddressBook._People);
+  t.type(people, AddressBook.People);
 
   const alice = people.get(0);
 
@@ -31,7 +31,7 @@ tap.test('write address book', (t) => {
 
   const alicePhones = alice.initPhones(1);
 
-  t.type(alicePhones, Person._Phones);
+  t.type(alicePhones, Person.Phones);
 
   alicePhones.get(0).setNumber('555-1212');
   alicePhones.get(0).setType(Person.PhoneNumber.Type.MOBILE);
@@ -54,7 +54,7 @@ tap.test('write address book', (t) => {
 
   const bobPhones = bob.initPhones(2);
 
-  t.type(bobPhones, Person._Phones);
+  t.type(bobPhones, Person.Phones);
 
   bobPhones.get(0).setNumber('555-4567');
   bobPhones.get(0).setType(Person.PhoneNumber.Type.HOME);

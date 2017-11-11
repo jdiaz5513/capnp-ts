@@ -1,6 +1,6 @@
-import {Message, Pointer} from '../../../../lib';
+import { Message, Pointer } from '../../../../lib';
 import * as C from '../../../../lib/constants';
-import {tap} from '../../../util';
+import { tap } from '../../../util';
 
 /* tslint:disable no-any */
 
@@ -41,7 +41,7 @@ tap.test('new Pointer()', (t) => {
 
   t.equal(p.segment, s);
   t.equal(p.byteOffset, 4);
-  t.equal((p as any)._depthLimit, C.MAX_DEPTH);
+  t.equal(p._capnp.depthLimit, C.MAX_DEPTH);
 
   t.end();
 

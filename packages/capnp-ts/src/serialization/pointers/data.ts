@@ -4,10 +4,10 @@
 
 import initTrace from 'debug';
 
-import {ListElementSize} from '../list-element-size';
-import {List} from './list';
-import {Pointer} from './pointer';
-import {PointerType} from './pointer-type';
+import { ListElementSize } from '../list-element-size';
+import { List } from './list';
+import { Pointer } from './pointer';
+import { PointerType } from './pointer-type';
 
 const trace = initTrace('capnp:data');
 trace('load');
@@ -33,7 +33,7 @@ export class Data extends List<number> {
 
   protected static _fromPointerUnchecked(pointer: Pointer): Data {
 
-    return new this(pointer.segment, pointer.byteOffset, pointer._depthLimit);
+    return new this(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
 
   }
 

@@ -4,12 +4,12 @@
 
 import initTrace from 'debug';
 
-import {DEFAULT_BUFFER_SIZE} from '../../constants';
-import {SEG_ID_OUT_OF_BOUNDS} from '../../errors';
-import {format, padToWord} from '../../util';
-import {Segment} from '../segment';
-import {Arena} from './arena';
-import {ArenaAllocationResult} from './arena-allocation-result';
+import { DEFAULT_BUFFER_SIZE } from '../../constants';
+import { SEG_ID_OUT_OF_BOUNDS } from '../../errors';
+import { format, padToWord } from '../../util';
+import { Segment } from '../segment';
+import { Arena } from './arena';
+import { ArenaAllocationResult } from './arena-allocation-result';
 
 const trace = initTrace('capnp:arena:multi');
 trace('load');

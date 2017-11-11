@@ -5,11 +5,10 @@
 /* tslint:disable */
 
 import * as capnp from "../../lib/index";
+import { ObjectSize } from '../../lib/index';
 export const _id = "b4dbefd56457c333";
 export class ListMania extends capnp.Struct {
-    static readonly _displayName = "ListMania";
-    static readonly _id = "d0a988493b63e78b";
-    static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(0, 16);
+    static readonly _capnp = { displayName: "ListMania", id: "d0a988493b63e78b", size: new ObjectSize(0, 16) };
     static _CompositeList: capnp.ListCtor<ListManiaStruct>;
     adoptBoolList(value: capnp.Orphan<capnp.List<boolean>>): void { this._getPointer(0).adopt(value); }
     disownBoolList(): capnp.Orphan<capnp.List<boolean>> { return this.getBoolList().disown(); }
@@ -110,15 +109,11 @@ export class ListMania extends capnp.Struct {
     toString(): string { return "ListMania_" + super.toString(); }
 }
 export class ListManiaInterface extends capnp.Struct {
-    static readonly _displayName = "ListManiaInterface";
-    static readonly _id = "8a94079c3c57204f";
-    static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(0, 0);
+    static readonly _capnp = { displayName: "ListManiaInterface", id: "8a94079c3c57204f", size: new ObjectSize(0, 0) };
     toString(): string { return "ListManiaInterface_" + super.toString(); }
 }
 export class ListManiaStruct extends capnp.Struct {
-    static readonly _displayName = "ListManiaStruct";
-    static readonly _id = "9e1eb66286605522";
-    static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(0, 1);
+    static readonly _capnp = { displayName: "ListManiaStruct", id: "9e1eb66286605522", size: new ObjectSize(0, 1) };
     adoptSelf(value: capnp.Orphan<ListMania>): void { this._getPointer(0).adopt(value); }
     disownSelf(): capnp.Orphan<ListMania> { return this.getSelf().disown(); }
     getSelf(): ListMania { return this._getStruct(0, ListMania); }

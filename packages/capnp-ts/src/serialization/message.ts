@@ -6,12 +6,12 @@ import initTrace from 'debug';
 
 import * as C from '../constants';
 import * as E from '../errors';
-import {dumpBuffer, format, padToWord} from '../util';
-import {Arena, MultiSegmentArena, SingleSegmentArena} from './arena';
-import {pack, unpack} from './packing';
-import {PointerType, Struct} from './pointers';
-import {StructCtor} from './pointers/struct';
-import {Segment} from './segment';
+import { dumpBuffer, format, padToWord } from '../util';
+import { Arena, MultiSegmentArena, SingleSegmentArena } from './arena';
+import { pack, unpack } from './packing';
+import { PointerType, Struct } from './pointers';
+import { StructCtor } from './pointers/struct';
+import { Segment } from './segment';
 
 const trace = initTrace('capnp:message');
 trace('load');
@@ -207,7 +207,7 @@ export class Message {
 
       r += `================\nSegment #${i}\n================\n`;
 
-      const {buffer, byteLength} = this._segments[i];
+      const { buffer, byteLength } = this._segments[i];
       const b = new Uint8Array(buffer, 0, byteLength);
 
       r += dumpBuffer(b);
@@ -238,11 +238,13 @@ export class Message {
     // Make sure the underlying pointer is actually big enough to hold the data and pointers as specified in the schema.
     // If not a shallow copy of the struct contents needs to be made before returning.
 
-    if (ts.dataByteLength < RootStruct._size.dataByteLength || ts.pointerLength < RootStruct._size.pointerLength) {
+    if (
+      ts.dataByteLength < RootStruct._capnp.size.dataByteLength
+      || ts.pointerLength < RootStruct._capnp.size.pointerLength) {
 
       trace('need to resize root struct %s', root);
 
-      root._resize(RootStruct._size);
+      root._resize(RootStruct._capnp.size);
 
     }
 
@@ -310,7 +312,7 @@ export class Message {
 
     const root = new RootStruct(this.getSegment(0), 0);
 
-    root._initStruct(RootStruct._size);
+    root._initStruct(RootStruct._capnp.size);
 
     trace('Initialized root pointer %s for %s.', root, this);
 

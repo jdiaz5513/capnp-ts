@@ -5,13 +5,6 @@
 import * as s from 'capnp-ts/lib/std/schema.capnp';
 import * as ts from 'typescript';
 
-/**
- * Contains state that's passed around and mutated during the compilation steps.
- *
- * @export
- * @class CodeGeneratorFileContext
- */
-
 export class CodeGeneratorFileContext {
 
   tsPath: string;
@@ -21,6 +14,15 @@ export class CodeGeneratorFileContext {
   nodes: s.Node[];
   req: s.CodeGeneratorRequest;
   sourceFile: ts.SourceFile;
+  namedImports: string[];
+
+  constructor(req: s.CodeGeneratorRequest, file: s.CodeGeneratorRequest_RequestedFile) {
+    this.req = req;
+    this.file = file;
+    this.nodes = req.getNodes().toArray();
+    this.concreteLists = [];
+    this.generatedNodeIds = [];
+  }
 
   toString() {
 

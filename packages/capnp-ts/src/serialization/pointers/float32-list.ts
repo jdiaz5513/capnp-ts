@@ -4,16 +4,18 @@
 
 import initTrace from 'debug';
 
-import {ListElementSize} from '../list-element-size';
-import {List} from './list';
+import { ListElementSize } from '../list-element-size';
+import { _ListCtor, List } from './list';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
 export class Float32List extends List<number> {
 
-  static readonly _displayName: string = 'List<Float32>';
-  static readonly _size = ListElementSize.BYTE_4;
+  static readonly _capnp: _ListCtor = {
+    displayName: 'List<Float32>' as string,
+    size: ListElementSize.BYTE_4,
+  };
 
   get(index: number): number {
 

@@ -4,24 +4,40 @@
 
 import initTrace from 'debug';
 
-import {LIST_SIZE_MASK, MAX_DEPTH, POINTER_DOUBLE_FAR_MASK, POINTER_TYPE_MASK} from '../../constants';
+import { LIST_SIZE_MASK, MAX_DEPTH, POINTER_DOUBLE_FAR_MASK, POINTER_TYPE_MASK } from '../../constants';
 import * as E from '../../errors';
-import {bufferToHex, format, padToWord} from '../../util';
-import {ListElementSize} from '../list-element-size';
-import {ObjectSize} from '../object-size';
-import {Segment} from '../segment';
-import {Orphan} from './orphan';
-import {PointerAllocationResult} from './pointer-allocation-result';
-import {PointerType} from './pointer-type';
+import { bufferToHex, format, padToWord } from '../../util';
+import { ListElementSize } from '../list-element-size';
+import { ObjectSize } from '../object-size';
+import { Segment } from '../segment';
+import { Orphan } from './orphan';
+import { PointerAllocationResult } from './pointer-allocation-result';
+import { PointerType } from './pointer-type';
 
 const trace = initTrace('capnp:pointer');
 trace('load');
 
+export interface _PointerCtor {
+  readonly displayName: string;
+}
+
 export interface PointerCtor<T extends Pointer> {
 
-  readonly _displayName: string;
+  readonly _capnp: _PointerCtor;
 
   new(segment: Segment, byteOffset: number, depthLimit?: number): T;
+
+}
+
+export interface _Pointer {
+
+  compositeList: boolean;
+
+  /**
+   * A number that is decremented as nested pointers are traversed. When this hits zero errors will be thrown.
+   */
+
+  depthLimit: number;
 
 }
 
@@ -35,15 +51,11 @@ export interface PointerCtor<T extends Pointer> {
 
 export class Pointer {
 
-  static readonly _displayName: string = 'Pointer';
+  static readonly _capnp: _PointerCtor = {
+    displayName: 'Pointer' as string,
+  };
 
-  /**
-   * A number that is decremented as nested pointers are traversed. When this hits zero errors will be thrown.
-   *
-   * @internal
-   */
-
-  _depthLimit: number;
+  readonly _capnp: _Pointer;
 
   /** Offset, in bytes, from the start of the segment to the beginning of this pointer. */
 
@@ -75,9 +87,9 @@ export class Pointer {
 
     }
 
+    this._capnp = { compositeList: false, depthLimit };
     this.segment = segment;
     this.byteOffset = byteOffset;
-    this._depthLimit = depthLimit;
 
   }
 
@@ -85,7 +97,6 @@ export class Pointer {
    * Get the total number of bytes required to hold a list of the provided size with the given length, rounded up to the
    * nearest word.
    *
-   * @internal
    * @param {ListElementSize} elementSize A number describing the size of the list elements.
    * @param {number} length The length of the list.
    * @param {ObjectSize} [compositeSize] The size of each element in a composite list; required if
@@ -130,7 +141,6 @@ export class Pointer {
    * Get the number of bytes required to hold a list element of the provided size. `COMPOSITE` elements do not have a
    * fixed size, and `BIT` elements are packed into exactly a single bit, so these both return `NaN`.
    *
-   * @internal
    * @param {ListElementSize} elementSize A number describing the size of the list elements.
    * @returns {number} The number of bytes required to hold an element of that size, or `NaN` if that is undefined.
    */
@@ -185,14 +195,13 @@ export class Pointer {
   /**
    * Add an offset to this pointer's offset and return a new Pointer for that address.
    *
-   * @internal
    * @param {number} offset The number of bytes to add to this pointer's offset.
    * @returns {Pointer} A new pointer to the address.
    */
 
   _add(offset: number): Pointer {
 
-    return new Pointer(this.segment, this.byteOffset + offset, this._depthLimit);
+    return new Pointer(this.segment, this.byteOffset + offset, this._capnp.depthLimit);
 
   }
 
@@ -295,7 +304,7 @@ export class Pointer {
 
           for (let i = 0; i < length; i++) {
 
-            new Pointer(c.segment, c.byteOffset + i * 8, this._depthLimit - 1)._erase();
+            new Pointer(c.segment, c.byteOffset + i * 8, this._capnp.depthLimit - 1)._erase();
 
           }
 
@@ -319,7 +328,9 @@ export class Pointer {
 
             for (let j = 0; j < compositeSize.pointerLength; j++) {
 
-              new Pointer(c.segment, c.byteOffset + i * compositeByteLength + j * 8, this._depthLimit - 1)._erase();
+              new Pointer(
+                c.segment, c.byteOffset + i * compositeByteLength + j * 8, this._capnp.depthLimit - 1)
+                ._erase();
 
             }
 
@@ -350,7 +361,6 @@ export class Pointer {
   /**
    * Set the pointer (and far pointer landing pads, if applicable) to zero. Does not touch the pointer's content.
    *
-   * @internal
    * @returns {void}
    */
 
@@ -383,7 +393,6 @@ export class Pointer {
   /**
    * Interpret the pointer as a far pointer, returning its target segment and offset.
    *
-   * @internal
    * @returns {Pointer} A pointer to the far target.
    */
 
@@ -392,7 +401,7 @@ export class Pointer {
     const targetSegment = this.segment.message.getSegment(this.segment.getUint32(this.byteOffset + 4));
     const targetWordOffset = this.segment.getUint32(this.byteOffset) >>> 3;
 
-    return new Pointer(targetSegment, targetWordOffset * 8, this._depthLimit - 1);
+    return new Pointer(targetSegment, targetWordOffset * 8, this._capnp.depthLimit - 1);
 
   }
 
@@ -400,7 +409,6 @@ export class Pointer {
    * If this address references a far pointer, follow it to the location where the actual pointer data is written.
    * Otherwise, returns this address unmodified.
    *
-   * @internal
    * @returns {Pointer} The location of the actual pointer data.
    */
 
@@ -429,7 +437,6 @@ export class Pointer {
   /**
    * Obtain the location of this pointer's content, following far pointers as needed.
    *
-   * @internal
    * @returns {Pointer} A pointer to the beginning of the pointer's content.
    */
 
@@ -447,7 +454,7 @@ export class Pointer {
     } else {
 
       const target = this._followFars();
-      
+
       p = new Pointer(target.segment, target.byteOffset + 8 + target._getOffsetWords() * 8);
 
     }
@@ -467,7 +474,6 @@ export class Pointer {
   /**
    * Read the target segment ID from a far pointer.
    *
-   * @internal
    * @returns {number} The target segment ID.
    */
 
@@ -480,7 +486,6 @@ export class Pointer {
   /**
    * Get a number indicating the size of the list's elements.
    *
-   * @internal
    * @returns {ListElementSize} The size of the list's elements.
    */
 
@@ -497,7 +502,6 @@ export class Pointer {
    * This method does **not** attempt to distinguish between composite and non-composite lists. To get the correct
    * length for composite lists use `_getTargetListLength()` instead.
    *
-   * @internal
    * @returns {number} The length of the list, or total number of words for composite lists.
    */
 
@@ -512,7 +516,6 @@ export class Pointer {
    * beginning of the data section, and for list pointers it is the location of the first element. The value should
    * always be zero for interface pointers.
    *
-   * @internal
    * @returns {number} The offset, in words, from the end of the pointer to the start of the data section.
    */
 
@@ -525,7 +528,6 @@ export class Pointer {
   /**
    * Look up the pointer type.
    *
-   * @internal
    * @returns {PointerType} The type of pointer.
    */
 
@@ -538,7 +540,6 @@ export class Pointer {
   /**
    * Read the number of data words from this struct pointer.
    *
-   * @internal
    * @returns {number} The number of data words in the struct.
    */
 
@@ -551,7 +552,6 @@ export class Pointer {
   /**
    * Read the number of pointers contained in this struct pointer.
    *
-   * @internal
    * @returns {number} The number of pointers in this struct.
    */
 
@@ -564,7 +564,6 @@ export class Pointer {
   /**
    * Get an object describing this struct pointer's size.
    *
-   * @internal
    * @returns {ObjectSize} The size of the struct.
    */
 
@@ -577,7 +576,6 @@ export class Pointer {
   /**
    * Get a pointer to this pointer's composite list tag word, following far pointers as needed.
    *
-   * @internal
    * @returns {Pointer} A pointer to the list's composite tag word.
    */
 
@@ -596,7 +594,6 @@ export class Pointer {
   /**
    * Get the object size for the target composite list, following far pointers as needed.
    *
-   * @internal
    * @returns {ObjectSize} An object describing the size of each struct in the list.
    */
 
@@ -609,7 +606,6 @@ export class Pointer {
   /**
    * Get the size of the list elements referenced by this pointer, following far pointers if necessary.
    *
-   * @internal
    * @returns {ListElementSize} The size of the elements in the list.
    */
 
@@ -624,7 +620,6 @@ export class Pointer {
    * Get the length of the list referenced by this pointer, following far pointers if necessary. If the list is a
    * composite list, it will look up the tag word and read the length from there.
    *
-   * @internal
    * @returns {number} The number of elements in the list.
    */
 
@@ -651,7 +646,6 @@ export class Pointer {
    * The target of a far pointer can never be another far pointer, and this method will throw if such a situation is
    * encountered.
    *
-   * @internal
    * @returns {PointerType} The type of pointer referenced by this pointer.
    */
 
@@ -668,7 +662,6 @@ export class Pointer {
   /**
    * Get the size of the struct referenced by this pointer, following far pointers if necessary.
    *
-   * @internal
    * @returns {ObjectSize} The size of the struct referenced by this pointer.
    */
 
@@ -685,7 +678,6 @@ export class Pointer {
    * The return value includes a pointer to write the pointer's actual data to (the eventual far target), and the offset
    * value (in words) to use for that pointer. In the case of double-far pointers this will always be zero.
    *
-   * @internal
    * @param {Segment} contentSegment The segment containing this pointer's content.
    * @param {number} contentOffset The offset within the content segment for the beginning of this pointer's content.
    * @returns {PointerAllocationResult} An object containing a pointer (where the pointer data should be written), and
@@ -742,7 +734,6 @@ export class Pointer {
   /**
    * Check if the pointer is a double-far pointer.
    *
-   * @internal
    * @returns {boolean} `true` if it is a double-far pointer, `false` otherwise.
    */
 
@@ -798,7 +789,6 @@ export class Pointer {
   /**
    * Write a far pointer to this location.
    *
-   * @internal
    * @param {boolean} doubleFar Set to `true` if this is a double far pointer.
    * @param {number} offsetWords The offset, in words, to the target pointer.
    * @param {number} segmentId The segment the target pointer is located in.
@@ -820,7 +810,6 @@ export class Pointer {
   /**
    * Write a raw interface pointer to this location.
    *
-   * @internal
    * @param {number} capId The capability ID.
    * @returns {void}
    */
@@ -835,7 +824,6 @@ export class Pointer {
   /**
    * Write a raw list pointer to this location.
    *
-   * @internal
    * @param {number} offsetWords The number of words from the end of this pointer to the beginning of the list content.
    * @param {ListElementSize} size The size of each element in the list.
    * @param {number} length The number of elements in the list.
@@ -845,7 +833,7 @@ export class Pointer {
    */
 
   _setListPointer(offsetWords: number, size: ListElementSize, length: number,
-                            compositeSize?: ObjectSize): void {
+    compositeSize?: ObjectSize): void {
 
     const A = PointerType.LIST;
     const B = offsetWords;
@@ -868,7 +856,6 @@ export class Pointer {
   /**
    * Write a raw struct pointer to this location.
    *
-   * @internal
    * @param {number} offsetWords The number of words from the end of this pointer to the beginning of the struct's data
    * section.
    * @param {ObjectSize} size An object describing the size of the struct.
@@ -891,7 +878,6 @@ export class Pointer {
   /**
    * Read some bits off a pointer to make sure it has the right pointer data.
    *
-   * @internal
    * @param {PointerType} pointerType The expected pointer type.
    * @param {ListElementSize} [elementSize] For list pointers, the expected element size. Leave this
    * undefined for struct pointers.
@@ -959,13 +945,14 @@ export class Pointer {
 
   toString(): string {
 
-    return format('Pointer_%d@%a,%s,limit:%x', this.segment.id, this.byteOffset, this.dump(), this._depthLimit);
+    return format(
+      'Pointer_%d@%a,%s,limit:%x', this.segment.id, this.byteOffset, this.dump(), this._capnp.depthLimit);
 
   }
 
   private _copyFromList(src: Pointer): void {
 
-    if (this._depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
+    if (this._capnp.depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
 
     const dst = this;
     const srcContent = src._getContent();
@@ -983,8 +970,10 @@ export class Pointer {
 
       for (let i = 0; i < srcLength; i++) {
 
-        const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + (i << 3), src._depthLimit - 1);
-        const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + (i << 3), dst._depthLimit - 1);
+        const srcPtr = new Pointer(
+          srcContent.segment, srcContent.byteOffset + (i << 3), src._capnp.depthLimit - 1);
+        const dstPtr = new Pointer(
+          dstContent.segment, dstContent.byteOffset + (i << 3), dst._capnp.depthLimit - 1);
 
         dstPtr._copyFrom(srcPtr);
 
@@ -1021,8 +1010,10 @@ export class Pointer {
 
           const offset = i * srcStructByteLength + srcCompositeSize.dataByteLength + (j << 3);
 
-          const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._depthLimit - 1);
-          const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset + 8, dst._depthLimit - 1);
+          const srcPtr = new Pointer(
+            srcContent.segment, srcContent.byteOffset + offset, src._capnp.depthLimit - 1);
+          const dstPtr = new Pointer(
+            dstContent.segment, dstContent.byteOffset + offset + 8, dst._capnp.depthLimit - 1);
 
           dstPtr._copyFrom(srcPtr);
 
@@ -1054,7 +1045,7 @@ export class Pointer {
 
   private _copyFromStruct(src: Pointer): void {
 
-    if (this._depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
+    if (this._capnp.depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
 
     const dst = this;
     const srcContent = src._getContent();
@@ -1075,8 +1066,8 @@ export class Pointer {
 
       const offset = srcSize.dataByteLength + i * 8;
 
-      const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._depthLimit - 1);
-      const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset, dst._depthLimit - 1);
+      const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._capnp.depthLimit - 1);
+      const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset, dst._capnp.depthLimit - 1);
 
       dstPtr._copyFrom(srcPtr);
 
@@ -1085,7 +1076,7 @@ export class Pointer {
     // Don't touch dst if it's already initialized as a composite list pointer. With composite struct pointers there's
     // no pointer to copy here and we've already copied the contents.
 
-    if ((dst as {_compositeIndex?: number})._compositeIndex !== undefined) return;
+    if (dst._capnp.compositeList) return;
 
     // Initialize the struct pointer.
 

@@ -1,14 +1,14 @@
 import * as s from 'capnp-ts/lib/std/schema.capnp';
 import initTrace from 'debug';
 import * as fs from 'fs';
-import * as path from 'path';
 import * as mkdirp from 'mkdirp';
+import * as path from 'path';
 import * as ts from 'typescript';
 
-import {CodeGeneratorContext} from './code-generator-context';
-import {CodeGeneratorFileContext} from './code-generator-file-context';
-import {SOURCE_COMMENT} from './constants';
-import {loadRequestedFile, lookupNode} from './file';
+import { CodeGeneratorContext } from './code-generator-context';
+import { CodeGeneratorFileContext } from './code-generator-file-context';
+import { SOURCE_COMMENT } from './constants';
+import { loadRequestedFile, lookupNode } from './file';
 import {
   generateCapnpImport,
   generateConcreteListInitializer,
@@ -29,7 +29,7 @@ export function compile(ctx: CodeGeneratorFileContext): string {
 
   ctx.concreteLists.forEach(([fullClassName, field]) => generateConcreteListInitializer(ctx, fullClassName, field));
 
-  return SOURCE_COMMENT + ts.createPrinter({newLine: ts.NewLineKind.LineFeed}).printFile(ctx.sourceFile);
+  return SOURCE_COMMENT + ts.createPrinter({ newLine: ts.NewLineKind.LineFeed }).printFile(ctx.sourceFile);
 
 }
 
@@ -63,7 +63,7 @@ export function writeTsFiles(ctx: CodeGeneratorContext): void {
 
     mkdirp.sync(path.dirname(f.tsPath));
 
-    fs.writeFileSync(f.tsPath, compile(f), {encoding: 'utf-8'});
+    fs.writeFileSync(f.tsPath, compile(f), { encoding: 'utf-8' });
 
   });
 

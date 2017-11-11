@@ -4,12 +4,12 @@
 
 import initTrace from 'debug';
 
-import {MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN} from '../constants';
-import {SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW} from '../errors';
-import {Int64, Uint64} from '../types';
-import {format, padToWord} from '../util';
-import {Message} from './message';
-import {Pointer} from './pointers';
+import { MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN } from '../constants';
+import { SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from '../errors';
+import { Int64, Uint64 } from '../types';
+import { format, padToWord } from '../util';
+import { Message } from './message';
+import { Pointer } from './pointers';
 
 const trace = initTrace('capnp:segment');
 trace('load');
@@ -39,7 +39,7 @@ export class Segment implements DataView {
 
   private _dv: DataView;
 
-  constructor(id: number, message: Message, buffer: ArrayBuffer, byteLength=0) {
+  constructor(id: number, message: Message, buffer: ArrayBuffer, byteLength = 0) {
 
     this.id = id;
     this.message = message;
@@ -498,7 +498,7 @@ export class Segment implements DataView {
   toString() {
 
     return format('Segment_id:%d,off:%a,len:%a,cap:%a', this.id, this.byteLength, this.byteOffset,
-                  this.buffer.byteLength);
+      this.buffer.byteLength);
 
   }
 

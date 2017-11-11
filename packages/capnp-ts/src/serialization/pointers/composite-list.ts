@@ -4,9 +4,9 @@
 
 import initTrace from 'debug';
 
-import {ListElementSize} from '../list-element-size';
-import {List, ListCtor} from './list';
-import {Struct, StructCtor} from './struct';
+import { ListElementSize } from '../list-element-size';
+import { _ListCtor, List, ListCtor } from './list';
+import { Struct, StructCtor } from './struct';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -15,13 +15,15 @@ export function CompositeList<T extends Struct>(CompositeClass: StructCtor<T>): 
 
   return class extends List<T> {
 
-    static readonly _compositeSize = CompositeClass._size;
-    static readonly _displayName = `List<${CompositeClass._displayName}>`;
-    static readonly _size = ListElementSize.COMPOSITE;
+    static readonly _capnp: _ListCtor = {
+      compositeSize: CompositeClass._capnp.size,
+      displayName: `List<${CompositeClass._capnp.displayName}>` as string,
+      size: ListElementSize.COMPOSITE,
+    };
 
     get(index: number): T {
 
-      return new CompositeClass(this.segment, this.byteOffset, this._depthLimit - 1, index);
+      return new CompositeClass(this.segment, this.byteOffset, this._capnp.depthLimit - 1, index);
 
     }
 

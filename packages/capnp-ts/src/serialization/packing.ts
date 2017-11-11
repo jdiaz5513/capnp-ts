@@ -2,8 +2,8 @@
  * @author jdiaz5513
  */
 
-import {PACK_SPAN_THRESHOLD} from '../constants';
-import {MSG_PACK_NOT_WORD_ALIGNED} from '../errors';
+import { PACK_SPAN_THRESHOLD } from '../constants';
+import { MSG_PACK_NOT_WORD_ALIGNED } from '../errors';
 
 /**
  * When packing a message there are two tags that are interpreted in a special way: `0x00` and `0xff`.
@@ -81,13 +81,13 @@ export function getTagByte(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte,
   // Yes, it's pretty. Don't touch it.
 
   return (a === 0 ? 0 : 0b00000001) |
-         (b === 0 ? 0 : 0b00000010) |
-         (c === 0 ? 0 : 0b00000100) |
-         (d === 0 ? 0 : 0b00001000) |
-         (e === 0 ? 0 : 0b00010000) |
-         (f === 0 ? 0 : 0b00100000) |
-         (g === 0 ? 0 : 0b01000000) |
-         (h === 0 ? 0 : 0b10000000) ;
+    (b === 0 ? 0 : 0b00000010) |
+    (c === 0 ? 0 : 0b00000100) |
+    (d === 0 ? 0 : 0b00001000) |
+    (e === 0 ? 0 : 0b00010000) |
+    (f === 0 ? 0 : 0b00100000) |
+    (g === 0 ? 0 : 0b01000000) |
+    (h === 0 ? 0 : 0b10000000);
 
 }
 
@@ -159,13 +159,13 @@ export function getUnpackedByteLength(packed: ArrayBuffer): number {
 export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte, g: byte, h: byte): number {
 
   return (a === 0 ? 1 : 0) +
-         (b === 0 ? 1 : 0) +
-         (c === 0 ? 1 : 0) +
-         (d === 0 ? 1 : 0) +
-         (e === 0 ? 1 : 0) +
-         (f === 0 ? 1 : 0) +
-         (g === 0 ? 1 : 0) +
-         (h === 0 ? 1 : 0) ;
+    (b === 0 ? 1 : 0) +
+    (c === 0 ? 1 : 0) +
+    (d === 0 ? 1 : 0) +
+    (e === 0 ? 1 : 0) +
+    (f === 0 ? 1 : 0) +
+    (g === 0 ? 1 : 0) +
+    (h === 0 ? 1 : 0);
 
 }
 
@@ -186,7 +186,7 @@ export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f:
  * @returns {ArrayBuffer} A packed version of the message.
  */
 
-export function pack(unpacked: ArrayBuffer, byteOffset?: number, byteLength?: number): ArrayBuffer {
+export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number): ArrayBuffer {
 
   if (unpacked.byteLength % 8 !== 0) throw new Error(MSG_PACK_NOT_WORD_ALIGNED);
 

@@ -1,20 +1,27 @@
 import initTrace from 'debug';
 
 import {
-  INVARIANT_UNREACHABLE_CODE,
   PTR_ADOPT_WRONG_MESSAGE,
   PTR_ALREADY_ADOPTED,
   PTR_INVALID_POINTER_TYPE,
 } from '../../errors';
-import {format} from '../../util';
-import {ListElementSize} from '../list-element-size';
-import {ObjectSize} from '../object-size';
-import {Segment} from '../segment';
-import {Pointer} from './pointer';
-import {PointerType} from './pointer-type';
+import { format } from '../../util';
+import { ListElementSize } from '../list-element-size';
+import { ObjectSize } from '../object-size';
+import { Segment } from '../segment';
+import { Pointer } from './pointer';
+import { PointerType } from './pointer-type';
 
 const trace = initTrace('capnp:orphan');
 trace('load');
+
+export interface _Orphan {
+  capId: number;
+  elementSize: ListElementSize;
+  length: number;
+  size: ObjectSize;
+  type: PointerType;
+}
 
 // Technically speaking this class doesn't need to be generic, but the extra type checking enforced by this helps to
 // make sure you don't accidentally adopt a pointer of the wrong type.
@@ -32,25 +39,10 @@ trace('load');
 
 export class Orphan<T extends Pointer> {
 
-  /** @internal */
-  _capId?: number;
+  /** If this member is not present then the orphan has already been adopted, or something went very wrong. */
+  _capnp?: _Orphan;
 
-  /** @internal */
-  _elementSize?: ListElementSize;
-
-  /** @internal */
-  _length?: number;
-
-  /** @internal */
-  _size?: ObjectSize;
-
-  /** @internal */
-  _type?: PointerType;
-
-  /** @internal */
   byteOffset: number;
-
-  /** @internal */
   segment: Segment;
 
   constructor(src: T) {
@@ -60,30 +52,32 @@ export class Orphan<T extends Pointer> {
     this.segment = c.segment;
     this.byteOffset = c.byteOffset;
 
+    this._capnp = {} as _Orphan;
+
     // Read vital info from the src pointer so we can reconstruct it during adoption.
 
-    this._type = src._getTargetPointerType();
+    this._capnp.type = src._getTargetPointerType();
 
-    switch (this._type) {
+    switch (this._capnp.type) {
 
       case PointerType.STRUCT:
 
-        this._size = src._getTargetStructSize();
+        this._capnp.size = src._getTargetStructSize();
 
         break;
 
       case PointerType.LIST:
 
-        this._length = src._getTargetListLength();
-        this._elementSize = src._getTargetListElementSize();
+        this._capnp.length = src._getTargetListLength();
+        this._capnp.elementSize = src._getTargetListElementSize();
 
-        if (this._elementSize === ListElementSize.COMPOSITE) this._size = src._getTargetCompositeListSize();
+        if (this._capnp.elementSize === ListElementSize.COMPOSITE) this._capnp.size = src._getTargetCompositeListSize();
 
         break;
 
       case PointerType.OTHER:
 
-        this._capId = src._getCapabilityId();
+        this._capnp.capId = src._getCapabilityId();
 
         break;
 
@@ -104,14 +98,13 @@ export class Orphan<T extends Pointer> {
   /**
    * Adopt (move) this orphan into the target pointer location. This will allocate far pointers in `dst` as needed.
    *
-   * @internal
    * @param {T} dst The destination pointer.
    * @returns {void}
    */
 
   _moveTo(dst: T): void {
 
-    if (this._type === undefined) throw new Error(format(PTR_ALREADY_ADOPTED, this));
+    if (this._capnp === undefined) throw new Error(format(PTR_ALREADY_ADOPTED, this));
 
     // TODO: Implement copy semantics when this happens.
     if (this.segment.message !== dst.segment.message) throw new Error(format(PTR_ADOPT_WRONG_MESSAGE, this, dst));
@@ -122,36 +115,27 @@ export class Orphan<T extends Pointer> {
 
     const res = dst._initPointer(this.segment, this.byteOffset);
 
-    switch (this._type) {
+    switch (this._capnp.type) {
 
       case PointerType.STRUCT:
 
-        /* istanbul ignore next */
-        if (this._size === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
-
-        res.pointer._setStructPointer(res.offsetWords, this._size);
+        res.pointer._setStructPointer(res.offsetWords, this._capnp.size);
 
         break;
 
       case PointerType.LIST:
 
-        /* istanbul ignore next */
-        if (this._length === undefined || this._elementSize === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
-
         let offsetWords = res.offsetWords;
 
-        if (this._elementSize === ListElementSize.COMPOSITE) offsetWords--;    // The tag word gets skipped.
+        if (this._capnp.elementSize === ListElementSize.COMPOSITE) offsetWords--;    // The tag word gets skipped.
 
-        res.pointer._setListPointer(offsetWords, this._elementSize, this._length, this._size);
+        res.pointer._setListPointer(offsetWords, this._capnp.elementSize, this._capnp.length, this._capnp.size);
 
         break;
 
       case PointerType.OTHER:
 
-        /* istanbul ignore next */
-        if (this._capId === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
-
-        res.pointer._setInterfacePointer(this._capId);
+        res.pointer._setInterfacePointer(this._capnp.capId);
 
         break;
 
@@ -162,35 +146,32 @@ export class Orphan<T extends Pointer> {
 
     }
 
-    this._type = undefined;
+    this._capnp = undefined;
 
   }
 
   dispose(): void {
 
-    switch (this._type) {
+    // FIXME: Should this throw?
+    if (this._capnp === undefined) {
+
+      trace('not disposing an already disposed orphan', this);
+
+      return;
+
+    }
+
+    switch (this._capnp.type) {
 
       case PointerType.STRUCT:
 
-        /* istanbul ignore next */
-        if (this._size === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
-
-        this.segment.fillZeroWords(this.byteOffset, this._size.getWordLength());
+        this.segment.fillZeroWords(this.byteOffset, this._capnp.size.getWordLength());
 
         break;
 
       case PointerType.LIST:
 
-        /* istanbul ignore next */
-        if (
-          (this._length === undefined || this._elementSize === undefined) ||
-          (this._elementSize === ListElementSize.COMPOSITE && this._size === undefined)) {
-
-          throw new Error(INVARIANT_UNREACHABLE_CODE);
-
-        }
-
-        const byteLength = Pointer._getListByteLength(this._elementSize, this._length, this._size);
+        const byteLength = Pointer._getListByteLength(this._capnp.elementSize, this._capnp.length, this._capnp.size);
         this.segment.fillZeroWords(this.byteOffset, byteLength);
 
         break;
@@ -203,13 +184,13 @@ export class Orphan<T extends Pointer> {
 
     }
 
-    this._type = undefined;
+    this._capnp = undefined;
 
   }
 
   toString(): string {
 
-    return format('Orphan_%d@%a,type:%s', this.segment.id, this.byteOffset, this._type);
+    return format('Orphan_%d@%a,type:%s', this.segment.id, this.byteOffset, this._capnp && this._capnp.type);
 
   }
 

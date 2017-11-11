@@ -4,16 +4,18 @@
 
 import initTrace from 'debug';
 
-import {ListElementSize} from '../list-element-size';
-import {List} from './list';
+import { ListElementSize } from '../list-element-size';
+import { _ListCtor, List } from './list';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
 export class BoolList extends List<boolean> {
 
-  static readonly _displayName = 'List<boolean>';
-  static readonly _size = ListElementSize.BIT;
+  static readonly _capnp: _ListCtor = {
+    displayName: 'List<boolean>' as string,
+    size: ListElementSize.BIT,
+  };
 
   _initList(length: number): void {
 

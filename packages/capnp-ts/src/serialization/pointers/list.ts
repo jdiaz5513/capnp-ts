@@ -4,21 +4,25 @@
 
 import initTrace from 'debug';
 
-import {PTR_COMPOSITE_SIZE_UNDEFINED, PTR_INVALID_LIST_SIZE} from '../../errors';
-import {format, identity} from '../../util';
-import {ListElementSize} from '../list-element-size';
-import {ObjectSize} from '../object-size';
-import {Segment} from '../segment';
-import {Pointer} from './pointer';
+import { PTR_COMPOSITE_SIZE_UNDEFINED, PTR_INVALID_LIST_SIZE } from '../../errors';
+import { format, identity } from '../../util';
+import { ListElementSize } from '../list-element-size';
+import { ObjectSize } from '../object-size';
+import { Segment } from '../segment';
+import { Pointer } from './pointer';
 
 const trace = initTrace('capnp:list');
 trace('load');
 
+export interface _ListCtor {
+  readonly compositeSize?: ObjectSize;
+  readonly displayName: string;
+  readonly size: ListElementSize;
+}
+
 export interface ListCtor<T> {
 
-  readonly _compositeSize?: ObjectSize;
-  readonly _displayName: string;
-  readonly _size: ListElementSize;
+  readonly _capnp: _ListCtor;
 
   new(segment: Segment, byteOffset: number, depthLimit?: number): List<T>;
 
@@ -26,9 +30,16 @@ export interface ListCtor<T> {
 
 export class List<T> extends Pointer {
 
-  static readonly _compositeSize?: ObjectSize;
-  static readonly _displayName: string = 'List<Generic>';
-  static readonly _size: ListElementSize;
+  static readonly _capnp: _ListCtor = {
+    displayName: 'List<Generic>' as string,
+    size: ListElementSize.VOID,
+  };
+
+  static toString(): string {
+
+    return this._capnp.displayName;
+
+  }
 
   every(callbackFn: (this: void, value: T, index: number) => boolean): boolean {
 
@@ -174,7 +185,6 @@ export class List<T> extends Pointer {
    * Initialize this list with the given element size and length. This will allocate new space for the list, ideally in
    * the same segment as this pointer.
    *
-   * @internal
    * @param {ListElementSize} elementSize The size of each element in the list.
    * @param {number} length The number of elements in the list.
    * @param {ObjectSize} [compositeSize] The size of each element in a composite list. This value is required for

@@ -1,18 +1,18 @@
 import * as capnp from 'capnp-ts';
 import * as s from 'capnp-ts/lib/std/schema.capnp';
-import {format} from 'capnp-ts/lib/util';
+import { format } from 'capnp-ts/lib/util';
 import initTrace from 'debug';
 import * as ts from 'typescript';
 
-import {CodeGeneratorFileContext} from './code-generator-file-context';
-import {ConcreteListType} from './constants';
+import { CodeGeneratorFileContext } from './code-generator-file-context';
+import { ConcreteListType } from './constants';
 import * as E from './errors';
 import * as util from './util';
 
 const trace = initTrace('capnpc:file');
 trace('load');
 
-export function compareCodeOrder(a: {getCodeOrder(): number}, b: {getCodeOrder(): number}): number {
+export function compareCodeOrder(a: { getCodeOrder(): number }, b: { getCodeOrder(): number }): number {
 
   return a.getCodeOrder() - b.getCodeOrder();
 
@@ -143,13 +143,7 @@ export function loadRequestedFile(
 
   trace('compile(%s, %s)', req, file);
 
-  const ctx = new CodeGeneratorFileContext();
-
-  ctx.req = req;
-  ctx.file = file;
-  ctx.nodes = req.getNodes().toArray();
-  ctx.concreteLists = [];
-  ctx.generatedNodeIds = [];
+  const ctx = new CodeGeneratorFileContext(req, file);
 
   const schema = lookupNode(ctx, file.getId());
 
@@ -160,7 +154,7 @@ export function loadRequestedFile(
 
 }
 
-export function lookupNode(ctx: CodeGeneratorFileContext, lookup: {getId(): capnp.Uint64} | capnp.Uint64): s.Node {
+export function lookupNode(ctx: CodeGeneratorFileContext, lookup: { getId(): capnp.Uint64 } | capnp.Uint64): s.Node {
 
   const id = lookup instanceof capnp.Uint64 ? lookup : lookup.getId();
   const node = ctx.nodes.find((n) => n.getId().equals(id));

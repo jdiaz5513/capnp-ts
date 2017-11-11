@@ -4,9 +4,9 @@
 
 import initTrace from 'debug';
 
-import {ListElementSize} from '../list-element-size';
-import {List, ListCtor} from './list';
-import {Pointer, PointerCtor} from './pointer';
+import { ListElementSize } from '../list-element-size';
+import { _ListCtor, List, ListCtor } from './list';
+import { Pointer, PointerCtor } from './pointer';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -15,14 +15,16 @@ export function PointerList<T extends Pointer>(PointerClass: PointerCtor<T>): Li
 
   return class extends List<T> {
 
-    static readonly _displayName: string = `List<${PointerClass._displayName}>`;
-    static readonly _size = ListElementSize.POINTER;
+    static readonly _capnp: _ListCtor = {
+      displayName: `List<${PointerClass._capnp.displayName}>` as string,
+      size: ListElementSize.POINTER,
+    };
 
     get(index: number): T {
 
       const c = this._getContent();
 
-      return new PointerClass(c.segment, c.byteOffset + index * 8, this._depthLimit - 1);
+      return new PointerClass(c.segment, c.byteOffset + index * 8, this._capnp.depthLimit - 1);
 
     }
 

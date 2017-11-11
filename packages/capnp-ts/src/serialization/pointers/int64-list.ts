@@ -4,17 +4,19 @@
 
 import initTrace from 'debug';
 
-import {Int64} from '../../types';
-import {ListElementSize} from '../list-element-size';
-import {List} from './list';
+import { Int64 } from '../../types';
+import { ListElementSize } from '../list-element-size';
+import { _ListCtor, List } from './list';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
 export class Int64List extends List<Int64> {
 
-  static readonly _displayName: string = 'List<Int64>';
-  static readonly _size = ListElementSize.BYTE_8;
+  static readonly _capnp: _ListCtor = {
+    displayName: 'List<Int64>' as string,
+    size: ListElementSize.BYTE_8,
+  };
 
   get(index: number): Int64 {
 
