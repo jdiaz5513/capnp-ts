@@ -4,8 +4,8 @@
 
 import initTrace from 'debug';
 
-import {Segment} from '../segment';
-import {ArenaAllocationResult} from './arena-allocation-result';
+import { Segment } from '../segment';
+import { ArenaAllocationResult } from './arena-allocation-result';
 
 const trace = initTrace('capnp:arena');
 trace('load');

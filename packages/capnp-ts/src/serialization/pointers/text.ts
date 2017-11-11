@@ -4,11 +4,11 @@
 
 import initTrace from 'debug';
 
-import {decodeUtf8, encodeUtf8} from '../../util';
-import {ListElementSize} from '../list-element-size';
-import {List} from './list';
-import {Pointer} from './pointer';
-import {PointerType} from './pointer-type';
+import { decodeUtf8, encodeUtf8 } from '../../util';
+import { ListElementSize } from '../list-element-size';
+import { List } from './list';
+import { Pointer } from './pointer';
+import { PointerType } from './pointer-type';
 
 const trace = initTrace('capnp:text');
 trace('load');
@@ -25,7 +25,7 @@ export class Text extends List<string> {
 
   protected static _fromPointerUnchecked(pointer: Pointer): Text {
 
-    return new this(pointer.segment, pointer.byteOffset, pointer._depthLimit);
+    return new this(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
 
   }
 
@@ -78,7 +78,7 @@ export class Text extends List<string> {
     const src = encodeUtf8(value);
     const dstLength = src.byteLength + index;
     let c: Pointer;
-    let original: Uint8Array|undefined;
+    let original: Uint8Array | undefined;
 
     // TODO: Consider reusing existing space if list is already initialized and there's enough room for the value.
 

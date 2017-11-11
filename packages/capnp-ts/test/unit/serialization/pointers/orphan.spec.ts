@@ -1,17 +1,12 @@
-import {Message, ObjectSize, Orphan, Struct} from '../../../../lib';
-import {Int32List} from '../../../../lib/serialization';
-import {tap} from '../../../util';
-
-  // LINT: This is how we nicely ask the compiler to let us access the internal properties for testing...
-  /* tslint:disable no-any no-unsafe-any */
+import { Message, ObjectSize, Orphan, Struct } from '../../../../lib';
+import { Int32List } from '../../../../lib/serialization';
+import { tap } from '../../../util';
 
 /** Just a silly struct that holds a single pointer to... itself? */
 
 class TestStruct extends Struct {
 
-  static readonly _displayName = 'TestStruct';
-  static readonly _id = 'f38ff832f33d57da';
-  static readonly _size = new ObjectSize(8, 2);
+  static readonly _capnp = { displayName: 'TestStruct', id: 'f38ff832f33d57da', size: new ObjectSize(8, 2) };
 
   adoptTest(value: Orphan<TestStruct>): void {
 
@@ -86,19 +81,25 @@ tap.test('new Orphan()', (t) => {
   const message = new Message();
   const root = message.initRoot(TestStruct);
 
-  const structOrphan = new Orphan(root) as any;
+  const structOrphan = new Orphan(root);
 
-  t.equal(structOrphan._size.dataByteLength, TestStruct._size.dataByteLength, 'should copy the data byte length');
-  t.equal(structOrphan._size.pointerLength, TestStruct._size.pointerLength, 'should copy the pointer count');
+  if (structOrphan._capnp === undefined) throw new Error('orphan already adopted?');
+
+  t.equal(
+    structOrphan._capnp.size.dataByteLength, TestStruct._capnp.size.dataByteLength, 'should copy the data byte length');
+  t.equal(
+    structOrphan._capnp.size.pointerLength, TestStruct._capnp.size.pointerLength, 'should copy the pointer count');
 
   t.ok(root._isNull(), 'should zero out the struct pointer');
 
   const list = new Message().initRoot(TestStruct).initList(2);
 
-  const listOrphan = new Orphan(list) as any;
+  const listOrphan = new Orphan(list);
 
-  t.equal(listOrphan._length, 2, 'should copy the list length');
-  t.equal(listOrphan._elementSize, Int32List._size, 'should copy the list element size');
+  if (listOrphan._capnp === undefined) throw new Error('orphan already adopted?');
+
+  t.equal(listOrphan._capnp.length, 2, 'should copy the list length');
+  t.equal(listOrphan._capnp.elementSize, Int32List._capnp.size, 'should copy the list element size');
 
   t.ok(list._isNull(), 'should zero out the list pointer');
 
@@ -114,8 +115,8 @@ tap.test('Orphan._moveTo()', (t) => {
   oldChild.setFoo(100);
   oldList.set(1, 300);
 
-  const structOrphan = root.disownTest() as any;
-  const listOrphan = root.disownList() as any;
+  const structOrphan = root.disownTest();
+  const listOrphan = root.disownList();
 
   const newChild = root.initTest();
   const newList = root.initList(5);
@@ -141,7 +142,7 @@ tap.test('Orphan._moveTo()', (t) => {
 
   t.throws(() => {
 
-    const o = root.disownTest() as any;
+    const o = root.disownTest();
     o._moveTo(new Message().initRoot(TestStruct));
 
   }, undefined, 'should not allow moving to a different message');

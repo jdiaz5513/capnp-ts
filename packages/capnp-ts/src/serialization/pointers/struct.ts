@@ -4,19 +4,19 @@
 
 import initTrace from 'debug';
 
-import {MAX_DEPTH, NATIVE_LITTLE_ENDIAN} from '../../constants';
+import { MAX_DEPTH, NATIVE_LITTLE_ENDIAN } from '../../constants';
 import * as E from '../../errors';
-import {Int64, Uint64} from '../../types';
-import {format, padToWord} from '../../util';
-import {ListElementSize} from '../list-element-size';
-import {ObjectSize} from '../object-size';
-import {Segment} from '../segment';
-import {Data} from './data';
-import {List, ListCtor} from './list';
-import {Orphan} from './orphan';
-import {Pointer, PointerCtor} from './pointer';
-import {PointerType} from './pointer-type';
-import {Text} from './text';
+import { Int64, Uint64 } from '../../types';
+import { format, padToWord } from '../../util';
+import { ListElementSize } from '../list-element-size';
+import { ObjectSize } from '../object-size';
+import { Segment } from '../segment';
+import { Data } from './data';
+import { List, ListCtor } from './list';
+import { Orphan } from './orphan';
+import { _Pointer, _PointerCtor, Pointer, PointerCtor } from './pointer';
+import { PointerType } from './pointer-type';
+import { Text } from './text';
 
 const trace = initTrace('capnp:struct');
 trace('load');
@@ -24,21 +24,30 @@ trace('load');
 // Used to apply bit masks (default values).
 const TMP_WORD = new DataView(new ArrayBuffer(8));
 
+export interface _StructCtor extends _PointerCtor {
+  readonly id: string;
+  readonly size: ObjectSize;
+}
+
 export interface StructCtor<T extends Struct> {
 
-  readonly _displayName: string;
-  readonly _id: string;
-  readonly _size: ObjectSize;
+  readonly _capnp: _StructCtor;
 
   new(segment: Segment, byteOffset: number, depthLimit?: number, compositeIndex?: number): T;
 
 }
 
+export interface _Struct extends _Pointer {
+  compositeIndex?: number;
+}
+
 export class Struct extends Pointer {
 
-  static readonly _displayName: string = 'Struct';
+  static readonly _capnp = {
+    displayName: 'Struct' as string,
+  };
 
-  private readonly _compositeIndex?: number;
+  readonly _capnp: _Struct;
 
   /**
    * Create a new pointer to a struct.
@@ -57,21 +66,21 @@ export class Struct extends Pointer {
 
     super(segment, byteOffset, depthLimit);
 
-    this._compositeIndex = compositeIndex;
+    this._capnp.compositeIndex = compositeIndex;
+    this._capnp.compositeList = compositeIndex !== undefined;
 
   }
 
   static toString(): string {
 
-    return this._displayName;
+    return this._capnp.displayName;
 
   }
 
   /**
-   * Get a pointer to the beginning of this struct's content. If `_compositeIndex` is set, it will be offset by a
+   * Get a pointer to the beginning of this struct's content. If `compositeIndex` is set, it will be offset by a
    * multiple of the struct's size.
    *
-   * @internal
    * @returns {Pointer} A pointer to the beginning of the struct's content.
    */
 
@@ -79,15 +88,15 @@ export class Struct extends Pointer {
 
     const c = super._getContent();
 
-    if (this._compositeIndex !== undefined) {
+    if (this._capnp.compositeIndex !== undefined) {
 
       // Seek backwards by one word so we can read the struct size off the tag word.
 
       c.byteOffset -= 8;
 
-      // Seek ahead by `_compositeIndex` multiples of the struct's total size.
+      // Seek ahead by `compositeIndex` multiples of the struct's total size.
 
-      c.byteOffset += 8 + this._compositeIndex * c._getStructSize().padToWord().getByteLength();
+      c.byteOffset += 8 + this._capnp.compositeIndex * c._getStructSize().padToWord().getByteLength();
 
     }
 
@@ -99,14 +108,13 @@ export class Struct extends Pointer {
    * Initialize this struct with the provided object size. This will allocate new space for the struct contents, ideally
    * in the same segment as this pointer.
    *
-   * @internal
    * @param {ObjectSize} size An object describing the size of the struct's data and pointer sections.
    * @returns {void}
    */
 
   _initStruct(size: ObjectSize): void {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_INIT_COMPOSITE_STRUCT, this));
+    if (this._capnp.compositeIndex !== undefined) throw new Error(format(E.PTR_INIT_COMPOSITE_STRUCT, this));
 
     // Make sure to clear existing contents before overwriting the pointer data (erase is a noop if already empty).
 
@@ -124,7 +132,7 @@ export class Struct extends Pointer {
 
     const s = this._getPointerAs(index, StructClass);
 
-    s._initStruct(StructClass._size);
+    s._initStruct(StructClass._capnp.size);
 
     return s;
 
@@ -197,13 +205,14 @@ export class Struct extends Pointer {
 
   toString() {
 
-    return `Struct_${super.toString()}${this._compositeIndex === undefined ? '' : `,ci:${this._compositeIndex}`}`;
+    return `Struct_${super.toString()}` +
+      `${this._capnp.compositeIndex === undefined ? '' : `,ci:${this._capnp.compositeIndex}`}`;
 
   }
 
   adopt(src: Orphan<this>): void {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_ADOPT_COMPOSITE_STRUCT, this));
+    if (this._capnp.compositeIndex !== undefined) throw new Error(format(E.PTR_ADOPT_COMPOSITE_STRUCT, this));
 
     super.adopt(src);
 
@@ -211,7 +220,7 @@ export class Struct extends Pointer {
 
   disown(): Orphan<this> {
 
-    if (this._compositeIndex !== undefined) throw new Error(format(E.PTR_DISOWN_COMPOSITE_STRUCT, this));
+    if (this._capnp.compositeIndex !== undefined) throw new Error(format(E.PTR_DISOWN_COMPOSITE_STRUCT, this));
 
     return super.disown();
 
@@ -228,7 +237,8 @@ export class Struct extends Pointer {
 
   protected _getAs<T extends Struct>(StructClass: StructCtor<T>): T {
 
-    return new StructClass(this.segment, this.byteOffset, this._depthLimit, this._compositeIndex);
+    return new StructClass(
+      this.segment, this.byteOffset, this._capnp.depthLimit, this._capnp.compositeIndex);
 
   }
 
@@ -267,7 +277,7 @@ export class Struct extends Pointer {
 
     ps.byteOffset += index * 8;
 
-    const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
+    const l = new Data(ps.segment, ps.byteOffset, this._capnp.depthLimit - 1);
 
     if (l._isNull()) {
 
@@ -432,20 +442,20 @@ export class Struct extends Pointer {
 
     ps.byteOffset += index * 8;
 
-    const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+    const l = new ListClass(ps.segment, ps.byteOffset, this._capnp.depthLimit - 1);
 
     if (l._isNull()) {
 
-      l._initList(ListClass._size, 0, ListClass._compositeSize);
+      l._initList(ListClass._capnp.size, 0, ListClass._capnp.compositeSize);
 
-    } else if (ListClass._compositeSize !== undefined) {
+    } else if (ListClass._capnp.compositeSize !== undefined) {
 
       // If this is a composite list we need to be sure the composite elements are big enough to hold everything as
       // specified in the schema. If the new schema has added fields we'll need to "resize" (shallow-copy) the list so
       // it has room for the new fields.
 
       const srcSize = l._getTargetCompositeListSize();
-      const dstSize = ListClass._compositeSize;
+      const dstSize = ListClass._capnp.compositeSize;
 
       if (dstSize.dataByteLength > srcSize.dataByteLength || dstSize.pointerLength > srcSize.pointerLength) {
 
@@ -460,7 +470,7 @@ export class Struct extends Pointer {
 
         const res = l._initPointer(dstContent.segment, dstContent.byteOffset);
 
-        res.pointer._setListPointer(res.offsetWords, ListClass._size, srcLength, dstSize);
+        res.pointer._setListPointer(res.offsetWords, ListClass._capnp.size, srcLength, dstSize);
 
         // Write the new tag word.
 
@@ -532,7 +542,7 @@ export class Struct extends Pointer {
 
     ps.byteOffset += index * 8;
 
-    return new Pointer(ps.segment, ps.byteOffset, this._depthLimit - 1);
+    return new Pointer(ps.segment, ps.byteOffset, this._capnp.depthLimit - 1);
 
   }
 
@@ -544,7 +554,7 @@ export class Struct extends Pointer {
 
     ps.byteOffset += index * 8;
 
-    return new PointerClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+    return new PointerClass(ps.segment, ps.byteOffset, this._capnp.depthLimit - 1);
 
   }
 
@@ -560,7 +570,7 @@ export class Struct extends Pointer {
 
   protected _getSize(): ObjectSize {
 
-    if (this._compositeIndex !== undefined) {
+    if (this._capnp.compositeIndex !== undefined) {
 
       // For composite lists the object size is stored in a tag word right before the content.
 
@@ -582,7 +592,7 @@ export class Struct extends Pointer {
 
     if (s._isNull()) {
 
-      s._initStruct(StructClass._size);
+      s._initStruct(StructClass._capnp.size);
 
     } else {
 
@@ -594,11 +604,13 @@ export class Struct extends Pointer {
       // fields were added to the struct. A shallow copy of the struct will be made so that there's enough room for the
       // data and pointer sections. This will unfortunately leave a "hole" of zeroes in the message, but that hole will
       // at least compress well.
-      if (ts.dataByteLength < StructClass._size.dataByteLength || ts.pointerLength < StructClass._size.pointerLength) {
+      if (
+        ts.dataByteLength < StructClass._capnp.size.dataByteLength
+        || ts.pointerLength < StructClass._capnp.size.pointerLength) {
 
         trace('need to resize child struct %s', s);
 
-        s._resize(StructClass._size);
+        s._resize(StructClass._capnp.size);
 
       }
 
@@ -706,7 +718,7 @@ export class Struct extends Pointer {
 
     ps.byteOffset += index * 8;
 
-    const l = new Data(ps.segment, ps.byteOffset, this._depthLimit - 1);
+    const l = new Data(ps.segment, ps.byteOffset, this._capnp.depthLimit - 1);
 
     l._erase();
 
@@ -724,11 +736,11 @@ export class Struct extends Pointer {
 
     ps.byteOffset += index * 8;
 
-    const l = new ListClass(ps.segment, ps.byteOffset, this._depthLimit - 1);
+    const l = new ListClass(ps.segment, ps.byteOffset, this._capnp.depthLimit - 1);
 
     l._erase();
 
-    l._initList(ListClass._size, length, ListClass._compositeSize);
+    l._initList(ListClass._capnp.size, length, ListClass._capnp.compositeSize);
 
     return l;
 

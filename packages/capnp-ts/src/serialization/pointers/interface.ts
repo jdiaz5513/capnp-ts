@@ -2,11 +2,11 @@
  * @author jdiaz5513
  */
 
-import {MAX_DEPTH} from '../../constants';
-import {NOT_IMPLEMENTED} from '../../errors';
-import {format} from '../../util';
-import {Segment} from '../segment';
-import {Pointer} from './pointer';
+import { MAX_DEPTH } from '../../constants';
+import { NOT_IMPLEMENTED } from '../../errors';
+import { format } from '../../util';
+import { Segment } from '../segment';
+import { Pointer } from './pointer';
 
 export class Interface extends Pointer {
 

@@ -4,17 +4,19 @@
 
 import initTrace from 'debug';
 
-import {ListElementSize} from '../list-element-size';
-import {List} from './list';
-import {Text} from './text';
+import { ListElementSize } from '../list-element-size';
+import { _ListCtor, List } from './list';
+import { Text } from './text';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
 export class TextList extends List<string> {
 
-  static readonly _displayName = `List<Text>`;
-  static readonly _size = ListElementSize.POINTER;
+  static readonly _capnp: _ListCtor = {
+    displayName: 'List<Text>' as string,
+    size: ListElementSize.POINTER,
+  };
 
   get(index: number): string {
 

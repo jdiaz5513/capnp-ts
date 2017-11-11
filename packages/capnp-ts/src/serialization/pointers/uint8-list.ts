@@ -4,16 +4,18 @@
 
 import initTrace from 'debug';
 
-import {ListElementSize} from '../list-element-size';
-import {List} from './list';
+import { ListElementSize } from '../list-element-size';
+import { _ListCtor, List } from './list';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
 
 export class Uint8List extends List<number> {
 
-  static readonly _displayName = `List<Uint8>`;
-  static readonly _size = ListElementSize.BYTE;
+  static readonly _capnp: _ListCtor = {
+    displayName: 'List<Uint8>' as string,
+    size: ListElementSize.BYTE,
+  };
 
   get(index: number): number {
 

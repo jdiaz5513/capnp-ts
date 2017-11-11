@@ -1,6 +1,6 @@
 import * as capnp from 'capnp-ts';
 import * as s from 'capnp-ts/lib/std/schema.capnp';
-import {format} from 'capnp-ts/lib/util';
+import { format } from 'capnp-ts/lib/util';
 import initTrace from 'debug';
 import * as ts from 'typescript';
 
@@ -13,7 +13,7 @@ import {
   createUnionConstProperty,
   createValueExpression,
 } from './ast-creators';
-import {CodeGeneratorFileContext} from './code-generator-file-context';
+import { CodeGeneratorFileContext } from './code-generator-file-context';
 import {
   __,
   BOOLEAN_TYPE,
@@ -49,37 +49,46 @@ trace('load');
 
 export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
 
-    // Look for the special importPath annotation on the file to see if we need a different import path for capnp-ts.
+  // Look for the special importPath annotation on the file to see if we need a different import path for capnp-ts.
 
-    const fileNode = lookupNode(ctx, ctx.file);
-    const tsFileId = capnp.Uint64.fromHexString(TS_FILE_ID);
-    // This may be undefined if ts.capnp is not imported; fine, we'll just use the default.
-    const tsAnnotationFile = ctx.nodes.find((n) => n.getId().equals(tsFileId));
-    // We might not find the importPath annotation; that's definitely a bug but let's move on.
-    const tsImportPathAnnotation = tsAnnotationFile && tsAnnotationFile.getNestedNodes().find(
-      (n) => n.getName() === 'importPath');
-    // There may not necessarily be an import path annotation on the file node. That's fine.
-    const importAnnotation = tsImportPathAnnotation && fileNode.getAnnotations().find(
-      (a) => a.getId().equals(tsImportPathAnnotation.getId()));
-    const importPath = importAnnotation === undefined ? 'capnp-ts' : importAnnotation.getValue().getText();
+  const fileNode = lookupNode(ctx, ctx.file);
+  const tsFileId = capnp.Uint64.fromHexString(TS_FILE_ID);
+  // This may be undefined if ts.capnp is not imported; fine, we'll just use the default.
+  const tsAnnotationFile = ctx.nodes.find((n) => n.getId().equals(tsFileId));
+  // We might not find the importPath annotation; that's definitely a bug but let's move on.
+  const tsImportPathAnnotation = tsAnnotationFile && tsAnnotationFile.getNestedNodes().find(
+    (n) => n.getName() === 'importPath');
+  // There may not necessarily be an import path annotation on the file node. That's fine.
+  const importAnnotation = tsImportPathAnnotation && fileNode.getAnnotations().find(
+    (a) => a.getId().equals(tsImportPathAnnotation.getId()));
+  const importPath = importAnnotation === undefined ? 'capnp-ts' : importAnnotation.getValue().getText();
 
-    /* tslint:disable-next-line */
-    let u: ts.Identifier | undefined;
+  /* tslint:disable-next-line */
+  let u: ts.Identifier | undefined;
 
-    // import * as capnp from '${importPath}';
-    ctx.sourceFile.statements.push(ts.createImportDeclaration(
-      __, __, ts.createImportClause(
-        u as ts.Identifier, ts.createNamespaceImport(CAPNP)), ts.createLiteral(importPath)));
+  // import * as capnp from '${importPath}';
+  ctx.sourceFile.statements.push(ts.createImportDeclaration(
+    __, __, ts.createImportClause(
+      u as ts.Identifier, ts.createNamespaceImport(CAPNP)), ts.createLiteral(importPath)));
 
+  // import { ObjectSize } from '${importPath}';
+  ctx.sourceFile.statements.push(
+    ts.createStatement(ts.createIdentifier(`import { ObjectSize } from '${importPath}'`)));
+  // ctx.sourceFile.statements.push(
+  //   ts.createImportDeclaration(
+  //     __, __, ts.createImportClause(
+  //       ts.createIdentifier('ObjectSize'), ts.createNamedImports([
+  //         ts.createImportSpecifier(
+  //           ts.createIdentifier('ObjectSize'), ts.createIdentifier('ObjectSize'))])), ts.createLiteral(importPath)));
 }
 
 export function generateConcreteListInitializer(
   ctx: CodeGeneratorFileContext, fullClassName: string, field: s.Field): void {
 
-    const left = ts.createPropertyAccess(ts.createIdentifier(fullClassName), `_${util.c2t(field.getName())}`);
-    const right = ts.createIdentifier(getConcreteListType(ctx, field.getSlot().getType()));
+  const left = ts.createPropertyAccess(ts.createIdentifier(fullClassName), `_${util.c2t(field.getName())}`);
+  const right = ts.createIdentifier(getConcreteListType(ctx, field.getSlot().getType()));
 
-    ctx.sourceFile.statements.push(ts.createStatement(ts.createAssignment(left, right)));
+  ctx.sourceFile.statements.push(ts.createStatement(ts.createAssignment(left, right)));
 
 }
 
@@ -132,10 +141,11 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
 
   trace('generateFileId()');
 
+  // export const _capnpFileId = 'abcdef';
   const fileId = ts.createLiteral(ctx.file.getId().toHexString());
   ctx.sourceFile.statements.push(ts.createVariableStatement(
     [EXPORT], ts.createVariableDeclarationList(
-      [ts.createVariableDeclaration('_id', __, fileId)],
+      [ts.createVariableDeclaration('_capnpFileId', __, fileId)],
       ts.NodeFlags.Const)));
 
 }
@@ -291,7 +301,7 @@ export function generateStructFieldMethods(
     case s.Type.UINT64:
     case s.Type.UINT8:
 
-      const {byteLength, getter, setter} = Primitive[whichType as number];
+      const { byteLength, getter, setter } = Primitive[whichType as number];
       // NOTE: For a BOOL type this is actually a bit offset; `byteLength` will be `1` in that case.
       const byteOffset = ts.createNumericLiteral((offset * byteLength).toString());
       const getArgs: ts.Expression[] = [byteOffset];
@@ -338,7 +348,7 @@ export function generateStructFieldMethods(
 
         listClass = `${fullClassName}._${properName}`;
 
-      } else if (listClass === void(0)) {
+      } else if (listClass === void (0)) {
 
         /* istanbul ignore next */
         throw new Error(format(E.GEN_UNSUPPORTED_LIST_ELEMENT_TYPE, whichElementType));
@@ -559,19 +569,18 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   // }
 
-  // static readonly _displayName = 'MyStruct';
-  members.push(ts.createProperty(__, [STATIC, READONLY], '_displayName', __, __, ts.createLiteral(displayNamePrefix)));
-
-  // static readonly _id = '4732bab4310f81';
-  members.push(ts.createProperty(__, [STATIC, READONLY], '_id', __, __, ts.createLiteral(nodeIdHex)));
-
-  // static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(8, 8);
-  members.push(ts.createProperty(__, [STATIC, READONLY], '_size', __, ts.createTypeReferenceNode(
-    'capnp.ObjectSize', __), ts.createNew(
-      ts.createIdentifier(
-        'capnp.ObjectSize'), __, [
-          ts.createNumericLiteral(dataByteLength.toString()),
-          ts.createNumericLiteral(pointerCount.toString())])));
+  // static reaodnly _capnp = { displayName: 'MyStruct', id: '4732bab4310f81', size = new ObjectSize(8, 8) };
+  members.push(
+    ts.createProperty(
+      __, [STATIC, READONLY], '_capnp', __, __,
+      ts.createObjectLiteral([
+        ts.createPropertyAssignment('displayName', ts.createLiteral(displayNamePrefix)),
+        ts.createPropertyAssignment('id', ts.createLiteral(nodeIdHex)),
+        ts.createPropertyAssignment(
+          'size', ts.createNew(
+            ts.createIdentifier('ObjectSize'), __, [
+              ts.createNumericLiteral(dataByteLength.toString()),
+              ts.createNumericLiteral(pointerCount.toString())]))])));
 
   // private static _ConcreteListClass: MyStruct_ConcreteListClass;
   members.push(...concreteLists.map((f) => createConcreteListProperty(ctx, f)));
@@ -592,7 +601,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
       ts.createPropertyAccess(
         THIS, '_getUint16'), __, [ts.createNumericLiteral((discriminantOffset * 2).toString())]);
     members.push(createMethod('which', [], ts.createTypeReferenceNode(`${fullClassName}_Which`, __),
-                                          [whichExpression], true));
+      [whichExpression], true));
 
   }
 
@@ -602,7 +611,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   if (interfaceNode) {
 
-      generateInterfaceClasses(ctx, node);
+    generateInterfaceClasses(ctx, node);
 
   }
 
@@ -619,11 +628,11 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 export function generateUnnamedUnionEnum(
   ctx: CodeGeneratorFileContext, fullClassName: string, unionFields: s.Field[]): void {
 
-    const members = unionFields.sort(compareCodeOrder).map((f) => ts.createEnumMember(
-      util.c2s(f.getName()), ts.createNumericLiteral(
-        f.getDiscriminantValue().toString())));
-    const d = ts.createEnumDeclaration(__, [EXPORT], `${fullClassName}_Which`, members);
+  const members = unionFields.sort(compareCodeOrder).map((f) => ts.createEnumMember(
+    util.c2s(f.getName()), ts.createNumericLiteral(
+      f.getDiscriminantValue().toString())));
+  const d = ts.createEnumDeclaration(__, [EXPORT], `${fullClassName}_Which`, members);
 
-    ctx.sourceFile.statements.push(d);
+  ctx.sourceFile.statements.push(d);
 
 }

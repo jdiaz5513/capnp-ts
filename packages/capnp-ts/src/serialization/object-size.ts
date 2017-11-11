@@ -4,7 +4,7 @@
 
 import initTrace from 'debug';
 
-import {format, padToWord} from '../util';
+import { format, padToWord } from '../util';
 
 const trace = initTrace('capnp:object-size');
 trace('load');

@@ -5,11 +5,10 @@
 /* tslint:disable */
 
 import * as capnp from "../../lib/index";
+import { ObjectSize } from '../../lib/index';
 export const _id = "c81a48fa54bfdd1f";
 export class Upgrade extends capnp.Struct {
-    static readonly _displayName = "Upgrade";
-    static readonly _id = "8fa95f1989e267fb";
-    static readonly _size: capnp.ObjectSize = new capnp.ObjectSize(8, 3);
+    static readonly _capnp = { displayName: "Upgrade", id: "8fa95f1989e267fb", size: new ObjectSize(8, 3) };
     static _SelfReferences: capnp.ListCtor<Upgrade>;
     getLegacyName(): string { return this._getText(0); }
     setLegacyName(value: string): void { this._setText(0, value); }
