@@ -3,22 +3,24 @@
  */
 
 import initTrace from 'debug';
-
-import * as C from '../constants';
-import * as E from '../errors';
 import { dumpBuffer, format, padToWord } from '../util';
-import { Arena, MultiSegmentArena, SingleSegmentArena } from './arena';
+import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena } from './arena';
 import { pack, unpack } from './packing';
 import { PointerType, Struct } from './pointers';
 import { StructCtor } from './pointers/struct';
 import { Segment } from './segment';
+import { DEFAULT_TRAVERSE_LIMIT, DEFAULT_BUFFER_SIZE } from '../constants';
+import {
+  MSG_INVALID_FRAME_HEADER, MSG_SEGMENT_OUT_OF_BOUNDS, MSG_SEGMENT_TOO_SMALL, PTR_TRAVERSAL_LIMIT_EXCEEDED,
+  MSG_NO_SEGMENTS_IN_ARENA,
+} from '../errors';
 
 const trace = initTrace('capnp:message');
 trace('load');
 
 export class Message {
 
-  private readonly _arena: Arena;
+  private readonly _arena: AnyArena;
 
   private _segments: Segment[];
 
@@ -33,11 +35,11 @@ export class Message {
    * @param {Arena} [arena=new SingleSegmentArena()] The arena to use for allocating new segments.
    */
 
-  constructor(arena: Arena = new SingleSegmentArena()) {
+  constructor(arena: AnyArena = new SingleSegmentArena()) {
 
     this._arena = arena;
     this._segments = [];
-    this._traversalLimit = C.DEFAULT_TRAVERSE_LIMIT;
+    this._traversalLimit = DEFAULT_TRAVERSE_LIMIT;
 
     trace('Instantiated message %s.', this);
 
@@ -135,13 +137,13 @@ export class Message {
     let byteOffset = 4 + segmentCount * 4;
     byteOffset += byteOffset % 8;
 
-    if (byteOffset + segmentCount * 4 > message.byteLength) throw new Error(E.MSG_INVALID_FRAME_HEADER);
+    if (byteOffset + segmentCount * 4 > message.byteLength) throw new Error(MSG_INVALID_FRAME_HEADER);
 
     for (let i = 0; i < segmentCount; i++) {
 
       const byteLength = dv.getUint32(4 + i * 4, true) * 8;
 
-      if (byteOffset + byteLength > message.byteLength) throw new Error(E.MSG_INVALID_FRAME_HEADER);
+      if (byteOffset + byteLength > message.byteLength) throw new Error(MSG_INVALID_FRAME_HEADER);
 
       segments[i] = message.slice(byteOffset, byteOffset + byteLength);
 
@@ -157,7 +159,7 @@ export class Message {
 
     trace('need to allocate %x bytes from the arena for %s', byteLength, this);
 
-    const res = this._arena.allocate(byteLength, this._segments);
+    const res = Arena.allocate(byteLength, this._segments, this._arena);
     let s: Segment;
 
     if (res.id === this._segments.length) {
@@ -173,7 +175,7 @@ export class Message {
 
     } else if (res.id < 0 || res.id > this._segments.length) {
 
-      throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, res.id, this));
+      throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, res.id, this));
 
     } else {
 
@@ -270,21 +272,21 @@ export class Message {
       // Segment zero is special. If we have no segments in the arena we'll want to allocate a new one and leave room
       // for the root pointer.
 
-      const arenaSegments = this._arena.getNumSegments();
+      const arenaSegments = Arena.getNumSegments(this._arena);
 
       if (arenaSegments === 0) {
 
-        this.allocateSegment(C.DEFAULT_BUFFER_SIZE);
+        this.allocateSegment(DEFAULT_BUFFER_SIZE);
 
       } else {
 
         // Okay, the arena already has a buffer we can use. This is totally fine.
 
-        this._segments[0] = new Segment(0, this, this._arena.getBuffer(0));
+        this._segments[0] = new Segment(0, this, Arena.getBuffer(0, this._arena));
 
       }
 
-      if (!this._segments[0].hasCapacity(8)) throw new Error(E.MSG_SEGMENT_TOO_SMALL);
+      if (!this._segments[0].hasCapacity(8)) throw new Error(MSG_SEGMENT_TOO_SMALL);
 
       // This will leave room for the root pointer.
 
@@ -294,7 +296,7 @@ export class Message {
 
     }
 
-    if (id < 0 || id >= segmentLength) throw new Error(format(E.MSG_SEGMENT_OUT_OF_BOUNDS, id, this));
+    if (id < 0 || id >= segmentLength) throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, id, this));
 
     return this._segments[id];
 
@@ -336,7 +338,7 @@ export class Message {
 
     if (this._traversalLimit <= 0) {
 
-      throw new Error(format(E.PTR_TRAVERSAL_LIMIT_EXCEEDED, pointer));
+      throw new Error(format(PTR_TRAVERSAL_LIMIT_EXCEEDED, pointer));
 
     }
 
@@ -437,9 +439,9 @@ export class Message {
 
   protected _preallocateSegments(): void {
 
-    const numSegments = this._arena.getNumSegments();
+    const numSegments = Arena.getNumSegments(this._arena);
 
-    if (numSegments < 1) throw new Error(E.MSG_NO_SEGMENTS_IN_ARENA);
+    if (numSegments < 1) throw new Error(MSG_NO_SEGMENTS_IN_ARENA);
 
     this._segments = new Array(numSegments);
 
@@ -447,7 +449,7 @@ export class Message {
 
       // Set up each segment so that they're fully allocated to the extents of the existing buffers.
 
-      const buffer = this._arena.getBuffer(i);
+      const buffer = Arena.getBuffer(i, this._arena);
       const segment = new Segment(i, this, buffer, buffer.byteLength);
 
       this._segments[i] = segment;
