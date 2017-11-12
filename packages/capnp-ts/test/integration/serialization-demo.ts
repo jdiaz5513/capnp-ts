@@ -25,7 +25,7 @@ export class AddressBook extends __S {
 
     // There is no extra overhead to proxy through to the Pointer static methods via Struct like this since the original
     // function reference is copied as a static property.
-    __S.adopt(value, this._getPointer(0));
+    __S.adopt(value, __S.getPointer(0, this));
 
   }
 
@@ -37,25 +37,25 @@ export class AddressBook extends __S {
 
   getPeople(): capnp.List<Person> {
 
-    return this._getList(0, AddressBook.People);
+    return __S.getList(0, AddressBook.People, this);
 
   }
 
   hasPeople(): boolean {
 
-    return !__S.isNull(this._getPointer(0));
+    return !__S.isNull(__S.getPointer(0, this));
 
   }
 
   initPeople(length: number): capnp.List<Person> {
 
-    return this._initList(0, AddressBook.People, length);
+    return __S.initList(0, AddressBook.People, length, this);
 
   }
 
   setPeople(value: capnp.List<Person>): void {
 
-    __S.copyFrom(value, this._getPointer(0));
+    __S.copyFrom(value, __S.getPointer(0, this));
 
   }
 
@@ -90,23 +90,23 @@ class Person_Employment extends __S {
 
   _initGroup = () => {
 
-    this._setUint16(4, 0);
+    __S.setUint16(4, 0, this);
 
   }
 
   getEmployer(): string {
 
-    this._testWhich('employment', this.which(), 1);
+    __S.testWhich('employment', this.which(), 1, this);
 
-    return this._getText(3);
+    return __S.getText(3, this);
 
   }
 
   getSchool(): string {
 
-    this._testWhich('employment', this.which(), 2);
+    __S.testWhich('employment', this.which(), 2, this);
 
-    return this._getText(3);
+    return __S.getText(3, this);
 
   }
 
@@ -136,43 +136,43 @@ class Person_Employment extends __S {
 
   hasEmployer(): boolean {
 
-    this._testWhich('employment', this.which(), 1);
+    __S.testWhich('employment', this.which(), 1, this);
 
-    return !__S.isNull(this._getPointer(3));
+    return !__S.isNull(__S.getPointer(3, this));
 
   }
 
   hasSchool(): boolean {
 
-    this._testWhich('employment', this.which(), 2);
+    __S.testWhich('employment', this.which(), 2, this);
 
-    return !__S.isNull(this._getPointer(3));
+    return !__S.isNull(__S.getPointer(3, this));
 
   }
 
   setEmployer(value: string): void {
 
-    this._setUint16(4, 1);
-    this._setText(3, value);
+    __S.setUint16(4, 1, this);
+    __S.setText(3, value, this);
 
   }
 
   setSchool(value: string): void {
 
-    this._setUint16(4, 2);
-    this._setText(3, value);
+    __S.setUint16(4, 2, this);
+    __S.setText(3, value, this);
 
   }
 
   setSelfEmployed(): void {
 
-    this._setUint16(4, 3);
+    __S.setUint16(4, 3, this);
 
   }
 
   setUnemployed(): void {
 
-    this._setUint16(4, 0);
+    __S.setUint16(4, 0, this);
 
   }
 
@@ -184,7 +184,7 @@ class Person_Employment extends __S {
 
   which(): number {
 
-    return this._getUint16(4);
+    return __S.getUint16(4, this);
 
   }
 
@@ -197,25 +197,25 @@ class Person_PhoneNumber extends __S {
 
   getNumber(): string {
 
-    return this._getText(0);
+    return __S.getText(0, this);
 
   }
 
   getType(): Person_PhoneNumber_Type {
 
-    return this._getUint16(0);
+    return __S.getUint16(0, this);
 
   }
 
   setNumber(value: string): void {
 
-    this._setText(0, value);
+    __S.setText(0, value, this);
 
   }
 
   setType(value: Person_PhoneNumber_Type): void {
 
-    this._setUint16(0, value);
+    __S.setUint16(0, value, this);
 
   }
 
@@ -236,7 +236,7 @@ export class Person extends __S {
 
   adoptPhones(value: capnp.Orphan<capnp.List<Person_PhoneNumber>>): void {
 
-    __S.adopt(value, this._getPointer(2));
+    __S.adopt(value, __S.getPointer(2, this));
 
   }
 
@@ -248,49 +248,49 @@ export class Person extends __S {
 
   getEmail(): string {
 
-    return this._getText(1);
+    return __S.getText(1, this);
 
   }
 
   getEmployment(): Person_Employment {
 
-    return this._getAs(Person_Employment);
+    return __S.getAs(Person_Employment, this);
 
   }
 
   getId(): number {
 
-    return this._getUint32(0);
+    return __S.getUint32(0, this);
 
   }
 
   getName(): string {
 
-    return this._getText(0);
+    return __S.getText(0, this);
 
   }
 
   getPhones(): capnp.List<Person_PhoneNumber> {
 
-    return this._getList(2, Person.Phones);
+    return __S.getList(2, Person.Phones, this);
 
   }
 
   hasEmail(): boolean {
 
-    return !__S.isNull(this._getPointer(1));
+    return !__S.isNull(__S.getPointer(1, this));
 
   }
 
   hasName(): boolean {
 
-    return !__S.isNull(this._getPointer(0));
+    return !__S.isNull(__S.getPointer(0, this));
 
   }
 
   hasPhones(): boolean {
 
-    return !__S.isNull(this._getPointer(2));
+    return !__S.isNull(__S.getPointer(2, this));
 
   }
 
@@ -304,31 +304,31 @@ export class Person extends __S {
 
   initPhones(length: number): capnp.List<Person_PhoneNumber> {
 
-    return this._initList(2, Person.Phones, length);
+    return __S.initList(2, Person.Phones, length, this);
 
   }
 
   setEmail(value: string): void {
 
-    this._setText(1, value);
+    __S.setText(1, value, this);
 
   }
 
   setId(value: number): void {
 
-    this._setUint32(0, value);
+    __S.setUint32(0, value, this);
 
   }
 
   setName(value: string): void {
 
-    this._setText(0, value);
+    __S.setText(0, value, this);
 
   }
 
   setPhones(value: capnp.List<Person_PhoneNumber>): void {
 
-    __S.copyFrom(value, this._getPointer(2));
+    __S.copyFrom(value, __S.getPointer(2, this));
 
   }
 

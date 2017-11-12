@@ -34,6 +34,8 @@ export interface PointerCtor<T extends Pointer> {
 
 export interface _Pointer {
 
+  compositeIndex?: number;
+
   compositeList: boolean;
 
   /**
@@ -502,12 +504,15 @@ function isCompositeList(p: Pointer): boolean {
 
 /**
  * Obtain the location of the pointer's content, following far pointers as needed.
+ * If the pointer is a struct pointer and `compositeIndex` is set, it will be offset by a multiple of the struct's size.
  *
  * @param {Pointer} p The pointer to read from.
+ * @param {boolean} [ignoreCompositeIndex] If true, will not follow the composite struct pointer's composite index and
+ * instead return a pointer to the parent list's contents (also the beginning of the first struct).
  * @returns {Pointer} A pointer to the beginning of the pointer's content.
  */
 
-export function getContent(p: Pointer): Pointer {
+export function getContent(p: Pointer, ignoreCompositeIndex?: boolean): Pointer {
 
   let c: Pointer;
 
@@ -523,9 +528,17 @@ export function getContent(p: Pointer): Pointer {
 
   }
 
-  if (isCompositeList(p)) {
+  if (isCompositeList(p)) c.byteOffset += 8;
 
-    c.byteOffset += 8;
+  if (!ignoreCompositeIndex && p._capnp.compositeIndex !== undefined) {
+
+    // Seek backwards by one word so we can read the struct size off the tag word.
+
+    c.byteOffset -= 8;
+
+    // Seek ahead by `compositeIndex` multiples of the struct's total size.
+
+    c.byteOffset += 8 + p._capnp.compositeIndex * getStructSize(c).padToWord().getByteLength();
 
   }
 

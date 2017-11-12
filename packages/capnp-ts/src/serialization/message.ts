@@ -14,6 +14,7 @@ import { pack, unpack } from './packing';
 import { StructCtor, PointerType, Struct } from './pointers';
 import { Segment } from './segment';
 import { getTargetStructSize, validate } from './pointers/pointer';
+import { resize, initStruct } from './pointers/struct';
 
 const trace = initTrace('capnp:message');
 trace('load');
@@ -246,7 +247,7 @@ export class Message {
 
       trace('need to resize root struct %s', root);
 
-      root._resize(RootStruct._capnp.size);
+      resize(RootStruct._capnp.size, root);
 
     }
 
@@ -314,7 +315,7 @@ export class Message {
 
     const root = new RootStruct(this.getSegment(0), 0);
 
-    root._initStruct(RootStruct._capnp.size);
+    initStruct(RootStruct._capnp.size, root);
 
     trace('Initialized root pointer %s for %s.', root, this);
 

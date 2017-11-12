@@ -10,49 +10,49 @@ class TestStruct extends Struct {
 
   adoptTest(value: Orphan<TestStruct>): void {
 
-    Struct.adopt(value, this._getPointer(0));
+    Struct.adopt(value, Struct.getPointer(0, this));
 
   }
 
   disownTest(): Orphan<TestStruct> {
 
-    return this.getTest().disown();
+    return Struct.disown(this.getTest());
 
   }
 
   getTest(): TestStruct {
 
-    return this._getPointerAs(0, TestStruct);
+    return Struct.getPointerAs(0, TestStruct, this);
 
   }
 
   hasTest(): boolean {
 
-    return !Struct.isNull(this._getPointer(0));
+    return !Struct.isNull(Struct.getPointer(0, this));
 
   }
 
   initTest(): TestStruct {
 
-    return this._initStructAt(0, TestStruct);
+    return Struct.initStructAt(0, TestStruct, this);
 
   }
 
   setTest(value: TestStruct): void {
 
-    Struct.copyFrom(value, this._getPointer(0));
+    Struct.copyFrom(value, Struct.getPointer(0, this));
 
   }
 
   getFoo(): number {
 
-    return this._getUint32(0);
+    return Struct.getUint32(0, this);
 
   }
 
   setFoo(value: number): void {
 
-    this._setUint32(0, value);
+    Struct.setUint32(0, value, this);
 
   }
 
@@ -64,13 +64,13 @@ class TestStruct extends Struct {
 
   getList(): Int32List {
 
-    return this._getPointerAs(1, Int32List);
+    return Struct.getPointerAs(1, Int32List, this);
 
   }
 
   initList(length: number): Int32List {
 
-    return this._initList(1, Int32List, length);
+    return Struct.initList(1, Int32List, length, this);
 
   }
 

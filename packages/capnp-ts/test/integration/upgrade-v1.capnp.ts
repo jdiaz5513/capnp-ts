@@ -5,27 +5,27 @@
 /* tslint:disable */
 
 import * as capnp from "../../lib/index";
-import { ObjectSize } from '../../lib/index';
+import { ObjectSize as __O, Struct as __S } from '../../lib/index';
 export const _capnpFileId = "c81a48fa54bfdd1f";
-export class Upgrade extends capnp.Struct {
-    static readonly _capnp = { displayName: "Upgrade", id: "8fa95f1989e267fb", size: new ObjectSize(8, 3) };
+export class Upgrade extends __S {
+    static readonly _capnp = { displayName: "Upgrade", id: "8fa95f1989e267fb", size: new __O(8, 3) };
     static _SelfReferences: capnp.ListCtor<Upgrade>;
-    getLegacyName(): string { return this._getText(0); }
-    setLegacyName(value: string): void { this._setText(0, value); }
-    getLegacyId(): number { return this._getInt32(0); }
-    setLegacyId(value: number): void { this._setInt32(0, value); }
-    adoptSelfReference(value: capnp.Orphan<Upgrade>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
-    disownSelfReference(): capnp.Orphan<Upgrade> { return capnp.Struct.disown(this.getSelfReference()); }
-    getSelfReference(): Upgrade { return this._getStruct(1, Upgrade); }
-    hasSelfReference(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
-    initSelfReference(): Upgrade { return this._initStructAt(1, Upgrade); }
-    setSelfReference(value: Upgrade): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
-    adoptSelfReferences(value: capnp.Orphan<capnp.List<Upgrade>>): void { capnp.Struct.adopt(value, this._getPointer(2)); }
-    disownSelfReferences(): capnp.Orphan<capnp.List<Upgrade>> { return capnp.Struct.disown(this.getSelfReferences()); }
-    getSelfReferences(): capnp.List<Upgrade> { return this._getList(2, Upgrade._SelfReferences); }
-    hasSelfReferences(): boolean { return !capnp.Struct.isNull(this._getPointer(2)); }
-    initSelfReferences(length: number): capnp.List<Upgrade> { return this._initList(2, Upgrade._SelfReferences, length); }
-    setSelfReferences(value: capnp.List<Upgrade>): void { capnp.Struct.copyFrom(value, this._getPointer(2)); }
+    getLegacyName(): string { return __S.getText(0, this); }
+    setLegacyName(value: string): void { __S.setText(0, value, this); }
+    getLegacyId(): number { return __S.getInt32(0, this); }
+    setLegacyId(value: number): void { __S.setInt32(0, value, this); }
+    adoptSelfReference(value: capnp.Orphan<Upgrade>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownSelfReference(): capnp.Orphan<Upgrade> { return __S.disown(this.getSelfReference()); }
+    getSelfReference(): Upgrade { return __S.getStruct(1, Upgrade, this); }
+    hasSelfReference(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initSelfReference(): Upgrade { return __S.initStructAt(1, Upgrade, this); }
+    setSelfReference(value: Upgrade): void { __S.copyFrom(value, __S.getPointer(1, this)); }
+    adoptSelfReferences(value: capnp.Orphan<capnp.List<Upgrade>>): void { __S.adopt(value, __S.getPointer(2, this)); }
+    disownSelfReferences(): capnp.Orphan<capnp.List<Upgrade>> { return __S.disown(this.getSelfReferences()); }
+    getSelfReferences(): capnp.List<Upgrade> { return __S.getList(2, Upgrade._SelfReferences, this); }
+    hasSelfReferences(): boolean { return !__S.isNull(__S.getPointer(2, this)); }
+    initSelfReferences(length: number): capnp.List<Upgrade> { return __S.initList(2, Upgrade._SelfReferences, length, this); }
+    setSelfReferences(value: capnp.List<Upgrade>): void { __S.copyFrom(value, __S.getPointer(2, this)); }
     toString(): string { return "Upgrade_" + super.toString(); }
 }
 Upgrade._SelfReferences = capnp.CompositeList(Upgrade);
