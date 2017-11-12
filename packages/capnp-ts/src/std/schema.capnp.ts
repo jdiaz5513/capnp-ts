@@ -296,7 +296,7 @@ export class Field extends __S {
     hasAnnotations(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
     initAnnotations(length: number): capnp.List<Annotation> { return __S.initList(1, Field._Annotations, length, this); }
     setAnnotations(value: capnp.List<Annotation>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
-    getDiscriminantValue(): number { return __S.getUint16(2, FIELD_DISCRIMINANT_VALUE_DEFAULT, this); }
+    getDiscriminantValue(): number { return __S.getUint16(2, this, FIELD_DISCRIMINANT_VALUE_DEFAULT); }
     setDiscriminantValue(value: number): void { __S.setUint16(2, value, this); }
     getSlot(): Field_Slot {
         __S.testWhich("slot", __S.getUint16(8, this), 0, this);
