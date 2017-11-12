@@ -33,7 +33,7 @@ export class MultiSegmentArena {
 
 }
 
-function allocate(minSize: number, m: MultiSegmentArena): ArenaAllocationResult {
+export function allocate(minSize: number, m: MultiSegmentArena): ArenaAllocationResult {
 
   const b = new ArrayBuffer(padToWord(Math.max(minSize, DEFAULT_BUFFER_SIZE)));
   m.buffers.push(b);
@@ -42,7 +42,7 @@ function allocate(minSize: number, m: MultiSegmentArena): ArenaAllocationResult 
 
 }
 
-function getBuffer(id: number, m: MultiSegmentArena): ArrayBuffer {
+export function getBuffer(id: number, m: MultiSegmentArena): ArrayBuffer {
 
   if (id < 0 || id >= m.buffers.length) throw new Error(format(SEG_ID_OUT_OF_BOUNDS, id));
 
@@ -50,7 +50,7 @@ function getBuffer(id: number, m: MultiSegmentArena): ArrayBuffer {
 
 }
 
-function getNumSegments(m: MultiSegmentArena): number {
+export function getNumSegments(m: MultiSegmentArena): number {
 
   return m.buffers.length;
 

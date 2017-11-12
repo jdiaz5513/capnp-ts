@@ -6,106 +6,106 @@
 
 import * as capnp from "../../lib/index";
 import { ObjectSize } from '../../lib/index';
-export const _id = "b4dbefd56457c333";
+export const _capnpFileId = "b4dbefd56457c333";
 export class ListMania extends capnp.Struct {
     static readonly _capnp = { displayName: "ListMania", id: "d0a988493b63e78b", size: new ObjectSize(0, 16) };
     static _CompositeList: capnp.ListCtor<ListManiaStruct>;
-    adoptBoolList(value: capnp.Orphan<capnp.List<boolean>>): void { this._getPointer(0).adopt(value); }
-    disownBoolList(): capnp.Orphan<capnp.List<boolean>> { return this.getBoolList().disown(); }
+    adoptBoolList(value: capnp.Orphan<capnp.List<boolean>>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownBoolList(): capnp.Orphan<capnp.List<boolean>> { return capnp.Struct.disown(this.getBoolList()); }
     getBoolList(): capnp.List<boolean> { return this._getList(0, capnp.BoolList); }
-    hasBoolList(): boolean { return !this._getPointer(0)._isNull(); }
+    hasBoolList(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initBoolList(length: number): capnp.List<boolean> { return this._initList(0, capnp.BoolList, length); }
-    setBoolList(value: capnp.List<boolean>): void { this._getPointer(0)._copyFrom(value); }
-    adoptCompositeList(value: capnp.Orphan<capnp.List<ListManiaStruct>>): void { this._getPointer(1).adopt(value); }
-    disownCompositeList(): capnp.Orphan<capnp.List<ListManiaStruct>> { return this.getCompositeList().disown(); }
+    setBoolList(value: capnp.List<boolean>): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
+    adoptCompositeList(value: capnp.Orphan<capnp.List<ListManiaStruct>>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownCompositeList(): capnp.Orphan<capnp.List<ListManiaStruct>> { return capnp.Struct.disown(this.getCompositeList()); }
     getCompositeList(): capnp.List<ListManiaStruct> { return this._getList(1, ListMania._CompositeList); }
-    hasCompositeList(): boolean { return !this._getPointer(1)._isNull(); }
+    hasCompositeList(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initCompositeList(length: number): capnp.List<ListManiaStruct> { return this._initList(1, ListMania._CompositeList, length); }
-    setCompositeList(value: capnp.List<ListManiaStruct>): void { this._getPointer(1)._copyFrom(value); }
-    adoptDataList(value: capnp.Orphan<capnp.List<capnp.Data>>): void { this._getPointer(2).adopt(value); }
-    disownDataList(): capnp.Orphan<capnp.List<capnp.Data>> { return this.getDataList().disown(); }
+    setCompositeList(value: capnp.List<ListManiaStruct>): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
+    adoptDataList(value: capnp.Orphan<capnp.List<capnp.Data>>): void { capnp.Struct.adopt(value, this._getPointer(2)); }
+    disownDataList(): capnp.Orphan<capnp.List<capnp.Data>> { return capnp.Struct.disown(this.getDataList()); }
     getDataList(): capnp.List<capnp.Data> { return this._getList(2, capnp.DataList); }
-    hasDataList(): boolean { return !this._getPointer(2)._isNull(); }
+    hasDataList(): boolean { return !capnp.Struct.isNull(this._getPointer(2)); }
     initDataList(length: number): capnp.List<capnp.Data> { return this._initList(2, capnp.DataList, length); }
-    setDataList(value: capnp.List<capnp.Data>): void { this._getPointer(2)._copyFrom(value); }
-    adoptFloat32List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(3).adopt(value); }
-    disownFloat32List(): capnp.Orphan<capnp.List<number>> { return this.getFloat32List().disown(); }
+    setDataList(value: capnp.List<capnp.Data>): void { capnp.Struct.copyFrom(value, this._getPointer(2)); }
+    adoptFloat32List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownFloat32List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getFloat32List()); }
     getFloat32List(): capnp.List<number> { return this._getList(3, capnp.Float32List); }
-    hasFloat32List(): boolean { return !this._getPointer(3)._isNull(); }
+    hasFloat32List(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initFloat32List(length: number): capnp.List<number> { return this._initList(3, capnp.Float32List, length); }
-    setFloat32List(value: capnp.List<number>): void { this._getPointer(3)._copyFrom(value); }
-    adoptFloat64List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(4).adopt(value); }
-    disownFloat64List(): capnp.Orphan<capnp.List<number>> { return this.getFloat64List().disown(); }
+    setFloat32List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
+    adoptFloat64List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(4)); }
+    disownFloat64List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getFloat64List()); }
     getFloat64List(): capnp.List<number> { return this._getList(4, capnp.Float64List); }
-    hasFloat64List(): boolean { return !this._getPointer(4)._isNull(); }
+    hasFloat64List(): boolean { return !capnp.Struct.isNull(this._getPointer(4)); }
     initFloat64List(length: number): capnp.List<number> { return this._initList(4, capnp.Float64List, length); }
-    setFloat64List(value: capnp.List<number>): void { this._getPointer(4)._copyFrom(value); }
-    adoptInt8List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(5).adopt(value); }
-    disownInt8List(): capnp.Orphan<capnp.List<number>> { return this.getInt8List().disown(); }
+    setFloat64List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(4)); }
+    adoptInt8List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(5)); }
+    disownInt8List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getInt8List()); }
     getInt8List(): capnp.List<number> { return this._getList(5, capnp.Int8List); }
-    hasInt8List(): boolean { return !this._getPointer(5)._isNull(); }
+    hasInt8List(): boolean { return !capnp.Struct.isNull(this._getPointer(5)); }
     initInt8List(length: number): capnp.List<number> { return this._initList(5, capnp.Int8List, length); }
-    setInt8List(value: capnp.List<number>): void { this._getPointer(5)._copyFrom(value); }
-    adoptInt16List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(6).adopt(value); }
-    disownInt16List(): capnp.Orphan<capnp.List<number>> { return this.getInt16List().disown(); }
+    setInt8List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(5)); }
+    adoptInt16List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(6)); }
+    disownInt16List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getInt16List()); }
     getInt16List(): capnp.List<number> { return this._getList(6, capnp.Int16List); }
-    hasInt16List(): boolean { return !this._getPointer(6)._isNull(); }
+    hasInt16List(): boolean { return !capnp.Struct.isNull(this._getPointer(6)); }
     initInt16List(length: number): capnp.List<number> { return this._initList(6, capnp.Int16List, length); }
-    setInt16List(value: capnp.List<number>): void { this._getPointer(6)._copyFrom(value); }
-    adoptInt32List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(7).adopt(value); }
-    disownInt32List(): capnp.Orphan<capnp.List<number>> { return this.getInt32List().disown(); }
+    setInt16List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(6)); }
+    adoptInt32List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(7)); }
+    disownInt32List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getInt32List()); }
     getInt32List(): capnp.List<number> { return this._getList(7, capnp.Int32List); }
-    hasInt32List(): boolean { return !this._getPointer(7)._isNull(); }
+    hasInt32List(): boolean { return !capnp.Struct.isNull(this._getPointer(7)); }
     initInt32List(length: number): capnp.List<number> { return this._initList(7, capnp.Int32List, length); }
-    setInt32List(value: capnp.List<number>): void { this._getPointer(7)._copyFrom(value); }
-    adoptInt64List(value: capnp.Orphan<capnp.List<capnp.Int64>>): void { this._getPointer(8).adopt(value); }
-    disownInt64List(): capnp.Orphan<capnp.List<capnp.Int64>> { return this.getInt64List().disown(); }
+    setInt32List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(7)); }
+    adoptInt64List(value: capnp.Orphan<capnp.List<capnp.Int64>>): void { capnp.Struct.adopt(value, this._getPointer(8)); }
+    disownInt64List(): capnp.Orphan<capnp.List<capnp.Int64>> { return capnp.Struct.disown(this.getInt64List()); }
     getInt64List(): capnp.List<capnp.Int64> { return this._getList(8, capnp.Int64List); }
-    hasInt64List(): boolean { return !this._getPointer(8)._isNull(); }
+    hasInt64List(): boolean { return !capnp.Struct.isNull(this._getPointer(8)); }
     initInt64List(length: number): capnp.List<capnp.Int64> { return this._initList(8, capnp.Int64List, length); }
-    setInt64List(value: capnp.List<capnp.Int64>): void { this._getPointer(8)._copyFrom(value); }
-    adoptInterfaceList(value: capnp.Orphan<capnp.List<capnp.Interface>>): void { this._getPointer(9).adopt(value); }
-    disownInterfaceList(): capnp.Orphan<capnp.List<capnp.Interface>> { return this.getInterfaceList().disown(); }
+    setInt64List(value: capnp.List<capnp.Int64>): void { capnp.Struct.copyFrom(value, this._getPointer(8)); }
+    adoptInterfaceList(value: capnp.Orphan<capnp.List<capnp.Interface>>): void { capnp.Struct.adopt(value, this._getPointer(9)); }
+    disownInterfaceList(): capnp.Orphan<capnp.List<capnp.Interface>> { return capnp.Struct.disown(this.getInterfaceList()); }
     getInterfaceList(): capnp.List<capnp.Interface> { return this._getList(9, capnp.InterfaceList); }
-    hasInterfaceList(): boolean { return !this._getPointer(9)._isNull(); }
+    hasInterfaceList(): boolean { return !capnp.Struct.isNull(this._getPointer(9)); }
     initInterfaceList(length: number): capnp.List<capnp.Interface> { return this._initList(9, capnp.InterfaceList, length); }
-    setInterfaceList(value: capnp.List<capnp.Interface>): void { this._getPointer(9)._copyFrom(value); }
-    adoptTextList(value: capnp.Orphan<capnp.List<string>>): void { this._getPointer(10).adopt(value); }
-    disownTextList(): capnp.Orphan<capnp.List<string>> { return this.getTextList().disown(); }
+    setInterfaceList(value: capnp.List<capnp.Interface>): void { capnp.Struct.copyFrom(value, this._getPointer(9)); }
+    adoptTextList(value: capnp.Orphan<capnp.List<string>>): void { capnp.Struct.adopt(value, this._getPointer(10)); }
+    disownTextList(): capnp.Orphan<capnp.List<string>> { return capnp.Struct.disown(this.getTextList()); }
     getTextList(): capnp.List<string> { return this._getList(10, capnp.TextList); }
-    hasTextList(): boolean { return !this._getPointer(10)._isNull(); }
+    hasTextList(): boolean { return !capnp.Struct.isNull(this._getPointer(10)); }
     initTextList(length: number): capnp.List<string> { return this._initList(10, capnp.TextList, length); }
-    setTextList(value: capnp.List<string>): void { this._getPointer(10)._copyFrom(value); }
-    adoptUint8List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(11).adopt(value); }
-    disownUint8List(): capnp.Orphan<capnp.List<number>> { return this.getUint8List().disown(); }
+    setTextList(value: capnp.List<string>): void { capnp.Struct.copyFrom(value, this._getPointer(10)); }
+    adoptUint8List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(11)); }
+    disownUint8List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getUint8List()); }
     getUint8List(): capnp.List<number> { return this._getList(11, capnp.Uint8List); }
-    hasUint8List(): boolean { return !this._getPointer(11)._isNull(); }
+    hasUint8List(): boolean { return !capnp.Struct.isNull(this._getPointer(11)); }
     initUint8List(length: number): capnp.List<number> { return this._initList(11, capnp.Uint8List, length); }
-    setUint8List(value: capnp.List<number>): void { this._getPointer(11)._copyFrom(value); }
-    adoptUint16List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(12).adopt(value); }
-    disownUint16List(): capnp.Orphan<capnp.List<number>> { return this.getUint16List().disown(); }
+    setUint8List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(11)); }
+    adoptUint16List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(12)); }
+    disownUint16List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getUint16List()); }
     getUint16List(): capnp.List<number> { return this._getList(12, capnp.Uint16List); }
-    hasUint16List(): boolean { return !this._getPointer(12)._isNull(); }
+    hasUint16List(): boolean { return !capnp.Struct.isNull(this._getPointer(12)); }
     initUint16List(length: number): capnp.List<number> { return this._initList(12, capnp.Uint16List, length); }
-    setUint16List(value: capnp.List<number>): void { this._getPointer(12)._copyFrom(value); }
-    adoptUint32List(value: capnp.Orphan<capnp.List<number>>): void { this._getPointer(13).adopt(value); }
-    disownUint32List(): capnp.Orphan<capnp.List<number>> { return this.getUint32List().disown(); }
+    setUint16List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(12)); }
+    adoptUint32List(value: capnp.Orphan<capnp.List<number>>): void { capnp.Struct.adopt(value, this._getPointer(13)); }
+    disownUint32List(): capnp.Orphan<capnp.List<number>> { return capnp.Struct.disown(this.getUint32List()); }
     getUint32List(): capnp.List<number> { return this._getList(13, capnp.Uint32List); }
-    hasUint32List(): boolean { return !this._getPointer(13)._isNull(); }
+    hasUint32List(): boolean { return !capnp.Struct.isNull(this._getPointer(13)); }
     initUint32List(length: number): capnp.List<number> { return this._initList(13, capnp.Uint32List, length); }
-    setUint32List(value: capnp.List<number>): void { this._getPointer(13)._copyFrom(value); }
-    adoptUint64List(value: capnp.Orphan<capnp.List<capnp.Uint64>>): void { this._getPointer(14).adopt(value); }
-    disownUint64List(): capnp.Orphan<capnp.List<capnp.Uint64>> { return this.getUint64List().disown(); }
+    setUint32List(value: capnp.List<number>): void { capnp.Struct.copyFrom(value, this._getPointer(13)); }
+    adoptUint64List(value: capnp.Orphan<capnp.List<capnp.Uint64>>): void { capnp.Struct.adopt(value, this._getPointer(14)); }
+    disownUint64List(): capnp.Orphan<capnp.List<capnp.Uint64>> { return capnp.Struct.disown(this.getUint64List()); }
     getUint64List(): capnp.List<capnp.Uint64> { return this._getList(14, capnp.Uint64List); }
-    hasUint64List(): boolean { return !this._getPointer(14)._isNull(); }
+    hasUint64List(): boolean { return !capnp.Struct.isNull(this._getPointer(14)); }
     initUint64List(length: number): capnp.List<capnp.Uint64> { return this._initList(14, capnp.Uint64List, length); }
-    setUint64List(value: capnp.List<capnp.Uint64>): void { this._getPointer(14)._copyFrom(value); }
-    adoptVoidList(value: capnp.Orphan<capnp.List<capnp.Void>>): void { this._getPointer(15).adopt(value); }
-    disownVoidList(): capnp.Orphan<capnp.List<capnp.Void>> { return this.getVoidList().disown(); }
+    setUint64List(value: capnp.List<capnp.Uint64>): void { capnp.Struct.copyFrom(value, this._getPointer(14)); }
+    adoptVoidList(value: capnp.Orphan<capnp.List<capnp.Void>>): void { capnp.Struct.adopt(value, this._getPointer(15)); }
+    disownVoidList(): capnp.Orphan<capnp.List<capnp.Void>> { return capnp.Struct.disown(this.getVoidList()); }
     getVoidList(): capnp.List<capnp.Void> { return this._getList(15, capnp.VoidList); }
-    hasVoidList(): boolean { return !this._getPointer(15)._isNull(); }
+    hasVoidList(): boolean { return !capnp.Struct.isNull(this._getPointer(15)); }
     initVoidList(length: number): capnp.List<capnp.Void> { return this._initList(15, capnp.VoidList, length); }
-    setVoidList(value: capnp.List<capnp.Void>): void { this._getPointer(15)._copyFrom(value); }
+    setVoidList(value: capnp.List<capnp.Void>): void { capnp.Struct.copyFrom(value, this._getPointer(15)); }
     toString(): string { return "ListMania_" + super.toString(); }
 }
 export class ListManiaInterface extends capnp.Struct {
@@ -114,12 +114,12 @@ export class ListManiaInterface extends capnp.Struct {
 }
 export class ListManiaStruct extends capnp.Struct {
     static readonly _capnp = { displayName: "ListManiaStruct", id: "9e1eb66286605522", size: new ObjectSize(0, 1) };
-    adoptSelf(value: capnp.Orphan<ListMania>): void { this._getPointer(0).adopt(value); }
-    disownSelf(): capnp.Orphan<ListMania> { return this.getSelf().disown(); }
+    adoptSelf(value: capnp.Orphan<ListMania>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownSelf(): capnp.Orphan<ListMania> { return capnp.Struct.disown(this.getSelf()); }
     getSelf(): ListMania { return this._getStruct(0, ListMania); }
-    hasSelf(): boolean { return !this._getPointer(0)._isNull(); }
+    hasSelf(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initSelf(): ListMania { return this._initStructAt(0, ListMania); }
-    setSelf(value: ListMania): void { this._getPointer(0)._copyFrom(value); }
+    setSelf(value: ListMania): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "ListManiaStruct_" + super.toString(); }
 }
 ListMania._CompositeList = capnp.CompositeList(ListManiaStruct);

@@ -26,10 +26,12 @@ import {
   READONLY,
   STATIC,
   STRING_TYPE,
+  STRUCT,
   THIS,
   TS_FILE_ID,
   VALUE,
   VOID_TYPE,
+  OBJECT_SIZE,
 } from './constants';
 import * as E from './errors';
 import {
@@ -71,9 +73,9 @@ export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
     __, __, ts.createImportClause(
       u as ts.Identifier, ts.createNamespaceImport(CAPNP)), ts.createLiteral(importPath)));
 
-  // import { ObjectSize } from '${importPath}';
+  // import { ObjectSize as __O, Struct as __S } from '${importPath}';
   ctx.sourceFile.statements.push(
-    ts.createStatement(ts.createIdentifier(`import { ObjectSize } from '${importPath}'`)));
+    ts.createStatement(ts.createIdentifier(`import { ObjectSize as __O, Struct as __S } from '${importPath}'`)));
   // ctx.sourceFile.statements.push(
   //   ts.createImportDeclaration(
   //     __, __, ts.createImportClause(
@@ -255,11 +257,15 @@ export function generateStructFieldMethods(
   const union = discriminantValue !== s.Field.NO_DISCRIMINANT;
   const offset = (field.isSlot() && field.getSlot().getOffset()) || 0;
   const offsetLiteral = ts.createNumericLiteral(offset.toString());
+  /** this._getPointer(0) */
   const getPointer = ts.createCall(ts.createPropertyAccess(THIS, '_getPointer'), __, [offsetLiteral]);
-  const copyFromValue = ts.createCall(ts.createPropertyAccess(getPointer, '_copyFrom'), __, [VALUE]);
+  /** __S.copyFrom(value, this._getPointer(0)) */
+  const copyFromValue = ts.createCall(ts.createPropertyAccess(STRUCT, 'copyFrom'), __, [VALUE, getPointer]);
+  /** capnp.Orphan<Foo> */
   const orphanType = ts.createTypeReferenceNode('capnp.Orphan', [jsTypeReference]);
   const discriminantOffsetLiteral = ts.createNumericLiteral((discriminantOffset * 2).toString());
   const discriminantValueLiteral = ts.createNumericLiteral(discriminantValue.toString());
+  /** this._getUint16(0) */
   const getDiscriminant = ts.createCall(
     ts.createPropertyAccess(
       THIS, '_getUint16'), __, [discriminantOffsetLiteral]);
@@ -419,11 +425,11 @@ export function generateStructFieldMethods(
 
   }
 
-  // adoptFoo(value: capnp.Orphan<FooType>): void { ... }
+  // adoptFoo(value: capnp.Orphan<Foo>): void { __S.adopt(value, this._getPointer(3)); }}
   if (adopt) {
 
     const parameters = [ts.createParameter(__, __, __, VALUE, __, orphanType, __)];
-    const expressions = [ts.createCall(ts.createPropertyAccess(getPointer, 'adopt'), __, [VALUE])];
+    const expressions = [ts.createCall(ts.createPropertyAccess(STRUCT, 'adopt'), __, [VALUE, getPointer])];
 
     if (union) expressions.unshift(setDiscriminant);
 
@@ -431,11 +437,11 @@ export function generateStructFieldMethods(
 
   }
 
-  // disownFoo(): capnp.Orphan<FooType> { ... }
+  // disownFoo(): capnp.Orphan<Foo> { return __S.disown(this.getFoo()); }
   if (disown) {
 
     const getter = ts.createCall(ts.createPropertyAccess(THIS, `get${properName}`), __, []);
-    const expressions = [ts.createCall(ts.createPropertyAccess(getter, 'disown'), __, [])];
+    const expressions = [ts.createCall(ts.createPropertyAccess(STRUCT, 'disown'), __, [getter])];
 
     members.push(createMethod(`disown${properName}`, [], orphanType, expressions));
 
@@ -462,8 +468,10 @@ export function generateStructFieldMethods(
   // hasFoo(): boolean { ... }
   if (has) {
 
-    // !this._getPointer(8)._isNull();
-    const expressions = [ts.createLogicalNot(ts.createCall(ts.createPropertyAccess(getPointer, '_isNull'), __, []))];
+    // !__S.isNull(this._getPointer(8));
+    const expressions = [
+      ts.createLogicalNot(
+        ts.createCall(ts.createPropertyAccess(STRUCT, 'isNull'), __, [getPointer]))];
 
     members.push(createMethod(`has${properName}`, [], BOOLEAN_TYPE, expressions));
 
@@ -569,7 +577,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   // }
 
-  // static reaodnly _capnp = { displayName: 'MyStruct', id: '4732bab4310f81', size = new ObjectSize(8, 8) };
+  // static reaodnly _capnp = { displayName: 'MyStruct', id: '4732bab4310f81', size = new __O(8, 8) };
   members.push(
     ts.createProperty(
       __, [STATIC, READONLY], '_capnp', __, __,
@@ -578,7 +586,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
         ts.createPropertyAssignment('id', ts.createLiteral(nodeIdHex)),
         ts.createPropertyAssignment(
           'size', ts.createNew(
-            ts.createIdentifier('ObjectSize'), __, [
+            OBJECT_SIZE, __, [
               ts.createNumericLiteral(dataByteLength.toString()),
               ts.createNumericLiteral(pointerCount.toString())]))])));
 
@@ -605,7 +613,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   }
 
-  const c = ts.createClassDeclaration(__, [EXPORT], fullClassName, __, [createClassExtends('capnp.Struct')], members);
+  const c = ts.createClassDeclaration(__, [EXPORT], fullClassName, __, [createClassExtends('__S')], members);
 
   // Make sure the interface classes are generated first.
 

@@ -1,10 +1,8 @@
 import * as C from '../../../lib/constants';
-import {Message} from '../../../lib/serialization';
-import {MultiSegmentArena} from '../../../lib/serialization/arena';
-import {ArenaAllocationResult} from '../../../lib/serialization/arena/arena-allocation-result';
-import {Segment} from '../../../lib/serialization/segment';
-import {Person} from '../../integration/serialization-demo';
-import {compareBuffers, readFileBuffer, tap} from '../../util';
+import { Message } from '../../../lib/serialization';
+import { MultiSegmentArena } from '../../../lib/serialization/arena';
+import { Person } from '../../integration/serialization-demo';
+import { compareBuffers, readFileBuffer, tap } from '../../util';
 
 const SEGMENTED_PACKED = readFileBuffer('test/data/segmented-packed.bin');
 const SEGMENTED_UNPACKED = readFileBuffer('test/data/segmented.bin');
@@ -91,22 +89,6 @@ tap.test('Message.allocateSegment()', (t) => {
   m2.allocateSegment(length);
 
   t.equal(m2.getSegment(1).buffer.byteLength, length, 'should allocate new segments');
-
-  class BadArena extends MultiSegmentArena {
-
-    allocate(minSize: number, segments: Segment[]): ArenaAllocationResult {
-
-      const res = super.allocate(minSize, segments);
-
-      return new ArenaAllocationResult(999, res.buffer);
-
-    }
-
-  }
-
-  const m3 = new Message(new BadArena());
-
-  t.throws(() => m3.allocateSegment(1), undefined, 'should freak out if the arena is misbehaving');
 
   t.end();
 

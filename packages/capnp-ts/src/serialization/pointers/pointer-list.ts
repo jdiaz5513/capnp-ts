@@ -6,7 +6,7 @@ import initTrace from 'debug';
 
 import { ListElementSize } from '../list-element-size';
 import { _ListCtor, List, ListCtor } from './list';
-import { Pointer, PointerCtor } from './pointer';
+import { Pointer, PointerCtor, getContent, copyFrom } from './pointer';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -22,15 +22,14 @@ export function PointerList<T extends Pointer>(PointerClass: PointerCtor<T>): Li
 
     get(index: number): T {
 
-      const c = this._getContent();
-
+      const c = getContent(this);
       return new PointerClass(c.segment, c.byteOffset + index * 8, this._capnp.depthLimit - 1);
 
     }
 
     set(index: number, value: T): void {
 
-      this.get(index)._copyFrom(value);
+      copyFrom(value, this.get(index));
 
     }
 

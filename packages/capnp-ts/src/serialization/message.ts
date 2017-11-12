@@ -3,17 +3,17 @@
  */
 
 import initTrace from 'debug';
-import { dumpBuffer, format, padToWord } from '../util';
-import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena } from './arena';
-import { pack, unpack } from './packing';
-import { PointerType, Struct } from './pointers';
-import { StructCtor } from './pointers/struct';
-import { Segment } from './segment';
 import { DEFAULT_TRAVERSE_LIMIT, DEFAULT_BUFFER_SIZE } from '../constants';
 import {
   MSG_INVALID_FRAME_HEADER, MSG_SEGMENT_OUT_OF_BOUNDS, MSG_SEGMENT_TOO_SMALL, PTR_TRAVERSAL_LIMIT_EXCEEDED,
   MSG_NO_SEGMENTS_IN_ARENA,
 } from '../errors';
+import { dumpBuffer, format, padToWord } from '../util';
+import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena } from './arena';
+import { pack, unpack } from './packing';
+import { StructCtor, PointerType, Struct } from './pointers';
+import { Segment } from './segment';
+import { getTargetStructSize, validate } from './pointers/pointer';
 
 const trace = initTrace('capnp:message');
 trace('load');
@@ -233,9 +233,9 @@ export class Message {
 
     const root = new RootStruct(this.getSegment(0), 0);
 
-    root._validate(PointerType.STRUCT);
+    validate(PointerType.STRUCT, root);
 
-    const ts = root._getTargetStructSize();
+    const ts = getTargetStructSize(root);
 
     // Make sure the underlying pointer is actually big enough to hold the data and pointers as specified in the schema.
     // If not a shallow copy of the struct contents needs to be made before returning.

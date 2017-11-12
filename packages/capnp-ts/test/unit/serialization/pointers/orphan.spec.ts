@@ -10,7 +10,7 @@ class TestStruct extends Struct {
 
   adoptTest(value: Orphan<TestStruct>): void {
 
-    this._getPointer(0).adopt(value);
+    Struct.adopt(value, this._getPointer(0));
 
   }
 
@@ -28,7 +28,7 @@ class TestStruct extends Struct {
 
   hasTest(): boolean {
 
-    return !this._getPointer(0)._isNull();
+    return !Struct.isNull(this._getPointer(0));
 
   }
 
@@ -40,7 +40,7 @@ class TestStruct extends Struct {
 
   setTest(value: TestStruct): void {
 
-    this._getPointer(0)._copyFrom(value);
+    Struct.copyFrom(value, this._getPointer(0));
 
   }
 
@@ -58,7 +58,7 @@ class TestStruct extends Struct {
 
   disownList(): Orphan<Int32List> {
 
-    return this.getList().disown();
+    return Struct.disown(this.getList());
 
   }
 
@@ -90,7 +90,7 @@ tap.test('new Orphan()', (t) => {
   t.equal(
     structOrphan._capnp.size.pointerLength, TestStruct._capnp.size.pointerLength, 'should copy the pointer count');
 
-  t.ok(root._isNull(), 'should zero out the struct pointer');
+  t.ok(Struct.isNull(root), 'should zero out the struct pointer');
 
   const list = new Message().initRoot(TestStruct).initList(2);
 
@@ -101,7 +101,7 @@ tap.test('new Orphan()', (t) => {
   t.equal(listOrphan._capnp.length, 2, 'should copy the list length');
   t.equal(listOrphan._capnp.elementSize, Int32List._capnp.size, 'should copy the list element size');
 
-  t.ok(list._isNull(), 'should zero out the list pointer');
+  t.ok(Struct.isNull(list), 'should zero out the list pointer');
 
   t.end();
 

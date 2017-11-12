@@ -7,7 +7,7 @@ import initTrace from 'debug';
 import { decodeUtf8, encodeUtf8 } from '../../util';
 import { ListElementSize } from '../list-element-size';
 import { List } from './list';
-import { Pointer } from './pointer';
+import { Pointer, validate, isNull, getContent, erase } from './pointer';
 import { PointerType } from './pointer-type';
 
 const trace = initTrace('capnp:text');
@@ -17,7 +17,7 @@ export class Text extends List<string> {
 
   static fromPointer(pointer: Pointer): Text {
 
-    pointer._validate(PointerType.LIST, ListElementSize.BYTE);
+    validate(PointerType.LIST, pointer, ListElementSize.BYTE);
 
     return this._fromPointerUnchecked(pointer);
 
@@ -40,9 +40,9 @@ export class Text extends List<string> {
 
     if (index !== 0) trace('Called get() on %s with a strange index (%d).', this, index);
 
-    if (this._isNull()) return '';
+    if (isNull(this)) return '';
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     // Remember to exclude the NUL byte.
 
@@ -82,9 +82,9 @@ export class Text extends List<string> {
 
     // TODO: Consider reusing existing space if list is already initialized and there's enough room for the value.
 
-    if (!this._isNull()) {
+    if (!isNull(this)) {
 
-      c = this._getContent();
+      c = getContent(this);
 
       // Only copy bytes that will remain after copying. Everything after `index` should end up truncated.
 
@@ -102,7 +102,7 @@ export class Text extends List<string> {
 
       original = new Uint8Array(c.segment.buffer.slice(c.byteOffset, c.byteOffset + Math.min(originalLength, index)));
 
-      this._erase();
+      erase(this);
 
     }
 
@@ -110,7 +110,7 @@ export class Text extends List<string> {
 
     this._initList(ListElementSize.BYTE, dstLength + 1);
 
-    c = this._getContent();
+    c = getContent(this);
     const dst = new Uint8Array(c.segment.buffer, c.byteOffset, dstLength);
 
     if (original) dst.set(original);

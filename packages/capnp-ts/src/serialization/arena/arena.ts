@@ -22,7 +22,7 @@ export abstract class Arena {
 
 }
 
-function allocate(minSize: number, segments: Segment[], a: AnyArena): ArenaAllocationResult {
+export function allocate(minSize: number, segments: Segment[], a: AnyArena): ArenaAllocationResult {
 
   switch (a.kind) {
 
@@ -42,7 +42,7 @@ function allocate(minSize: number, segments: Segment[], a: AnyArena): ArenaAlloc
 
 }
 
-function getBuffer(id: number, a: AnyArena) {
+export function getBuffer(id: number, a: AnyArena) {
 
   switch (a.kind) {
 
@@ -62,7 +62,7 @@ function getBuffer(id: number, a: AnyArena) {
 
 }
 
-function getNumSegments(a: AnyArena) {
+export function getNumSegments(a: AnyArena) {
 
   switch (a.kind) {
 

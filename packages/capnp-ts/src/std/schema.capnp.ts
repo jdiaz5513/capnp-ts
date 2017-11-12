@@ -23,36 +23,36 @@ export class Node_NestedNode extends capnp.Struct {
 }
 export class Node_Const extends capnp.Struct {
     static readonly _capnp = { displayName: "const", id: "b18aa5ac7a0d9420", size: new ObjectSize(40, 6) };
-    adoptType(value: capnp.Orphan<Type>): void { this._getPointer(3).adopt(value); }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
+    adoptType(value: capnp.Orphan<Type>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownType(): capnp.Orphan<Type> { return capnp.Struct.disown(this.getType()); }
     getType(): Type { return this._getStruct(3, Type); }
-    hasType(): boolean { return !this._getPointer(3)._isNull(); }
+    hasType(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initType(): Type { return this._initStructAt(3, Type); }
-    setType(value: Type): void { this._getPointer(3)._copyFrom(value); }
-    adoptValue(value: capnp.Orphan<Value>): void { this._getPointer(4).adopt(value); }
-    disownValue(): capnp.Orphan<Value> { return this.getValue().disown(); }
+    setType(value: Type): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
+    adoptValue(value: capnp.Orphan<Value>): void { capnp.Struct.adopt(value, this._getPointer(4)); }
+    disownValue(): capnp.Orphan<Value> { return capnp.Struct.disown(this.getValue()); }
     getValue(): Value { return this._getStruct(4, Value); }
-    hasValue(): boolean { return !this._getPointer(4)._isNull(); }
+    hasValue(): boolean { return !capnp.Struct.isNull(this._getPointer(4)); }
     initValue(): Value { return this._initStructAt(4, Value); }
-    setValue(value: Value): void { this._getPointer(4)._copyFrom(value); }
+    setValue(value: Value): void { capnp.Struct.copyFrom(value, this._getPointer(4)); }
     toString(): string { return "Node_Const_" + super.toString(); }
 }
 export class Node_Interface extends capnp.Struct {
     static readonly _capnp = { displayName: "interface", id: "e82753cff0c2218f", size: new ObjectSize(40, 6) };
     static _Methods: capnp.ListCtor<Method>;
     static _Superclasses: capnp.ListCtor<Superclass>;
-    adoptMethods(value: capnp.Orphan<capnp.List<Method>>): void { this._getPointer(3).adopt(value); }
-    disownMethods(): capnp.Orphan<capnp.List<Method>> { return this.getMethods().disown(); }
+    adoptMethods(value: capnp.Orphan<capnp.List<Method>>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownMethods(): capnp.Orphan<capnp.List<Method>> { return capnp.Struct.disown(this.getMethods()); }
     getMethods(): capnp.List<Method> { return this._getList(3, Node_Interface._Methods); }
-    hasMethods(): boolean { return !this._getPointer(3)._isNull(); }
+    hasMethods(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initMethods(length: number): capnp.List<Method> { return this._initList(3, Node_Interface._Methods, length); }
-    setMethods(value: capnp.List<Method>): void { this._getPointer(3)._copyFrom(value); }
-    adoptSuperclasses(value: capnp.Orphan<capnp.List<Superclass>>): void { this._getPointer(4).adopt(value); }
-    disownSuperclasses(): capnp.Orphan<capnp.List<Superclass>> { return this.getSuperclasses().disown(); }
+    setMethods(value: capnp.List<Method>): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
+    adoptSuperclasses(value: capnp.Orphan<capnp.List<Superclass>>): void { capnp.Struct.adopt(value, this._getPointer(4)); }
+    disownSuperclasses(): capnp.Orphan<capnp.List<Superclass>> { return capnp.Struct.disown(this.getSuperclasses()); }
     getSuperclasses(): capnp.List<Superclass> { return this._getList(4, Node_Interface._Superclasses); }
-    hasSuperclasses(): boolean { return !this._getPointer(4)._isNull(); }
+    hasSuperclasses(): boolean { return !capnp.Struct.isNull(this._getPointer(4)); }
     initSuperclasses(length: number): capnp.List<Superclass> { return this._initList(4, Node_Interface._Superclasses, length); }
-    setSuperclasses(value: capnp.List<Superclass>): void { this._getPointer(4)._copyFrom(value); }
+    setSuperclasses(value: capnp.List<Superclass>): void { capnp.Struct.copyFrom(value, this._getPointer(4)); }
     toString(): string { return "Node_Interface_" + super.toString(); }
 }
 export class Node_Struct extends capnp.Struct {
@@ -70,22 +70,22 @@ export class Node_Struct extends capnp.Struct {
     setDiscriminantCount(value: number): void { this._setUint16(30, value); }
     getDiscriminantOffset(): number { return this._getUint32(32); }
     setDiscriminantOffset(value: number): void { this._setUint32(32, value); }
-    adoptFields(value: capnp.Orphan<capnp.List<Field>>): void { this._getPointer(3).adopt(value); }
-    disownFields(): capnp.Orphan<capnp.List<Field>> { return this.getFields().disown(); }
+    adoptFields(value: capnp.Orphan<capnp.List<Field>>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownFields(): capnp.Orphan<capnp.List<Field>> { return capnp.Struct.disown(this.getFields()); }
     getFields(): capnp.List<Field> { return this._getList(3, Node_Struct._Fields); }
-    hasFields(): boolean { return !this._getPointer(3)._isNull(); }
+    hasFields(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initFields(length: number): capnp.List<Field> { return this._initList(3, Node_Struct._Fields, length); }
-    setFields(value: capnp.List<Field>): void { this._getPointer(3)._copyFrom(value); }
+    setFields(value: capnp.List<Field>): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
     toString(): string { return "Node_Struct_" + super.toString(); }
 }
 export class Node_Annotation extends capnp.Struct {
     static readonly _capnp = { displayName: "annotation", id: "ec1619d4400a0290", size: new ObjectSize(40, 6) };
-    adoptType(value: capnp.Orphan<Type>): void { this._getPointer(3).adopt(value); }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
+    adoptType(value: capnp.Orphan<Type>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownType(): capnp.Orphan<Type> { return capnp.Struct.disown(this.getType()); }
     getType(): Type { return this._getStruct(3, Type); }
-    hasType(): boolean { return !this._getPointer(3)._isNull(); }
+    hasType(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initType(): Type { return this._initStructAt(3, Type); }
-    setType(value: Type): void { this._getPointer(3)._copyFrom(value); }
+    setType(value: Type): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
     getTargetsFile(): boolean { return this._getBit(112); }
     setTargetsFile(value: boolean): void { this._setBit(112, value); }
     getTargetsConst(): boolean { return this._getBit(113); }
@@ -115,12 +115,12 @@ export class Node_Annotation extends capnp.Struct {
 export class Node_Enum extends capnp.Struct {
     static readonly _capnp = { displayName: "enum", id: "b54ab3364333f598", size: new ObjectSize(40, 6) };
     static _Enumerants: capnp.ListCtor<Enumerant>;
-    adoptEnumerants(value: capnp.Orphan<capnp.List<Enumerant>>): void { this._getPointer(3).adopt(value); }
-    disownEnumerants(): capnp.Orphan<capnp.List<Enumerant>> { return this.getEnumerants().disown(); }
+    adoptEnumerants(value: capnp.Orphan<capnp.List<Enumerant>>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownEnumerants(): capnp.Orphan<capnp.List<Enumerant>> { return capnp.Struct.disown(this.getEnumerants()); }
     getEnumerants(): capnp.List<Enumerant> { return this._getList(3, Node_Enum._Enumerants); }
-    hasEnumerants(): boolean { return !this._getPointer(3)._isNull(); }
+    hasEnumerants(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initEnumerants(length: number): capnp.List<Enumerant> { return this._initList(3, Node_Enum._Enumerants, length); }
-    setEnumerants(value: capnp.List<Enumerant>): void { this._getPointer(3)._copyFrom(value); }
+    setEnumerants(value: capnp.List<Enumerant>): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
     toString(): string { return "Node_Enum_" + super.toString(); }
 }
 export enum Node_Which {
@@ -152,26 +152,26 @@ export class Node extends capnp.Struct {
     setDisplayNamePrefixLength(value: number): void { this._setUint32(8, value); }
     getScopeId(): capnp.Uint64 { return this._getUint64(16); }
     setScopeId(value: capnp.Uint64): void { this._setUint64(16, value); }
-    adoptParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { this._getPointer(5).adopt(value); }
-    disownParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return this.getParameters().disown(); }
+    adoptParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { capnp.Struct.adopt(value, this._getPointer(5)); }
+    disownParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return capnp.Struct.disown(this.getParameters()); }
     getParameters(): capnp.List<Node_Parameter> { return this._getList(5, Node._Parameters); }
-    hasParameters(): boolean { return !this._getPointer(5)._isNull(); }
+    hasParameters(): boolean { return !capnp.Struct.isNull(this._getPointer(5)); }
     initParameters(length: number): capnp.List<Node_Parameter> { return this._initList(5, Node._Parameters, length); }
-    setParameters(value: capnp.List<Node_Parameter>): void { this._getPointer(5)._copyFrom(value); }
+    setParameters(value: capnp.List<Node_Parameter>): void { capnp.Struct.copyFrom(value, this._getPointer(5)); }
     getIsGeneric(): boolean { return this._getBit(288); }
     setIsGeneric(value: boolean): void { this._setBit(288, value); }
-    adoptNestedNodes(value: capnp.Orphan<capnp.List<Node_NestedNode>>): void { this._getPointer(1).adopt(value); }
-    disownNestedNodes(): capnp.Orphan<capnp.List<Node_NestedNode>> { return this.getNestedNodes().disown(); }
+    adoptNestedNodes(value: capnp.Orphan<capnp.List<Node_NestedNode>>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownNestedNodes(): capnp.Orphan<capnp.List<Node_NestedNode>> { return capnp.Struct.disown(this.getNestedNodes()); }
     getNestedNodes(): capnp.List<Node_NestedNode> { return this._getList(1, Node._NestedNodes); }
-    hasNestedNodes(): boolean { return !this._getPointer(1)._isNull(); }
+    hasNestedNodes(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initNestedNodes(length: number): capnp.List<Node_NestedNode> { return this._initList(1, Node._NestedNodes, length); }
-    setNestedNodes(value: capnp.List<Node_NestedNode>): void { this._getPointer(1)._copyFrom(value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(2).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
+    setNestedNodes(value: capnp.List<Node_NestedNode>): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { capnp.Struct.adopt(value, this._getPointer(2)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return capnp.Struct.disown(this.getAnnotations()); }
     getAnnotations(): capnp.List<Annotation> { return this._getList(2, Node._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(2)._isNull(); }
+    hasAnnotations(): boolean { return !capnp.Struct.isNull(this._getPointer(2)); }
     initAnnotations(length: number): capnp.List<Annotation> { return this._initList(2, Node._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(2)._copyFrom(value); }
+    setAnnotations(value: capnp.List<Annotation>): void { capnp.Struct.copyFrom(value, this._getPointer(2)); }
     isFile(): boolean { return this._getUint16(12) === 0; }
     setFile(): void { this._setUint16(12, 0); }
     getStruct(): Node_Struct {
@@ -259,18 +259,18 @@ export class Field_Slot extends capnp.Struct {
     static readonly _capnp = { displayName: "slot", id: "c42305476bb4746f", size: new ObjectSize(24, 4) };
     getOffset(): number { return this._getUint32(4); }
     setOffset(value: number): void { this._setUint32(4, value); }
-    adoptType(value: capnp.Orphan<Type>): void { this._getPointer(2).adopt(value); }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
+    adoptType(value: capnp.Orphan<Type>): void { capnp.Struct.adopt(value, this._getPointer(2)); }
+    disownType(): capnp.Orphan<Type> { return capnp.Struct.disown(this.getType()); }
     getType(): Type { return this._getStruct(2, Type); }
-    hasType(): boolean { return !this._getPointer(2)._isNull(); }
+    hasType(): boolean { return !capnp.Struct.isNull(this._getPointer(2)); }
     initType(): Type { return this._initStructAt(2, Type); }
-    setType(value: Type): void { this._getPointer(2)._copyFrom(value); }
-    adoptDefaultValue(value: capnp.Orphan<Value>): void { this._getPointer(3).adopt(value); }
-    disownDefaultValue(): capnp.Orphan<Value> { return this.getDefaultValue().disown(); }
+    setType(value: Type): void { capnp.Struct.copyFrom(value, this._getPointer(2)); }
+    adoptDefaultValue(value: capnp.Orphan<Value>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownDefaultValue(): capnp.Orphan<Value> { return capnp.Struct.disown(this.getDefaultValue()); }
     getDefaultValue(): Value { return this._getStruct(3, Value); }
-    hasDefaultValue(): boolean { return !this._getPointer(3)._isNull(); }
+    hasDefaultValue(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initDefaultValue(): Value { return this._initStructAt(3, Value); }
-    setDefaultValue(value: Value): void { this._getPointer(3)._copyFrom(value); }
+    setDefaultValue(value: Value): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
     getHadExplicitDefault(): boolean { return this._getBit(128); }
     setHadExplicitDefault(value: boolean): void { this._setBit(128, value); }
     toString(): string { return "Field_Slot_" + super.toString(); }
@@ -290,12 +290,12 @@ export class Field extends capnp.Struct {
     setName(value: string): void { this._setText(0, value); }
     getCodeOrder(): number { return this._getUint16(0); }
     setCodeOrder(value: number): void { this._setUint16(0, value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(1).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return capnp.Struct.disown(this.getAnnotations()); }
     getAnnotations(): capnp.List<Annotation> { return this._getList(1, Field._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(1)._isNull(); }
+    hasAnnotations(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initAnnotations(length: number): capnp.List<Annotation> { return this._initList(1, Field._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(1)._copyFrom(value); }
+    setAnnotations(value: capnp.List<Annotation>): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
     getDiscriminantValue(): number { return this._getUint16(2, FIELD_DISCRIMINANT_VALUE_DEFAULT); }
     setDiscriminantValue(value: number): void { this._setUint16(2, value); }
     getSlot(): Field_Slot {
@@ -330,24 +330,24 @@ export class Enumerant extends capnp.Struct {
     setName(value: string): void { this._setText(0, value); }
     getCodeOrder(): number { return this._getUint16(0); }
     setCodeOrder(value: number): void { this._setUint16(0, value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(1).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return capnp.Struct.disown(this.getAnnotations()); }
     getAnnotations(): capnp.List<Annotation> { return this._getList(1, Enumerant._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(1)._isNull(); }
+    hasAnnotations(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initAnnotations(length: number): capnp.List<Annotation> { return this._initList(1, Enumerant._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(1)._copyFrom(value); }
+    setAnnotations(value: capnp.List<Annotation>): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
     toString(): string { return "Enumerant_" + super.toString(); }
 }
 export class Superclass extends capnp.Struct {
     static readonly _capnp = { displayName: "Superclass", id: "a9962a9ed0a4d7f8", size: new ObjectSize(8, 1) };
     getId(): capnp.Uint64 { return this._getUint64(0); }
     setId(value: capnp.Uint64): void { this._setUint64(0, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownBrand(): capnp.Orphan<Brand> { return capnp.Struct.disown(this.getBrand()); }
     getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
+    hasBrand(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+    setBrand(value: Brand): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "Superclass_" + super.toString(); }
 }
 export class Method extends capnp.Struct {
@@ -358,34 +358,34 @@ export class Method extends capnp.Struct {
     setName(value: string): void { this._setText(0, value); }
     getCodeOrder(): number { return this._getUint16(0); }
     setCodeOrder(value: number): void { this._setUint16(0, value); }
-    adoptImplicitParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { this._getPointer(4).adopt(value); }
-    disownImplicitParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return this.getImplicitParameters().disown(); }
+    adoptImplicitParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { capnp.Struct.adopt(value, this._getPointer(4)); }
+    disownImplicitParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return capnp.Struct.disown(this.getImplicitParameters()); }
     getImplicitParameters(): capnp.List<Node_Parameter> { return this._getList(4, Method._ImplicitParameters); }
-    hasImplicitParameters(): boolean { return !this._getPointer(4)._isNull(); }
+    hasImplicitParameters(): boolean { return !capnp.Struct.isNull(this._getPointer(4)); }
     initImplicitParameters(length: number): capnp.List<Node_Parameter> { return this._initList(4, Method._ImplicitParameters, length); }
-    setImplicitParameters(value: capnp.List<Node_Parameter>): void { this._getPointer(4)._copyFrom(value); }
+    setImplicitParameters(value: capnp.List<Node_Parameter>): void { capnp.Struct.copyFrom(value, this._getPointer(4)); }
     getParamStructType(): capnp.Uint64 { return this._getUint64(8); }
     setParamStructType(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptParamBrand(value: capnp.Orphan<Brand>): void { this._getPointer(2).adopt(value); }
-    disownParamBrand(): capnp.Orphan<Brand> { return this.getParamBrand().disown(); }
+    adoptParamBrand(value: capnp.Orphan<Brand>): void { capnp.Struct.adopt(value, this._getPointer(2)); }
+    disownParamBrand(): capnp.Orphan<Brand> { return capnp.Struct.disown(this.getParamBrand()); }
     getParamBrand(): Brand { return this._getStruct(2, Brand); }
-    hasParamBrand(): boolean { return !this._getPointer(2)._isNull(); }
+    hasParamBrand(): boolean { return !capnp.Struct.isNull(this._getPointer(2)); }
     initParamBrand(): Brand { return this._initStructAt(2, Brand); }
-    setParamBrand(value: Brand): void { this._getPointer(2)._copyFrom(value); }
+    setParamBrand(value: Brand): void { capnp.Struct.copyFrom(value, this._getPointer(2)); }
     getResultStructType(): capnp.Uint64 { return this._getUint64(16); }
     setResultStructType(value: capnp.Uint64): void { this._setUint64(16, value); }
-    adoptResultBrand(value: capnp.Orphan<Brand>): void { this._getPointer(3).adopt(value); }
-    disownResultBrand(): capnp.Orphan<Brand> { return this.getResultBrand().disown(); }
+    adoptResultBrand(value: capnp.Orphan<Brand>): void { capnp.Struct.adopt(value, this._getPointer(3)); }
+    disownResultBrand(): capnp.Orphan<Brand> { return capnp.Struct.disown(this.getResultBrand()); }
     getResultBrand(): Brand { return this._getStruct(3, Brand); }
-    hasResultBrand(): boolean { return !this._getPointer(3)._isNull(); }
+    hasResultBrand(): boolean { return !capnp.Struct.isNull(this._getPointer(3)); }
     initResultBrand(): Brand { return this._initStructAt(3, Brand); }
-    setResultBrand(value: Brand): void { this._getPointer(3)._copyFrom(value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(1).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
+    setResultBrand(value: Brand): void { capnp.Struct.copyFrom(value, this._getPointer(3)); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return capnp.Struct.disown(this.getAnnotations()); }
     getAnnotations(): capnp.List<Annotation> { return this._getList(1, Method._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(1)._isNull(); }
+    hasAnnotations(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initAnnotations(length: number): capnp.List<Annotation> { return this._initList(1, Method._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(1)._copyFrom(value); }
+    setAnnotations(value: capnp.List<Annotation>): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
     toString(): string { return "Method_" + super.toString(); }
 }
 export enum Type_AnyPointer_Unconstrained_Which {
@@ -472,46 +472,46 @@ export class Type_Struct extends capnp.Struct {
     static readonly _capnp = { displayName: "struct", id: "ac3a6f60ef4cc6d3", size: new ObjectSize(24, 1) };
     getTypeId(): capnp.Uint64 { return this._getUint64(8); }
     setTypeId(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownBrand(): capnp.Orphan<Brand> { return capnp.Struct.disown(this.getBrand()); }
     getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
+    hasBrand(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+    setBrand(value: Brand): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "Type_Struct_" + super.toString(); }
 }
 export class Type_Enum extends capnp.Struct {
     static readonly _capnp = { displayName: "enum", id: "9e0e78711a7f87a9", size: new ObjectSize(24, 1) };
     getTypeId(): capnp.Uint64 { return this._getUint64(8); }
     setTypeId(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownBrand(): capnp.Orphan<Brand> { return capnp.Struct.disown(this.getBrand()); }
     getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
+    hasBrand(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+    setBrand(value: Brand): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "Type_Enum_" + super.toString(); }
 }
 export class Type_List extends capnp.Struct {
     static readonly _capnp = { displayName: "list", id: "87e739250a60ea97", size: new ObjectSize(24, 1) };
-    adoptElementType(value: capnp.Orphan<Type>): void { this._getPointer(0).adopt(value); }
-    disownElementType(): capnp.Orphan<Type> { return this.getElementType().disown(); }
+    adoptElementType(value: capnp.Orphan<Type>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownElementType(): capnp.Orphan<Type> { return capnp.Struct.disown(this.getElementType()); }
     getElementType(): Type { return this._getStruct(0, Type); }
-    hasElementType(): boolean { return !this._getPointer(0)._isNull(); }
+    hasElementType(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initElementType(): Type { return this._initStructAt(0, Type); }
-    setElementType(value: Type): void { this._getPointer(0)._copyFrom(value); }
+    setElementType(value: Type): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "Type_List_" + super.toString(); }
 }
 export class Type_Interface extends capnp.Struct {
     static readonly _capnp = { displayName: "interface", id: "ed8bca69f7fb0cbf", size: new ObjectSize(24, 1) };
     getTypeId(): capnp.Uint64 { return this._getUint64(8); }
     setTypeId(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownBrand(): capnp.Orphan<Brand> { return capnp.Struct.disown(this.getBrand()); }
     getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
+    hasBrand(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+    setBrand(value: Brand): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "Type_Interface_" + super.toString(); }
 }
 export enum Type_Which {
@@ -650,14 +650,14 @@ export class Brand_Scope extends capnp.Struct {
     setScopeId(value: capnp.Uint64): void { this._setUint64(0, value); }
     adoptBind(value: capnp.Orphan<capnp.List<Brand_Binding>>): void {
         this._setUint16(8, 0);
-        this._getPointer(0).adopt(value);
+        capnp.Struct.adopt(value, this._getPointer(0));
     }
-    disownBind(): capnp.Orphan<capnp.List<Brand_Binding>> { return this.getBind().disown(); }
+    disownBind(): capnp.Orphan<capnp.List<Brand_Binding>> { return capnp.Struct.disown(this.getBind()); }
     getBind(): capnp.List<Brand_Binding> {
         this._testWhich("bind", this._getUint16(8), 0);
         return this._getList(0, Brand_Scope._Bind);
     }
-    hasBind(): boolean { return !this._getPointer(0)._isNull(); }
+    hasBind(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initBind(length: number): capnp.List<Brand_Binding> {
         this._setUint16(8, 0);
         return this._initList(0, Brand_Scope._Bind, length);
@@ -665,7 +665,7 @@ export class Brand_Scope extends capnp.Struct {
     isBind(): boolean { return this._getUint16(8) === 0; }
     setBind(value: capnp.List<Brand_Binding>): void {
         this._setUint16(8, 0);
-        this._getPointer(0)._copyFrom(value);
+        capnp.Struct.copyFrom(value, this._getPointer(0));
     }
     isInherit(): boolean { return this._getUint16(8) === 1; }
     setInherit(): void { this._setUint16(8, 1); }
@@ -684,14 +684,14 @@ export class Brand_Binding extends capnp.Struct {
     setUnbound(): void { this._setUint16(0, 0); }
     adoptType(value: capnp.Orphan<Type>): void {
         this._setUint16(0, 1);
-        this._getPointer(0).adopt(value);
+        capnp.Struct.adopt(value, this._getPointer(0));
     }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
+    disownType(): capnp.Orphan<Type> { return capnp.Struct.disown(this.getType()); }
     getType(): Type {
         this._testWhich("type", this._getUint16(0), 1);
         return this._getStruct(0, Type);
     }
-    hasType(): boolean { return !this._getPointer(0)._isNull(); }
+    hasType(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initType(): Type {
         this._setUint16(0, 1);
         return this._initStructAt(0, Type);
@@ -699,7 +699,7 @@ export class Brand_Binding extends capnp.Struct {
     isType(): boolean { return this._getUint16(0) === 1; }
     setType(value: Type): void {
         this._setUint16(0, 1);
-        this._getPointer(0)._copyFrom(value);
+        capnp.Struct.copyFrom(value, this._getPointer(0));
     }
     toString(): string { return "Brand_Binding_" + super.toString(); }
     which(): Brand_Binding_Which { return this._getUint16(0); }
@@ -709,12 +709,12 @@ export class Brand extends capnp.Struct {
     static readonly Binding = Brand_Binding;
     static readonly _capnp = { displayName: "Brand", id: "903455f06065422b", size: new ObjectSize(0, 1) };
     static _Scopes: capnp.ListCtor<Brand_Scope>;
-    adoptScopes(value: capnp.Orphan<capnp.List<Brand_Scope>>): void { this._getPointer(0).adopt(value); }
-    disownScopes(): capnp.Orphan<capnp.List<Brand_Scope>> { return this.getScopes().disown(); }
+    adoptScopes(value: capnp.Orphan<capnp.List<Brand_Scope>>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownScopes(): capnp.Orphan<capnp.List<Brand_Scope>> { return capnp.Struct.disown(this.getScopes()); }
     getScopes(): capnp.List<Brand_Scope> { return this._getList(0, Brand._Scopes); }
-    hasScopes(): boolean { return !this._getPointer(0)._isNull(); }
+    hasScopes(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initScopes(length: number): capnp.List<Brand_Scope> { return this._initList(0, Brand._Scopes, length); }
-    setScopes(value: capnp.List<Brand_Scope>): void { this._getPointer(0)._copyFrom(value); }
+    setScopes(value: capnp.List<Brand_Scope>): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "Brand_" + super.toString(); }
 }
 export enum Value_Which {
@@ -871,14 +871,14 @@ export class Value extends capnp.Struct {
     }
     adoptData(value: capnp.Orphan<capnp.Data>): void {
         this._setUint16(0, 13);
-        this._getPointer(0).adopt(value);
+        capnp.Struct.adopt(value, this._getPointer(0));
     }
-    disownData(): capnp.Orphan<capnp.Data> { return this.getData().disown(); }
+    disownData(): capnp.Orphan<capnp.Data> { return capnp.Struct.disown(this.getData()); }
     getData(): capnp.Data {
         this._testWhich("data", this._getUint16(0), 13);
         return this._getData(0);
     }
-    hasData(): boolean { return !this._getPointer(0)._isNull(); }
+    hasData(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initData(length: number): capnp.Data {
         this._setUint16(0, 13);
         return this._initData(0, length);
@@ -886,22 +886,22 @@ export class Value extends capnp.Struct {
     isData(): boolean { return this._getUint16(0) === 13; }
     setData(value: capnp.Data): void {
         this._setUint16(0, 13);
-        this._getPointer(0)._copyFrom(value);
+        capnp.Struct.copyFrom(value, this._getPointer(0));
     }
     adoptList(value: capnp.Orphan<capnp.Pointer>): void {
         this._setUint16(0, 14);
-        this._getPointer(0).adopt(value);
+        capnp.Struct.adopt(value, this._getPointer(0));
     }
-    disownList(): capnp.Orphan<capnp.Pointer> { return this.getList().disown(); }
+    disownList(): capnp.Orphan<capnp.Pointer> { return capnp.Struct.disown(this.getList()); }
     getList(): capnp.Pointer {
         this._testWhich("list", this._getUint16(0), 14);
         return this._getPointer(0);
     }
-    hasList(): boolean { return !this._getPointer(0)._isNull(); }
+    hasList(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     isList(): boolean { return this._getUint16(0) === 14; }
     setList(value: capnp.Pointer): void {
         this._setUint16(0, 14);
-        this._getPointer(0)._copyFrom(value);
+        capnp.Struct.copyFrom(value, this._getPointer(0));
     }
     getEnum(): number {
         this._testWhich("enum", this._getUint16(0), 15);
@@ -914,35 +914,35 @@ export class Value extends capnp.Struct {
     }
     adoptStruct(value: capnp.Orphan<capnp.Pointer>): void {
         this._setUint16(0, 16);
-        this._getPointer(0).adopt(value);
+        capnp.Struct.adopt(value, this._getPointer(0));
     }
-    disownStruct(): capnp.Orphan<capnp.Pointer> { return this.getStruct().disown(); }
+    disownStruct(): capnp.Orphan<capnp.Pointer> { return capnp.Struct.disown(this.getStruct()); }
     getStruct(): capnp.Pointer {
         this._testWhich("struct", this._getUint16(0), 16);
         return this._getPointer(0);
     }
-    hasStruct(): boolean { return !this._getPointer(0)._isNull(); }
+    hasStruct(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     isStruct(): boolean { return this._getUint16(0) === 16; }
     setStruct(value: capnp.Pointer): void {
         this._setUint16(0, 16);
-        this._getPointer(0)._copyFrom(value);
+        capnp.Struct.copyFrom(value, this._getPointer(0));
     }
     isInterface(): boolean { return this._getUint16(0) === 17; }
     setInterface(): void { this._setUint16(0, 17); }
     adoptAnyPointer(value: capnp.Orphan<capnp.Pointer>): void {
         this._setUint16(0, 18);
-        this._getPointer(0).adopt(value);
+        capnp.Struct.adopt(value, this._getPointer(0));
     }
-    disownAnyPointer(): capnp.Orphan<capnp.Pointer> { return this.getAnyPointer().disown(); }
+    disownAnyPointer(): capnp.Orphan<capnp.Pointer> { return capnp.Struct.disown(this.getAnyPointer()); }
     getAnyPointer(): capnp.Pointer {
         this._testWhich("anyPointer", this._getUint16(0), 18);
         return this._getPointer(0);
     }
-    hasAnyPointer(): boolean { return !this._getPointer(0)._isNull(); }
+    hasAnyPointer(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     isAnyPointer(): boolean { return this._getUint16(0) === 18; }
     setAnyPointer(value: capnp.Pointer): void {
         this._setUint16(0, 18);
-        this._getPointer(0)._copyFrom(value);
+        capnp.Struct.copyFrom(value, this._getPointer(0));
     }
     toString(): string { return "Value_" + super.toString(); }
     which(): Value_Which { return this._getUint16(0); }
@@ -951,18 +951,18 @@ export class Annotation extends capnp.Struct {
     static readonly _capnp = { displayName: "Annotation", id: "f1c8950dab257542", size: new ObjectSize(8, 2) };
     getId(): capnp.Uint64 { return this._getUint64(0); }
     setId(value: capnp.Uint64): void { this._setUint64(0, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(1).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownBrand(): capnp.Orphan<Brand> { return capnp.Struct.disown(this.getBrand()); }
     getBrand(): Brand { return this._getStruct(1, Brand); }
-    hasBrand(): boolean { return !this._getPointer(1)._isNull(); }
+    hasBrand(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initBrand(): Brand { return this._initStructAt(1, Brand); }
-    setBrand(value: Brand): void { this._getPointer(1)._copyFrom(value); }
-    adoptValue(value: capnp.Orphan<Value>): void { this._getPointer(0).adopt(value); }
-    disownValue(): capnp.Orphan<Value> { return this.getValue().disown(); }
+    setBrand(value: Brand): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
+    adoptValue(value: capnp.Orphan<Value>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownValue(): capnp.Orphan<Value> { return capnp.Struct.disown(this.getValue()); }
     getValue(): Value { return this._getStruct(0, Value); }
-    hasValue(): boolean { return !this._getPointer(0)._isNull(); }
+    hasValue(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initValue(): Value { return this._initStructAt(0, Value); }
-    setValue(value: Value): void { this._getPointer(0)._copyFrom(value); }
+    setValue(value: Value): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
     toString(): string { return "Annotation_" + super.toString(); }
 }
 export enum ElementSize {
@@ -1001,12 +1001,12 @@ export class CodeGeneratorRequest_RequestedFile extends capnp.Struct {
     setId(value: capnp.Uint64): void { this._setUint64(0, value); }
     getFilename(): string { return this._getText(0); }
     setFilename(value: string): void { this._setText(0, value); }
-    adoptImports(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>>): void { this._getPointer(1).adopt(value); }
-    disownImports(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>> { return this.getImports().disown(); }
+    adoptImports(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownImports(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>> { return capnp.Struct.disown(this.getImports()); }
     getImports(): capnp.List<CodeGeneratorRequest_RequestedFile_Import> { return this._getList(1, CodeGeneratorRequest_RequestedFile._Imports); }
-    hasImports(): boolean { return !this._getPointer(1)._isNull(); }
+    hasImports(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initImports(length: number): capnp.List<CodeGeneratorRequest_RequestedFile_Import> { return this._initList(1, CodeGeneratorRequest_RequestedFile._Imports, length); }
-    setImports(value: capnp.List<CodeGeneratorRequest_RequestedFile_Import>): void { this._getPointer(1)._copyFrom(value); }
+    setImports(value: capnp.List<CodeGeneratorRequest_RequestedFile_Import>): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
     toString(): string { return "CodeGeneratorRequest_RequestedFile_" + super.toString(); }
 }
 export class CodeGeneratorRequest extends capnp.Struct {
@@ -1014,24 +1014,24 @@ export class CodeGeneratorRequest extends capnp.Struct {
     static readonly _capnp = { displayName: "CodeGeneratorRequest", id: "bfc546f6210ad7ce", size: new ObjectSize(0, 3) };
     static _Nodes: capnp.ListCtor<Node>;
     static _RequestedFiles: capnp.ListCtor<CodeGeneratorRequest_RequestedFile>;
-    adoptCapnpVersion(value: capnp.Orphan<CapnpVersion>): void { this._getPointer(2).adopt(value); }
-    disownCapnpVersion(): capnp.Orphan<CapnpVersion> { return this.getCapnpVersion().disown(); }
+    adoptCapnpVersion(value: capnp.Orphan<CapnpVersion>): void { capnp.Struct.adopt(value, this._getPointer(2)); }
+    disownCapnpVersion(): capnp.Orphan<CapnpVersion> { return capnp.Struct.disown(this.getCapnpVersion()); }
     getCapnpVersion(): CapnpVersion { return this._getStruct(2, CapnpVersion); }
-    hasCapnpVersion(): boolean { return !this._getPointer(2)._isNull(); }
+    hasCapnpVersion(): boolean { return !capnp.Struct.isNull(this._getPointer(2)); }
     initCapnpVersion(): CapnpVersion { return this._initStructAt(2, CapnpVersion); }
-    setCapnpVersion(value: CapnpVersion): void { this._getPointer(2)._copyFrom(value); }
-    adoptNodes(value: capnp.Orphan<capnp.List<Node>>): void { this._getPointer(0).adopt(value); }
-    disownNodes(): capnp.Orphan<capnp.List<Node>> { return this.getNodes().disown(); }
+    setCapnpVersion(value: CapnpVersion): void { capnp.Struct.copyFrom(value, this._getPointer(2)); }
+    adoptNodes(value: capnp.Orphan<capnp.List<Node>>): void { capnp.Struct.adopt(value, this._getPointer(0)); }
+    disownNodes(): capnp.Orphan<capnp.List<Node>> { return capnp.Struct.disown(this.getNodes()); }
     getNodes(): capnp.List<Node> { return this._getList(0, CodeGeneratorRequest._Nodes); }
-    hasNodes(): boolean { return !this._getPointer(0)._isNull(); }
+    hasNodes(): boolean { return !capnp.Struct.isNull(this._getPointer(0)); }
     initNodes(length: number): capnp.List<Node> { return this._initList(0, CodeGeneratorRequest._Nodes, length); }
-    setNodes(value: capnp.List<Node>): void { this._getPointer(0)._copyFrom(value); }
-    adoptRequestedFiles(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>>): void { this._getPointer(1).adopt(value); }
-    disownRequestedFiles(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>> { return this.getRequestedFiles().disown(); }
+    setNodes(value: capnp.List<Node>): void { capnp.Struct.copyFrom(value, this._getPointer(0)); }
+    adoptRequestedFiles(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>>): void { capnp.Struct.adopt(value, this._getPointer(1)); }
+    disownRequestedFiles(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>> { return capnp.Struct.disown(this.getRequestedFiles()); }
     getRequestedFiles(): capnp.List<CodeGeneratorRequest_RequestedFile> { return this._getList(1, CodeGeneratorRequest._RequestedFiles); }
-    hasRequestedFiles(): boolean { return !this._getPointer(1)._isNull(); }
+    hasRequestedFiles(): boolean { return !capnp.Struct.isNull(this._getPointer(1)); }
     initRequestedFiles(length: number): capnp.List<CodeGeneratorRequest_RequestedFile> { return this._initList(1, CodeGeneratorRequest._RequestedFiles, length); }
-    setRequestedFiles(value: capnp.List<CodeGeneratorRequest_RequestedFile>): void { this._getPointer(1)._copyFrom(value); }
+    setRequestedFiles(value: capnp.List<CodeGeneratorRequest_RequestedFile>): void { capnp.Struct.copyFrom(value, this._getPointer(1)); }
     toString(): string { return "CodeGeneratorRequest_" + super.toString(); }
 }
 Node_Interface._Methods = capnp.CompositeList(Method);

@@ -57,12 +57,12 @@ tap.test('Pointer.adopt(), Pointer.disown()', (t) => {
   s.setUint32(0, 0x00000001);
   s.setUint32(4, 0x00000001);
 
-  const o = p.disown();
+  const o = Pointer.disown(p);
 
   t.equal(s.getUint32(0), 0x00000000);
   t.equal(s.getUint32(4), 0x00000000);
 
-  p.adopt(o);
+  Pointer.adopt(o, p);
 
   t.equal(s.getUint32(0), 0x00000001);
   t.equal(s.getUint32(4), 0x00000001);
@@ -80,7 +80,7 @@ tap.test('Pointer.dump()', (t) => {
   s.setUint32(0, 0x00000001);
   s.setUint32(4, 0x00000002);
 
-  t.equal(p.dump(), '[01 00 00 00 02 00 00 00]');
+  t.equal(Pointer.dump(p), '[01 00 00 00 02 00 00 00]');
 
   t.end();
 

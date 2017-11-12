@@ -36,7 +36,7 @@ export class SingleSegmentArena {
 
 }
 
-function allocate(minSize: number, segments: Segment[], s: SingleSegmentArena): ArenaAllocationResult {
+export function allocate(minSize: number, segments: Segment[], s: SingleSegmentArena): ArenaAllocationResult {
 
   trace('Allocating %x bytes for segment 0 in %s.', minSize, s);
 
@@ -62,7 +62,7 @@ function allocate(minSize: number, segments: Segment[], s: SingleSegmentArena): 
 
 }
 
-function getBuffer(id: number, s: SingleSegmentArena): ArrayBuffer {
+export function getBuffer(id: number, s: SingleSegmentArena): ArrayBuffer {
 
   if (id !== 0) throw new Error(format(SEG_GET_NON_ZERO_SINGLE, id));
 
@@ -70,7 +70,7 @@ function getBuffer(id: number, s: SingleSegmentArena): ArrayBuffer {
 
 }
 
-function getNumSegments(): number {
+export function getNumSegments(): number {
 
   return 1;
 

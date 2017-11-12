@@ -175,7 +175,7 @@ tap.test('adoption', (t) => {
   t.ok(s.isWordZero(0x08), 'should null the pointer');
   t.notOk(s.isWordZero(0x10), 'should not wipe out the composite list tag word');
   t.notOk(s.isWordZero(0x40), 'should not touch the content');
-  t.ok(people1._isNull(), 'should null the original pointer');
+  t.ok(capnp.Pointer.isNull(people1), 'should null the original pointer');
 
   addressBook.adoptPeople(o);
 

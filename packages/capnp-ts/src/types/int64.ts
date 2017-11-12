@@ -4,9 +4,9 @@
 
 import initTrace from 'debug';
 
-import {MAX_SAFE_INTEGER, VAL32} from '../constants';
-import {pad} from '../util';
-import {Uint64} from './uint64';
+import { MAX_SAFE_INTEGER, VAL32 } from '../constants';
+import { pad } from '../util';
+import { Uint64 } from './uint64';
 
 const trace = initTrace('capnp:int64');
 trace('load');
@@ -75,7 +75,7 @@ export class Int64 extends Uint64 {
     const bytes = source.toLowerCase().replace(/[^\da-f]/g, '');
     const buf = new Uint8Array(new ArrayBuffer(8));
 
-    for (let i = 0; i < 8; i ++) buf[7 - i] = parseInt(bytes.substr(i * 2, 2), 16);
+    for (let i = 0; i < 8; i++) buf[7 - i] = parseInt(bytes.substr(i * 2, 2), 16);
 
     const val = new Int64(buf);
 

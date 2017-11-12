@@ -9,7 +9,9 @@ import { format, identity } from '../../util';
 import { ListElementSize } from '../list-element-size';
 import { ObjectSize } from '../object-size';
 import { Segment } from '../segment';
-import { Pointer } from './pointer';
+import {
+  Pointer, getTargetListLength, getListElementByteLength, setStructPointer, setListPointer, initPointer,
+} from './pointer';
 
 const trace = initTrace('capnp:list');
 trace('load');
@@ -110,7 +112,7 @@ export class List<T> extends Pointer {
 
   getLength(): number {
 
-    return this._getTargetListLength();
+    return getTargetListLength(this);
 
   }
 
@@ -210,7 +212,7 @@ export class List<T> extends Pointer {
       case ListElementSize.BYTE_8:
       case ListElementSize.POINTER:
 
-        c = this.segment.allocate(length * Pointer._getListElementByteLength(elementSize));
+        c = this.segment.allocate(length * getListElementByteLength(elementSize));
 
         break;
 
@@ -228,7 +230,7 @@ export class List<T> extends Pointer {
 
         c = this.segment.allocate(byteLength + 8);
 
-        c._setStructPointer(length, compositeSize);
+        setStructPointer(length, compositeSize, c);
 
         trace('Wrote composite tag word %s for %s.', c, this);
 
@@ -238,7 +240,7 @@ export class List<T> extends Pointer {
 
         // No need to allocate anything, we can write the list pointer right here.
 
-        this._setListPointer(0, elementSize, length);
+        setListPointer(0, elementSize, length, this);
 
         return;
 
@@ -248,9 +250,9 @@ export class List<T> extends Pointer {
 
     }
 
-    const res = this._initPointer(c.segment, c.byteOffset);
+    const res = initPointer(c.segment, c.byteOffset, this);
 
-    res.pointer._setListPointer(res.offsetWords, elementSize, length, compositeSize);
+    setListPointer(res.offsetWords, elementSize, length, res.pointer, compositeSize);
 
   }
 
