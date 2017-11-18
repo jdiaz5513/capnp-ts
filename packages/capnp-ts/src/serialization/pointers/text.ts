@@ -6,7 +6,7 @@ import initTrace from 'debug';
 
 import { decodeUtf8, encodeUtf8 } from '../../util';
 import { ListElementSize } from '../list-element-size';
-import { List } from './list';
+import { List, initList } from './list';
 import { Pointer, validate, isNull, getContent, erase } from './pointer';
 import { PointerType } from './pointer-type';
 
@@ -19,13 +19,7 @@ export class Text extends List<string> {
 
     validate(PointerType.LIST, pointer, ListElementSize.BYTE);
 
-    return this._fromPointerUnchecked(pointer);
-
-  }
-
-  protected static _fromPointerUnchecked(pointer: Pointer): Text {
-
-    return new this(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
+    return textFromPointerUnchecked(pointer);
 
   }
 
@@ -108,7 +102,7 @@ export class Text extends List<string> {
 
     // Always allocate an extra byte for the NUL byte.
 
-    this._initList(ListElementSize.BYTE, dstLength + 1);
+    initList(ListElementSize.BYTE, dstLength + 1, this);
 
     c = getContent(this);
     const dst = new Uint8Array(c.segment.buffer, c.byteOffset, dstLength);
@@ -124,5 +118,11 @@ export class Text extends List<string> {
     return `Text_${super.toString()}`;
 
   }
+
+}
+
+function textFromPointerUnchecked(pointer: Pointer): Text {
+
+  return new Text(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
 
 }

@@ -18,12 +18,6 @@ export class BoolList extends List<boolean> {
     size: ListElementSize.BIT,
   };
 
-  _initList(length: number): void {
-
-    super._initList(ListElementSize.BIT, length);
-
-  }
-
   get(index: number): boolean {
 
     const bitMask = 1 << index % 8;

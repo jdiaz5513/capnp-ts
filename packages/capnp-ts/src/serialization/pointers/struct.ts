@@ -301,7 +301,7 @@ export function getData(index: number, s: Struct): Data {
 
   if (isNull(l)) {
 
-    l._initList(ListElementSize.BYTE, 0);
+    List.initList(ListElementSize.BYTE, 0, l);
 
   }
 
@@ -472,7 +472,7 @@ export function getList<T>(index: number, ListClass: ListCtor<T>, s: Struct): Li
 
   if (isNull(l)) {
 
-    l._initList(ListClass._capnp.size, 0, ListClass._capnp.compositeSize);
+    List.initList(ListClass._capnp.size, 0, l, ListClass._capnp.compositeSize);
 
   } else if (ListClass._capnp.compositeSize !== undefined) {
 
@@ -752,7 +752,7 @@ export function initData(index: number, length: number, s: Struct): Data {
 
   erase(l);
 
-  l._initList(ListElementSize.BYTE, length);
+  List.initList(ListElementSize.BYTE, length, l);
 
   return l;
 
@@ -770,7 +770,7 @@ export function initList<T>(index: number, ListClass: ListCtor<T>, length: numbe
 
   erase(l);
 
-  l._initList(ListClass._capnp.size, length, ListClass._capnp.compositeSize);
+  List.initList(ListClass._capnp.size, length, l, ListClass._capnp.compositeSize);
 
   return l;
 

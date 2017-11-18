@@ -2,14 +2,12 @@ import { Message, Pointer } from '../../../../lib';
 import * as C from '../../../../lib/constants';
 import { tap } from '../../../util';
 
-/* tslint:disable no-any */
-
 tap.test('new Pointer()', (t) => {
 
   const m = new Message();
   const s = m.getSegment(0);
 
-  const initialTraversalLimit = (m as any)._traversalLimit as number;
+  const initialTraversalLimit = m._capnp.traversalLimit as number;
 
   t.throws(() => {
 
@@ -20,7 +18,7 @@ tap.test('new Pointer()', (t) => {
 
   const p = new Pointer(s, 4);
 
-  t.equal((m as any)._traversalLimit, initialTraversalLimit - 8, 'should track pointer allocation in the message');
+  t.equal(m._capnp.traversalLimit, initialTraversalLimit - 8, 'should track pointer allocation in the message');
 
   t.throws(() => {
 

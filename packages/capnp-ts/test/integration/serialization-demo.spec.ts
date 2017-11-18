@@ -77,9 +77,7 @@ tap.test('write address book', (t) => {
 
 tap.test('read address book', (t) => {
 
-  // Normally this is silly, but we're sure that this .bin file only contains a single segment.
-
-  const message = capnp.Message.fromSegmentBuffer(capnp.Message.getFramedSegments(SERIALIZATION_DEMO)[0]);
+  const message = new capnp.Message(SERIALIZATION_DEMO, false);
 
   const addressBook = message.getRoot(AddressBook);
 

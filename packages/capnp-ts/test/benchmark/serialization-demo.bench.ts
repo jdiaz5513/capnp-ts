@@ -1,19 +1,19 @@
 /* tslint:disable:no-unsafe-any no-any */
 
-import {Suite} from 'benchmark';
-import {readFileSync} from 'fs';
+import { Suite } from 'benchmark';
+import { readFileSync } from 'fs';
 import * as path from 'path';
 
 import * as capnp from '../../lib';
-import {decodeUtf8} from '../../lib/util';
-import {AddressBook} from '../integration/serialization-demo';
-import {logBench, readFileBuffer} from '../util';
+import { decodeUtf8 } from '../../lib/util';
+import { AddressBook } from '../integration/serialization-demo';
+import { logBench, readFileBuffer } from '../util';
 
 const jsonBuffer = new Uint8Array(readFileBuffer('test/data/serialization-demo.json'));
 const jsonString = readFileSync(path.join(__dirname, '../../', 'test/data/serialization-demo.json'), 'utf-8');
 const messageData = readFileBuffer('test/data/serialization-demo.bin');
 // Let's preprocess it so we have just the raw segment data.
-const messageSegment = capnp.Message.getFramedSegments(messageData)[0];
+const messageSegment = new capnp.Message(messageData).getSegment(0).buffer;
 
 const deeplyNested = new Suite('iteration over deeply nested lists')
 
@@ -49,9 +49,9 @@ const deeplyNested = new Suite('iteration over deeply nested lists')
 
   })
 
-  .add('capnp.Message.fromSegmentBuffer(m)', () => {
+  .add('capnp.Message(m)', () => {
 
-    const message = capnp.Message.fromSegmentBuffer(messageSegment);
+    const message = new capnp.Message(messageSegment, false, true);
 
     const addressBook = message.getRoot(AddressBook);
 
@@ -85,9 +85,9 @@ const listLength = new Suite('top level list length access')
 
   })
 
-  .add('capnp.Message.fromSegmentBuffer(m)', () => {
+  .add('capnp.Message(m)', () => {
 
-    const message = capnp.Message.fromSegmentBuffer(messageSegment);
+    const message = new capnp.Message(messageSegment, false, true);
 
     const addressBook = message.getRoot(AddressBook);
 
@@ -109,11 +109,11 @@ const parse = new Suite('"parse"')
 
   })
 
-  .add('capnp.Message.fromSegmentBuffer(m).getRoot(A)', () => {
+  .add('capnp.Message(m).getRoot(A)', () => {
 
     // Okay, this isn't fair. Cap'n Proto only does "parsing" at access time. :)
 
-    capnp.Message.fromSegmentBuffer(messageSegment).getRoot(AddressBook);
+    new capnp.Message(messageSegment, false, true).getRoot(AddressBook);
 
   });
 

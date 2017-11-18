@@ -5,7 +5,6 @@
 import initTrace from 'debug';
 
 import { LIST_SIZE_MASK, MAX_DEPTH, POINTER_DOUBLE_FAR_MASK, POINTER_TYPE_MASK } from '../../constants';
-import * as E from '../../errors';
 import { bufferToHex, format, padToWord } from '../../util';
 import { ListElementSize } from '../list-element-size';
 import { ObjectSize } from '../object-size';
@@ -14,6 +13,12 @@ import { Orphan } from './orphan';
 import { PointerAllocationResult } from './pointer-allocation-result';
 import { PointerType } from './pointer-type';
 import { INVARIANT_UNREACHABLE_CODE } from '../../../lib/errors';
+import { Message } from '../message';
+import {
+  PTR_TRAVERSAL_LIMIT_EXCEEDED, PTR_DEPTH_LIMIT_EXCEEDED, PTR_OFFSET_OUT_OF_BOUNDS, PTR_INVALID_LIST_SIZE,
+  PTR_INVALID_POINTER_TYPE, PTR_INVALID_FAR_TARGET, TYPE_COMPOSITE_SIZE_UNDEFINED, PTR_WRONG_POINTER_TYPE,
+  PTR_WRONG_LIST_TYPE,
+} from '../../errors';
 
 const trace = initTrace('capnp:pointer');
 trace('load');
@@ -81,11 +86,11 @@ export class Pointer {
 
   constructor(segment: Segment, byteOffset: number, depthLimit = MAX_DEPTH) {
 
-    if (depthLimit === 0) throw new Error(format(E.PTR_DEPTH_LIMIT_EXCEEDED, this));
+    if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
 
     // Make sure we keep track of all pointer allocations; there's a limit per message (prevent DoS).
 
-    segment.message.onCreatePointer(this);
+    trackPointerAllocation(segment.message, this);
 
     // NOTE: It's okay to have a pointer to the end of the segment; you'll see this when creating pointers to the
     // beginning of the content of a newly-allocated composite list with zero elements. Unlike other language
@@ -94,13 +99,15 @@ export class Pointer {
 
     if (byteOffset < 0 || byteOffset > segment.byteLength) {
 
-      throw new Error(format(E.PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
+      throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
 
     }
 
     this._capnp = { compositeList: false, depthLimit };
     this.segment = segment;
     this.byteOffset = byteOffset;
+
+    trace('new %s', this);
 
   }
 
@@ -182,14 +189,14 @@ export function getListByteLength(elementSize: ListElementSize, length: number, 
     /* istanbul ignore next */
     case ListElementSize.COMPOSITE:
 
-      if (compositeSize === undefined) throw new Error(format(E.PTR_INVALID_LIST_SIZE, NaN));
+      if (compositeSize === undefined) throw new Error(format(PTR_INVALID_LIST_SIZE, NaN));
 
       return length * padToWord(compositeSize.getByteLength());
 
     /* istanbul ignore next */
     default:
 
-      throw new Error(E.PTR_INVALID_LIST_SIZE);
+      throw new Error(PTR_INVALID_LIST_SIZE);
 
   }
 
@@ -244,7 +251,7 @@ export function getListElementByteLength(elementSize: ListElementSize): number {
     /* istanbul ignore next */
     default:
 
-      throw new Error(format(E.PTR_INVALID_LIST_SIZE, elementSize));
+      throw new Error(format(PTR_INVALID_LIST_SIZE, elementSize));
 
   }
 
@@ -307,7 +314,7 @@ export function copyFrom(src: Pointer, p: Pointer): void {
     /* istanbul ignore next */
     default:
 
-      throw new Error(format(E.PTR_INVALID_POINTER_TYPE, getTargetPointerType(p)));
+      throw new Error(format(PTR_INVALID_POINTER_TYPE, getTargetPointerType(p)));
 
   }
 
@@ -409,7 +416,7 @@ export function erase(p: Pointer): void {
 
     default:
 
-      throw new Error(format(E.PTR_INVALID_POINTER_TYPE, getTargetPointerType(p)));
+      throw new Error(format(PTR_INVALID_POINTER_TYPE, getTargetPointerType(p)));
 
   }
 
@@ -741,7 +748,7 @@ export function getTargetPointerType(p: Pointer): PointerType {
 
   const t = getPointerType(followFars(p));
 
-  if (t === PointerType.FAR) throw new Error(format(E.PTR_INVALID_FAR_TARGET, p));
+  if (t === PointerType.FAR) throw new Error(format(PTR_INVALID_FAR_TARGET, p));
 
   return t;
 
@@ -805,7 +812,7 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
 
     if (landingPad.segment.id !== contentSegment.id) {
 
-      throw new Error(E.INVARIANT_UNREACHABLE_CODE);
+      throw new Error(INVARIANT_UNREACHABLE_CODE);
 
     }
 
@@ -940,7 +947,7 @@ export function setListPointer(
 
   if (size === ListElementSize.COMPOSITE) {
 
-    if (compositeSize === undefined) throw new TypeError(E.TYPE_COMPOSITE_SIZE_UNDEFINED);
+    if (compositeSize === undefined) throw new TypeError(TYPE_COMPOSITE_SIZE_UNDEFINED);
 
     D *= compositeSize.getWordLength();
 
@@ -994,7 +1001,7 @@ export function validate(pointerType: PointerType, p: Pointer, elementSize?: Lis
 
   const A = t.segment.getUint32(t.byteOffset) & POINTER_TYPE_MASK;
 
-  if (A !== pointerType) throw new Error(format(E.PTR_WRONG_POINTER_TYPE, p, pointerType));
+  if (A !== pointerType) throw new Error(format(PTR_WRONG_POINTER_TYPE, p, pointerType));
 
   // Check the list element size, if provided.
 
@@ -1002,7 +1009,7 @@ export function validate(pointerType: PointerType, p: Pointer, elementSize?: Lis
 
     const C = t.segment.getUint32(t.byteOffset + 4) & LIST_SIZE_MASK;
 
-    if (C !== elementSize) throw new Error(format(E.PTR_WRONG_LIST_TYPE, p, ListElementSize[elementSize]));
+    if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, p, ListElementSize[elementSize]));
 
   }
 
@@ -1010,7 +1017,7 @@ export function validate(pointerType: PointerType, p: Pointer, elementSize?: Lis
 
 export function copyFromList(src: Pointer, dst: Pointer): void {
 
-  if (dst._capnp.depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
+  if (dst._capnp.depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
 
   const srcContent = getContent(src);
   const srcElementSize = getTargetListElementSize(src);
@@ -1102,7 +1109,7 @@ export function copyFromList(src: Pointer, dst: Pointer): void {
 
 export function copyFromStruct(src: Pointer, dst: Pointer): void {
 
-  if (dst._capnp.depthLimit <= 0) throw new Error(E.PTR_DEPTH_LIMIT_EXCEEDED);
+  if (dst._capnp.depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
 
   const srcContent = getContent(src);
   const srcSize = getTargetStructSize(src);
@@ -1138,5 +1145,28 @@ export function copyFromStruct(src: Pointer, dst: Pointer): void {
 
   const res = initPointer(dstContent.segment, dstContent.byteOffset, dst);
   setStructPointer(res.offsetWords, srcSize, res.pointer);
+
+}
+
+/**
+ * Track the allocation of a new Pointer object.
+ *
+ * This will decrement an internal counter tracking how many bytes have been traversed in the message so far. After
+ * a certain limit, this method will throw an error in order to prevent a certain class of DoS attacks.
+ *
+ * @param {Message} message The message the pointer belongs to.
+ * @param {Pointer} p The pointer being allocated.
+ * @returns {void}
+ */
+
+export function trackPointerAllocation(message: Message, p: Pointer) {
+
+  message._capnp.traversalLimit -= 8;
+
+  if (message._capnp.traversalLimit <= 0) {
+
+    throw new Error(format(PTR_TRAVERSAL_LIMIT_EXCEEDED, p));
+
+  }
 
 }

@@ -28,7 +28,7 @@ export class SingleSegmentArena {
 
     this.buffer = buffer;
 
-    trace('new', this);
+    trace('new %s', this);
 
   }
 

@@ -25,7 +25,7 @@ export class MultiSegmentArena {
 
     this.buffers = buffers;
 
-    trace('new', this);
+    trace('new %s', this);
 
   }
 
