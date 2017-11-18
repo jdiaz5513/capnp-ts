@@ -607,7 +607,10 @@ export function getListLength(p: Pointer): number {
 
 export function getOffsetWords(p: Pointer): number {
 
-  return p.segment.getInt32(p.byteOffset) >> 2;
+  const o = p.segment.getInt32(p.byteOffset);
+
+  // Far pointers only have 29 offset bits.
+  return o & 2 ? o >> 3 : o >> 2;
 
 }
 
