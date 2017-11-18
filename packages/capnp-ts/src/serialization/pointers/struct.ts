@@ -8,7 +8,7 @@ import { MAX_DEPTH, NATIVE_LITTLE_ENDIAN } from '../../constants';
 import { Int64, Uint64 } from '../../types';
 import { format, padToWord } from '../../util';
 import { ListElementSize } from '../list-element-size';
-import { ObjectSize } from '../object-size';
+import { ObjectSize, getByteLength, getDataWordLength, getWordLength } from '../object-size';
 import { Segment } from '../segment';
 import { Data } from './data';
 import { List, ListCtor } from './list';
@@ -145,7 +145,7 @@ export function initStruct(size: ObjectSize, s: Struct): void {
 
   erase(s);
 
-  const c = s.segment.allocate(size.getByteLength());
+  const c = s.segment.allocate(getByteLength(size));
 
   const res = initPointer(c.segment, c.byteOffset, s);
 
@@ -178,12 +178,12 @@ export function resize(dstSize: ObjectSize, s: Struct): void {
 
   const srcSize = getSize(s);
   const srcContent = getContent(s);
-  const dstContent = s.segment.allocate(dstSize.getByteLength());
+  const dstContent = s.segment.allocate(getByteLength(dstSize));
 
   // Only copy the data section for now. The pointer section will need to be rewritten.
   dstContent.segment.copyWords(
     dstContent.byteOffset, srcContent.segment, srcContent.byteOffset,
-    Math.min(srcSize.getDataWordLength(), dstSize.getDataWordLength()));
+    Math.min(getDataWordLength(srcSize), getDataWordLength(dstSize)));
 
   const res = initPointer(dstContent.segment, dstContent.byteOffset, s);
 
@@ -225,7 +225,7 @@ export function resize(dstSize: ObjectSize, s: Struct): void {
 
   // Zero out the old data and pointer sections.
 
-  srcContent.segment.fillZeroWords(srcContent.byteOffset, srcSize.getWordLength());
+  srcContent.segment.fillZeroWords(srcContent.byteOffset, getWordLength(srcSize));
 
 }
 
@@ -489,10 +489,10 @@ export function getList<T>(index: number, ListClass: ListCtor<T>, s: Struct): Li
       const srcLength = getTargetListLength(l);
 
       trace(
-        'resizing composite list %s due to protocol upgrade, new size: %d', l, dstSize.getByteLength() * srcLength);
+        'resizing composite list %s due to protocol upgrade, new size: %d', l, getByteLength(dstSize) * srcLength);
 
       // Allocate an extra 8 bytes for the tag.
-      const dstContent = l.segment.allocate(dstSize.getByteLength() * srcLength + 8);
+      const dstContent = l.segment.allocate(getByteLength(dstSize) * srcLength + 8);
 
       const res = initPointer(dstContent.segment, dstContent.byteOffset, l);
 
@@ -507,12 +507,12 @@ export function getList<T>(index: number, ListClass: ListCtor<T>, s: Struct): Li
 
       for (let i = 0; i < srcLength; i++) {
 
-        const srcElementOffset = srcContent.byteOffset + i * srcSize.getByteLength();
-        const dstElementOffset = dstContent.byteOffset + i * dstSize.getByteLength();
+        const srcElementOffset = srcContent.byteOffset + i * getByteLength(srcSize);
+        const dstElementOffset = dstContent.byteOffset + i * getByteLength(dstSize);
 
         // Copy the data section.
 
-        dstContent.segment.copyWords(dstElementOffset, srcContent.segment, srcElementOffset, srcSize.getWordLength());
+        dstContent.segment.copyWords(dstElementOffset, srcContent.segment, srcElementOffset, getWordLength(srcSize));
 
         // Iterate through the pointers and update the offsets so they point to the right place.
 
@@ -550,7 +550,7 @@ export function getList<T>(index: number, ListClass: ListCtor<T>, s: Struct): Li
 
       // Zero out the old content.
 
-      srcContent.segment.fillZeroWords(srcContent.byteOffset, srcSize.getWordLength() * srcLength);
+      srcContent.segment.fillZeroWords(srcContent.byteOffset, getWordLength(srcSize) * srcLength);
 
     }
 

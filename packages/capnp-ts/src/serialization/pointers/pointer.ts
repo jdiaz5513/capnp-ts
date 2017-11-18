@@ -7,7 +7,7 @@ import initTrace from 'debug';
 import { LIST_SIZE_MASK, MAX_DEPTH, POINTER_DOUBLE_FAR_MASK, POINTER_TYPE_MASK } from '../../constants';
 import { bufferToHex, format, padToWord } from '../../util';
 import { ListElementSize } from '../list-element-size';
-import { ObjectSize } from '../object-size';
+import { ObjectSize, getByteLength, padToWord as padObjectToWord, getWordLength, getDataWordLength } from '../object-size';
 import { Segment } from '../segment';
 import { Orphan } from './orphan';
 import { PointerAllocationResult } from './pointer-allocation-result';
@@ -191,7 +191,7 @@ export function getListByteLength(elementSize: ListElementSize, length: number, 
 
       if (compositeSize === undefined) throw new Error(format(PTR_INVALID_LIST_SIZE, NaN));
 
-      return length * padToWord(compositeSize.getByteLength());
+      return length * padToWord(getByteLength(compositeSize));
 
     /* istanbul ignore next */
     default:
@@ -385,7 +385,7 @@ export function erase(p: Pointer): void {
         // Read some stuff from the tag word.
         const tag = add(-8, c);
         const compositeSize = getStructSize(tag);
-        const compositeByteLength = compositeSize.getByteLength();
+        const compositeByteLength = getByteLength(compositeSize);
         contentWords = getOffsetWords(tag);
 
         // Kill the tag word.
@@ -545,7 +545,7 @@ export function getContent(p: Pointer, ignoreCompositeIndex?: boolean): Pointer 
 
     // Seek ahead by `compositeIndex` multiples of the struct's total size.
 
-    c.byteOffset += 8 + p._capnp.compositeIndex * getStructSize(c).padToWord().getByteLength();
+    c.byteOffset += 8 + p._capnp.compositeIndex * getByteLength(padObjectToWord(getStructSize(c)));
 
   }
 
@@ -949,7 +949,7 @@ export function setListPointer(
 
     if (compositeSize === undefined) throw new TypeError(TYPE_COMPOSITE_SIZE_UNDEFINED);
 
-    D *= compositeSize.getWordLength();
+    D *= getWordLength(compositeSize);
 
   }
 
@@ -972,7 +972,7 @@ export function setStructPointer(offsetWords: number, size: ObjectSize, p: Point
 
   const A = PointerType.STRUCT;
   const B = offsetWords;
-  const C = size.getDataWordLength();
+  const C = getDataWordLength(size);
   const D = size.pointerLength;
 
   p.segment.setUint32(p.byteOffset, A | B << 2);
@@ -1028,7 +1028,7 @@ export function copyFromList(src: Pointer, dst: Pointer): void {
 
   if (srcElementSize === ListElementSize.POINTER) {
 
-    dstContent = dst.segment.allocate(getTargetCompositeListSize(src).getByteLength() * srcLength);
+    dstContent = dst.segment.allocate(getByteLength(getTargetCompositeListSize(src)) * srcLength);
 
     // Recursively copy each pointer in the list.
 
@@ -1045,10 +1045,10 @@ export function copyFromList(src: Pointer, dst: Pointer): void {
 
   } else if (srcElementSize === ListElementSize.COMPOSITE) {
 
-    srcCompositeSize = getTargetCompositeListSize(src).padToWord();
-    srcStructByteLength = srcCompositeSize.getByteLength();
+    srcCompositeSize = padObjectToWord(getTargetCompositeListSize(src));
+    srcStructByteLength = getByteLength(srcCompositeSize);
 
-    dstContent = dst.segment.allocate(srcCompositeSize.getByteLength() * srcLength + 8);
+    dstContent = dst.segment.allocate(getByteLength(srcCompositeSize) * srcLength + 8);
 
     // Copy the tag word.
 
@@ -1060,7 +1060,7 @@ export function copyFromList(src: Pointer, dst: Pointer): void {
     // PERF: Skip this step if the composite struct only contains pointers.
     if (srcCompositeSize.dataByteLength > 0) {
 
-      const wordLength = srcCompositeSize.getWordLength() * srcLength;
+      const wordLength = getWordLength(srcCompositeSize) * srcLength;
 
       dstContent.segment.copyWords(dstContent.byteOffset + 8, srcContent.segment, srcContent.byteOffset, wordLength);
 
@@ -1113,11 +1113,11 @@ export function copyFromStruct(src: Pointer, dst: Pointer): void {
 
   const srcContent = getContent(src);
   const srcSize = getTargetStructSize(src);
-  const srcDataWordLength = srcSize.getDataWordLength();
+  const srcDataWordLength = getDataWordLength(srcSize);
 
   // Allocate space for the destination content.
 
-  const dstContent = dst.segment.allocate(srcSize.getByteLength());
+  const dstContent = dst.segment.allocate(getByteLength(srcSize));
 
   // Copy the data section.
 

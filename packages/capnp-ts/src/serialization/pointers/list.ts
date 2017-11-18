@@ -7,7 +7,7 @@ import initTrace from 'debug';
 import { PTR_COMPOSITE_SIZE_UNDEFINED, PTR_INVALID_LIST_SIZE } from '../../errors';
 import { format, identity } from '../../util';
 import { ListElementSize } from '../list-element-size';
-import { ObjectSize } from '../object-size';
+import { ObjectSize, padToWord, getByteLength } from '../object-size';
 import { Segment } from '../segment';
 import {
   Pointer, getTargetListLength, getListElementByteLength, setStructPointer, setListPointer, initPointer,
@@ -371,9 +371,9 @@ export function initList<T>(
 
       if (compositeSize === undefined) throw new Error(format(PTR_COMPOSITE_SIZE_UNDEFINED));
 
-      compositeSize = compositeSize.padToWord();
+      compositeSize = padToWord(compositeSize);
 
-      const byteLength = compositeSize.getByteLength() * length;
+      const byteLength = getByteLength(compositeSize) * length;
 
       // We need to allocate an extra 8 bytes for the tag word, then make sure we write the length to it. We advance
       // the content pointer by 8 bytes so that it then points to the first list element as intended. Everything

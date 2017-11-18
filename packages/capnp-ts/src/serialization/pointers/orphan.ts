@@ -7,7 +7,7 @@ import {
 } from '../../errors';
 import { format } from '../../util';
 import { ListElementSize } from '../list-element-size';
-import { ObjectSize } from '../object-size';
+import { ObjectSize, getWordLength } from '../object-size';
 import { Segment } from '../segment';
 import {
   Pointer, getTargetListLength, getTargetStructSize, getTargetPointerType, getTargetListElementSize,
@@ -169,7 +169,7 @@ export class Orphan<T extends Pointer> {
 
       case PointerType.STRUCT:
 
-        this.segment.fillZeroWords(this.byteOffset, this._capnp.size.getWordLength());
+        this.segment.fillZeroWords(this.byteOffset, getWordLength(this._capnp.size));
 
         break;
 
