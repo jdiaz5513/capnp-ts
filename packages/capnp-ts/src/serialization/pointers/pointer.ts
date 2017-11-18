@@ -794,7 +794,7 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
 
     if (!contentSegment.hasCapacity(8)) {
 
-      // GAH! Not enough space in this pointer's segment for a landing pad so we need a double far pointer.
+      // GAH! Not enough space in the content segment for a landing pad so we need a double far pointer.
 
       const landingPad = p.segment.allocate(16);
 
@@ -821,7 +821,7 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
 
     setFarPointer(false, landingPad.byteOffset / 8, landingPad.segment.id, p);
 
-    return new PointerAllocationResult(landingPad, (contentOffset - landingPad.byteOffset + 8) / 8);
+    return new PointerAllocationResult(landingPad, (contentOffset - landingPad.byteOffset - 8) / 8);
 
   }
 
