@@ -16,37 +16,14 @@
         "DEBUG": "capnp:*",
         "NODE_ENV": "development"
       },
-      "name": "Debug (Unit)",
       "outFiles": [
-        "${workspaceRoot}/lib/**/*.js",
-        "${workspaceRoot}/lib-test/**/*.js"
+        "${workspaceRoot}/packages/*/lib-test/**/*"
       ],
-      "preLaunchTask": "lib-test",
-      "program": "${workspaceRoot}/lib-test/unit/index.js",
+      "name": "Debug (Test)",
+      "preLaunchTask": "build",
+      "program": "${file}",
       "request": "launch",
-      "runtimeArgs": [
-        "--nolazy"
-      ],
-      "stopOnEntry": false,
-      "type": "node"
-    },
-    {
-      "cwd": "${workspaceRoot}",
-      "env": {
-        "DEBUG": "capnp:*",
-        "NODE_ENV": "development"
-      },
-      "name": "Debug (Integration)",
-      "outFiles": [
-        "${workspaceRoot}/lib/**/*.js",
-        "${workspaceRoot}/lib-test/**/*.js"
-      ],
-      "preLaunchTask": "lib-test",
-      "program": "${workspaceRoot}/lib-test/integration/index.js",
-      "request": "launch",
-      "runtimeArgs": [
-        "--nolazy"
-      ],
+      "sourceMaps": true,
       "stopOnEntry": false,
       "type": "node"
     }
