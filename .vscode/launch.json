@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Attach",
-      "port": 5858,
+      "port": 9229,
       "request": "attach",
       "type": "node"
     },
