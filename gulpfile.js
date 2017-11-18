@@ -14,6 +14,8 @@ var spawnSync = require('child_process').spawnSync;
 // FIXME: Not yet able to compile all the schema files, so this whitelist is needed.
 const CAPNP_WHITELIST = [
   'capnp-ts/src/std/schema.capnp',
+  'capnp-ts/test/integration/foo.capnp',
+  'capnp-ts/test/integration/foo-new.capnp',
   'capnp-ts/test/integration/list-mania.capnp',
   'capnp-ts/test/integration/upgrade-v1.capnp',
 ];
@@ -30,15 +32,15 @@ function build(src, dest, test) {
 
 function compileCapnp() {
   return gutil.buffer(function (err, files) {
-    var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.js'];
-    var result = spawnSync('capnpc', options.concat(files.map(function (file) {
-      return file.path;
-    }).filter(function (path) {
-      return path.endsWith('.capnp') && CAPNP_WHITELIST.some((p) => path.endsWith(p));
-    })), { stdio: 'inherit' });
-    if (result.status !== 0) {
-      throw new Error('Process exited with non-zero status: ' + result.status);
-    }
+    files.filter(function (file) {
+      return file.path.endsWith('.capnp') && CAPNP_WHITELIST.some((p) => file.path.endsWith(p));
+    }).forEach(function (file) {
+      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.js', file.path];
+      var result = spawnSync('capnpc', options, { stdio: 'inherit' });
+      if (result.status !== 0) {
+        throw new Error('Process exited with non-zero status: ' + result.status);
+      }
+    });
   });
 }
 
