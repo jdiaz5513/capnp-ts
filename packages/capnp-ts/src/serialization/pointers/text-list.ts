@@ -7,6 +7,7 @@ import initTrace from 'debug';
 import { ListElementSize } from '../list-element-size';
 import { _ListCtor, List } from './list';
 import { Text } from './text';
+import { getContent } from './pointer';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -20,7 +21,7 @@ export class TextList extends List<string> {
 
   get(index: number): string {
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     c.byteOffset += index * 8;
 
@@ -30,7 +31,7 @@ export class TextList extends List<string> {
 
   set(index: number, value: string): void {
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     c.byteOffset += index * 8;
 

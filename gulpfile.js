@@ -11,6 +11,16 @@ var realTslint = require('tslint');
 var mergeStream = require('merge-stream');
 var spawnSync = require('child_process').spawnSync;
 
+// FIXME: Not yet able to compile all the schema files, so this whitelist is needed.
+const CAPNP_WHITELIST = [
+  'capnp-ts/src/std/schema.capnp',
+  'capnp-ts/test/integration/foo.capnp',
+  'capnp-ts/test/integration/foo-new.capnp',
+  'capnp-ts/test/integration/list-mania.capnp',
+  'capnp-ts/test/integration/upgrade-v1.capnp',
+];
+
+
 function build(src, dest, test) {
   var tsProject = ts.createProject('configs/tsconfig-base.json', { declaration: !test });
   return gulp.src(src)
@@ -19,6 +29,26 @@ function build(src, dest, test) {
     .pipe(sourcemaps.write('.', { includeContent: false, destPath: dest }))
     .pipe(gulp.dest(dest));
 }
+
+function compileCapnp() {
+  return gutil.buffer(function (err, files) {
+    files.filter(function (file) {
+      return file.path.endsWith('.capnp') && CAPNP_WHITELIST.some((p) => file.path.endsWith(p));
+    }).forEach(function (file) {
+      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.js', file.path];
+      var result = spawnSync('capnpc', options, { stdio: 'inherit' });
+      if (result.status !== 0) {
+        throw new Error('Process exited with non-zero status: ' + result.status);
+      }
+    });
+  });
+}
+
+/** Compile any capnp schema files. */
+gulp.task('build:capnp', ['build:capnp-ts', 'build:capnpc-ts'], function() {
+  return gulp.src('./packages/**/*.capnp')
+    .pipe(compileCapnp());
+});
 
 /** Build the main capnp-ts library. */
 gulp.task('build:capnp-ts', function () {
@@ -36,7 +66,7 @@ gulp.task('build:capnpc-js', ['build:capnp-ts', 'build:capnpc-ts'], function () 
 });
 
 /** Main build task (does not build tests). */
-gulp.task('build', ['build:capnp-ts', 'build:capnpc-ts', 'build:capnpc-js']);
+gulp.task('build', ['build:capnp-ts', 'build:capnpc-ts', 'build:capnpc-js', 'build:capnp']);
 
 function test(coverage) {
   return gutil.buffer(function (err, files) {
@@ -50,14 +80,14 @@ function test(coverage) {
       // This filters not only unrelated files, but also sourcemaps
       return path.endsWith('.spec.js');
     })), { stdio: 'inherit' });
-    if (result.status != 0) {
+    if (result.status !== 0) {
       throw new Error('Process exited with non-zero status: ' + result.status);
     }
   });
 }
 
 /** Run tests for the main capnp-ts library. */
-gulp.task('test:capnp-ts', ['build:capnp-ts'], function () {
+gulp.task('test:capnp-ts', ['build:capnp', 'build:capnp-ts'], function () {
   return build(
     './packages/capnp-ts/test/**/*.ts',
     'packages/capnp-ts/lib-test',
@@ -66,7 +96,7 @@ gulp.task('test:capnp-ts', ['build:capnp-ts'], function () {
 });
 
 /** Run tests for the capnpc-ts schema compiler. */
-gulp.task('test:capnpc-ts', ['build:capnpc-ts'], function () {
+gulp.task('test:capnpc-ts', ['build:capnp', 'build:capnpc-ts'], function () {
   return build(
     './packages/capnpc-ts/test/**/*.ts',
     'packages/capnpc-ts/lib-test',
@@ -75,7 +105,7 @@ gulp.task('test:capnpc-ts', ['build:capnpc-ts'], function () {
 });
 
 /** Run tests for the capnpc-js schema compiler. */
-gulp.task('test:capnpc-js', ['build:capnpc-js'], function () {
+gulp.task('test:capnpc-js', ['build:capnp', 'build:capnpc-js'], function () {
   return build(
     './packages/capnpc-js/test/**/*.ts',
     'packages/capnpc-js/lib-test',
@@ -87,7 +117,7 @@ gulp.task('test:capnpc-js', ['build:capnpc-js'], function () {
 gulp.task('test', ['test:capnp-ts', 'test:capnpc-ts', 'test:capnpc-js']);
 
 /** Run all tests with test coverage. */
-gulp.task('test-cov', ['build:capnp-ts', 'build:capnpc-ts', 'build:capnpc-js'], function () {
+gulp.task('test-cov', ['build:capnp', 'build:capnp-ts', 'build:capnpc-ts', 'build:capnpc-js'], function () {
   return mergeStream(build(
     './packages/capnp-ts/test/**/*.ts',
     'packages/capnp-ts/lib-test',
@@ -110,7 +140,7 @@ gulp.task('coverage', ['test-cov'], function () {
   }
 });
 
-gulp.task('benchmark:capnp-ts', ['build:capnp-ts'], function () {
+gulp.task('benchmark:capnp-ts', ['build:capnp', 'build:capnp-ts'], function () {
   var tsProject = ts.createProject('configs/tsconfig-base.json');
   return build(
     './packages/capnpc-ts/test/benchmark/**/*.ts',

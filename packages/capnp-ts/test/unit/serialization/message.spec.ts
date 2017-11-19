@@ -1,17 +1,16 @@
 import * as C from '../../../lib/constants';
-import {Message} from '../../../lib/serialization';
-import {MultiSegmentArena} from '../../../lib/serialization/arena';
-import {ArenaAllocationResult} from '../../../lib/serialization/arena/arena-allocation-result';
-import {Segment} from '../../../lib/serialization/segment';
-import {Person} from '../../integration/serialization-demo';
-import {compareBuffers, readFileBuffer, tap} from '../../util';
+import { Message } from '../../../lib/serialization';
+import { MultiSegmentArena } from '../../../lib/serialization/arena';
+import { getFramedSegments, preallocateSegments } from '../../../lib/serialization/message';
+import { Person } from '../../integration/serialization-demo';
+import { compareBuffers, readFileBuffer, tap } from '../../util';
 
 const SEGMENTED_PACKED = readFileBuffer('test/data/segmented-packed.bin');
 const SEGMENTED_UNPACKED = readFileBuffer('test/data/segmented.bin');
 
-tap.test('Message.fromArrayBuffer()', (t) => {
+tap.test('new Message(ArrayBuffer, false)', (t) => {
 
-  const message = Message.fromArrayBuffer(SEGMENTED_UNPACKED);
+  const message = new Message(SEGMENTED_UNPACKED, false);
 
   compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, 'should read segmented messages');
 
@@ -19,9 +18,9 @@ tap.test('Message.fromArrayBuffer()', (t) => {
 
 });
 
-tap.test('Message.fromBuffer()', (t) => {
+tap.test('new Message(Buffer, false)', (t) => {
 
-  const message = Message.fromBuffer(new Buffer(SEGMENTED_UNPACKED));
+  const message = new Message(new Buffer(SEGMENTED_UNPACKED), false);
 
   compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, 'should read messages from a Buffer');
 
@@ -29,9 +28,9 @@ tap.test('Message.fromBuffer()', (t) => {
 
 });
 
-tap.test('Message.fromPackedArrayBuffer()', (t) => {
+tap.test('new Message(ArrayBuffer)', (t) => {
 
-  const message = Message.fromPackedArrayBuffer(SEGMENTED_PACKED);
+  const message = new Message(SEGMENTED_PACKED);
 
   compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, 'should read packed messages');
 
@@ -39,9 +38,9 @@ tap.test('Message.fromPackedArrayBuffer()', (t) => {
 
 });
 
-tap.test('Message.fromPackedBuffer()', (t) => {
+tap.test('new Message(Buffer)', (t) => {
 
-  const message = Message.fromPackedBuffer(new Buffer(SEGMENTED_PACKED));
+  const message = new Message(new Buffer(SEGMENTED_PACKED));
 
   compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, 'should read packed messages from a Buffer');
 
@@ -49,17 +48,17 @@ tap.test('Message.fromPackedBuffer()', (t) => {
 
 });
 
-tap.test('Message.getFramedSegments()', (t) => {
+tap.test('getFramedSegments()', (t) => {
 
-  t.throws(() => Message.getFramedSegments(new Uint8Array([
+  t.throws(() => getFramedSegments(new Uint8Array([
     0x00, 0x00, 0x00, 0x00,   // need at least 4 more bytes for an empty message
   ]).buffer), undefined, 'should throw when segment counts are missing');
 
-  t.throws(() => Message.getFramedSegments(new Uint8Array([
+  t.throws(() => getFramedSegments(new Uint8Array([
     0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,  // need at least 4 more bytes for the second segment length
   ]).buffer), undefined, 'should throw when there are not enough segment counts');
 
-  t.throws(() => Message.getFramedSegments(new Uint8Array([
+  t.throws(() => getFramedSegments(new Uint8Array([
     0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00,   // should have 16 words in a single segment
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,   // but only get 2
@@ -91,22 +90,6 @@ tap.test('Message.allocateSegment()', (t) => {
   m2.allocateSegment(length);
 
   t.equal(m2.getSegment(1).buffer.byteLength, length, 'should allocate new segments');
-
-  class BadArena extends MultiSegmentArena {
-
-    allocate(minSize: number, segments: Segment[]): ArenaAllocationResult {
-
-      const res = super.allocate(minSize, segments);
-
-      return new ArenaAllocationResult(999, res.buffer);
-
-    }
-
-  }
-
-  const m3 = new Message(new BadArena());
-
-  t.throws(() => m3.allocateSegment(1), undefined, 'should freak out if the arena is misbehaving');
 
   t.end();
 
@@ -180,7 +163,7 @@ tap.test('Message.toArrayBuffer()', (t) => {
 
 tap.test('Message.toPackedArrayBuffer()', (t) => {
 
-  const message = Message.fromArrayBuffer(SEGMENTED_UNPACKED);
+  const message = new Message(SEGMENTED_UNPACKED, false);
 
   compareBuffers(t, message.toPackedArrayBuffer(), SEGMENTED_PACKED, 'should pack messages properly');
 
@@ -188,14 +171,13 @@ tap.test('Message.toPackedArrayBuffer()', (t) => {
 
 });
 
-tap.test('Message._preallocateSegments()', (t) => {
+tap.test('preallocateSegments()', (t) => {
 
   t.throws(() => {
 
     const message = new Message(new MultiSegmentArena());
 
-    /* tslint:disable-next-line */
-    message['_preallocateSegments']();
+    preallocateSegments(message);
 
   }, undefined, 'should throw when preallocating an empty arena');
 

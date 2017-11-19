@@ -6,10 +6,16 @@
 
 import initTrace from 'debug';
 
-import {MAX_SEGMENT_LENGTH} from './constants';
+import { MAX_SEGMENT_LENGTH } from './constants';
 
 const trace = initTrace('capnp:errors');
 trace('load');
+
+export function assertNever(n: never): never {
+
+  throw new Error(INVARIANT_UNREACHABLE_CODE + ` (never block hit with: ${n})`);
+
+}
 
 // Invariant violations (sometimes known as "precondition failed").
 //

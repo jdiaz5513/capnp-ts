@@ -13,7 +13,7 @@ export class CodeGeneratorFileContext {
   generatedNodeIds: string[];
   nodes: s.Node[];
   req: s.CodeGeneratorRequest;
-  sourceFile: ts.SourceFile;
+  statements: ts.Statement[];
   namedImports: string[];
 
   constructor(req: s.CodeGeneratorRequest, file: s.CodeGeneratorRequest_RequestedFile) {
@@ -22,6 +22,7 @@ export class CodeGeneratorFileContext {
     this.nodes = req.getNodes().toArray();
     this.concreteLists = [];
     this.generatedNodeIds = [];
+    this.statements = [];
   }
 
   toString() {

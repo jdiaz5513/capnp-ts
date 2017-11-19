@@ -3,8 +3,8 @@
  */
 
 import * as capnp from '../../lib';
-import {CodeGeneratorRequest} from '../../lib/std/schema.capnp';
-import {compareBuffers, readFileBuffer, tap} from '../util';
+import { CodeGeneratorRequest } from '../../lib/std/schema.capnp';
+import { compareBuffers, readFileBuffer, tap } from '../util';
 
 const SCHEMA_MESSAGE = readFileBuffer('test/data/schema.bin');
 
@@ -12,7 +12,7 @@ const SCHEMA_FILE_ID = capnp.Int64.fromHexString('a93fc509624c72d9');
 
 tap.test('schema roundtrip', (t) => {
 
-  const message = capnp.Message.fromArrayBuffer(SCHEMA_MESSAGE);
+  const message = new capnp.Message(SCHEMA_MESSAGE, false);
   const req = message.getRoot(CodeGeneratorRequest);
 
   t.type(req, CodeGeneratorRequest);

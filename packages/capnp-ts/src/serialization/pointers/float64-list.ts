@@ -6,6 +6,7 @@ import initTrace from 'debug';
 
 import { ListElementSize } from '../list-element-size';
 import { _ListCtor, List } from './list';
+import { getContent } from './pointer';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -19,7 +20,7 @@ export class Float64List extends List<number> {
 
   get(index: number): number {
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     return c.segment.getFloat64(c.byteOffset + index * 8);
 
@@ -27,7 +28,7 @@ export class Float64List extends List<number> {
 
   set(index: number, value: number): void {
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     c.segment.setFloat64(c.byteOffset + index * 8, value);
 

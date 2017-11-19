@@ -10,67 +10,67 @@ class TestStruct extends Struct {
 
   adoptTest(value: Orphan<TestStruct>): void {
 
-    this._getPointer(0).adopt(value);
+    Struct.adopt(value, Struct.getPointer(0, this));
 
   }
 
   disownTest(): Orphan<TestStruct> {
 
-    return this.getTest().disown();
+    return Struct.disown(this.getTest());
 
   }
 
   getTest(): TestStruct {
 
-    return this._getPointerAs(0, TestStruct);
+    return Struct.getPointerAs(0, TestStruct, this);
 
   }
 
   hasTest(): boolean {
 
-    return !this._getPointer(0)._isNull();
+    return !Struct.isNull(Struct.getPointer(0, this));
 
   }
 
   initTest(): TestStruct {
 
-    return this._initStructAt(0, TestStruct);
+    return Struct.initStructAt(0, TestStruct, this);
 
   }
 
   setTest(value: TestStruct): void {
 
-    this._getPointer(0)._copyFrom(value);
+    Struct.copyFrom(value, Struct.getPointer(0, this));
 
   }
 
   getFoo(): number {
 
-    return this._getUint32(0);
+    return Struct.getUint32(0, this);
 
   }
 
   setFoo(value: number): void {
 
-    this._setUint32(0, value);
+    Struct.setUint32(0, value, this);
 
   }
 
   disownList(): Orphan<Int32List> {
 
-    return this.getList().disown();
+    return Struct.disown(this.getList());
 
   }
 
   getList(): Int32List {
 
-    return this._getPointerAs(1, Int32List);
+    return Struct.getPointerAs(1, Int32List, this);
 
   }
 
   initList(length: number): Int32List {
 
-    return this._initList(1, Int32List, length);
+    return Struct.initList(1, Int32List, length, this);
 
   }
 
@@ -90,7 +90,7 @@ tap.test('new Orphan()', (t) => {
   t.equal(
     structOrphan._capnp.size.pointerLength, TestStruct._capnp.size.pointerLength, 'should copy the pointer count');
 
-  t.ok(root._isNull(), 'should zero out the struct pointer');
+  t.ok(Struct.isNull(root), 'should zero out the struct pointer');
 
   const list = new Message().initRoot(TestStruct).initList(2);
 
@@ -101,7 +101,7 @@ tap.test('new Orphan()', (t) => {
   t.equal(listOrphan._capnp.length, 2, 'should copy the list length');
   t.equal(listOrphan._capnp.elementSize, Int32List._capnp.size, 'should copy the list element size');
 
-  t.ok(list._isNull(), 'should zero out the list pointer');
+  t.ok(Struct.isNull(list), 'should zero out the list pointer');
 
   t.end();
 

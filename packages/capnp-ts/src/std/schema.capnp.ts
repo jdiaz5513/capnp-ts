@@ -5,122 +5,122 @@
 /* tslint:disable */
 
 import * as capnp from "../index";
-import { ObjectSize } from '../index';
-export const _id = "a93fc509624c72d9";
-export class Node_Parameter extends capnp.Struct {
-    static readonly _capnp = { displayName: "Parameter", id: "b9521bccf10fa3b1", size: new ObjectSize(0, 1) };
-    getName(): string { return this._getText(0); }
-    setName(value: string): void { this._setText(0, value); }
+import { ObjectSize as __O, Struct as __S } from '../index';
+export const _capnpFileId = "a93fc509624c72d9";
+export class Node_Parameter extends __S {
+    static readonly _capnp = { displayName: "Parameter", id: "b9521bccf10fa3b1", size: new __O(0, 1) };
+    getName(): string { return __S.getText(0, this); }
+    setName(value: string): void { __S.setText(0, value, this); }
     toString(): string { return "Node_Parameter_" + super.toString(); }
 }
-export class Node_NestedNode extends capnp.Struct {
-    static readonly _capnp = { displayName: "NestedNode", id: "debf55bbfa0fc242", size: new ObjectSize(8, 1) };
-    getName(): string { return this._getText(0); }
-    setName(value: string): void { this._setText(0, value); }
-    getId(): capnp.Uint64 { return this._getUint64(0); }
-    setId(value: capnp.Uint64): void { this._setUint64(0, value); }
+export class Node_NestedNode extends __S {
+    static readonly _capnp = { displayName: "NestedNode", id: "debf55bbfa0fc242", size: new __O(8, 1) };
+    getName(): string { return __S.getText(0, this); }
+    setName(value: string): void { __S.setText(0, value, this); }
+    getId(): capnp.Uint64 { return __S.getUint64(0, this); }
+    setId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
     toString(): string { return "Node_NestedNode_" + super.toString(); }
 }
-export class Node_Const extends capnp.Struct {
-    static readonly _capnp = { displayName: "const", id: "b18aa5ac7a0d9420", size: new ObjectSize(40, 6) };
-    adoptType(value: capnp.Orphan<Type>): void { this._getPointer(3).adopt(value); }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
-    getType(): Type { return this._getStruct(3, Type); }
-    hasType(): boolean { return !this._getPointer(3)._isNull(); }
-    initType(): Type { return this._initStructAt(3, Type); }
-    setType(value: Type): void { this._getPointer(3)._copyFrom(value); }
-    adoptValue(value: capnp.Orphan<Value>): void { this._getPointer(4).adopt(value); }
-    disownValue(): capnp.Orphan<Value> { return this.getValue().disown(); }
-    getValue(): Value { return this._getStruct(4, Value); }
-    hasValue(): boolean { return !this._getPointer(4)._isNull(); }
-    initValue(): Value { return this._initStructAt(4, Value); }
-    setValue(value: Value): void { this._getPointer(4)._copyFrom(value); }
+export class Node_Const extends __S {
+    static readonly _capnp = { displayName: "const", id: "b18aa5ac7a0d9420", size: new __O(40, 6) };
+    adoptType(value: capnp.Orphan<Type>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownType(): capnp.Orphan<Type> { return __S.disown(this.getType()); }
+    getType(): Type { return __S.getStruct(3, Type, this); }
+    hasType(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initType(): Type { return __S.initStructAt(3, Type, this); }
+    setType(value: Type): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    adoptValue(value: capnp.Orphan<Value>): void { __S.adopt(value, __S.getPointer(4, this)); }
+    disownValue(): capnp.Orphan<Value> { return __S.disown(this.getValue()); }
+    getValue(): Value { return __S.getStruct(4, Value, this); }
+    hasValue(): boolean { return !__S.isNull(__S.getPointer(4, this)); }
+    initValue(): Value { return __S.initStructAt(4, Value, this); }
+    setValue(value: Value): void { __S.copyFrom(value, __S.getPointer(4, this)); }
     toString(): string { return "Node_Const_" + super.toString(); }
 }
-export class Node_Interface extends capnp.Struct {
-    static readonly _capnp = { displayName: "interface", id: "e82753cff0c2218f", size: new ObjectSize(40, 6) };
+export class Node_Interface extends __S {
+    static readonly _capnp = { displayName: "interface", id: "e82753cff0c2218f", size: new __O(40, 6) };
     static _Methods: capnp.ListCtor<Method>;
     static _Superclasses: capnp.ListCtor<Superclass>;
-    adoptMethods(value: capnp.Orphan<capnp.List<Method>>): void { this._getPointer(3).adopt(value); }
-    disownMethods(): capnp.Orphan<capnp.List<Method>> { return this.getMethods().disown(); }
-    getMethods(): capnp.List<Method> { return this._getList(3, Node_Interface._Methods); }
-    hasMethods(): boolean { return !this._getPointer(3)._isNull(); }
-    initMethods(length: number): capnp.List<Method> { return this._initList(3, Node_Interface._Methods, length); }
-    setMethods(value: capnp.List<Method>): void { this._getPointer(3)._copyFrom(value); }
-    adoptSuperclasses(value: capnp.Orphan<capnp.List<Superclass>>): void { this._getPointer(4).adopt(value); }
-    disownSuperclasses(): capnp.Orphan<capnp.List<Superclass>> { return this.getSuperclasses().disown(); }
-    getSuperclasses(): capnp.List<Superclass> { return this._getList(4, Node_Interface._Superclasses); }
-    hasSuperclasses(): boolean { return !this._getPointer(4)._isNull(); }
-    initSuperclasses(length: number): capnp.List<Superclass> { return this._initList(4, Node_Interface._Superclasses, length); }
-    setSuperclasses(value: capnp.List<Superclass>): void { this._getPointer(4)._copyFrom(value); }
+    adoptMethods(value: capnp.Orphan<capnp.List<Method>>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownMethods(): capnp.Orphan<capnp.List<Method>> { return __S.disown(this.getMethods()); }
+    getMethods(): capnp.List<Method> { return __S.getList(3, Node_Interface._Methods, this); }
+    hasMethods(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initMethods(length: number): capnp.List<Method> { return __S.initList(3, Node_Interface._Methods, length, this); }
+    setMethods(value: capnp.List<Method>): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    adoptSuperclasses(value: capnp.Orphan<capnp.List<Superclass>>): void { __S.adopt(value, __S.getPointer(4, this)); }
+    disownSuperclasses(): capnp.Orphan<capnp.List<Superclass>> { return __S.disown(this.getSuperclasses()); }
+    getSuperclasses(): capnp.List<Superclass> { return __S.getList(4, Node_Interface._Superclasses, this); }
+    hasSuperclasses(): boolean { return !__S.isNull(__S.getPointer(4, this)); }
+    initSuperclasses(length: number): capnp.List<Superclass> { return __S.initList(4, Node_Interface._Superclasses, length, this); }
+    setSuperclasses(value: capnp.List<Superclass>): void { __S.copyFrom(value, __S.getPointer(4, this)); }
     toString(): string { return "Node_Interface_" + super.toString(); }
 }
-export class Node_Struct extends capnp.Struct {
-    static readonly _capnp = { displayName: "struct", id: "9ea0b19b37fb4435", size: new ObjectSize(40, 6) };
+export class Node_Struct extends __S {
+    static readonly _capnp = { displayName: "struct", id: "9ea0b19b37fb4435", size: new __O(40, 6) };
     static _Fields: capnp.ListCtor<Field>;
-    getDataWordCount(): number { return this._getUint16(14); }
-    setDataWordCount(value: number): void { this._setUint16(14, value); }
-    getPointerCount(): number { return this._getUint16(24); }
-    setPointerCount(value: number): void { this._setUint16(24, value); }
-    getPreferredListEncoding(): ElementSize { return this._getUint16(26); }
-    setPreferredListEncoding(value: ElementSize): void { this._setUint16(26, value); }
-    getIsGroup(): boolean { return this._getBit(224); }
-    setIsGroup(value: boolean): void { this._setBit(224, value); }
-    getDiscriminantCount(): number { return this._getUint16(30); }
-    setDiscriminantCount(value: number): void { this._setUint16(30, value); }
-    getDiscriminantOffset(): number { return this._getUint32(32); }
-    setDiscriminantOffset(value: number): void { this._setUint32(32, value); }
-    adoptFields(value: capnp.Orphan<capnp.List<Field>>): void { this._getPointer(3).adopt(value); }
-    disownFields(): capnp.Orphan<capnp.List<Field>> { return this.getFields().disown(); }
-    getFields(): capnp.List<Field> { return this._getList(3, Node_Struct._Fields); }
-    hasFields(): boolean { return !this._getPointer(3)._isNull(); }
-    initFields(length: number): capnp.List<Field> { return this._initList(3, Node_Struct._Fields, length); }
-    setFields(value: capnp.List<Field>): void { this._getPointer(3)._copyFrom(value); }
+    getDataWordCount(): number { return __S.getUint16(14, this); }
+    setDataWordCount(value: number): void { __S.setUint16(14, value, this); }
+    getPointerCount(): number { return __S.getUint16(24, this); }
+    setPointerCount(value: number): void { __S.setUint16(24, value, this); }
+    getPreferredListEncoding(): ElementSize { return __S.getUint16(26, this); }
+    setPreferredListEncoding(value: ElementSize): void { __S.setUint16(26, value, this); }
+    getIsGroup(): boolean { return __S.getBit(224, this); }
+    setIsGroup(value: boolean): void { __S.setBit(224, value, this); }
+    getDiscriminantCount(): number { return __S.getUint16(30, this); }
+    setDiscriminantCount(value: number): void { __S.setUint16(30, value, this); }
+    getDiscriminantOffset(): number { return __S.getUint32(32, this); }
+    setDiscriminantOffset(value: number): void { __S.setUint32(32, value, this); }
+    adoptFields(value: capnp.Orphan<capnp.List<Field>>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownFields(): capnp.Orphan<capnp.List<Field>> { return __S.disown(this.getFields()); }
+    getFields(): capnp.List<Field> { return __S.getList(3, Node_Struct._Fields, this); }
+    hasFields(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initFields(length: number): capnp.List<Field> { return __S.initList(3, Node_Struct._Fields, length, this); }
+    setFields(value: capnp.List<Field>): void { __S.copyFrom(value, __S.getPointer(3, this)); }
     toString(): string { return "Node_Struct_" + super.toString(); }
 }
-export class Node_Annotation extends capnp.Struct {
-    static readonly _capnp = { displayName: "annotation", id: "ec1619d4400a0290", size: new ObjectSize(40, 6) };
-    adoptType(value: capnp.Orphan<Type>): void { this._getPointer(3).adopt(value); }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
-    getType(): Type { return this._getStruct(3, Type); }
-    hasType(): boolean { return !this._getPointer(3)._isNull(); }
-    initType(): Type { return this._initStructAt(3, Type); }
-    setType(value: Type): void { this._getPointer(3)._copyFrom(value); }
-    getTargetsFile(): boolean { return this._getBit(112); }
-    setTargetsFile(value: boolean): void { this._setBit(112, value); }
-    getTargetsConst(): boolean { return this._getBit(113); }
-    setTargetsConst(value: boolean): void { this._setBit(113, value); }
-    getTargetsEnum(): boolean { return this._getBit(114); }
-    setTargetsEnum(value: boolean): void { this._setBit(114, value); }
-    getTargetsEnumerant(): boolean { return this._getBit(115); }
-    setTargetsEnumerant(value: boolean): void { this._setBit(115, value); }
-    getTargetsStruct(): boolean { return this._getBit(116); }
-    setTargetsStruct(value: boolean): void { this._setBit(116, value); }
-    getTargetsField(): boolean { return this._getBit(117); }
-    setTargetsField(value: boolean): void { this._setBit(117, value); }
-    getTargetsUnion(): boolean { return this._getBit(118); }
-    setTargetsUnion(value: boolean): void { this._setBit(118, value); }
-    getTargetsGroup(): boolean { return this._getBit(119); }
-    setTargetsGroup(value: boolean): void { this._setBit(119, value); }
-    getTargetsInterface(): boolean { return this._getBit(120); }
-    setTargetsInterface(value: boolean): void { this._setBit(120, value); }
-    getTargetsMethod(): boolean { return this._getBit(121); }
-    setTargetsMethod(value: boolean): void { this._setBit(121, value); }
-    getTargetsParam(): boolean { return this._getBit(122); }
-    setTargetsParam(value: boolean): void { this._setBit(122, value); }
-    getTargetsAnnotation(): boolean { return this._getBit(123); }
-    setTargetsAnnotation(value: boolean): void { this._setBit(123, value); }
+export class Node_Annotation extends __S {
+    static readonly _capnp = { displayName: "annotation", id: "ec1619d4400a0290", size: new __O(40, 6) };
+    adoptType(value: capnp.Orphan<Type>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownType(): capnp.Orphan<Type> { return __S.disown(this.getType()); }
+    getType(): Type { return __S.getStruct(3, Type, this); }
+    hasType(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initType(): Type { return __S.initStructAt(3, Type, this); }
+    setType(value: Type): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    getTargetsFile(): boolean { return __S.getBit(112, this); }
+    setTargetsFile(value: boolean): void { __S.setBit(112, value, this); }
+    getTargetsConst(): boolean { return __S.getBit(113, this); }
+    setTargetsConst(value: boolean): void { __S.setBit(113, value, this); }
+    getTargetsEnum(): boolean { return __S.getBit(114, this); }
+    setTargetsEnum(value: boolean): void { __S.setBit(114, value, this); }
+    getTargetsEnumerant(): boolean { return __S.getBit(115, this); }
+    setTargetsEnumerant(value: boolean): void { __S.setBit(115, value, this); }
+    getTargetsStruct(): boolean { return __S.getBit(116, this); }
+    setTargetsStruct(value: boolean): void { __S.setBit(116, value, this); }
+    getTargetsField(): boolean { return __S.getBit(117, this); }
+    setTargetsField(value: boolean): void { __S.setBit(117, value, this); }
+    getTargetsUnion(): boolean { return __S.getBit(118, this); }
+    setTargetsUnion(value: boolean): void { __S.setBit(118, value, this); }
+    getTargetsGroup(): boolean { return __S.getBit(119, this); }
+    setTargetsGroup(value: boolean): void { __S.setBit(119, value, this); }
+    getTargetsInterface(): boolean { return __S.getBit(120, this); }
+    setTargetsInterface(value: boolean): void { __S.setBit(120, value, this); }
+    getTargetsMethod(): boolean { return __S.getBit(121, this); }
+    setTargetsMethod(value: boolean): void { __S.setBit(121, value, this); }
+    getTargetsParam(): boolean { return __S.getBit(122, this); }
+    setTargetsParam(value: boolean): void { __S.setBit(122, value, this); }
+    getTargetsAnnotation(): boolean { return __S.getBit(123, this); }
+    setTargetsAnnotation(value: boolean): void { __S.setBit(123, value, this); }
     toString(): string { return "Node_Annotation_" + super.toString(); }
 }
-export class Node_Enum extends capnp.Struct {
-    static readonly _capnp = { displayName: "enum", id: "b54ab3364333f598", size: new ObjectSize(40, 6) };
+export class Node_Enum extends __S {
+    static readonly _capnp = { displayName: "enum", id: "b54ab3364333f598", size: new __O(40, 6) };
     static _Enumerants: capnp.ListCtor<Enumerant>;
-    adoptEnumerants(value: capnp.Orphan<capnp.List<Enumerant>>): void { this._getPointer(3).adopt(value); }
-    disownEnumerants(): capnp.Orphan<capnp.List<Enumerant>> { return this.getEnumerants().disown(); }
-    getEnumerants(): capnp.List<Enumerant> { return this._getList(3, Node_Enum._Enumerants); }
-    hasEnumerants(): boolean { return !this._getPointer(3)._isNull(); }
-    initEnumerants(length: number): capnp.List<Enumerant> { return this._initList(3, Node_Enum._Enumerants, length); }
-    setEnumerants(value: capnp.List<Enumerant>): void { this._getPointer(3)._copyFrom(value); }
+    adoptEnumerants(value: capnp.Orphan<capnp.List<Enumerant>>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownEnumerants(): capnp.Orphan<capnp.List<Enumerant>> { return __S.disown(this.getEnumerants()); }
+    getEnumerants(): capnp.List<Enumerant> { return __S.getList(3, Node_Enum._Enumerants, this); }
+    hasEnumerants(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initEnumerants(length: number): capnp.List<Enumerant> { return __S.initList(3, Node_Enum._Enumerants, length, this); }
+    setEnumerants(value: capnp.List<Enumerant>): void { __S.copyFrom(value, __S.getPointer(3, this)); }
     toString(): string { return "Node_Enum_" + super.toString(); }
 }
 export enum Node_Which {
@@ -131,7 +131,7 @@ export enum Node_Which {
     CONST = 4,
     ANNOTATION = 5
 }
-export class Node extends capnp.Struct {
+export class Node extends __S {
     static readonly FILE = Node_Which.FILE;
     static readonly STRUCT = Node_Which.STRUCT;
     static readonly ENUM = Node_Which.ENUM;
@@ -140,139 +140,139 @@ export class Node extends capnp.Struct {
     static readonly ANNOTATION = Node_Which.ANNOTATION;
     static readonly Parameter = Node_Parameter;
     static readonly NestedNode = Node_NestedNode;
-    static readonly _capnp = { displayName: "Node", id: "e682ab4cf923a417", size: new ObjectSize(40, 6) };
+    static readonly _capnp = { displayName: "Node", id: "e682ab4cf923a417", size: new __O(40, 6) };
     static _Parameters: capnp.ListCtor<Node_Parameter>;
     static _NestedNodes: capnp.ListCtor<Node_NestedNode>;
     static _Annotations: capnp.ListCtor<Annotation>;
-    getId(): capnp.Uint64 { return this._getUint64(0); }
-    setId(value: capnp.Uint64): void { this._setUint64(0, value); }
-    getDisplayName(): string { return this._getText(0); }
-    setDisplayName(value: string): void { this._setText(0, value); }
-    getDisplayNamePrefixLength(): number { return this._getUint32(8); }
-    setDisplayNamePrefixLength(value: number): void { this._setUint32(8, value); }
-    getScopeId(): capnp.Uint64 { return this._getUint64(16); }
-    setScopeId(value: capnp.Uint64): void { this._setUint64(16, value); }
-    adoptParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { this._getPointer(5).adopt(value); }
-    disownParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return this.getParameters().disown(); }
-    getParameters(): capnp.List<Node_Parameter> { return this._getList(5, Node._Parameters); }
-    hasParameters(): boolean { return !this._getPointer(5)._isNull(); }
-    initParameters(length: number): capnp.List<Node_Parameter> { return this._initList(5, Node._Parameters, length); }
-    setParameters(value: capnp.List<Node_Parameter>): void { this._getPointer(5)._copyFrom(value); }
-    getIsGeneric(): boolean { return this._getBit(288); }
-    setIsGeneric(value: boolean): void { this._setBit(288, value); }
-    adoptNestedNodes(value: capnp.Orphan<capnp.List<Node_NestedNode>>): void { this._getPointer(1).adopt(value); }
-    disownNestedNodes(): capnp.Orphan<capnp.List<Node_NestedNode>> { return this.getNestedNodes().disown(); }
-    getNestedNodes(): capnp.List<Node_NestedNode> { return this._getList(1, Node._NestedNodes); }
-    hasNestedNodes(): boolean { return !this._getPointer(1)._isNull(); }
-    initNestedNodes(length: number): capnp.List<Node_NestedNode> { return this._initList(1, Node._NestedNodes, length); }
-    setNestedNodes(value: capnp.List<Node_NestedNode>): void { this._getPointer(1)._copyFrom(value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(2).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
-    getAnnotations(): capnp.List<Annotation> { return this._getList(2, Node._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(2)._isNull(); }
-    initAnnotations(length: number): capnp.List<Annotation> { return this._initList(2, Node._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(2)._copyFrom(value); }
-    isFile(): boolean { return this._getUint16(12) === 0; }
-    setFile(): void { this._setUint16(12, 0); }
+    getId(): capnp.Uint64 { return __S.getUint64(0, this); }
+    setId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
+    getDisplayName(): string { return __S.getText(0, this); }
+    setDisplayName(value: string): void { __S.setText(0, value, this); }
+    getDisplayNamePrefixLength(): number { return __S.getUint32(8, this); }
+    setDisplayNamePrefixLength(value: number): void { __S.setUint32(8, value, this); }
+    getScopeId(): capnp.Uint64 { return __S.getUint64(16, this); }
+    setScopeId(value: capnp.Uint64): void { __S.setUint64(16, value, this); }
+    adoptParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { __S.adopt(value, __S.getPointer(5, this)); }
+    disownParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return __S.disown(this.getParameters()); }
+    getParameters(): capnp.List<Node_Parameter> { return __S.getList(5, Node._Parameters, this); }
+    hasParameters(): boolean { return !__S.isNull(__S.getPointer(5, this)); }
+    initParameters(length: number): capnp.List<Node_Parameter> { return __S.initList(5, Node._Parameters, length, this); }
+    setParameters(value: capnp.List<Node_Parameter>): void { __S.copyFrom(value, __S.getPointer(5, this)); }
+    getIsGeneric(): boolean { return __S.getBit(288, this); }
+    setIsGeneric(value: boolean): void { __S.setBit(288, value, this); }
+    adoptNestedNodes(value: capnp.Orphan<capnp.List<Node_NestedNode>>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownNestedNodes(): capnp.Orphan<capnp.List<Node_NestedNode>> { return __S.disown(this.getNestedNodes()); }
+    getNestedNodes(): capnp.List<Node_NestedNode> { return __S.getList(1, Node._NestedNodes, this); }
+    hasNestedNodes(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initNestedNodes(length: number): capnp.List<Node_NestedNode> { return __S.initList(1, Node._NestedNodes, length, this); }
+    setNestedNodes(value: capnp.List<Node_NestedNode>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { __S.adopt(value, __S.getPointer(2, this)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return __S.disown(this.getAnnotations()); }
+    getAnnotations(): capnp.List<Annotation> { return __S.getList(2, Node._Annotations, this); }
+    hasAnnotations(): boolean { return !__S.isNull(__S.getPointer(2, this)); }
+    initAnnotations(length: number): capnp.List<Annotation> { return __S.initList(2, Node._Annotations, length, this); }
+    setAnnotations(value: capnp.List<Annotation>): void { __S.copyFrom(value, __S.getPointer(2, this)); }
+    isFile(): boolean { return __S.getUint16(12, this) === 0; }
+    setFile(): void { __S.setUint16(12, 0, this); }
     getStruct(): Node_Struct {
-        this._testWhich("struct", this._getUint16(12), 1);
-        return this._getAs(Node_Struct);
+        __S.testWhich("struct", __S.getUint16(12, this), 1, this);
+        return __S.getAs(Node_Struct, this);
     }
     initStruct(): Node_Struct {
-        this._setUint16(12, 1);
-        return this._getAs(Node_Struct);
+        __S.setUint16(12, 1, this);
+        return __S.getAs(Node_Struct, this);
     }
-    isStruct(): boolean { return this._getUint16(12) === 1; }
-    setStruct(): void { this._setUint16(12, 1); }
+    isStruct(): boolean { return __S.getUint16(12, this) === 1; }
+    setStruct(): void { __S.setUint16(12, 1, this); }
     getEnum(): Node_Enum {
-        this._testWhich("enum", this._getUint16(12), 2);
-        return this._getAs(Node_Enum);
+        __S.testWhich("enum", __S.getUint16(12, this), 2, this);
+        return __S.getAs(Node_Enum, this);
     }
     initEnum(): Node_Enum {
-        this._setUint16(12, 2);
-        return this._getAs(Node_Enum);
+        __S.setUint16(12, 2, this);
+        return __S.getAs(Node_Enum, this);
     }
-    isEnum(): boolean { return this._getUint16(12) === 2; }
-    setEnum(): void { this._setUint16(12, 2); }
+    isEnum(): boolean { return __S.getUint16(12, this) === 2; }
+    setEnum(): void { __S.setUint16(12, 2, this); }
     getInterface(): Node_Interface {
-        this._testWhich("interface", this._getUint16(12), 3);
-        return this._getAs(Node_Interface);
+        __S.testWhich("interface", __S.getUint16(12, this), 3, this);
+        return __S.getAs(Node_Interface, this);
     }
     initInterface(): Node_Interface {
-        this._setUint16(12, 3);
-        return this._getAs(Node_Interface);
+        __S.setUint16(12, 3, this);
+        return __S.getAs(Node_Interface, this);
     }
-    isInterface(): boolean { return this._getUint16(12) === 3; }
-    setInterface(): void { this._setUint16(12, 3); }
+    isInterface(): boolean { return __S.getUint16(12, this) === 3; }
+    setInterface(): void { __S.setUint16(12, 3, this); }
     getConst(): Node_Const {
-        this._testWhich("const", this._getUint16(12), 4);
-        return this._getAs(Node_Const);
+        __S.testWhich("const", __S.getUint16(12, this), 4, this);
+        return __S.getAs(Node_Const, this);
     }
     initConst(): Node_Const {
-        this._setUint16(12, 4);
-        return this._getAs(Node_Const);
+        __S.setUint16(12, 4, this);
+        return __S.getAs(Node_Const, this);
     }
-    isConst(): boolean { return this._getUint16(12) === 4; }
-    setConst(): void { this._setUint16(12, 4); }
+    isConst(): boolean { return __S.getUint16(12, this) === 4; }
+    setConst(): void { __S.setUint16(12, 4, this); }
     getAnnotation(): Node_Annotation {
-        this._testWhich("annotation", this._getUint16(12), 5);
-        return this._getAs(Node_Annotation);
+        __S.testWhich("annotation", __S.getUint16(12, this), 5, this);
+        return __S.getAs(Node_Annotation, this);
     }
     initAnnotation(): Node_Annotation {
-        this._setUint16(12, 5);
-        return this._getAs(Node_Annotation);
+        __S.setUint16(12, 5, this);
+        return __S.getAs(Node_Annotation, this);
     }
-    isAnnotation(): boolean { return this._getUint16(12) === 5; }
-    setAnnotation(): void { this._setUint16(12, 5); }
+    isAnnotation(): boolean { return __S.getUint16(12, this) === 5; }
+    setAnnotation(): void { __S.setUint16(12, 5, this); }
     toString(): string { return "Node_" + super.toString(); }
-    which(): Node_Which { return this._getUint16(12); }
+    which(): Node_Which { return __S.getUint16(12, this); }
 }
-export class Field_Group extends capnp.Struct {
-    static readonly _capnp = { displayName: "group", id: "cafccddb68db1d11", size: new ObjectSize(24, 4) };
-    getTypeId(): capnp.Uint64 { return this._getUint64(16); }
-    setTypeId(value: capnp.Uint64): void { this._setUint64(16, value); }
+export class Field_Group extends __S {
+    static readonly _capnp = { displayName: "group", id: "cafccddb68db1d11", size: new __O(24, 4) };
+    getTypeId(): capnp.Uint64 { return __S.getUint64(16, this); }
+    setTypeId(value: capnp.Uint64): void { __S.setUint64(16, value, this); }
     toString(): string { return "Field_Group_" + super.toString(); }
 }
 export enum Field_Ordinal_Which {
     IMPLICIT = 0,
     EXPLICIT = 1
 }
-export class Field_Ordinal extends capnp.Struct {
+export class Field_Ordinal extends __S {
     static readonly IMPLICIT = Field_Ordinal_Which.IMPLICIT;
     static readonly EXPLICIT = Field_Ordinal_Which.EXPLICIT;
-    static readonly _capnp = { displayName: "ordinal", id: "bb90d5c287870be6", size: new ObjectSize(24, 4) };
-    isImplicit(): boolean { return this._getUint16(10) === 0; }
-    setImplicit(): void { this._setUint16(10, 0); }
+    static readonly _capnp = { displayName: "ordinal", id: "bb90d5c287870be6", size: new __O(24, 4) };
+    isImplicit(): boolean { return __S.getUint16(10, this) === 0; }
+    setImplicit(): void { __S.setUint16(10, 0, this); }
     getExplicit(): number {
-        this._testWhich("explicit", this._getUint16(10), 1);
-        return this._getUint16(12);
+        __S.testWhich("explicit", __S.getUint16(10, this), 1, this);
+        return __S.getUint16(12, this);
     }
-    isExplicit(): boolean { return this._getUint16(10) === 1; }
+    isExplicit(): boolean { return __S.getUint16(10, this) === 1; }
     setExplicit(value: number): void {
-        this._setUint16(10, 1);
-        this._setUint16(12, value);
+        __S.setUint16(10, 1, this);
+        __S.setUint16(12, value, this);
     }
     toString(): string { return "Field_Ordinal_" + super.toString(); }
-    which(): Field_Ordinal_Which { return this._getUint16(10); }
+    which(): Field_Ordinal_Which { return __S.getUint16(10, this); }
 }
-export class Field_Slot extends capnp.Struct {
-    static readonly _capnp = { displayName: "slot", id: "c42305476bb4746f", size: new ObjectSize(24, 4) };
-    getOffset(): number { return this._getUint32(4); }
-    setOffset(value: number): void { this._setUint32(4, value); }
-    adoptType(value: capnp.Orphan<Type>): void { this._getPointer(2).adopt(value); }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
-    getType(): Type { return this._getStruct(2, Type); }
-    hasType(): boolean { return !this._getPointer(2)._isNull(); }
-    initType(): Type { return this._initStructAt(2, Type); }
-    setType(value: Type): void { this._getPointer(2)._copyFrom(value); }
-    adoptDefaultValue(value: capnp.Orphan<Value>): void { this._getPointer(3).adopt(value); }
-    disownDefaultValue(): capnp.Orphan<Value> { return this.getDefaultValue().disown(); }
-    getDefaultValue(): Value { return this._getStruct(3, Value); }
-    hasDefaultValue(): boolean { return !this._getPointer(3)._isNull(); }
-    initDefaultValue(): Value { return this._initStructAt(3, Value); }
-    setDefaultValue(value: Value): void { this._getPointer(3)._copyFrom(value); }
-    getHadExplicitDefault(): boolean { return this._getBit(128); }
-    setHadExplicitDefault(value: boolean): void { this._setBit(128, value); }
+export class Field_Slot extends __S {
+    static readonly _capnp = { displayName: "slot", id: "c42305476bb4746f", size: new __O(24, 4) };
+    getOffset(): number { return __S.getUint32(4, this); }
+    setOffset(value: number): void { __S.setUint32(4, value, this); }
+    adoptType(value: capnp.Orphan<Type>): void { __S.adopt(value, __S.getPointer(2, this)); }
+    disownType(): capnp.Orphan<Type> { return __S.disown(this.getType()); }
+    getType(): Type { return __S.getStruct(2, Type, this); }
+    hasType(): boolean { return !__S.isNull(__S.getPointer(2, this)); }
+    initType(): Type { return __S.initStructAt(2, Type, this); }
+    setType(value: Type): void { __S.copyFrom(value, __S.getPointer(2, this)); }
+    adoptDefaultValue(value: capnp.Orphan<Value>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownDefaultValue(): capnp.Orphan<Value> { return __S.disown(this.getDefaultValue()); }
+    getDefaultValue(): Value { return __S.getStruct(3, Value, this); }
+    hasDefaultValue(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initDefaultValue(): Value { return __S.initStructAt(3, Value, this); }
+    setDefaultValue(value: Value): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    getHadExplicitDefault(): boolean { return __S.getBit(128, this); }
+    setHadExplicitDefault(value: boolean): void { __S.setBit(128, value, this); }
     toString(): string { return "Field_Slot_" + super.toString(); }
 }
 export enum Field_Which {
@@ -280,112 +280,112 @@ export enum Field_Which {
     GROUP = 1
 }
 const FIELD_DISCRIMINANT_VALUE_DEFAULT = capnp.getUint16Mask(65535);
-export class Field extends capnp.Struct {
+export class Field extends __S {
     static readonly NO_DISCRIMINANT = 65535;
     static readonly SLOT = Field_Which.SLOT;
     static readonly GROUP = Field_Which.GROUP;
-    static readonly _capnp = { displayName: "Field", id: "9aad50a41f4af45f", size: new ObjectSize(24, 4) };
+    static readonly _capnp = { displayName: "Field", id: "9aad50a41f4af45f", size: new __O(24, 4) };
     static _Annotations: capnp.ListCtor<Annotation>;
-    getName(): string { return this._getText(0); }
-    setName(value: string): void { this._setText(0, value); }
-    getCodeOrder(): number { return this._getUint16(0); }
-    setCodeOrder(value: number): void { this._setUint16(0, value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(1).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
-    getAnnotations(): capnp.List<Annotation> { return this._getList(1, Field._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(1)._isNull(); }
-    initAnnotations(length: number): capnp.List<Annotation> { return this._initList(1, Field._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(1)._copyFrom(value); }
-    getDiscriminantValue(): number { return this._getUint16(2, FIELD_DISCRIMINANT_VALUE_DEFAULT); }
-    setDiscriminantValue(value: number): void { this._setUint16(2, value); }
+    getName(): string { return __S.getText(0, this); }
+    setName(value: string): void { __S.setText(0, value, this); }
+    getCodeOrder(): number { return __S.getUint16(0, this); }
+    setCodeOrder(value: number): void { __S.setUint16(0, value, this); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return __S.disown(this.getAnnotations()); }
+    getAnnotations(): capnp.List<Annotation> { return __S.getList(1, Field._Annotations, this); }
+    hasAnnotations(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initAnnotations(length: number): capnp.List<Annotation> { return __S.initList(1, Field._Annotations, length, this); }
+    setAnnotations(value: capnp.List<Annotation>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
+    getDiscriminantValue(): number { return __S.getUint16(2, this, FIELD_DISCRIMINANT_VALUE_DEFAULT); }
+    setDiscriminantValue(value: number): void { __S.setUint16(2, value, this); }
     getSlot(): Field_Slot {
-        this._testWhich("slot", this._getUint16(8), 0);
-        return this._getAs(Field_Slot);
+        __S.testWhich("slot", __S.getUint16(8, this), 0, this);
+        return __S.getAs(Field_Slot, this);
     }
     initSlot(): Field_Slot {
-        this._setUint16(8, 0);
-        return this._getAs(Field_Slot);
+        __S.setUint16(8, 0, this);
+        return __S.getAs(Field_Slot, this);
     }
-    isSlot(): boolean { return this._getUint16(8) === 0; }
-    setSlot(): void { this._setUint16(8, 0); }
+    isSlot(): boolean { return __S.getUint16(8, this) === 0; }
+    setSlot(): void { __S.setUint16(8, 0, this); }
     getGroup(): Field_Group {
-        this._testWhich("group", this._getUint16(8), 1);
-        return this._getAs(Field_Group);
+        __S.testWhich("group", __S.getUint16(8, this), 1, this);
+        return __S.getAs(Field_Group, this);
     }
     initGroup(): Field_Group {
-        this._setUint16(8, 1);
-        return this._getAs(Field_Group);
+        __S.setUint16(8, 1, this);
+        return __S.getAs(Field_Group, this);
     }
-    isGroup(): boolean { return this._getUint16(8) === 1; }
-    setGroup(): void { this._setUint16(8, 1); }
-    getOrdinal(): Field_Ordinal { return this._getAs(Field_Ordinal); }
-    initOrdinal(): Field_Ordinal { return this._getAs(Field_Ordinal); }
+    isGroup(): boolean { return __S.getUint16(8, this) === 1; }
+    setGroup(): void { __S.setUint16(8, 1, this); }
+    getOrdinal(): Field_Ordinal { return __S.getAs(Field_Ordinal, this); }
+    initOrdinal(): Field_Ordinal { return __S.getAs(Field_Ordinal, this); }
     toString(): string { return "Field_" + super.toString(); }
-    which(): Field_Which { return this._getUint16(8); }
+    which(): Field_Which { return __S.getUint16(8, this); }
 }
-export class Enumerant extends capnp.Struct {
-    static readonly _capnp = { displayName: "Enumerant", id: "978a7cebdc549a4d", size: new ObjectSize(8, 2) };
+export class Enumerant extends __S {
+    static readonly _capnp = { displayName: "Enumerant", id: "978a7cebdc549a4d", size: new __O(8, 2) };
     static _Annotations: capnp.ListCtor<Annotation>;
-    getName(): string { return this._getText(0); }
-    setName(value: string): void { this._setText(0, value); }
-    getCodeOrder(): number { return this._getUint16(0); }
-    setCodeOrder(value: number): void { this._setUint16(0, value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(1).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
-    getAnnotations(): capnp.List<Annotation> { return this._getList(1, Enumerant._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(1)._isNull(); }
-    initAnnotations(length: number): capnp.List<Annotation> { return this._initList(1, Enumerant._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(1)._copyFrom(value); }
+    getName(): string { return __S.getText(0, this); }
+    setName(value: string): void { __S.setText(0, value, this); }
+    getCodeOrder(): number { return __S.getUint16(0, this); }
+    setCodeOrder(value: number): void { __S.setUint16(0, value, this); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return __S.disown(this.getAnnotations()); }
+    getAnnotations(): capnp.List<Annotation> { return __S.getList(1, Enumerant._Annotations, this); }
+    hasAnnotations(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initAnnotations(length: number): capnp.List<Annotation> { return __S.initList(1, Enumerant._Annotations, length, this); }
+    setAnnotations(value: capnp.List<Annotation>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
     toString(): string { return "Enumerant_" + super.toString(); }
 }
-export class Superclass extends capnp.Struct {
-    static readonly _capnp = { displayName: "Superclass", id: "a9962a9ed0a4d7f8", size: new ObjectSize(8, 1) };
-    getId(): capnp.Uint64 { return this._getUint64(0); }
-    setId(value: capnp.Uint64): void { this._setUint64(0, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
-    getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
-    initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+export class Superclass extends __S {
+    static readonly _capnp = { displayName: "Superclass", id: "a9962a9ed0a4d7f8", size: new __O(8, 1) };
+    getId(): capnp.Uint64 { return __S.getUint64(0, this); }
+    setId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
+    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
+    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
+    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Superclass_" + super.toString(); }
 }
-export class Method extends capnp.Struct {
-    static readonly _capnp = { displayName: "Method", id: "9500cce23b334d80", size: new ObjectSize(24, 5) };
+export class Method extends __S {
+    static readonly _capnp = { displayName: "Method", id: "9500cce23b334d80", size: new __O(24, 5) };
     static _ImplicitParameters: capnp.ListCtor<Node_Parameter>;
     static _Annotations: capnp.ListCtor<Annotation>;
-    getName(): string { return this._getText(0); }
-    setName(value: string): void { this._setText(0, value); }
-    getCodeOrder(): number { return this._getUint16(0); }
-    setCodeOrder(value: number): void { this._setUint16(0, value); }
-    adoptImplicitParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { this._getPointer(4).adopt(value); }
-    disownImplicitParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return this.getImplicitParameters().disown(); }
-    getImplicitParameters(): capnp.List<Node_Parameter> { return this._getList(4, Method._ImplicitParameters); }
-    hasImplicitParameters(): boolean { return !this._getPointer(4)._isNull(); }
-    initImplicitParameters(length: number): capnp.List<Node_Parameter> { return this._initList(4, Method._ImplicitParameters, length); }
-    setImplicitParameters(value: capnp.List<Node_Parameter>): void { this._getPointer(4)._copyFrom(value); }
-    getParamStructType(): capnp.Uint64 { return this._getUint64(8); }
-    setParamStructType(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptParamBrand(value: capnp.Orphan<Brand>): void { this._getPointer(2).adopt(value); }
-    disownParamBrand(): capnp.Orphan<Brand> { return this.getParamBrand().disown(); }
-    getParamBrand(): Brand { return this._getStruct(2, Brand); }
-    hasParamBrand(): boolean { return !this._getPointer(2)._isNull(); }
-    initParamBrand(): Brand { return this._initStructAt(2, Brand); }
-    setParamBrand(value: Brand): void { this._getPointer(2)._copyFrom(value); }
-    getResultStructType(): capnp.Uint64 { return this._getUint64(16); }
-    setResultStructType(value: capnp.Uint64): void { this._setUint64(16, value); }
-    adoptResultBrand(value: capnp.Orphan<Brand>): void { this._getPointer(3).adopt(value); }
-    disownResultBrand(): capnp.Orphan<Brand> { return this.getResultBrand().disown(); }
-    getResultBrand(): Brand { return this._getStruct(3, Brand); }
-    hasResultBrand(): boolean { return !this._getPointer(3)._isNull(); }
-    initResultBrand(): Brand { return this._initStructAt(3, Brand); }
-    setResultBrand(value: Brand): void { this._getPointer(3)._copyFrom(value); }
-    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { this._getPointer(1).adopt(value); }
-    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return this.getAnnotations().disown(); }
-    getAnnotations(): capnp.List<Annotation> { return this._getList(1, Method._Annotations); }
-    hasAnnotations(): boolean { return !this._getPointer(1)._isNull(); }
-    initAnnotations(length: number): capnp.List<Annotation> { return this._initList(1, Method._Annotations, length); }
-    setAnnotations(value: capnp.List<Annotation>): void { this._getPointer(1)._copyFrom(value); }
+    getName(): string { return __S.getText(0, this); }
+    setName(value: string): void { __S.setText(0, value, this); }
+    getCodeOrder(): number { return __S.getUint16(0, this); }
+    setCodeOrder(value: number): void { __S.setUint16(0, value, this); }
+    adoptImplicitParameters(value: capnp.Orphan<capnp.List<Node_Parameter>>): void { __S.adopt(value, __S.getPointer(4, this)); }
+    disownImplicitParameters(): capnp.Orphan<capnp.List<Node_Parameter>> { return __S.disown(this.getImplicitParameters()); }
+    getImplicitParameters(): capnp.List<Node_Parameter> { return __S.getList(4, Method._ImplicitParameters, this); }
+    hasImplicitParameters(): boolean { return !__S.isNull(__S.getPointer(4, this)); }
+    initImplicitParameters(length: number): capnp.List<Node_Parameter> { return __S.initList(4, Method._ImplicitParameters, length, this); }
+    setImplicitParameters(value: capnp.List<Node_Parameter>): void { __S.copyFrom(value, __S.getPointer(4, this)); }
+    getParamStructType(): capnp.Uint64 { return __S.getUint64(8, this); }
+    setParamStructType(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    adoptParamBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(2, this)); }
+    disownParamBrand(): capnp.Orphan<Brand> { return __S.disown(this.getParamBrand()); }
+    getParamBrand(): Brand { return __S.getStruct(2, Brand, this); }
+    hasParamBrand(): boolean { return !__S.isNull(__S.getPointer(2, this)); }
+    initParamBrand(): Brand { return __S.initStructAt(2, Brand, this); }
+    setParamBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(2, this)); }
+    getResultStructType(): capnp.Uint64 { return __S.getUint64(16, this); }
+    setResultStructType(value: capnp.Uint64): void { __S.setUint64(16, value, this); }
+    adoptResultBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownResultBrand(): capnp.Orphan<Brand> { return __S.disown(this.getResultBrand()); }
+    getResultBrand(): Brand { return __S.getStruct(3, Brand, this); }
+    hasResultBrand(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initResultBrand(): Brand { return __S.initStructAt(3, Brand, this); }
+    setResultBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    adoptAnnotations(value: capnp.Orphan<capnp.List<Annotation>>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownAnnotations(): capnp.Orphan<capnp.List<Annotation>> { return __S.disown(this.getAnnotations()); }
+    getAnnotations(): capnp.List<Annotation> { return __S.getList(1, Method._Annotations, this); }
+    hasAnnotations(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initAnnotations(length: number): capnp.List<Annotation> { return __S.initList(1, Method._Annotations, length, this); }
+    setAnnotations(value: capnp.List<Annotation>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
     toString(): string { return "Method_" + super.toString(); }
 }
 export enum Type_AnyPointer_Unconstrained_Which {
@@ -394,35 +394,35 @@ export enum Type_AnyPointer_Unconstrained_Which {
     LIST = 2,
     CAPABILITY = 3
 }
-export class Type_AnyPointer_Unconstrained extends capnp.Struct {
+export class Type_AnyPointer_Unconstrained extends __S {
     static readonly ANY_KIND = Type_AnyPointer_Unconstrained_Which.ANY_KIND;
     static readonly STRUCT = Type_AnyPointer_Unconstrained_Which.STRUCT;
     static readonly LIST = Type_AnyPointer_Unconstrained_Which.LIST;
     static readonly CAPABILITY = Type_AnyPointer_Unconstrained_Which.CAPABILITY;
-    static readonly _capnp = { displayName: "unconstrained", id: "8e3b5f79fe593656", size: new ObjectSize(24, 1) };
-    isAnyKind(): boolean { return this._getUint16(10) === 0; }
-    setAnyKind(): void { this._setUint16(10, 0); }
-    isStruct(): boolean { return this._getUint16(10) === 1; }
-    setStruct(): void { this._setUint16(10, 1); }
-    isList(): boolean { return this._getUint16(10) === 2; }
-    setList(): void { this._setUint16(10, 2); }
-    isCapability(): boolean { return this._getUint16(10) === 3; }
-    setCapability(): void { this._setUint16(10, 3); }
+    static readonly _capnp = { displayName: "unconstrained", id: "8e3b5f79fe593656", size: new __O(24, 1) };
+    isAnyKind(): boolean { return __S.getUint16(10, this) === 0; }
+    setAnyKind(): void { __S.setUint16(10, 0, this); }
+    isStruct(): boolean { return __S.getUint16(10, this) === 1; }
+    setStruct(): void { __S.setUint16(10, 1, this); }
+    isList(): boolean { return __S.getUint16(10, this) === 2; }
+    setList(): void { __S.setUint16(10, 2, this); }
+    isCapability(): boolean { return __S.getUint16(10, this) === 3; }
+    setCapability(): void { __S.setUint16(10, 3, this); }
     toString(): string { return "Type_AnyPointer_Unconstrained_" + super.toString(); }
-    which(): Type_AnyPointer_Unconstrained_Which { return this._getUint16(10); }
+    which(): Type_AnyPointer_Unconstrained_Which { return __S.getUint16(10, this); }
 }
-export class Type_AnyPointer_Parameter extends capnp.Struct {
-    static readonly _capnp = { displayName: "parameter", id: "9dd1f724f4614a85", size: new ObjectSize(24, 1) };
-    getScopeId(): capnp.Uint64 { return this._getUint64(16); }
-    setScopeId(value: capnp.Uint64): void { this._setUint64(16, value); }
-    getParameterIndex(): number { return this._getUint16(10); }
-    setParameterIndex(value: number): void { this._setUint16(10, value); }
+export class Type_AnyPointer_Parameter extends __S {
+    static readonly _capnp = { displayName: "parameter", id: "9dd1f724f4614a85", size: new __O(24, 1) };
+    getScopeId(): capnp.Uint64 { return __S.getUint64(16, this); }
+    setScopeId(value: capnp.Uint64): void { __S.setUint64(16, value, this); }
+    getParameterIndex(): number { return __S.getUint16(10, this); }
+    setParameterIndex(value: number): void { __S.setUint16(10, value, this); }
     toString(): string { return "Type_AnyPointer_Parameter_" + super.toString(); }
 }
-export class Type_AnyPointer_ImplicitMethodParameter extends capnp.Struct {
-    static readonly _capnp = { displayName: "implicitMethodParameter", id: "baefc9120c56e274", size: new ObjectSize(24, 1) };
-    getParameterIndex(): number { return this._getUint16(10); }
-    setParameterIndex(value: number): void { this._setUint16(10, value); }
+export class Type_AnyPointer_ImplicitMethodParameter extends __S {
+    static readonly _capnp = { displayName: "implicitMethodParameter", id: "baefc9120c56e274", size: new __O(24, 1) };
+    getParameterIndex(): number { return __S.getUint16(10, this); }
+    setParameterIndex(value: number): void { __S.setUint16(10, value, this); }
     toString(): string { return "Type_AnyPointer_ImplicitMethodParameter_" + super.toString(); }
 }
 export enum Type_AnyPointer_Which {
@@ -430,88 +430,88 @@ export enum Type_AnyPointer_Which {
     PARAMETER = 1,
     IMPLICIT_METHOD_PARAMETER = 2
 }
-export class Type_AnyPointer extends capnp.Struct {
+export class Type_AnyPointer extends __S {
     static readonly UNCONSTRAINED = Type_AnyPointer_Which.UNCONSTRAINED;
     static readonly PARAMETER = Type_AnyPointer_Which.PARAMETER;
     static readonly IMPLICIT_METHOD_PARAMETER = Type_AnyPointer_Which.IMPLICIT_METHOD_PARAMETER;
-    static readonly _capnp = { displayName: "anyPointer", id: "c2573fe8a23e49f1", size: new ObjectSize(24, 1) };
+    static readonly _capnp = { displayName: "anyPointer", id: "c2573fe8a23e49f1", size: new __O(24, 1) };
     getUnconstrained(): Type_AnyPointer_Unconstrained {
-        this._testWhich("unconstrained", this._getUint16(8), 0);
-        return this._getAs(Type_AnyPointer_Unconstrained);
+        __S.testWhich("unconstrained", __S.getUint16(8, this), 0, this);
+        return __S.getAs(Type_AnyPointer_Unconstrained, this);
     }
     initUnconstrained(): Type_AnyPointer_Unconstrained {
-        this._setUint16(8, 0);
-        return this._getAs(Type_AnyPointer_Unconstrained);
+        __S.setUint16(8, 0, this);
+        return __S.getAs(Type_AnyPointer_Unconstrained, this);
     }
-    isUnconstrained(): boolean { return this._getUint16(8) === 0; }
-    setUnconstrained(): void { this._setUint16(8, 0); }
+    isUnconstrained(): boolean { return __S.getUint16(8, this) === 0; }
+    setUnconstrained(): void { __S.setUint16(8, 0, this); }
     getParameter(): Type_AnyPointer_Parameter {
-        this._testWhich("parameter", this._getUint16(8), 1);
-        return this._getAs(Type_AnyPointer_Parameter);
+        __S.testWhich("parameter", __S.getUint16(8, this), 1, this);
+        return __S.getAs(Type_AnyPointer_Parameter, this);
     }
     initParameter(): Type_AnyPointer_Parameter {
-        this._setUint16(8, 1);
-        return this._getAs(Type_AnyPointer_Parameter);
+        __S.setUint16(8, 1, this);
+        return __S.getAs(Type_AnyPointer_Parameter, this);
     }
-    isParameter(): boolean { return this._getUint16(8) === 1; }
-    setParameter(): void { this._setUint16(8, 1); }
+    isParameter(): boolean { return __S.getUint16(8, this) === 1; }
+    setParameter(): void { __S.setUint16(8, 1, this); }
     getImplicitMethodParameter(): Type_AnyPointer_ImplicitMethodParameter {
-        this._testWhich("implicitMethodParameter", this._getUint16(8), 2);
-        return this._getAs(Type_AnyPointer_ImplicitMethodParameter);
+        __S.testWhich("implicitMethodParameter", __S.getUint16(8, this), 2, this);
+        return __S.getAs(Type_AnyPointer_ImplicitMethodParameter, this);
     }
     initImplicitMethodParameter(): Type_AnyPointer_ImplicitMethodParameter {
-        this._setUint16(8, 2);
-        return this._getAs(Type_AnyPointer_ImplicitMethodParameter);
+        __S.setUint16(8, 2, this);
+        return __S.getAs(Type_AnyPointer_ImplicitMethodParameter, this);
     }
-    isImplicitMethodParameter(): boolean { return this._getUint16(8) === 2; }
-    setImplicitMethodParameter(): void { this._setUint16(8, 2); }
+    isImplicitMethodParameter(): boolean { return __S.getUint16(8, this) === 2; }
+    setImplicitMethodParameter(): void { __S.setUint16(8, 2, this); }
     toString(): string { return "Type_AnyPointer_" + super.toString(); }
-    which(): Type_AnyPointer_Which { return this._getUint16(8); }
+    which(): Type_AnyPointer_Which { return __S.getUint16(8, this); }
 }
-export class Type_Struct extends capnp.Struct {
-    static readonly _capnp = { displayName: "struct", id: "ac3a6f60ef4cc6d3", size: new ObjectSize(24, 1) };
-    getTypeId(): capnp.Uint64 { return this._getUint64(8); }
-    setTypeId(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
-    getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
-    initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+export class Type_Struct extends __S {
+    static readonly _capnp = { displayName: "struct", id: "ac3a6f60ef4cc6d3", size: new __O(24, 1) };
+    getTypeId(): capnp.Uint64 { return __S.getUint64(8, this); }
+    setTypeId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
+    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
+    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
+    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Type_Struct_" + super.toString(); }
 }
-export class Type_Enum extends capnp.Struct {
-    static readonly _capnp = { displayName: "enum", id: "9e0e78711a7f87a9", size: new ObjectSize(24, 1) };
-    getTypeId(): capnp.Uint64 { return this._getUint64(8); }
-    setTypeId(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
-    getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
-    initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+export class Type_Enum extends __S {
+    static readonly _capnp = { displayName: "enum", id: "9e0e78711a7f87a9", size: new __O(24, 1) };
+    getTypeId(): capnp.Uint64 { return __S.getUint64(8, this); }
+    setTypeId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
+    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
+    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
+    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Type_Enum_" + super.toString(); }
 }
-export class Type_List extends capnp.Struct {
-    static readonly _capnp = { displayName: "list", id: "87e739250a60ea97", size: new ObjectSize(24, 1) };
-    adoptElementType(value: capnp.Orphan<Type>): void { this._getPointer(0).adopt(value); }
-    disownElementType(): capnp.Orphan<Type> { return this.getElementType().disown(); }
-    getElementType(): Type { return this._getStruct(0, Type); }
-    hasElementType(): boolean { return !this._getPointer(0)._isNull(); }
-    initElementType(): Type { return this._initStructAt(0, Type); }
-    setElementType(value: Type): void { this._getPointer(0)._copyFrom(value); }
+export class Type_List extends __S {
+    static readonly _capnp = { displayName: "list", id: "87e739250a60ea97", size: new __O(24, 1) };
+    adoptElementType(value: capnp.Orphan<Type>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownElementType(): capnp.Orphan<Type> { return __S.disown(this.getElementType()); }
+    getElementType(): Type { return __S.getStruct(0, Type, this); }
+    hasElementType(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initElementType(): Type { return __S.initStructAt(0, Type, this); }
+    setElementType(value: Type): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Type_List_" + super.toString(); }
 }
-export class Type_Interface extends capnp.Struct {
-    static readonly _capnp = { displayName: "interface", id: "ed8bca69f7fb0cbf", size: new ObjectSize(24, 1) };
-    getTypeId(): capnp.Uint64 { return this._getUint64(8); }
-    setTypeId(value: capnp.Uint64): void { this._setUint64(8, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(0).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
-    getBrand(): Brand { return this._getStruct(0, Brand); }
-    hasBrand(): boolean { return !this._getPointer(0)._isNull(); }
-    initBrand(): Brand { return this._initStructAt(0, Brand); }
-    setBrand(value: Brand): void { this._getPointer(0)._copyFrom(value); }
+export class Type_Interface extends __S {
+    static readonly _capnp = { displayName: "interface", id: "ed8bca69f7fb0cbf", size: new __O(24, 1) };
+    getTypeId(): capnp.Uint64 { return __S.getUint64(8, this); }
+    setTypeId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
+    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
+    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
+    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Type_Interface_" + super.toString(); }
 }
 export enum Type_Which {
@@ -535,7 +535,7 @@ export enum Type_Which {
     INTERFACE = 17,
     ANY_POINTER = 18
 }
-export class Type extends capnp.Struct {
+export class Type extends __S {
     static readonly VOID = Type_Which.VOID;
     static readonly BOOL = Type_Which.BOOL;
     static readonly INT8 = Type_Which.INT8;
@@ -555,166 +555,166 @@ export class Type extends capnp.Struct {
     static readonly STRUCT = Type_Which.STRUCT;
     static readonly INTERFACE = Type_Which.INTERFACE;
     static readonly ANY_POINTER = Type_Which.ANY_POINTER;
-    static readonly _capnp = { displayName: "Type", id: "d07378ede1f9cc60", size: new ObjectSize(24, 1) };
-    isVoid(): boolean { return this._getUint16(0) === 0; }
-    setVoid(): void { this._setUint16(0, 0); }
-    isBool(): boolean { return this._getUint16(0) === 1; }
-    setBool(): void { this._setUint16(0, 1); }
-    isInt8(): boolean { return this._getUint16(0) === 2; }
-    setInt8(): void { this._setUint16(0, 2); }
-    isInt16(): boolean { return this._getUint16(0) === 3; }
-    setInt16(): void { this._setUint16(0, 3); }
-    isInt32(): boolean { return this._getUint16(0) === 4; }
-    setInt32(): void { this._setUint16(0, 4); }
-    isInt64(): boolean { return this._getUint16(0) === 5; }
-    setInt64(): void { this._setUint16(0, 5); }
-    isUint8(): boolean { return this._getUint16(0) === 6; }
-    setUint8(): void { this._setUint16(0, 6); }
-    isUint16(): boolean { return this._getUint16(0) === 7; }
-    setUint16(): void { this._setUint16(0, 7); }
-    isUint32(): boolean { return this._getUint16(0) === 8; }
-    setUint32(): void { this._setUint16(0, 8); }
-    isUint64(): boolean { return this._getUint16(0) === 9; }
-    setUint64(): void { this._setUint16(0, 9); }
-    isFloat32(): boolean { return this._getUint16(0) === 10; }
-    setFloat32(): void { this._setUint16(0, 10); }
-    isFloat64(): boolean { return this._getUint16(0) === 11; }
-    setFloat64(): void { this._setUint16(0, 11); }
-    isText(): boolean { return this._getUint16(0) === 12; }
-    setText(): void { this._setUint16(0, 12); }
-    isData(): boolean { return this._getUint16(0) === 13; }
-    setData(): void { this._setUint16(0, 13); }
+    static readonly _capnp = { displayName: "Type", id: "d07378ede1f9cc60", size: new __O(24, 1) };
+    isVoid(): boolean { return __S.getUint16(0, this) === 0; }
+    setVoid(): void { __S.setUint16(0, 0, this); }
+    isBool(): boolean { return __S.getUint16(0, this) === 1; }
+    setBool(): void { __S.setUint16(0, 1, this); }
+    isInt8(): boolean { return __S.getUint16(0, this) === 2; }
+    setInt8(): void { __S.setUint16(0, 2, this); }
+    isInt16(): boolean { return __S.getUint16(0, this) === 3; }
+    setInt16(): void { __S.setUint16(0, 3, this); }
+    isInt32(): boolean { return __S.getUint16(0, this) === 4; }
+    setInt32(): void { __S.setUint16(0, 4, this); }
+    isInt64(): boolean { return __S.getUint16(0, this) === 5; }
+    setInt64(): void { __S.setUint16(0, 5, this); }
+    isUint8(): boolean { return __S.getUint16(0, this) === 6; }
+    setUint8(): void { __S.setUint16(0, 6, this); }
+    isUint16(): boolean { return __S.getUint16(0, this) === 7; }
+    setUint16(): void { __S.setUint16(0, 7, this); }
+    isUint32(): boolean { return __S.getUint16(0, this) === 8; }
+    setUint32(): void { __S.setUint16(0, 8, this); }
+    isUint64(): boolean { return __S.getUint16(0, this) === 9; }
+    setUint64(): void { __S.setUint16(0, 9, this); }
+    isFloat32(): boolean { return __S.getUint16(0, this) === 10; }
+    setFloat32(): void { __S.setUint16(0, 10, this); }
+    isFloat64(): boolean { return __S.getUint16(0, this) === 11; }
+    setFloat64(): void { __S.setUint16(0, 11, this); }
+    isText(): boolean { return __S.getUint16(0, this) === 12; }
+    setText(): void { __S.setUint16(0, 12, this); }
+    isData(): boolean { return __S.getUint16(0, this) === 13; }
+    setData(): void { __S.setUint16(0, 13, this); }
     getList(): Type_List {
-        this._testWhich("list", this._getUint16(0), 14);
-        return this._getAs(Type_List);
+        __S.testWhich("list", __S.getUint16(0, this), 14, this);
+        return __S.getAs(Type_List, this);
     }
     initList(): Type_List {
-        this._setUint16(0, 14);
-        return this._getAs(Type_List);
+        __S.setUint16(0, 14, this);
+        return __S.getAs(Type_List, this);
     }
-    isList(): boolean { return this._getUint16(0) === 14; }
-    setList(): void { this._setUint16(0, 14); }
+    isList(): boolean { return __S.getUint16(0, this) === 14; }
+    setList(): void { __S.setUint16(0, 14, this); }
     getEnum(): Type_Enum {
-        this._testWhich("enum", this._getUint16(0), 15);
-        return this._getAs(Type_Enum);
+        __S.testWhich("enum", __S.getUint16(0, this), 15, this);
+        return __S.getAs(Type_Enum, this);
     }
     initEnum(): Type_Enum {
-        this._setUint16(0, 15);
-        return this._getAs(Type_Enum);
+        __S.setUint16(0, 15, this);
+        return __S.getAs(Type_Enum, this);
     }
-    isEnum(): boolean { return this._getUint16(0) === 15; }
-    setEnum(): void { this._setUint16(0, 15); }
+    isEnum(): boolean { return __S.getUint16(0, this) === 15; }
+    setEnum(): void { __S.setUint16(0, 15, this); }
     getStruct(): Type_Struct {
-        this._testWhich("struct", this._getUint16(0), 16);
-        return this._getAs(Type_Struct);
+        __S.testWhich("struct", __S.getUint16(0, this), 16, this);
+        return __S.getAs(Type_Struct, this);
     }
     initStruct(): Type_Struct {
-        this._setUint16(0, 16);
-        return this._getAs(Type_Struct);
+        __S.setUint16(0, 16, this);
+        return __S.getAs(Type_Struct, this);
     }
-    isStruct(): boolean { return this._getUint16(0) === 16; }
-    setStruct(): void { this._setUint16(0, 16); }
+    isStruct(): boolean { return __S.getUint16(0, this) === 16; }
+    setStruct(): void { __S.setUint16(0, 16, this); }
     getInterface(): Type_Interface {
-        this._testWhich("interface", this._getUint16(0), 17);
-        return this._getAs(Type_Interface);
+        __S.testWhich("interface", __S.getUint16(0, this), 17, this);
+        return __S.getAs(Type_Interface, this);
     }
     initInterface(): Type_Interface {
-        this._setUint16(0, 17);
-        return this._getAs(Type_Interface);
+        __S.setUint16(0, 17, this);
+        return __S.getAs(Type_Interface, this);
     }
-    isInterface(): boolean { return this._getUint16(0) === 17; }
-    setInterface(): void { this._setUint16(0, 17); }
+    isInterface(): boolean { return __S.getUint16(0, this) === 17; }
+    setInterface(): void { __S.setUint16(0, 17, this); }
     getAnyPointer(): Type_AnyPointer {
-        this._testWhich("anyPointer", this._getUint16(0), 18);
-        return this._getAs(Type_AnyPointer);
+        __S.testWhich("anyPointer", __S.getUint16(0, this), 18, this);
+        return __S.getAs(Type_AnyPointer, this);
     }
     initAnyPointer(): Type_AnyPointer {
-        this._setUint16(0, 18);
-        return this._getAs(Type_AnyPointer);
+        __S.setUint16(0, 18, this);
+        return __S.getAs(Type_AnyPointer, this);
     }
-    isAnyPointer(): boolean { return this._getUint16(0) === 18; }
-    setAnyPointer(): void { this._setUint16(0, 18); }
+    isAnyPointer(): boolean { return __S.getUint16(0, this) === 18; }
+    setAnyPointer(): void { __S.setUint16(0, 18, this); }
     toString(): string { return "Type_" + super.toString(); }
-    which(): Type_Which { return this._getUint16(0); }
+    which(): Type_Which { return __S.getUint16(0, this); }
 }
 export enum Brand_Scope_Which {
     BIND = 0,
     INHERIT = 1
 }
-export class Brand_Scope extends capnp.Struct {
+export class Brand_Scope extends __S {
     static readonly BIND = Brand_Scope_Which.BIND;
     static readonly INHERIT = Brand_Scope_Which.INHERIT;
-    static readonly _capnp = { displayName: "Scope", id: "abd73485a9636bc9", size: new ObjectSize(16, 1) };
+    static readonly _capnp = { displayName: "Scope", id: "abd73485a9636bc9", size: new __O(16, 1) };
     static _Bind: capnp.ListCtor<Brand_Binding>;
-    getScopeId(): capnp.Uint64 { return this._getUint64(0); }
-    setScopeId(value: capnp.Uint64): void { this._setUint64(0, value); }
+    getScopeId(): capnp.Uint64 { return __S.getUint64(0, this); }
+    setScopeId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
     adoptBind(value: capnp.Orphan<capnp.List<Brand_Binding>>): void {
-        this._setUint16(8, 0);
-        this._getPointer(0).adopt(value);
+        __S.setUint16(8, 0, this);
+        __S.adopt(value, __S.getPointer(0, this));
     }
-    disownBind(): capnp.Orphan<capnp.List<Brand_Binding>> { return this.getBind().disown(); }
+    disownBind(): capnp.Orphan<capnp.List<Brand_Binding>> { return __S.disown(this.getBind()); }
     getBind(): capnp.List<Brand_Binding> {
-        this._testWhich("bind", this._getUint16(8), 0);
-        return this._getList(0, Brand_Scope._Bind);
+        __S.testWhich("bind", __S.getUint16(8, this), 0, this);
+        return __S.getList(0, Brand_Scope._Bind, this);
     }
-    hasBind(): boolean { return !this._getPointer(0)._isNull(); }
+    hasBind(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
     initBind(length: number): capnp.List<Brand_Binding> {
-        this._setUint16(8, 0);
-        return this._initList(0, Brand_Scope._Bind, length);
+        __S.setUint16(8, 0, this);
+        return __S.initList(0, Brand_Scope._Bind, length, this);
     }
-    isBind(): boolean { return this._getUint16(8) === 0; }
+    isBind(): boolean { return __S.getUint16(8, this) === 0; }
     setBind(value: capnp.List<Brand_Binding>): void {
-        this._setUint16(8, 0);
-        this._getPointer(0)._copyFrom(value);
+        __S.setUint16(8, 0, this);
+        __S.copyFrom(value, __S.getPointer(0, this));
     }
-    isInherit(): boolean { return this._getUint16(8) === 1; }
-    setInherit(): void { this._setUint16(8, 1); }
+    isInherit(): boolean { return __S.getUint16(8, this) === 1; }
+    setInherit(): void { __S.setUint16(8, 1, this); }
     toString(): string { return "Brand_Scope_" + super.toString(); }
-    which(): Brand_Scope_Which { return this._getUint16(8); }
+    which(): Brand_Scope_Which { return __S.getUint16(8, this); }
 }
 export enum Brand_Binding_Which {
     UNBOUND = 0,
     TYPE = 1
 }
-export class Brand_Binding extends capnp.Struct {
+export class Brand_Binding extends __S {
     static readonly UNBOUND = Brand_Binding_Which.UNBOUND;
     static readonly TYPE = Brand_Binding_Which.TYPE;
-    static readonly _capnp = { displayName: "Binding", id: "c863cd16969ee7fc", size: new ObjectSize(8, 1) };
-    isUnbound(): boolean { return this._getUint16(0) === 0; }
-    setUnbound(): void { this._setUint16(0, 0); }
+    static readonly _capnp = { displayName: "Binding", id: "c863cd16969ee7fc", size: new __O(8, 1) };
+    isUnbound(): boolean { return __S.getUint16(0, this) === 0; }
+    setUnbound(): void { __S.setUint16(0, 0, this); }
     adoptType(value: capnp.Orphan<Type>): void {
-        this._setUint16(0, 1);
-        this._getPointer(0).adopt(value);
+        __S.setUint16(0, 1, this);
+        __S.adopt(value, __S.getPointer(0, this));
     }
-    disownType(): capnp.Orphan<Type> { return this.getType().disown(); }
+    disownType(): capnp.Orphan<Type> { return __S.disown(this.getType()); }
     getType(): Type {
-        this._testWhich("type", this._getUint16(0), 1);
-        return this._getStruct(0, Type);
+        __S.testWhich("type", __S.getUint16(0, this), 1, this);
+        return __S.getStruct(0, Type, this);
     }
-    hasType(): boolean { return !this._getPointer(0)._isNull(); }
+    hasType(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
     initType(): Type {
-        this._setUint16(0, 1);
-        return this._initStructAt(0, Type);
+        __S.setUint16(0, 1, this);
+        return __S.initStructAt(0, Type, this);
     }
-    isType(): boolean { return this._getUint16(0) === 1; }
+    isType(): boolean { return __S.getUint16(0, this) === 1; }
     setType(value: Type): void {
-        this._setUint16(0, 1);
-        this._getPointer(0)._copyFrom(value);
+        __S.setUint16(0, 1, this);
+        __S.copyFrom(value, __S.getPointer(0, this));
     }
     toString(): string { return "Brand_Binding_" + super.toString(); }
-    which(): Brand_Binding_Which { return this._getUint16(0); }
+    which(): Brand_Binding_Which { return __S.getUint16(0, this); }
 }
-export class Brand extends capnp.Struct {
+export class Brand extends __S {
     static readonly Scope = Brand_Scope;
     static readonly Binding = Brand_Binding;
-    static readonly _capnp = { displayName: "Brand", id: "903455f06065422b", size: new ObjectSize(0, 1) };
+    static readonly _capnp = { displayName: "Brand", id: "903455f06065422b", size: new __O(0, 1) };
     static _Scopes: capnp.ListCtor<Brand_Scope>;
-    adoptScopes(value: capnp.Orphan<capnp.List<Brand_Scope>>): void { this._getPointer(0).adopt(value); }
-    disownScopes(): capnp.Orphan<capnp.List<Brand_Scope>> { return this.getScopes().disown(); }
-    getScopes(): capnp.List<Brand_Scope> { return this._getList(0, Brand._Scopes); }
-    hasScopes(): boolean { return !this._getPointer(0)._isNull(); }
-    initScopes(length: number): capnp.List<Brand_Scope> { return this._initList(0, Brand._Scopes, length); }
-    setScopes(value: capnp.List<Brand_Scope>): void { this._getPointer(0)._copyFrom(value); }
+    adoptScopes(value: capnp.Orphan<capnp.List<Brand_Scope>>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownScopes(): capnp.Orphan<capnp.List<Brand_Scope>> { return __S.disown(this.getScopes()); }
+    getScopes(): capnp.List<Brand_Scope> { return __S.getList(0, Brand._Scopes, this); }
+    hasScopes(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initScopes(length: number): capnp.List<Brand_Scope> { return __S.initList(0, Brand._Scopes, length, this); }
+    setScopes(value: capnp.List<Brand_Scope>): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Brand_" + super.toString(); }
 }
 export enum Value_Which {
@@ -738,7 +738,7 @@ export enum Value_Which {
     INTERFACE = 17,
     ANY_POINTER = 18
 }
-export class Value extends capnp.Struct {
+export class Value extends __S {
     static readonly VOID = Value_Which.VOID;
     static readonly BOOL = Value_Which.BOOL;
     static readonly INT8 = Value_Which.INT8;
@@ -758,211 +758,211 @@ export class Value extends capnp.Struct {
     static readonly STRUCT = Value_Which.STRUCT;
     static readonly INTERFACE = Value_Which.INTERFACE;
     static readonly ANY_POINTER = Value_Which.ANY_POINTER;
-    static readonly _capnp = { displayName: "Value", id: "ce23dcd2d7b00c9b", size: new ObjectSize(16, 1) };
-    isVoid(): boolean { return this._getUint16(0) === 0; }
-    setVoid(): void { this._setUint16(0, 0); }
+    static readonly _capnp = { displayName: "Value", id: "ce23dcd2d7b00c9b", size: new __O(16, 1) };
+    isVoid(): boolean { return __S.getUint16(0, this) === 0; }
+    setVoid(): void { __S.setUint16(0, 0, this); }
     getBool(): boolean {
-        this._testWhich("bool", this._getUint16(0), 1);
-        return this._getBit(16);
+        __S.testWhich("bool", __S.getUint16(0, this), 1, this);
+        return __S.getBit(16, this);
     }
-    isBool(): boolean { return this._getUint16(0) === 1; }
+    isBool(): boolean { return __S.getUint16(0, this) === 1; }
     setBool(value: boolean): void {
-        this._setUint16(0, 1);
-        this._setBit(16, value);
+        __S.setUint16(0, 1, this);
+        __S.setBit(16, value, this);
     }
     getInt8(): number {
-        this._testWhich("int8", this._getUint16(0), 2);
-        return this._getInt8(2);
+        __S.testWhich("int8", __S.getUint16(0, this), 2, this);
+        return __S.getInt8(2, this);
     }
-    isInt8(): boolean { return this._getUint16(0) === 2; }
+    isInt8(): boolean { return __S.getUint16(0, this) === 2; }
     setInt8(value: number): void {
-        this._setUint16(0, 2);
-        this._setInt8(2, value);
+        __S.setUint16(0, 2, this);
+        __S.setInt8(2, value, this);
     }
     getInt16(): number {
-        this._testWhich("int16", this._getUint16(0), 3);
-        return this._getInt16(2);
+        __S.testWhich("int16", __S.getUint16(0, this), 3, this);
+        return __S.getInt16(2, this);
     }
-    isInt16(): boolean { return this._getUint16(0) === 3; }
+    isInt16(): boolean { return __S.getUint16(0, this) === 3; }
     setInt16(value: number): void {
-        this._setUint16(0, 3);
-        this._setInt16(2, value);
+        __S.setUint16(0, 3, this);
+        __S.setInt16(2, value, this);
     }
     getInt32(): number {
-        this._testWhich("int32", this._getUint16(0), 4);
-        return this._getInt32(4);
+        __S.testWhich("int32", __S.getUint16(0, this), 4, this);
+        return __S.getInt32(4, this);
     }
-    isInt32(): boolean { return this._getUint16(0) === 4; }
+    isInt32(): boolean { return __S.getUint16(0, this) === 4; }
     setInt32(value: number): void {
-        this._setUint16(0, 4);
-        this._setInt32(4, value);
+        __S.setUint16(0, 4, this);
+        __S.setInt32(4, value, this);
     }
     getInt64(): capnp.Int64 {
-        this._testWhich("int64", this._getUint16(0), 5);
-        return this._getInt64(8);
+        __S.testWhich("int64", __S.getUint16(0, this), 5, this);
+        return __S.getInt64(8, this);
     }
-    isInt64(): boolean { return this._getUint16(0) === 5; }
+    isInt64(): boolean { return __S.getUint16(0, this) === 5; }
     setInt64(value: capnp.Int64): void {
-        this._setUint16(0, 5);
-        this._setInt64(8, value);
+        __S.setUint16(0, 5, this);
+        __S.setInt64(8, value, this);
     }
     getUint8(): number {
-        this._testWhich("uint8", this._getUint16(0), 6);
-        return this._getUint8(2);
+        __S.testWhich("uint8", __S.getUint16(0, this), 6, this);
+        return __S.getUint8(2, this);
     }
-    isUint8(): boolean { return this._getUint16(0) === 6; }
+    isUint8(): boolean { return __S.getUint16(0, this) === 6; }
     setUint8(value: number): void {
-        this._setUint16(0, 6);
-        this._setUint8(2, value);
+        __S.setUint16(0, 6, this);
+        __S.setUint8(2, value, this);
     }
     getUint16(): number {
-        this._testWhich("uint16", this._getUint16(0), 7);
-        return this._getUint16(2);
+        __S.testWhich("uint16", __S.getUint16(0, this), 7, this);
+        return __S.getUint16(2, this);
     }
-    isUint16(): boolean { return this._getUint16(0) === 7; }
+    isUint16(): boolean { return __S.getUint16(0, this) === 7; }
     setUint16(value: number): void {
-        this._setUint16(0, 7);
-        this._setUint16(2, value);
+        __S.setUint16(0, 7, this);
+        __S.setUint16(2, value, this);
     }
     getUint32(): number {
-        this._testWhich("uint32", this._getUint16(0), 8);
-        return this._getUint32(4);
+        __S.testWhich("uint32", __S.getUint16(0, this), 8, this);
+        return __S.getUint32(4, this);
     }
-    isUint32(): boolean { return this._getUint16(0) === 8; }
+    isUint32(): boolean { return __S.getUint16(0, this) === 8; }
     setUint32(value: number): void {
-        this._setUint16(0, 8);
-        this._setUint32(4, value);
+        __S.setUint16(0, 8, this);
+        __S.setUint32(4, value, this);
     }
     getUint64(): capnp.Uint64 {
-        this._testWhich("uint64", this._getUint16(0), 9);
-        return this._getUint64(8);
+        __S.testWhich("uint64", __S.getUint16(0, this), 9, this);
+        return __S.getUint64(8, this);
     }
-    isUint64(): boolean { return this._getUint16(0) === 9; }
+    isUint64(): boolean { return __S.getUint16(0, this) === 9; }
     setUint64(value: capnp.Uint64): void {
-        this._setUint16(0, 9);
-        this._setUint64(8, value);
+        __S.setUint16(0, 9, this);
+        __S.setUint64(8, value, this);
     }
     getFloat32(): number {
-        this._testWhich("float32", this._getUint16(0), 10);
-        return this._getFloat32(4);
+        __S.testWhich("float32", __S.getUint16(0, this), 10, this);
+        return __S.getFloat32(4, this);
     }
-    isFloat32(): boolean { return this._getUint16(0) === 10; }
+    isFloat32(): boolean { return __S.getUint16(0, this) === 10; }
     setFloat32(value: number): void {
-        this._setUint16(0, 10);
-        this._setFloat32(4, value);
+        __S.setUint16(0, 10, this);
+        __S.setFloat32(4, value, this);
     }
     getFloat64(): number {
-        this._testWhich("float64", this._getUint16(0), 11);
-        return this._getFloat64(8);
+        __S.testWhich("float64", __S.getUint16(0, this), 11, this);
+        return __S.getFloat64(8, this);
     }
-    isFloat64(): boolean { return this._getUint16(0) === 11; }
+    isFloat64(): boolean { return __S.getUint16(0, this) === 11; }
     setFloat64(value: number): void {
-        this._setUint16(0, 11);
-        this._setFloat64(8, value);
+        __S.setUint16(0, 11, this);
+        __S.setFloat64(8, value, this);
     }
     getText(): string {
-        this._testWhich("text", this._getUint16(0), 12);
-        return this._getText(0);
+        __S.testWhich("text", __S.getUint16(0, this), 12, this);
+        return __S.getText(0, this);
     }
-    isText(): boolean { return this._getUint16(0) === 12; }
+    isText(): boolean { return __S.getUint16(0, this) === 12; }
     setText(value: string): void {
-        this._setUint16(0, 12);
-        this._setText(0, value);
+        __S.setUint16(0, 12, this);
+        __S.setText(0, value, this);
     }
     adoptData(value: capnp.Orphan<capnp.Data>): void {
-        this._setUint16(0, 13);
-        this._getPointer(0).adopt(value);
+        __S.setUint16(0, 13, this);
+        __S.adopt(value, __S.getPointer(0, this));
     }
-    disownData(): capnp.Orphan<capnp.Data> { return this.getData().disown(); }
+    disownData(): capnp.Orphan<capnp.Data> { return __S.disown(this.getData()); }
     getData(): capnp.Data {
-        this._testWhich("data", this._getUint16(0), 13);
-        return this._getData(0);
+        __S.testWhich("data", __S.getUint16(0, this), 13, this);
+        return __S.getData(0, this);
     }
-    hasData(): boolean { return !this._getPointer(0)._isNull(); }
+    hasData(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
     initData(length: number): capnp.Data {
-        this._setUint16(0, 13);
-        return this._initData(0, length);
+        __S.setUint16(0, 13, this);
+        return __S.initData(0, length, this);
     }
-    isData(): boolean { return this._getUint16(0) === 13; }
+    isData(): boolean { return __S.getUint16(0, this) === 13; }
     setData(value: capnp.Data): void {
-        this._setUint16(0, 13);
-        this._getPointer(0)._copyFrom(value);
+        __S.setUint16(0, 13, this);
+        __S.copyFrom(value, __S.getPointer(0, this));
     }
     adoptList(value: capnp.Orphan<capnp.Pointer>): void {
-        this._setUint16(0, 14);
-        this._getPointer(0).adopt(value);
+        __S.setUint16(0, 14, this);
+        __S.adopt(value, __S.getPointer(0, this));
     }
-    disownList(): capnp.Orphan<capnp.Pointer> { return this.getList().disown(); }
+    disownList(): capnp.Orphan<capnp.Pointer> { return __S.disown(this.getList()); }
     getList(): capnp.Pointer {
-        this._testWhich("list", this._getUint16(0), 14);
-        return this._getPointer(0);
+        __S.testWhich("list", __S.getUint16(0, this), 14, this);
+        return __S.getPointer(0, this);
     }
-    hasList(): boolean { return !this._getPointer(0)._isNull(); }
-    isList(): boolean { return this._getUint16(0) === 14; }
+    hasList(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    isList(): boolean { return __S.getUint16(0, this) === 14; }
     setList(value: capnp.Pointer): void {
-        this._setUint16(0, 14);
-        this._getPointer(0)._copyFrom(value);
+        __S.setUint16(0, 14, this);
+        __S.copyFrom(value, __S.getPointer(0, this));
     }
     getEnum(): number {
-        this._testWhich("enum", this._getUint16(0), 15);
-        return this._getUint16(2);
+        __S.testWhich("enum", __S.getUint16(0, this), 15, this);
+        return __S.getUint16(2, this);
     }
-    isEnum(): boolean { return this._getUint16(0) === 15; }
+    isEnum(): boolean { return __S.getUint16(0, this) === 15; }
     setEnum(value: number): void {
-        this._setUint16(0, 15);
-        this._setUint16(2, value);
+        __S.setUint16(0, 15, this);
+        __S.setUint16(2, value, this);
     }
     adoptStruct(value: capnp.Orphan<capnp.Pointer>): void {
-        this._setUint16(0, 16);
-        this._getPointer(0).adopt(value);
+        __S.setUint16(0, 16, this);
+        __S.adopt(value, __S.getPointer(0, this));
     }
-    disownStruct(): capnp.Orphan<capnp.Pointer> { return this.getStruct().disown(); }
+    disownStruct(): capnp.Orphan<capnp.Pointer> { return __S.disown(this.getStruct()); }
     getStruct(): capnp.Pointer {
-        this._testWhich("struct", this._getUint16(0), 16);
-        return this._getPointer(0);
+        __S.testWhich("struct", __S.getUint16(0, this), 16, this);
+        return __S.getPointer(0, this);
     }
-    hasStruct(): boolean { return !this._getPointer(0)._isNull(); }
-    isStruct(): boolean { return this._getUint16(0) === 16; }
+    hasStruct(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    isStruct(): boolean { return __S.getUint16(0, this) === 16; }
     setStruct(value: capnp.Pointer): void {
-        this._setUint16(0, 16);
-        this._getPointer(0)._copyFrom(value);
+        __S.setUint16(0, 16, this);
+        __S.copyFrom(value, __S.getPointer(0, this));
     }
-    isInterface(): boolean { return this._getUint16(0) === 17; }
-    setInterface(): void { this._setUint16(0, 17); }
+    isInterface(): boolean { return __S.getUint16(0, this) === 17; }
+    setInterface(): void { __S.setUint16(0, 17, this); }
     adoptAnyPointer(value: capnp.Orphan<capnp.Pointer>): void {
-        this._setUint16(0, 18);
-        this._getPointer(0).adopt(value);
+        __S.setUint16(0, 18, this);
+        __S.adopt(value, __S.getPointer(0, this));
     }
-    disownAnyPointer(): capnp.Orphan<capnp.Pointer> { return this.getAnyPointer().disown(); }
+    disownAnyPointer(): capnp.Orphan<capnp.Pointer> { return __S.disown(this.getAnyPointer()); }
     getAnyPointer(): capnp.Pointer {
-        this._testWhich("anyPointer", this._getUint16(0), 18);
-        return this._getPointer(0);
+        __S.testWhich("anyPointer", __S.getUint16(0, this), 18, this);
+        return __S.getPointer(0, this);
     }
-    hasAnyPointer(): boolean { return !this._getPointer(0)._isNull(); }
-    isAnyPointer(): boolean { return this._getUint16(0) === 18; }
+    hasAnyPointer(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    isAnyPointer(): boolean { return __S.getUint16(0, this) === 18; }
     setAnyPointer(value: capnp.Pointer): void {
-        this._setUint16(0, 18);
-        this._getPointer(0)._copyFrom(value);
+        __S.setUint16(0, 18, this);
+        __S.copyFrom(value, __S.getPointer(0, this));
     }
     toString(): string { return "Value_" + super.toString(); }
-    which(): Value_Which { return this._getUint16(0); }
+    which(): Value_Which { return __S.getUint16(0, this); }
 }
-export class Annotation extends capnp.Struct {
-    static readonly _capnp = { displayName: "Annotation", id: "f1c8950dab257542", size: new ObjectSize(8, 2) };
-    getId(): capnp.Uint64 { return this._getUint64(0); }
-    setId(value: capnp.Uint64): void { this._setUint64(0, value); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { this._getPointer(1).adopt(value); }
-    disownBrand(): capnp.Orphan<Brand> { return this.getBrand().disown(); }
-    getBrand(): Brand { return this._getStruct(1, Brand); }
-    hasBrand(): boolean { return !this._getPointer(1)._isNull(); }
-    initBrand(): Brand { return this._initStructAt(1, Brand); }
-    setBrand(value: Brand): void { this._getPointer(1)._copyFrom(value); }
-    adoptValue(value: capnp.Orphan<Value>): void { this._getPointer(0).adopt(value); }
-    disownValue(): capnp.Orphan<Value> { return this.getValue().disown(); }
-    getValue(): Value { return this._getStruct(0, Value); }
-    hasValue(): boolean { return !this._getPointer(0)._isNull(); }
-    initValue(): Value { return this._initStructAt(0, Value); }
-    setValue(value: Value): void { this._getPointer(0)._copyFrom(value); }
+export class Annotation extends __S {
+    static readonly _capnp = { displayName: "Annotation", id: "f1c8950dab257542", size: new __O(8, 2) };
+    getId(): capnp.Uint64 { return __S.getUint64(0, this); }
+    setId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
+    getBrand(): Brand { return __S.getStruct(1, Brand, this); }
+    hasBrand(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initBrand(): Brand { return __S.initStructAt(1, Brand, this); }
+    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(1, this)); }
+    adoptValue(value: capnp.Orphan<Value>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownValue(): capnp.Orphan<Value> { return __S.disown(this.getValue()); }
+    getValue(): Value { return __S.getStruct(0, Value, this); }
+    hasValue(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initValue(): Value { return __S.initStructAt(0, Value, this); }
+    setValue(value: Value): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Annotation_" + super.toString(); }
 }
 export enum ElementSize {
@@ -975,63 +975,63 @@ export enum ElementSize {
     POINTER,
     INLINE_COMPOSITE
 }
-export class CapnpVersion extends capnp.Struct {
-    static readonly _capnp = { displayName: "CapnpVersion", id: "d85d305b7d839963", size: new ObjectSize(8, 0) };
-    getMajor(): number { return this._getUint16(0); }
-    setMajor(value: number): void { this._setUint16(0, value); }
-    getMinor(): number { return this._getUint8(2); }
-    setMinor(value: number): void { this._setUint8(2, value); }
-    getMicro(): number { return this._getUint8(3); }
-    setMicro(value: number): void { this._setUint8(3, value); }
+export class CapnpVersion extends __S {
+    static readonly _capnp = { displayName: "CapnpVersion", id: "d85d305b7d839963", size: new __O(8, 0) };
+    getMajor(): number { return __S.getUint16(0, this); }
+    setMajor(value: number): void { __S.setUint16(0, value, this); }
+    getMinor(): number { return __S.getUint8(2, this); }
+    setMinor(value: number): void { __S.setUint8(2, value, this); }
+    getMicro(): number { return __S.getUint8(3, this); }
+    setMicro(value: number): void { __S.setUint8(3, value, this); }
     toString(): string { return "CapnpVersion_" + super.toString(); }
 }
-export class CodeGeneratorRequest_RequestedFile_Import extends capnp.Struct {
-    static readonly _capnp = { displayName: "Import", id: "ae504193122357e5", size: new ObjectSize(8, 1) };
-    getId(): capnp.Uint64 { return this._getUint64(0); }
-    setId(value: capnp.Uint64): void { this._setUint64(0, value); }
-    getName(): string { return this._getText(0); }
-    setName(value: string): void { this._setText(0, value); }
+export class CodeGeneratorRequest_RequestedFile_Import extends __S {
+    static readonly _capnp = { displayName: "Import", id: "ae504193122357e5", size: new __O(8, 1) };
+    getId(): capnp.Uint64 { return __S.getUint64(0, this); }
+    setId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
+    getName(): string { return __S.getText(0, this); }
+    setName(value: string): void { __S.setText(0, value, this); }
     toString(): string { return "CodeGeneratorRequest_RequestedFile_Import_" + super.toString(); }
 }
-export class CodeGeneratorRequest_RequestedFile extends capnp.Struct {
+export class CodeGeneratorRequest_RequestedFile extends __S {
     static readonly Import = CodeGeneratorRequest_RequestedFile_Import;
-    static readonly _capnp = { displayName: "RequestedFile", id: "cfea0eb02e810062", size: new ObjectSize(8, 2) };
+    static readonly _capnp = { displayName: "RequestedFile", id: "cfea0eb02e810062", size: new __O(8, 2) };
     static _Imports: capnp.ListCtor<CodeGeneratorRequest_RequestedFile_Import>;
-    getId(): capnp.Uint64 { return this._getUint64(0); }
-    setId(value: capnp.Uint64): void { this._setUint64(0, value); }
-    getFilename(): string { return this._getText(0); }
-    setFilename(value: string): void { this._setText(0, value); }
-    adoptImports(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>>): void { this._getPointer(1).adopt(value); }
-    disownImports(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>> { return this.getImports().disown(); }
-    getImports(): capnp.List<CodeGeneratorRequest_RequestedFile_Import> { return this._getList(1, CodeGeneratorRequest_RequestedFile._Imports); }
-    hasImports(): boolean { return !this._getPointer(1)._isNull(); }
-    initImports(length: number): capnp.List<CodeGeneratorRequest_RequestedFile_Import> { return this._initList(1, CodeGeneratorRequest_RequestedFile._Imports, length); }
-    setImports(value: capnp.List<CodeGeneratorRequest_RequestedFile_Import>): void { this._getPointer(1)._copyFrom(value); }
+    getId(): capnp.Uint64 { return __S.getUint64(0, this); }
+    setId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
+    getFilename(): string { return __S.getText(0, this); }
+    setFilename(value: string): void { __S.setText(0, value, this); }
+    adoptImports(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownImports(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile_Import>> { return __S.disown(this.getImports()); }
+    getImports(): capnp.List<CodeGeneratorRequest_RequestedFile_Import> { return __S.getList(1, CodeGeneratorRequest_RequestedFile._Imports, this); }
+    hasImports(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initImports(length: number): capnp.List<CodeGeneratorRequest_RequestedFile_Import> { return __S.initList(1, CodeGeneratorRequest_RequestedFile._Imports, length, this); }
+    setImports(value: capnp.List<CodeGeneratorRequest_RequestedFile_Import>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
     toString(): string { return "CodeGeneratorRequest_RequestedFile_" + super.toString(); }
 }
-export class CodeGeneratorRequest extends capnp.Struct {
+export class CodeGeneratorRequest extends __S {
     static readonly RequestedFile = CodeGeneratorRequest_RequestedFile;
-    static readonly _capnp = { displayName: "CodeGeneratorRequest", id: "bfc546f6210ad7ce", size: new ObjectSize(0, 3) };
+    static readonly _capnp = { displayName: "CodeGeneratorRequest", id: "bfc546f6210ad7ce", size: new __O(0, 3) };
     static _Nodes: capnp.ListCtor<Node>;
     static _RequestedFiles: capnp.ListCtor<CodeGeneratorRequest_RequestedFile>;
-    adoptCapnpVersion(value: capnp.Orphan<CapnpVersion>): void { this._getPointer(2).adopt(value); }
-    disownCapnpVersion(): capnp.Orphan<CapnpVersion> { return this.getCapnpVersion().disown(); }
-    getCapnpVersion(): CapnpVersion { return this._getStruct(2, CapnpVersion); }
-    hasCapnpVersion(): boolean { return !this._getPointer(2)._isNull(); }
-    initCapnpVersion(): CapnpVersion { return this._initStructAt(2, CapnpVersion); }
-    setCapnpVersion(value: CapnpVersion): void { this._getPointer(2)._copyFrom(value); }
-    adoptNodes(value: capnp.Orphan<capnp.List<Node>>): void { this._getPointer(0).adopt(value); }
-    disownNodes(): capnp.Orphan<capnp.List<Node>> { return this.getNodes().disown(); }
-    getNodes(): capnp.List<Node> { return this._getList(0, CodeGeneratorRequest._Nodes); }
-    hasNodes(): boolean { return !this._getPointer(0)._isNull(); }
-    initNodes(length: number): capnp.List<Node> { return this._initList(0, CodeGeneratorRequest._Nodes, length); }
-    setNodes(value: capnp.List<Node>): void { this._getPointer(0)._copyFrom(value); }
-    adoptRequestedFiles(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>>): void { this._getPointer(1).adopt(value); }
-    disownRequestedFiles(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>> { return this.getRequestedFiles().disown(); }
-    getRequestedFiles(): capnp.List<CodeGeneratorRequest_RequestedFile> { return this._getList(1, CodeGeneratorRequest._RequestedFiles); }
-    hasRequestedFiles(): boolean { return !this._getPointer(1)._isNull(); }
-    initRequestedFiles(length: number): capnp.List<CodeGeneratorRequest_RequestedFile> { return this._initList(1, CodeGeneratorRequest._RequestedFiles, length); }
-    setRequestedFiles(value: capnp.List<CodeGeneratorRequest_RequestedFile>): void { this._getPointer(1)._copyFrom(value); }
+    adoptCapnpVersion(value: capnp.Orphan<CapnpVersion>): void { __S.adopt(value, __S.getPointer(2, this)); }
+    disownCapnpVersion(): capnp.Orphan<CapnpVersion> { return __S.disown(this.getCapnpVersion()); }
+    getCapnpVersion(): CapnpVersion { return __S.getStruct(2, CapnpVersion, this); }
+    hasCapnpVersion(): boolean { return !__S.isNull(__S.getPointer(2, this)); }
+    initCapnpVersion(): CapnpVersion { return __S.initStructAt(2, CapnpVersion, this); }
+    setCapnpVersion(value: CapnpVersion): void { __S.copyFrom(value, __S.getPointer(2, this)); }
+    adoptNodes(value: capnp.Orphan<capnp.List<Node>>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownNodes(): capnp.Orphan<capnp.List<Node>> { return __S.disown(this.getNodes()); }
+    getNodes(): capnp.List<Node> { return __S.getList(0, CodeGeneratorRequest._Nodes, this); }
+    hasNodes(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initNodes(length: number): capnp.List<Node> { return __S.initList(0, CodeGeneratorRequest._Nodes, length, this); }
+    setNodes(value: capnp.List<Node>): void { __S.copyFrom(value, __S.getPointer(0, this)); }
+    adoptRequestedFiles(value: capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownRequestedFiles(): capnp.Orphan<capnp.List<CodeGeneratorRequest_RequestedFile>> { return __S.disown(this.getRequestedFiles()); }
+    getRequestedFiles(): capnp.List<CodeGeneratorRequest_RequestedFile> { return __S.getList(1, CodeGeneratorRequest._RequestedFiles, this); }
+    hasRequestedFiles(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initRequestedFiles(length: number): capnp.List<CodeGeneratorRequest_RequestedFile> { return __S.initList(1, CodeGeneratorRequest._RequestedFiles, length, this); }
+    setRequestedFiles(value: capnp.List<CodeGeneratorRequest_RequestedFile>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
     toString(): string { return "CodeGeneratorRequest_" + super.toString(); }
 }
 Node_Interface._Methods = capnp.CompositeList(Method);

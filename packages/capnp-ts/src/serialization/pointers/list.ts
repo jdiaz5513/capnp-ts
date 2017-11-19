@@ -7,9 +7,11 @@ import initTrace from 'debug';
 import { PTR_COMPOSITE_SIZE_UNDEFINED, PTR_INVALID_LIST_SIZE } from '../../errors';
 import { format, identity } from '../../util';
 import { ListElementSize } from '../list-element-size';
-import { ObjectSize } from '../object-size';
+import { ObjectSize, padToWord, getByteLength } from '../object-size';
 import { Segment } from '../segment';
-import { Pointer } from './pointer';
+import {
+  Pointer, getTargetListLength, getListElementByteLength, setStructPointer, setListPointer, initPointer,
+} from './pointer';
 
 const trace = initTrace('capnp:list');
 trace('load');
@@ -28,12 +30,24 @@ export interface ListCtor<T> {
 
 }
 
+export type FilterCallback<T> = (this: void, value: T, index: number) => boolean;
+export type IndexedCallback<T, U> = (this: void, value: T, index: number) => U;
+
+export interface Group<T> {
+  [k: string]: T;
+}
+
+/**
+ * A generic list class. Implements Filterable, 
+ */
+
 export class List<T> extends Pointer {
 
   static readonly _capnp: _ListCtor = {
     displayName: 'List<Generic>' as string,
     size: ListElementSize.VOID,
   };
+  static readonly initList = initList;
 
   static toString(): string {
 
@@ -41,13 +55,13 @@ export class List<T> extends Pointer {
 
   }
 
-  every(callbackFn: (this: void, value: T, index: number) => boolean): boolean {
+  all(callbackfn: FilterCallback<T>): boolean {
 
     const length = this.getLength();
 
     for (let i = 0; i < length; i++) {
 
-      if (!callbackFn(this.get(i), i)) return false;
+      if (!callbackfn(this.get(i), i)) return false;
 
     }
 
@@ -55,7 +69,77 @@ export class List<T> extends Pointer {
 
   }
 
-  filter(callbackFn: (this: void, value: T, index: number) => boolean): T[] {
+  any(callbackfn: FilterCallback<T>): boolean {
+
+    const length = this.getLength();
+
+    for (let i = 0; i < length; i++) if (callbackfn(this.get(i), i)) return true;
+
+    return false;
+
+  }
+
+  ap<U>(callbackfns: Array<IndexedCallback<T, U>>): U[] {
+
+    const length = this.getLength();
+    const res: U[] = [];
+
+    for (let i = 0; i < length; i++) res.push(...callbackfns.map((f) => f(this.get(i), i)));
+
+    return res;
+
+  }
+
+  concat(other: List<T>): T[] {
+
+    const length = this.getLength();
+    const otherLength = other.getLength();
+    const res = new Array<T>(length + otherLength);
+
+    for (let i = 0; i < length; i++) res[i] = this.get(i);
+
+    for (let i = 0; i < otherLength; i++) res[i + length] = other.get(i);
+
+    return res;
+
+  }
+
+  drop(n: number): T[] {
+
+    const length = this.getLength();
+    const res: T[] = new Array(length);
+
+    for (let i = n; i < length; i++) res[i] = this.get(i);
+
+    return res;
+
+  }
+
+  dropWhile(callbackfn: FilterCallback<T>): T[] {
+
+    const length = this.getLength();
+    const res: T[] = [];
+    let drop = true;
+
+    for (let i = 0; i < length; i++) {
+
+      const v = this.get(i);
+
+      if (drop) drop = callbackfn(v, i);
+
+      if (!drop) res.push(v);
+
+    }
+
+    return res;
+
+  }
+
+  empty(): T[] { return [] as T[]; }
+
+  every(callbackfn: FilterCallback<T>): boolean { return this.all(callbackfn); }
+
+  filter(callbackfn: FilterCallback<T>): T[] {
 
     const length = this.getLength();
     const res: T[] = [];
@@ -64,7 +148,7 @@ export class List<T> extends Pointer {
 
       const value = this.get(i);
 
-      if (callbackFn(value, i)) res.push(value);
+      if (callbackfn(value, i)) res.push(value);
 
     }
 
@@ -72,7 +156,7 @@ export class List<T> extends Pointer {
 
   }
 
-  find(callbackFn: (this: void, value: T, index: number) => boolean): T | undefined {
+  find(callbackfn: FilterCallback<T>): T | undefined {
 
     const length = this.getLength();
 
@@ -80,7 +164,7 @@ export class List<T> extends Pointer {
 
       const value = this.get(i);
 
-      if (callbackFn(value, i)) return value;
+      if (callbackfn(value, i)) return value;
 
     }
 
@@ -88,11 +172,11 @@ export class List<T> extends Pointer {
 
   }
 
-  forEach(callbackFn: (this: void, value: T, index: number) => void): void {
+  forEach(callbackfn: (this: void, value: T, index: number) => void): void {
 
     const length = this.getLength();
 
-    for (let i = 0; i < length; i++) callbackFn(this.get(i), i);
+    for (let i = 0; i < length; i++) callbackfn(this.get(i), i);
 
   }
 
@@ -110,22 +194,55 @@ export class List<T> extends Pointer {
 
   getLength(): number {
 
-    return this._getTargetListLength();
+    return getTargetListLength(this);
 
   }
 
-  map<U>(callbackFn: (this: void, value: T, index: number) => U): U[] {
+  groupBy(callbackfn: IndexedCallback<T, string>): Group<T> {
 
     const length = this.getLength();
-    const res: U[] = new Array(length);
+    const res: Group<T> = {};
 
-    for (let i = 0; i < length; i++) res[i] = callbackFn(this.get(i), i);
+    for (let i = 0; i < length; i++) {
+
+      const v = this.get(i);
+      res[callbackfn(v, i)] = v;
+
+    }
 
     return res;
 
   }
 
-  reduce<U>(callbackFn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue?: U): U {
+  intersperse(sep: T): T[] {
+
+    const length = this.getLength();
+    const res: T[] = new Array(length);
+
+    for (let i = 0; i < length; i++) {
+
+      if (i > 0) res.push(sep);
+
+      res.push(this.get(i));
+
+    }
+
+    return res;
+
+  }
+
+  map<U>(callbackfn: IndexedCallback<T, U>): U[] {
+
+    const length = this.getLength();
+    const res: U[] = new Array(length);
+
+    for (let i = 0; i < length; i++) res[i] = callbackfn(this.get(i), i);
+
+    return res;
+
+  }
+
+  reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue?: U): U {
 
     let i = 0;
     let res: U;
@@ -143,7 +260,7 @@ export class List<T> extends Pointer {
 
     }
 
-    for (; i < this.getLength(); i++) res = callbackFn(res, this.get(i), i);
+    for (; i < this.getLength(); i++) res = callbackfn(res, this.get(i), i);
 
     return res;
 
@@ -155,17 +272,49 @@ export class List<T> extends Pointer {
 
   }
 
-  some(callbackFn: (this: void, value: T, index: number) => boolean): boolean {
+  slice(start = 0, end?: number): T[] {
+
+    const length = end ? Math.min(this.getLength(), end) : this.getLength();
+    const res: T[] = new Array(length - start);
+
+    for (let i = start; i < length; i++) res[i] = this.get(i);
+
+    return res;
+
+  }
+
+  some(callbackfn: FilterCallback<T>): boolean { return this.any(callbackfn); }
+
+  take(n: number): T[] {
+
+    const length = Math.min(this.getLength(), n);
+    const res: T[] = new Array(length);
+
+    for (let i = 0; i < length; i++) res[i] = this.get(i);
+
+    return res;
+
+  }
+
+  takeWhile(callbackfn: FilterCallback<T>): T[] {
 
     const length = this.getLength();
+    const res: T[] = [];
+    let take;
 
     for (let i = 0; i < length; i++) {
 
-      if (callbackFn(this.get(i), i)) return true;
+      const v = this.get(i);
+
+      take = callbackfn(v, i);
+
+      if (!take) return res;
+
+      res.push(v);
 
     }
 
-    return false;
+    return res;
 
   }
 
@@ -181,77 +330,80 @@ export class List<T> extends Pointer {
 
   }
 
-  /**
-   * Initialize this list with the given element size and length. This will allocate new space for the list, ideally in
-   * the same segment as this pointer.
-   *
-   * @param {ListElementSize} elementSize The size of each element in the list.
-   * @param {number} length The number of elements in the list.
-   * @param {ObjectSize} [compositeSize] The size of each element in a composite list. This value is required for
-   * composite lists.
-   * @returns {void}
-   */
+}
 
-  _initList(elementSize: ListElementSize, length: number, compositeSize?: ObjectSize): void {
+/**
+ * Initialize the list with the given element size and length. This will allocate new space for the list, ideally in
+ * the same segment as this pointer.
+ *
+ * @param {ListElementSize} elementSize The size of each element in the list.
+ * @param {number} length The number of elements in the list.
+ * @param {List<T>} l The list to initialize.
+ * @param {ObjectSize} [compositeSize] The size of each element in a composite list. This value is required for
+ * composite lists.
+ * @returns {void}
+ */
 
-    let c: Pointer;
+export function initList<T>(
+  elementSize: ListElementSize, length: number, l: List<T>, compositeSize?: ObjectSize): void {
 
-    switch (elementSize) {
+  let c: Pointer;
 
-      case ListElementSize.BIT:
+  switch (elementSize) {
 
-        c = this.segment.allocate(Math.ceil(length / 8));
+    case ListElementSize.BIT:
 
-        break;
+      c = l.segment.allocate(Math.ceil(length / 8));
 
-      case ListElementSize.BYTE:
-      case ListElementSize.BYTE_2:
-      case ListElementSize.BYTE_4:
-      case ListElementSize.BYTE_8:
-      case ListElementSize.POINTER:
+      break;
 
-        c = this.segment.allocate(length * Pointer._getListElementByteLength(elementSize));
+    case ListElementSize.BYTE:
+    case ListElementSize.BYTE_2:
+    case ListElementSize.BYTE_4:
+    case ListElementSize.BYTE_8:
+    case ListElementSize.POINTER:
 
-        break;
+      c = l.segment.allocate(length * getListElementByteLength(elementSize));
 
-      case ListElementSize.COMPOSITE:
+      break;
 
-        if (compositeSize === undefined) throw new Error(format(PTR_COMPOSITE_SIZE_UNDEFINED));
+    case ListElementSize.COMPOSITE:
 
-        compositeSize = compositeSize.padToWord();
+      if (compositeSize === undefined) throw new Error(format(PTR_COMPOSITE_SIZE_UNDEFINED));
 
-        const byteLength = compositeSize.getByteLength() * length;
+      compositeSize = padToWord(compositeSize);
 
-        // We need to allocate an extra 8 bytes for the tag word, then make sure we write the length to it. We advance
-        // the content pointer by 8 bytes so that it then points to the first list element as intended. Everything
-        // starts off zeroed out so these nested structs don't need to be initialized in any way.
+      const byteLength = getByteLength(compositeSize) * length;
 
-        c = this.segment.allocate(byteLength + 8);
+      // We need to allocate an extra 8 bytes for the tag word, then make sure we write the length to it. We advance
+      // the content pointer by 8 bytes so that it then points to the first list element as intended. Everything
+      // starts off zeroed out so these nested structs don't need to be initialized in any way.
 
-        c._setStructPointer(length, compositeSize);
+      c = l.segment.allocate(byteLength + 8);
 
-        trace('Wrote composite tag word %s for %s.', c, this);
+      setStructPointer(length, compositeSize, c);
 
-        break;
+      trace('Wrote composite tag word %s for %s.', c, l);
 
-      case ListElementSize.VOID:
+      break;
 
-        // No need to allocate anything, we can write the list pointer right here.
+    case ListElementSize.VOID:
 
-        this._setListPointer(0, elementSize, length);
+      // No need to allocate anything, we can write the list pointer right here.
 
-        return;
+      setListPointer(0, elementSize, length, l);
 
-      default:
+      return;
 
-        throw new Error(format(PTR_INVALID_LIST_SIZE, elementSize));
+    default:
 
-    }
-
-    const res = this._initPointer(c.segment, c.byteOffset);
-
-    res.pointer._setListPointer(res.offsetWords, elementSize, length, compositeSize);
+      throw new Error(format(PTR_INVALID_LIST_SIZE, elementSize));
 
   }
 
+  const res = initPointer(c.segment, c.byteOffset, l);
+
+  setListPointer(res.offsetWords, elementSize, length, res.pointer, compositeSize);
+
 }
+

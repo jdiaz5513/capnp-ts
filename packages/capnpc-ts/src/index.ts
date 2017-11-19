@@ -2,12 +2,12 @@ import * as Bluebird from 'bluebird';
 import * as capnp from 'capnp-ts';
 import * as s from 'capnp-ts/lib/std/schema.capnp';
 
-import {CodeGeneratorContext} from './code-generator-context';
-export {CodeGeneratorContext} from './code-generator-context';
+import { CodeGeneratorContext } from './code-generator-context';
+export { CodeGeneratorContext } from './code-generator-context';
 
 import initTrace from 'debug';
 
-import {loadRequest, writeTsFiles} from './compiler';
+import { loadRequest, writeTsFiles } from './compiler';
 
 const trace = initTrace('capnpc');
 trace('load');
@@ -63,7 +63,7 @@ export async function run(): Bluebird<CodeGeneratorContext> {
 
       trace('reqBuffer (length: %d)', reqBuffer.length, reqBuffer);
 
-      const message = capnp.Message.fromBuffer(reqBuffer);
+      const message = new capnp.Message(reqBuffer, false);
 
       trace('message: %s', message.dump());
 

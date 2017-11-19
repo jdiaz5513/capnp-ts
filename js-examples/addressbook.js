@@ -88,7 +88,7 @@ function readToEndOfStream(readStream) {
 
 function printAddressBook(readStream) {
   return readToEndOfStream(readStream).then(function(data) {
-    const message = capnp.Message.fromPackedArrayBuffer(data);
+    const message = new capnp.Message(data);
     const addressBook = message.getRoot(AddressBook);
     addressBook.getPeople().forEach(function(person) {
       console.log(person.getName() + ': ' + person.getEmail());

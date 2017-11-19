@@ -29,7 +29,11 @@ export function compile(ctx: CodeGeneratorFileContext): string {
 
   ctx.concreteLists.forEach(([fullClassName, field]) => generateConcreteListInitializer(ctx, fullClassName, field));
 
-  return SOURCE_COMMENT + ts.createPrinter({ newLine: ts.NewLineKind.LineFeed }).printFile(ctx.sourceFile);
+  const sourceFile = ts.createSourceFile(ctx.tsPath, '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
+  const printer = ts.createPrinter();
+  const source = ctx.statements.map((s) => printer.printNode(ts.EmitHint.Unspecified, s, sourceFile)).join('\n') + '\n';
+
+  return SOURCE_COMMENT + source;
 
 }
 
