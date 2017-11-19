@@ -6,7 +6,7 @@ import initTrace from 'debug';
 
 import { ListElementSize } from '../list-element-size';
 import { List } from './list';
-import { Pointer } from './pointer';
+import { Pointer, validate, getContent } from './pointer';
 import { PointerType } from './pointer-type';
 
 const trace = initTrace('capnp:data');
@@ -25,7 +25,7 @@ export class Data extends List<number> {
 
   static fromPointer(pointer: Pointer): Data {
 
-    pointer._validate(PointerType.LIST, ListElementSize.BYTE);
+    validate(PointerType.LIST, pointer, ListElementSize.BYTE);
 
     return this._fromPointerUnchecked(pointer);
 
@@ -50,7 +50,7 @@ export class Data extends List<number> {
 
   copyBuffer(src: ArrayBuffer | ArrayBufferView): void {
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     const dstLength = this.getLength();
     const srcLength = src.byteLength;
@@ -86,7 +86,7 @@ export class Data extends List<number> {
 
   get(byteOffset: number): number {
 
-    const c = this._getContent();
+    const c = getContent(this);
     return c.segment.getUint8(c.byteOffset + byteOffset);
 
   }
@@ -101,7 +101,7 @@ export class Data extends List<number> {
 
   set(byteOffset: number, value: number): void {
 
-    const c = this._getContent();
+    const c = getContent(this);
     c.segment.setUint8(c.byteOffset + byteOffset, value);
 
   }
@@ -116,7 +116,7 @@ export class Data extends List<number> {
 
   toArrayBuffer(): ArrayBuffer {
 
-    const c = this._getContent();
+    const c = getContent(this);
     return c.segment.buffer.slice(c.byteOffset, c.byteOffset + this.getLength());
 
   }
@@ -132,7 +132,7 @@ export class Data extends List<number> {
 
   toDataView(): DataView {
 
-    const c = this._getContent();
+    const c = getContent(this);
     return new DataView(c.segment.buffer, c.byteOffset, this.getLength());
 
   }
@@ -154,7 +154,7 @@ export class Data extends List<number> {
 
   toUint8Array(): Uint8Array {
 
-    const c = this._getContent();
+    const c = getContent(this);
     return new Uint8Array(c.segment.buffer, c.byteOffset, this.getLength());
 
   }

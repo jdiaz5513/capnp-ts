@@ -6,6 +6,7 @@ import initTrace from 'debug';
 
 import { ListElementSize } from '../list-element-size';
 import { _ListCtor, List } from './list';
+import { getContent } from './pointer';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -19,7 +20,7 @@ export class Int16List extends List<number> {
 
   get(index: number): number {
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     return c.segment.getInt16(c.byteOffset + index * 2);
 
@@ -27,7 +28,7 @@ export class Int16List extends List<number> {
 
   set(index: number, value: number): void {
 
-    const c = this._getContent();
+    const c = getContent(this);
 
     c.segment.setInt16(c.byteOffset + index * 2, value);
 

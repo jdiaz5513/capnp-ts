@@ -3,56 +3,55 @@
  */
 
 import initTrace from 'debug';
-
 import { DEFAULT_BUFFER_SIZE } from '../../constants';
 import { SEG_ID_OUT_OF_BOUNDS } from '../../errors';
-import { format, padToWord } from '../../util';
-import { Segment } from '../segment';
-import { Arena } from './arena';
+import { padToWord, format } from '../../util';
 import { ArenaAllocationResult } from './arena-allocation-result';
+import { ArenaKind } from './arena-kind';
 
 const trace = initTrace('capnp:arena:multi');
 trace('load');
 
-export class MultiSegmentArena extends Arena {
+export class MultiSegmentArena {
 
-  private readonly _buffers: ArrayBuffer[];
+  static readonly allocate = allocate;
+  static readonly getBuffer = getBuffer;
+  static readonly getNumSegments = getNumSegments;
+
+  readonly buffers: ArrayBuffer[];
+  readonly kind = ArenaKind.MULTI_SEGMENT;
 
   constructor(buffers: ArrayBuffer[] = []) {
 
-    super();
+    this.buffers = buffers;
 
-    this._buffers = buffers;
-
-  }
-
-  allocate(minSize: number, _segments: Segment[]): ArenaAllocationResult {
-
-    const b = new ArrayBuffer(padToWord(Math.max(minSize, DEFAULT_BUFFER_SIZE)));
-    this._buffers.push(b);
-
-    return new ArenaAllocationResult(this._buffers.length - 1, b);
+    trace('new %s', this);
 
   }
 
-  getBuffer(id: number): ArrayBuffer {
+  toString() { return format('MultiSegmentArena_segments:%d', getNumSegments(this)); }
 
-    if (id < 0 || id >= this._buffers.length) throw new Error(format(SEG_ID_OUT_OF_BOUNDS, id));
+}
 
-    return this._buffers[id];
+export function allocate(minSize: number, m: MultiSegmentArena): ArenaAllocationResult {
 
-  }
+  const b = new ArrayBuffer(padToWord(Math.max(minSize, DEFAULT_BUFFER_SIZE)));
+  m.buffers.push(b);
 
-  getNumSegments(): number {
+  return new ArenaAllocationResult(m.buffers.length - 1, b);
 
-    return this._buffers.length;
+}
 
-  }
+export function getBuffer(id: number, m: MultiSegmentArena): ArrayBuffer {
 
-  toString() {
+  if (id < 0 || id >= m.buffers.length) throw new Error(format(SEG_ID_OUT_OF_BOUNDS, id));
 
-    return format('MultiSegmentArena_segments:%d', this.getNumSegments());
+  return m.buffers[id];
 
-  }
+}
+
+export function getNumSegments(m: MultiSegmentArena): number {
+
+  return m.buffers.length;
 
 }

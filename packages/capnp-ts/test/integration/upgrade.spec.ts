@@ -5,9 +5,9 @@
  */
 
 import * as capnp from '../../lib';
-import {tap} from '../util';
-import {Upgrade as UpgradeV1} from './upgrade-v1.capnp';
-import {Upgrade as UpgradeV2} from './upgrade-v2.capnp';
+import { tap } from '../util';
+import { Upgrade as UpgradeV1 } from './upgrade-v1.capnp';
+import { Upgrade as UpgradeV2 } from './upgrade-v2.capnp';
 
 tap.test('schema upgrade with legacy data', (t) => {
 
@@ -34,7 +34,7 @@ tap.test('schema upgrade with legacy data', (t) => {
   const u2 = m.getRoot(UpgradeV2);
 
   t.comment('should null out the self-reference pointers');
-  t.ok(v1Child._isNull(), 'should null out the self-reference pointer');
+  t.ok(capnp.Pointer.isNull(v1Child), 'should null out the self-reference pointer');
   t.ok(m.getSegment(0).isWordZero(0x18), 'should null out the self-reference pointer');
 
   t.comment('should still be able to access the legacy data from both classes');
@@ -63,7 +63,7 @@ tap.test('schema upgrade with legacy data', (t) => {
 
   }, 'should be able to set new child fields');
 
-  t.ok(v1Child._isNull(), 'should not be able to access the old child');
+  t.ok(capnp.Pointer.isNull(v1Child), 'should not be able to access the old child');
   t.equal(v2Child.getLegacyId(), 0x6666, 'should preserve the child\'s legacy id');
   t.equal(v2Child.getLegacyName(), 'hihi', 'should preserve the child\'s legacy name');
 

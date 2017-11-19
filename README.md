@@ -130,7 +130,7 @@ import {MyStruct} from './myschema.capnp';
 
 export function loadMessage(buffer: ArrayBuffer): MyStruct {
 
-  const message = capnp.Message.fromArrayBuffer(buffer);
+  const message = new capnp.Message(buffer);
 
   return message.getRoot(MyStruct);
 
@@ -150,7 +150,7 @@ const MyStruct = require('./myschema.capnp').MyStruct;
 
 function loadMessage(buffer) {
 
-  const message = capnp.Message.fromArrayBuffer(buffer);
+  const message = new capnp.Message(buffer);
 
   return message.getRoot(MyStruct);
 

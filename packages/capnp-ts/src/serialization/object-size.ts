@@ -4,7 +4,7 @@
 
 import initTrace from 'debug';
 
-import { format, padToWord } from '../util';
+import * as _ from '../util';
 
 const trace = initTrace('capnp:object-size');
 trace('load');
@@ -33,34 +33,35 @@ export class ObjectSize {
 
   }
 
-  getByteLength(): number {
-
-    return this.dataByteLength + this.pointerLength * 8;
-
-  }
-
-  getDataWordLength(): number {
-
-    return this.dataByteLength / 8;
-
-  }
-
-  getWordLength(): number {
-
-    return this.dataByteLength / 8 + this.pointerLength;
-
-  }
-
-  padToWord(): ObjectSize {
-
-    return new ObjectSize(padToWord(this.dataByteLength), this.pointerLength);
-
-  }
-
   toString(): string {
 
-    return format('ObjectSize_dw:%d,pc:%d', this.getDataWordLength(), this.pointerLength);
+    return _.format('ObjectSize_dw:%d,pc:%d', getDataWordLength(this), this.pointerLength);
 
   }
 
 }
+
+export function getByteLength(o: ObjectSize): number {
+
+  return o.dataByteLength + o.pointerLength * 8;
+
+}
+
+export function getDataWordLength(o: ObjectSize): number {
+
+  return o.dataByteLength / 8;
+
+}
+
+export function getWordLength(o: ObjectSize): number {
+
+  return o.dataByteLength / 8 + o.pointerLength;
+
+}
+
+export function padToWord(o: ObjectSize): ObjectSize {
+
+  return new ObjectSize(_.padToWord(o.dataByteLength), o.pointerLength);
+
+}
+

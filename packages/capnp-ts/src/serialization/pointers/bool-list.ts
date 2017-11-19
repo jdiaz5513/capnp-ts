@@ -6,6 +6,7 @@ import initTrace from 'debug';
 
 import { ListElementSize } from '../list-element-size';
 import { _ListCtor, List } from './list';
+import { getContent } from './pointer';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -17,17 +18,11 @@ export class BoolList extends List<boolean> {
     size: ListElementSize.BIT,
   };
 
-  _initList(length: number): void {
-
-    super._initList(ListElementSize.BIT, length);
-
-  }
-
   get(index: number): boolean {
 
     const bitMask = 1 << index % 8;
     const byteOffset = index >>> 3;
-    const c = this._getContent();
+    const c = getContent(this);
     const v = c.segment.getUint8(c.byteOffset + byteOffset);
 
     return (v & bitMask) !== 0;
@@ -37,7 +32,7 @@ export class BoolList extends List<boolean> {
   set(index: number, value: boolean): void {
 
     const bitMask = 1 << index % 8;
-    const c = this._getContent();
+    const c = getContent(this);
     const byteOffset = c.byteOffset + (index >>> 3);
     const v = c.segment.getUint8(byteOffset);
 

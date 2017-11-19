@@ -2,6 +2,11 @@
  * @author jdiaz5513
  */
 
+import initTrace from 'debug';
+
+const trace = initTrace('capnp:serialization:arena:arena-allocation-result');
+trace('load');
+
 export class ArenaAllocationResult {
 
   /**
@@ -24,6 +29,8 @@ export class ArenaAllocationResult {
 
     this.id = id;
     this.buffer = buffer;
+
+    trace('new', this);
 
   }
 

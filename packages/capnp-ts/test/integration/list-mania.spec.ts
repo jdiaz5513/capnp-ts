@@ -7,8 +7,8 @@
  */
 
 import * as capnp from '../../lib';
-import {tap} from '../util';
-import {ListMania} from './list-mania.capnp';
+import { tap } from '../util';
+import { ListMania } from './list-mania.capnp';
 
 tap.test('loop de loop', (t) => {
 
@@ -95,22 +95,22 @@ tap.test('1 of each list', (t) => {
     uint32List.set(0, 1);
     uint64List.set(0, capnp.Uint64.fromNumber(1));
 
-    boolList.disown().dispose();
-    compositeList.disown().dispose();
-    dataList.disown().dispose();
-    float32List.disown().dispose();
-    float64List.disown().dispose();
-    int8List.disown().dispose();
-    int16List.disown().dispose();
-    int32List.disown().dispose();
-    int64List.disown().dispose();
-    interfaceList.disown().dispose();
-    textList.disown().dispose();
-    uint8List.disown().dispose();
-    uint16List.disown().dispose();
-    uint32List.disown().dispose();
-    uint64List.disown().dispose();
-    voidList.disown().dispose();
+    capnp.Pointer.disown(boolList).dispose();
+    capnp.Pointer.disown(compositeList).dispose();
+    capnp.Pointer.disown(dataList).dispose();
+    capnp.Pointer.disown(float32List).dispose();
+    capnp.Pointer.disown(float64List).dispose();
+    capnp.Pointer.disown(int8List).dispose();
+    capnp.Pointer.disown(int16List).dispose();
+    capnp.Pointer.disown(int32List).dispose();
+    capnp.Pointer.disown(int64List).dispose();
+    capnp.Pointer.disown(interfaceList).dispose();
+    capnp.Pointer.disown(textList).dispose();
+    capnp.Pointer.disown(uint8List).dispose();
+    capnp.Pointer.disown(uint16List).dispose();
+    capnp.Pointer.disown(uint32List).dispose();
+    capnp.Pointer.disown(uint64List).dispose();
+    capnp.Pointer.disown(voidList).dispose();
 
     // Everything after the root pointer should be zero now.
 

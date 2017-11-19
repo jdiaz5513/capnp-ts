@@ -7,6 +7,7 @@ import initTrace from 'debug';
 import { Uint64 } from '../../types';
 import { ListElementSize } from '../list-element-size';
 import { _ListCtor, List } from './list';
+import { getContent } from './pointer';
 
 const trace = initTrace('capnp:list:composite');
 trace('load');
@@ -20,16 +21,14 @@ export class Uint64List extends List<Uint64> {
 
   get(index: number): Uint64 {
 
-    const c = this._getContent();
-
+    const c = getContent(this);
     return c.segment.getUint64(c.byteOffset + index * 8);
 
   }
 
   set(index: number, value: Uint64): void {
 
-    const c = this._getContent();
-
+    const c = getContent(this);
     c.segment.setUint64(c.byteOffset + index * 8, value);
 
   }

@@ -2,14 +2,12 @@ import { Message, Pointer } from '../../../../lib';
 import * as C from '../../../../lib/constants';
 import { tap } from '../../../util';
 
-/* tslint:disable no-any */
-
 tap.test('new Pointer()', (t) => {
 
   const m = new Message();
   const s = m.getSegment(0);
 
-  const initialTraversalLimit = (m as any)._traversalLimit as number;
+  const initialTraversalLimit = m._capnp.traversalLimit as number;
 
   t.throws(() => {
 
@@ -20,7 +18,7 @@ tap.test('new Pointer()', (t) => {
 
   const p = new Pointer(s, 4);
 
-  t.equal((m as any)._traversalLimit, initialTraversalLimit - 8, 'should track pointer allocation in the message');
+  t.equal(m._capnp.traversalLimit, initialTraversalLimit - 8, 'should track pointer allocation in the message');
 
   t.throws(() => {
 
@@ -57,12 +55,12 @@ tap.test('Pointer.adopt(), Pointer.disown()', (t) => {
   s.setUint32(0, 0x00000001);
   s.setUint32(4, 0x00000001);
 
-  const o = p.disown();
+  const o = Pointer.disown(p);
 
   t.equal(s.getUint32(0), 0x00000000);
   t.equal(s.getUint32(4), 0x00000000);
 
-  p.adopt(o);
+  Pointer.adopt(o, p);
 
   t.equal(s.getUint32(0), 0x00000001);
   t.equal(s.getUint32(4), 0x00000001);
@@ -80,7 +78,7 @@ tap.test('Pointer.dump()', (t) => {
   s.setUint32(0, 0x00000001);
   s.setUint32(4, 0x00000002);
 
-  t.equal(p.dump(), '[01 00 00 00 02 00 00 00]');
+  t.equal(Pointer.dump(p), '[01 00 00 00 02 00 00 00]');
 
   t.end();
 

@@ -77,9 +77,7 @@ tap.test('write address book', (t) => {
 
 tap.test('read address book', (t) => {
 
-  // Normally this is silly, but we're sure that this .bin file only contains a single segment.
-
-  const message = capnp.Message.fromSegmentBuffer(capnp.Message.getFramedSegments(SERIALIZATION_DEMO)[0]);
+  const message = new capnp.Message(SERIALIZATION_DEMO, false);
 
   const addressBook = message.getRoot(AddressBook);
 
@@ -175,7 +173,7 @@ tap.test('adoption', (t) => {
   t.ok(s.isWordZero(0x08), 'should null the pointer');
   t.notOk(s.isWordZero(0x10), 'should not wipe out the composite list tag word');
   t.notOk(s.isWordZero(0x40), 'should not touch the content');
-  t.ok(people1._isNull(), 'should null the original pointer');
+  t.ok(capnp.Pointer.isNull(people1), 'should null the original pointer');
 
   addressBook.adoptPeople(o);
 
