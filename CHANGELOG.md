@@ -1,3 +1,17 @@
+# 0.2.1
+
+Structs can be imported from other schema files.
+
+```capnp
+@0xfc552bdafbb0b889;
+
+using Bar = import "import-bar.capnp";
+
+struct Foo {
+  baz @0 :Bar.Baz;
+}
+```
+
 # 0.2.0
 
 The message factory functions have been integrated into a revamped message constructor.
