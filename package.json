@@ -20,7 +20,7 @@
     "tslint": "^5.5.0",
     "tslint-eslint-rules": "^4.1.1",
     "tslint-language-service": "^0.9.6",
-    "typescript": "^2.4.1"
+    "typescript": "^2.6.1"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [
@@ -37,21 +37,24 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap --hoist",
+    "bootstrap": "lerna bootstrap",
     "benchmark": "gulp benchmark",
     "build": "gulp build",
-		"build:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn build",
+    "build:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn build",
     "ci": "gulp lint && gulp coverage && codecov --disable=gcov && js-examples/test.sh",
     "coverage": "gulp coverage",
-		"coverage:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn coverage",
+    "coverage:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn coverage",
     "lerna": "lerna",
     "lint": "gulp lint",
-    "postinstall": "npm run bootstrap",
+    "prepublish": "gulp build",
     "test": "gulp test",
-		"test:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn test",
+    "test:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn test",
     "watch": "gulp watch"
   },
   "typings": "lib/index",
   "version": "0.0.1",
-  "dependencies": {}
+  "dependencies": {},
+  "workspaces": [
+    "packages/*"
+  ]
 }

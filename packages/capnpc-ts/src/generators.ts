@@ -69,14 +69,14 @@ export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
   let u: ts.Identifier | undefined;
 
   // import * as capnp from '${importPath}';
-  ctx.sourceFile.statements.push(ts.createImportDeclaration(
+  ctx.statements.push(ts.createImportDeclaration(
     __, __, ts.createImportClause(
       u as ts.Identifier, ts.createNamespaceImport(CAPNP)), ts.createLiteral(importPath)));
 
   // import { ObjectSize as __O, Struct as __S } from '${importPath}';
-  ctx.sourceFile.statements.push(
+  ctx.statements.push(
     ts.createStatement(ts.createIdentifier(`import { ObjectSize as __O, Struct as __S } from '${importPath}'`)));
-  // ctx.sourceFile.statements.push(
+  // ctx.statements.push(
   //   ts.createImportDeclaration(
   //     __, __, ts.createImportClause(
   //       ts.createIdentifier('ObjectSize'), ts.createNamedImports([
@@ -90,7 +90,7 @@ export function generateConcreteListInitializer(
   const left = ts.createPropertyAccess(ts.createIdentifier(fullClassName), `_${util.c2t(field.getName())}`);
   const right = ts.createIdentifier(getConcreteListType(ctx, field.getSlot().getType()));
 
-  ctx.sourceFile.statements.push(ts.createStatement(ts.createAssignment(left, right)));
+  ctx.statements.push(ts.createStatement(ts.createAssignment(left, right)));
 
 }
 
@@ -116,7 +116,7 @@ export function generateDefaultValue(
   if (whichSlotType === s.Type.BOOL) args.push(ts.createNumericLiteral((slot.getOffset() % 8).toString()));
 
   // export const MY_STRUCT_FOO_DEFAULT = capnp.getFloat32Mask(32.6);
-  ctx.sourceFile.statements.push(ts.createVariableStatement(
+  ctx.statements.push(ts.createVariableStatement(
     __, ts.createVariableDeclarationList(
       [ts.createVariableDeclaration(
         variableName, __, ts.createCall(
@@ -135,7 +135,7 @@ export function generateEnumNode(ctx: CodeGeneratorFileContext, node: s.Node): v
     (e) => ts.createEnumMember(util.c2s(e.getName())));
   const d = ts.createEnumDeclaration(__, [EXPORT], getFullClassName(node), members);
 
-  ctx.sourceFile.statements.push(d);
+  ctx.statements.push(d);
 
 }
 
@@ -145,7 +145,7 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
 
   // export const _capnpFileId = 'abcdef';
   const fileId = ts.createLiteral(ctx.file.getId().toHexString());
-  ctx.sourceFile.statements.push(ts.createVariableStatement(
+  ctx.statements.push(ts.createVariableStatement(
     [EXPORT], ts.createVariableDeclarationList(
       [ts.createVariableDeclaration('_capnpFileId', __, fileId)],
       ts.NodeFlags.Const)));
@@ -638,7 +638,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   }
 
-  ctx.sourceFile.statements.push(c);
+  ctx.statements.push(c);
 
   // Write out the concrete list type initializer after all the class definitions. It can't be initialized within the
   // class's static initializer because the nested type might not be defined yet.
@@ -656,6 +656,6 @@ export function generateUnnamedUnionEnum(
       f.getDiscriminantValue().toString())));
   const d = ts.createEnumDeclaration(__, [EXPORT], `${fullClassName}_Which`, members);
 
-  ctx.sourceFile.statements.push(d);
+  ctx.statements.push(d);
 
 }

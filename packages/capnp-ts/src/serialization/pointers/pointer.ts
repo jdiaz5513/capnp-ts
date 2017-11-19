@@ -7,17 +7,18 @@ import initTrace from 'debug';
 import { LIST_SIZE_MASK, MAX_DEPTH, POINTER_DOUBLE_FAR_MASK, POINTER_TYPE_MASK } from '../../constants';
 import { bufferToHex, format, padToWord } from '../../util';
 import { ListElementSize } from '../list-element-size';
-import { ObjectSize, getByteLength, padToWord as padObjectToWord, getWordLength, getDataWordLength } from '../object-size';
+import {
+  ObjectSize, getByteLength, padToWord as padObjectToWord, getWordLength, getDataWordLength,
+} from '../object-size';
 import { Segment } from '../segment';
 import { Orphan } from './orphan';
 import { PointerAllocationResult } from './pointer-allocation-result';
 import { PointerType } from './pointer-type';
-import { INVARIANT_UNREACHABLE_CODE } from '../../../lib/errors';
 import { Message } from '../message';
 import {
   PTR_TRAVERSAL_LIMIT_EXCEEDED, PTR_DEPTH_LIMIT_EXCEEDED, PTR_OFFSET_OUT_OF_BOUNDS, PTR_INVALID_LIST_SIZE,
   PTR_INVALID_POINTER_TYPE, PTR_INVALID_FAR_TARGET, TYPE_COMPOSITE_SIZE_UNDEFINED, PTR_WRONG_POINTER_TYPE,
-  PTR_WRONG_LIST_TYPE,
+  PTR_WRONG_LIST_TYPE, INVARIANT_UNREACHABLE_CODE,
 } from '../../errors';
 
 const trace = initTrace('capnp:pointer');

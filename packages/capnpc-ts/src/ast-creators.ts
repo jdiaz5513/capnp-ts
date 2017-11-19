@@ -3,13 +3,13 @@
  */
 
 import * as s from 'capnp-ts/lib/std/schema.capnp';
-import {format, pad} from 'capnp-ts/lib/util';
+import { format, pad } from 'capnp-ts/lib/util';
 import * as ts from 'typescript';
 
-import {CodeGeneratorFileContext} from './code-generator-file-context';
-import {__, READONLY, STATIC, VOID_TYPE} from './constants';
+import { CodeGeneratorFileContext } from './code-generator-file-context';
+import { __, READONLY, STATIC, VOID_TYPE } from './constants';
 import * as E from './errors';
-import {getDisplayNamePrefix, getFullClassName, getJsType} from './file';
+import { getDisplayNamePrefix, getFullClassName, getJsType } from './file';
 import * as util from './util';
 
 export function createClassExtends(identifierText: string): ts.HeritageClause {
@@ -21,12 +21,12 @@ export function createClassExtends(identifierText: string): ts.HeritageClause {
 
 export function createConcreteListProperty(ctx: CodeGeneratorFileContext, field: s.Field): ts.PropertyDeclaration {
 
-    const name = `_${util.c2t(field.getName())}`;
-    const type = ts.createTypeReferenceNode(getJsType(ctx, field.getSlot().getType(), true), __);
-    // LINT: This is a dirty way to force the initializer to be undefined...
-    /* tslint:disable-next-line */
-    let u: ts.Expression | undefined;
-    return ts.createProperty(__, [STATIC], name, __, type, u as ts.Expression);
+  const name = `_${util.c2t(field.getName())}`;
+  const type = ts.createTypeReferenceNode(getJsType(ctx, field.getSlot().getType(), true), __);
+  // LINT: This is a dirty way to force the initializer to be undefined...
+  /* tslint:disable-next-line */
+  let u: ts.Expression | undefined;
+  return ts.createProperty(__, [STATIC], name, __, type, u as ts.Expression);
 
 }
 

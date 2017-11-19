@@ -148,7 +148,6 @@ export function loadRequestedFile(
   const schema = lookupNode(ctx, file.getId());
 
   ctx.tsPath = schema.getDisplayName() + '.ts';
-  ctx.sourceFile = ts.createSourceFile(ctx.tsPath, '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
 
   return ctx;
 
