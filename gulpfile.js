@@ -18,6 +18,8 @@ const CAPNP_WHITELIST = [
   'capnp-ts/test/integration/foo-new.capnp',
   'capnp-ts/test/integration/list-mania.capnp',
   'capnp-ts/test/integration/upgrade-v1.capnp',
+  'capnpc-ts/test/integration/import-bar.capnp',
+  'capnpc-ts/test/integration/import-foo.capnp'
 ];
 
 
