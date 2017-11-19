@@ -14,6 +14,7 @@ import {
   generateConcreteListInitializer,
   generateFileId,
   generateNode,
+  generateNestedImports,
 } from './generators';
 
 const trace = initTrace('capnpc:compile');
@@ -22,6 +23,8 @@ trace('load');
 export function compile(ctx: CodeGeneratorFileContext): string {
 
   generateCapnpImport(ctx);
+
+  generateNestedImports(ctx);
 
   generateFileId(ctx);
 

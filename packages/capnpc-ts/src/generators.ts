@@ -2,6 +2,7 @@ import * as capnp from 'capnp-ts';
 import * as s from 'capnp-ts/lib/std/schema.capnp';
 import { format } from 'capnp-ts/lib/util';
 import initTrace from 'debug';
+import * as path from 'path';
 import * as ts from 'typescript';
 
 import {
@@ -76,12 +77,36 @@ export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
   // import { ObjectSize as __O, Struct as __S } from '${importPath}';
   ctx.statements.push(
     ts.createStatement(ts.createIdentifier(`import { ObjectSize as __O, Struct as __S } from '${importPath}'`)));
-  // ctx.statements.push(
-  //   ts.createImportDeclaration(
-  //     __, __, ts.createImportClause(
-  //       ts.createIdentifier('ObjectSize'), ts.createNamedImports([
-  //         ts.createImportSpecifier(
-  //           ts.createIdentifier('ObjectSize'), ts.createIdentifier('ObjectSize'))])), ts.createLiteral(importPath)));
+
+}
+
+export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
+
+  const dirname = path.dirname(ctx.file.getFilename());
+
+  ctx.nodes
+    .filter((n) => n.isFile() && !n.getId().equals(ctx.file.getId()))
+    .forEach((n) => {
+
+      const imports = n.getNestedNodes()
+        .filter((nested) => lookupNode(ctx, nested).isStruct())
+        .map((nested) => nested.getName()).join(', ');
+
+      if (imports.length < 1) return;
+
+      let importPath = path.relative(dirname, n.getDisplayName());
+
+      // Make sure the import path is interpreted by nodejs as relative (must start with a period).
+      if (importPath[0] !== '.') importPath = `./${importPath}`;
+
+      const importStatement = `import { ${imports} } from '${importPath}'`;
+
+      trace('adding import statement', importStatement);
+
+      ctx.statements.push(ts.createStatement(ts.createIdentifier(importStatement)));
+
+    });
+
 }
 
 export function generateConcreteListInitializer(
