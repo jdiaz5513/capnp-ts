@@ -10,6 +10,7 @@ var tslint = require('gulp-tslint');
 var realTslint = require('tslint');
 var mergeStream = require('merge-stream');
 var spawnSync = require('child_process').spawnSync;
+var path = require('path');
 
 // FIXME: Not yet able to compile all the schema files, so this whitelist is needed.
 const CAPNP_WHITELIST = [
@@ -37,7 +38,7 @@ function compileCapnp() {
     files.filter(function (file) {
       return file.path.endsWith('.capnp') && CAPNP_WHITELIST.some((p) => file.path.endsWith(p));
     }).forEach(function (file) {
-      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.js', file.path];
+      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.js', '-I', path.join(__dirname, 'src', 'std'), file.path];
       var result = spawnSync('capnpc', options, { stdio: 'inherit' });
       if (result.status !== 0) {
         throw new Error('Process exited with non-zero status: ' + result.status);

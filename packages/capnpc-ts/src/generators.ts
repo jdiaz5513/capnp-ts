@@ -42,6 +42,7 @@ import {
   getFullClassName,
   getJsType,
   getUnnamedUnionFields,
+  hasNode,
   lookupNode,
   needsConcreteListClass,
 } from './file';
@@ -89,6 +90,7 @@ export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
     .forEach((n) => {
 
       const imports = n.getNestedNodes()
+        .filter((nested) => hasNode(ctx, nested))
         .filter((nested) => lookupNode(ctx, nested).isStruct())
         .map((nested) => nested.getName()).join(', ');
 
