@@ -138,6 +138,14 @@ export function getUnnamedUnionFields(node: s.Node): s.Field[] {
 
 }
 
+export function hasNode(ctx: CodeGeneratorFileContext, lookup: { getId(): capnp.Uint64 } | capnp.Uint64): boolean {
+
+  const id = lookup instanceof capnp.Uint64 ? lookup : lookup.getId();
+
+  return ctx.nodes.some((n) => n.getId().equals(id));
+
+}
+
 export function loadRequestedFile(
   req: s.CodeGeneratorRequest, file: s.CodeGeneratorRequest_RequestedFile): CodeGeneratorFileContext {
 
