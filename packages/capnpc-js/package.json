@@ -33,5 +33,5 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "typings": "lib/index",
-  "version": "0.2.2"
+  "version": "0.2.3"
 }
