@@ -3,7 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-  <a name="0.2.3"></a>
+      <a name="0.2.4"></a>
+## [0.2.4](https://github.com/jdiaz5513/capnp-ts/compare/v0.2.3...v0.2.4) (2017-11-24)
+
+
+### Bug Fixes
+
+* **build:** do not emit UMD modules ([#87](https://github.com/jdiaz5513/capnp-ts/issues/87)) ([157d1d9](https://github.com/jdiaz5513/capnp-ts/commit/157d1d9))
+
+
+
+
+      <a name="0.2.3"></a>
 ## [0.2.3](https://github.com/jdiaz5513/capnp-ts/compare/v0.2.2...v0.2.3) (2017-11-21)
 
 
@@ -14,7 +25,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-  <a name="0.2.2"></a>
+<a name="0.2.2"></a>
 ## [0.2.2](https://github.com/jdiaz5513/capnp-ts/compare/v0.2.1...v0.2.2) (2017-11-20)
 
 
