@@ -4,6 +4,6 @@
 
 export * from './mask';
 export { ListElementSize } from './list-element-size';
-export { Message } from './message';
+export { Message, readRawPointer } from './message';
 export { ObjectSize } from './object-size';
 export * from './pointers';

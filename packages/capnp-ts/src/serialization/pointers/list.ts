@@ -47,7 +47,9 @@ export class List<T> extends Pointer {
     displayName: 'List<Generic>' as string,
     size: ListElementSize.VOID,
   };
+  static readonly get = get;
   static readonly initList = initList;
+  static readonly set = set;
 
   static toString(): string {
 
@@ -172,6 +174,22 @@ export class List<T> extends Pointer {
 
   }
 
+  findIndex(callbackfn: FilterCallback<T>): number {
+
+    const length = this.getLength();
+
+    for (let i = 0; i < length; i++) {
+
+      const value = this.get(i);
+
+      if (callbackfn(value, i)) return i;
+
+    }
+
+    return -1;
+
+  }
+
   forEach(callbackfn: (this: void, value: T, index: number) => void): void {
 
     const length = this.getLength();
@@ -180,11 +198,7 @@ export class List<T> extends Pointer {
 
   }
 
-  get(_index: number): T {
-
-    throw new TypeError();
-
-  }
+  get(_index: number): T { return get(_index, this); }
 
   /**
    * Get the length of this list.
@@ -266,11 +280,7 @@ export class List<T> extends Pointer {
 
   }
 
-  set(_index: number, _value: T): void {
-
-    throw new TypeError();
-
-  }
+  set(_index: number, _value: T): void { return set(_index, _value, this); }
 
   slice(start = 0, end?: number): T[] {
 
@@ -407,3 +417,14 @@ export function initList<T>(
 
 }
 
+export function get<T>(_index: number, _l: List<T>): T {
+
+  throw new TypeError();
+
+}
+
+export function set<T>(_index: number, _value: T, _l: List<T>): void {
+
+  throw new TypeError();
+
+}

@@ -13,13 +13,8 @@ tap.test('foo regression', (t) => {
 
   const packed = Buffer.from(oldMessage.toPackedArrayBuffer());
 
-  console.log(packed.toString('base64'));
-
   const newMessage = new capnp.Message(packed);
-  console.log(newMessage.dump());
   const newFoo = newMessage.getRoot(NewFoo);
-
-  console.log(newFoo.getBar());
 
   t.pass('should not 💩 the 🛏');
 

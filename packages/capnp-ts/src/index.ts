@@ -7,6 +7,7 @@ export {
   ListElementSize,
   Message,
   ObjectSize,
+  readRawPointer,
 
   AnyPointerList,
   BoolList,

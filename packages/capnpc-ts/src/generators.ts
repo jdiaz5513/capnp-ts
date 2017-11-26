@@ -121,36 +121,65 @@ export function generateConcreteListInitializer(
 
 }
 
-export function generateDefaultValue(
-  ctx: CodeGeneratorFileContext, fullClassName: string, field: s.Field): ts.Expression {
+export function generateDefaultValue(node: s.Node, field: s.Field): ts.PropertyAssignment {
 
-  // Default values become constants in the source file that precede the class declaration.
-
+  const fullClassName = getFullClassName(node);
+  const nodeIdHex = node.getId().toHexString();
   const name = field.getName();
   const slot = field.getSlot();
   const whichSlotType = slot.getType().which();
   const p = Primitive[whichSlotType];
+  let initializer;
 
-  if (!p) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
+  switch (whichSlotType) {
 
-  // MY_STRUCT_FOO_DEFAULT
-  const variableName = ts.createIdentifier(util.c2s(`${fullClassName}_${name}_DEFAULT`));
+    case s.Type_Which.ANY_POINTER:
+    case s.Type_Which.DATA:
+    case s.Type_Which.LIST:
+    case s.Type_Which.STRUCT:
 
-  const args = [createValueExpression(slot.getDefaultValue())];
-  const mask = ts.createPropertyAccess(CAPNP, p.mask);
+      initializer = createValueExpression(slot.getDefaultValue());
 
-  // BOOL types also require a bit offset to generate the default mask.
-  if (whichSlotType === s.Type.BOOL) args.push(ts.createNumericLiteral((slot.getOffset() % 8).toString()));
+      break;
 
-  // export const MY_STRUCT_FOO_DEFAULT = capnp.getFloat32Mask(32.6);
-  ctx.statements.push(ts.createVariableStatement(
-    __, ts.createVariableDeclarationList(
-      [ts.createVariableDeclaration(
-        variableName, __, ts.createCall(
-          mask, __, args))],
-      ts.NodeFlags.Const)));
+    case s.Type_Which.TEXT:
 
-  return variableName;
+      initializer = ts.createLiteral(slot.getDefaultValue().getText());
+
+      break;
+
+    case s.Type_Which.BOOL:
+
+      initializer = ts.createCall(
+        ts.createPropertyAccess(CAPNP, p.mask), __,
+        [createValueExpression(slot.getDefaultValue()), ts.createNumericLiteral((slot.getOffset() % 8).toString())]);
+
+      break;
+
+    case s.Type_Which.ENUM:
+    case s.Type_Which.FLOAT32:
+    case s.Type_Which.FLOAT64:
+    case s.Type_Which.INT16:
+    case s.Type_Which.INT32:
+    case s.Type_Which.INT64:
+    case s.Type_Which.INT8:
+    case s.Type_Which.UINT16:
+    case s.Type_Which.UINT32:
+    case s.Type_Which.UINT64:
+    case s.Type_Which.UINT8:
+
+      initializer = ts.createCall(
+        ts.createPropertyAccess(CAPNP, p.mask), __, [createValueExpression(slot.getDefaultValue())]);
+
+      break;
+
+    default:
+
+      throw new Error(format(E.GEN_UNKNOWN_DEFAULT, s.Type_Which[whichSlotType]));
+
+  }
+
+  return ts.createPropertyAssignment(`default${util.c2t(name)}`, initializer);
 
 }
 
@@ -240,6 +269,11 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
       break;
 
     case s.Node.ANNOTATION:
+
+      trace('ignoring unsupported annotation node: %s', node.getDisplayName());
+
+      break;
+
     case s.Node.FILE:
     default:
 
@@ -252,7 +286,8 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
 const listLengthParameterName = 'length';
 
 export function generateStructFieldMethods(
-  ctx: CodeGeneratorFileContext, members: ts.ClassElement[], node: s.Node, field: s.Field): void {
+  ctx: CodeGeneratorFileContext, members: ts.ClassElement[], node: s.Node, field: s.Field,
+): void {
 
   let jsType: string;
   let whichType: s.Type_Which | string;
@@ -300,6 +335,9 @@ export function generateStructFieldMethods(
   const setDiscriminant = ts.createCall(
     ts.createPropertyAccess(
       STRUCT, 'setUint16'), __, [discriminantOffsetLiteral, discriminantValueLiteral, THIS]);
+  const defaultValue = hadExplicitDefault
+    ? ts.createIdentifier(`${fullClassName}._capnp.default${properName}`)
+    : undefined;
 
   let adopt = false;
   let disown = false;
@@ -307,17 +345,20 @@ export function generateStructFieldMethods(
   let has = false;
   let get;
   let set;
+  let getArgs: ts.Expression[];
 
   switch (whichType) {
 
     case s.Type.ANY_POINTER:
 
-      if (hadExplicitDefault) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
+      getArgs = [offsetLiteral, THIS];
+
+      if (defaultValue) getArgs.push(defaultValue);
 
       adopt = true;
       disown = true;
       /** __S.getPointer(0, this) */
-      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getPointer'), __, [offsetLiteral, THIS]);
+      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getPointer'), __, getArgs);
       has = true;
       /** __S.copyFrom(value, __S.getPointer(0, this)) */
       set = ts.createCall(ts.createPropertyAccess(STRUCT, 'copyFrom'), __, [VALUE, get]);
@@ -340,9 +381,9 @@ export function generateStructFieldMethods(
       const { byteLength, getter, setter } = Primitive[whichType as number];
       // NOTE: For a BOOL type this is actually a bit offset; `byteLength` will be `1` in that case.
       const byteOffset = ts.createNumericLiteral((offset * byteLength).toString());
-      const getArgs: ts.Expression[] = [byteOffset, THIS];
+      getArgs = [byteOffset, THIS];
 
-      if (hadExplicitDefault) getArgs.push(generateDefaultValue(ctx, fullClassName, field));
+      if (defaultValue) getArgs.push(defaultValue);
 
       /** __S.getXYZ(0, this) */
       get = ts.createCall(ts.createPropertyAccess(STRUCT, getter), __, getArgs);
@@ -353,12 +394,14 @@ export function generateStructFieldMethods(
 
     case s.Type.DATA:
 
-      if (hadExplicitDefault) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
+      getArgs = [offsetLiteral, THIS];
+
+      if (defaultValue) getArgs.push(defaultValue);
 
       adopt = true;
       disown = true;
       /** __S.getData(0, this) */
-      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getData'), __, [offsetLiteral, THIS]);
+      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getData'), __, getArgs);
       has = true;
       /** __S.initData(0, length, this) */
       init = ts.createCall(ts.createPropertyAccess(STRUCT, 'initData'), __, [offsetLiteral, LENGTH, THIS]);
@@ -368,7 +411,7 @@ export function generateStructFieldMethods(
 
     case s.Type.INTERFACE:
 
-      if (hadExplicitDefault) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
+      if (hadExplicitDefault) throw new Error(format(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE, 'INTERFACE'));
 
       /** __S.getPointerAs(0, Foo, this) */
       get = ts.createCall(
@@ -379,8 +422,6 @@ export function generateStructFieldMethods(
       break;
 
     case s.Type.LIST:
-
-      if (hadExplicitDefault) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
 
       const whichElementType = field.getSlot().getType().getList().getElementType().which();
       let listClass = ConcreteListType[whichElementType];
@@ -398,13 +439,14 @@ export function generateStructFieldMethods(
 
       const listClassIdentifier = ts.createIdentifier(listClass);
 
+      getArgs = [offsetLiteral, listClassIdentifier, THIS];
+
+      if (defaultValue) getArgs.push(defaultValue);
+
       adopt = true;
       disown = true;
       /** __S.getList(0, MyStruct._Foo, this) */
-      get = ts.createCall(
-        ts.createPropertyAccess(STRUCT, 'getList'),
-        __,
-        [offsetLiteral, listClassIdentifier, THIS]);
+      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getList'), __, getArgs);
       has = true;
       /** __S.initList(0, MyStruct._Foo, length, this) */
       init = ts.createCall(
@@ -417,14 +459,16 @@ export function generateStructFieldMethods(
 
     case s.Type.STRUCT:
 
-      if (hadExplicitDefault) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
-
       const structType = ts.createIdentifier(getJsType(ctx, field.getSlot().getType(), false));
+
+      getArgs = [offsetLiteral, structType, THIS];
+
+      if (defaultValue) getArgs.push(defaultValue);
 
       adopt = true;
       disown = true;
       /** __S.getStruct(0, Foo, this) */
-      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getStruct'), __, [offsetLiteral, structType, THIS]);
+      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getStruct'), __, getArgs);
       has = true;
       /** __S.initStruct(0, Foo, this) */
       init = ts.createCall(ts.createPropertyAccess(STRUCT, 'initStructAt'), __, [offsetLiteral, structType, THIS]);
@@ -434,10 +478,12 @@ export function generateStructFieldMethods(
 
     case s.Type.TEXT:
 
-      if (hadExplicitDefault) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
+      getArgs = [offsetLiteral, THIS];
+
+      if (defaultValue) getArgs.push(defaultValue);
 
       /** __S.getText(0, this) */
-      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getText'), __, [offsetLiteral, THIS]);
+      get = ts.createCall(ts.createPropertyAccess(STRUCT, 'getText'), __, getArgs);
       /** __S.setText(0, value, this) */
       set = ts.createCall(ts.createPropertyAccess(STRUCT, 'setText'), __, [offsetLiteral, VALUE, THIS]);
 
@@ -449,7 +495,7 @@ export function generateStructFieldMethods(
 
     case 'group':
 
-      if (hadExplicitDefault) throw new Error(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE);
+      if (hadExplicitDefault) throw new Error(format(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE, 'group'));
 
       const groupType = ts.createIdentifier(jsType);
 
@@ -576,7 +622,9 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   const displayNamePrefix = getDisplayNamePrefix(node);
   const fullClassName = getFullClassName(node);
-  const nestedNodes = node.getNestedNodes().map((n) => lookupNode(ctx, n)).filter((n) => !n.isConst());
+  const nestedNodes = node.getNestedNodes()
+    .map((n) => lookupNode(ctx, n))
+    .filter((n) => !n.isConst() && !n.isAnnotation());
   const nodeId = node.getId();
   const nodeIdHex = nodeId.toHexString();
   const struct = node.which() === s.Node.STRUCT ? node.getStruct() : undefined;
@@ -619,6 +667,12 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   // }
 
+  const defaultValues = fields.reduce(
+    (acc, f) => f.isSlot() && f.getSlot().getHadExplicitDefault() && f.getSlot().getType().which() !== s.Type.VOID
+      ? acc.concat(generateDefaultValue(node, f))
+      : acc,
+    [] as ts.PropertyAssignment[]);
+
   // static reaodnly _capnp = { displayName: 'MyStruct', id: '4732bab4310f81', size = new __O(8, 8) };
   members.push(
     ts.createProperty(
@@ -630,7 +684,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
           'size', ts.createNew(
             OBJECT_SIZE, __, [
               ts.createNumericLiteral(dataByteLength.toString()),
-              ts.createNumericLiteral(pointerCount.toString())]))])));
+              ts.createNumericLiteral(pointerCount.toString())]))].concat(defaultValues))));
 
   // private static _ConcreteListClass: MyStruct_ConcreteListClass;
   members.push(...concreteLists.map((f) => createConcreteListProperty(ctx, f)));
