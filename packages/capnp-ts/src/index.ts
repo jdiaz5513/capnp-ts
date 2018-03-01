@@ -58,3 +58,13 @@ export {
   Uint64,
 
 } from './types';
+
+export {
+
+  Capability_Client,
+  Capability_Server,
+
+  Request,
+  CallContext,
+
+} from './rpc';

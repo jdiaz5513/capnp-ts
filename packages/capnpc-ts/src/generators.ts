@@ -179,12 +179,75 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
 
 }
 
-export function generateInterfaceClasses(_ctx: CodeGeneratorFileContext, node: s.Node): void {
+export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.Node): void {
 
   trace('Interface generation is not yet implemented.');
 
   /* tslint:disable-next-line */
   console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`);
+
+  const fullClassName = getFullClassName(node);
+  const clientName = `${fullClassName}_Client`;
+  const serverName = `${fullClassName}_Server`;
+
+  console.log(node.toString());
+  console.log(node.getInterface());
+
+  const i = node.getInterface();
+
+  const clientMethods: ts.ClassElement[] = [];
+  const serverMethods: ts.ClassElement[] = [];
+
+  // TODO: handle superclasses
+
+  const methods = i.getMethods().toArray().sort(compareCodeOrder);
+
+  methods.forEach(function(method) {
+    const name = method.getName();
+
+    const paramNode = lookupNode(ctx, method.getParamStructType());
+    const resultNode = lookupNode(ctx, method.getResultStructType());
+
+    const paramTypeName = getFullClassName(paramNode);
+    const resultTypeName = getFullClassName(resultNode);
+
+    const requestType = ts.createTypeReferenceNode('capnp.Request', [
+      ts.createTypeReferenceNode(paramTypeName, __),
+      ts.createTypeReferenceNode(resultTypeName, __),
+    ]);
+    const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [
+      ts.createTypeReferenceNode(paramTypeName, __),
+      ts.createTypeReferenceNode(resultTypeName, __),
+    ]);
+
+    clientMethods.push(
+      ts.createMethod(__, __, __, `${name}Request`, __, __, [], requestType,
+        ts.createBlock([
+          ts.createThrow(ts.createNew(ts.createIdentifier('Error'), __, [ts.createLiteral("unimplemented!")])),
+        ], true)
+      )
+    );
+
+    const promiseType = ts.createTypeReferenceNode('Promise', [VOID_TYPE]);
+    const parameters = [ts.createParameter(__, __, __, ts.createIdentifier('_context'), __, callContextType, __)];
+    serverMethods.push(
+      ts.createMethod(__, __, __, name, __, __, parameters, promiseType,
+        ts.createBlock([
+          ts.createThrow(ts.createNew(ts.createIdentifier('Error'), __, [ts.createLiteral("unimplemented!")])),
+        ], true)
+      )
+    );
+
+    generateNode(ctx, paramNode);
+    generateNode(ctx, resultNode);
+  });
+
+  ctx.statements.push(
+    ts.createClassDeclaration(__, [EXPORT], clientName, __, [createClassExtends('capnp.Capability_Client')], clientMethods)
+  );
+  ctx.statements.push(
+    ts.createClassDeclaration(__, [EXPORT], serverName, __, [createClassExtends('capnp.Capability_Server')], serverMethods)
+  );
 
 }
 
@@ -610,14 +673,14 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   // static readonly Client = MyInterface_Client;
   // static readonly Server = MyInterface_Server;
-  // if (interfaceNode) {
+  if (interfaceNode) {
 
-  //   members.push(
-  //     ts.createProperty(__, [STATIC, READONLY], 'Client', __, __, ts.createLiteral(`${fullClassName}_Client`)));
-  //   members.push(
-  //     ts.createProperty(__, [STATIC, READONLY], 'Server', __, __, ts.createLiteral(`${fullClassName}_Server`)));
+    members.push(
+      ts.createProperty(__, [STATIC, READONLY], 'Client', __, __, ts.createIdentifier(`${fullClassName}_Client`)));
+    members.push(
+      ts.createProperty(__, [STATIC, READONLY], 'Server', __, __, ts.createIdentifier(`${fullClassName}_Server`)));
 
-  // }
+  }
 
   // static reaodnly _capnp = { displayName: 'MyStruct', id: '4732bab4310f81', size = new __O(8, 8) };
   members.push(
