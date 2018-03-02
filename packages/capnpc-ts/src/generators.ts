@@ -184,28 +184,55 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
 
 export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.Node): void {
 
-  trace('Interface generation is not yet implemented.');
+  trace('generateInterfaceClasses(%s) [%s]', node, node.getDisplayName());
 
   /* tslint:disable-next-line */
-  console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`);
+  console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet complete.`);
+
+  // Generate the parameter and result structs first.
+  generateMethodStructs(ctx, node);
+
+  // Now generate the client & server classes
+  generateClient(ctx, node);
+  generateServer(ctx, node);
+
+}
+
+export function generateMethodStructs(ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('generateMethodStructs(%s) [%s]', node, node.getDisplayName());
+
+  // TODO: handle superclasses
+
+  // Note: we don't sort by code order here, because we need methods to
+  // be identified by their index!
+
+  node.getInterface().getMethods().toArray().forEach(function(method) {
+    const paramNode = lookupNode(ctx, method.getParamStructType());
+    const resultNode = lookupNode(ctx, method.getResultStructType());
+
+    generateNode(ctx, paramNode);
+    generateNode(ctx, resultNode);
+  });
+
+}
+
+export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('generateClient(%s) [%s]', node, node.getDisplayName());
 
   const fullClassName = getFullClassName(node);
   const clientName = `${fullClassName}_Client`;
-  const serverName = `${fullClassName}_Server`;
-
-  console.log(node.toString());
-  console.log(node.getInterface());
 
   const i = node.getInterface();
 
   const clientMethods: ts.ClassElement[] = [];
-  const serverMethods: ts.ClassElement[] = [];
 
   // TODO: handle superclasses
 
+  // Note: we don't sort by code order here, because we need methods to
+  // be identified by their index!
   const methods = i.getMethods().toArray();
-
-  const methodCases: ts.CaseOrDefaultClause[] = [];
 
   methods.forEach(function(method, index) {
     const name = method.getName();
@@ -220,7 +247,6 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
     const resultType = ts.createTypeReferenceNode(resultTypeName, __);
 
     const requestType = ts.createTypeReferenceNode('capnp.Request', [paramType, resultType]);
-    const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [paramType, resultType]);
 
     clientMethods.push(
       createMethod(`${name}Request`, [], requestType, [
@@ -238,6 +264,46 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
         )
       ])
     );
+  });
+
+  ctx.statements.push(
+    ts.createClassDeclaration(__, [EXPORT], clientName, __, [createClassExtends('capnp.Capability_Client')], clientMethods)
+  );
+
+}
+
+export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('generateServer(%s) [%s]', node, node.getDisplayName());
+
+  const fullClassName = getFullClassName(node);
+  const serverName = `${fullClassName}_Server`;
+
+  const i = node.getInterface();
+
+  const serverMethods: ts.ClassElement[] = [];
+
+  // TODO: handle superclasses
+
+  // Note: we don't sort by code order here, because we need methods to
+  // be identified by their index!
+  const methods = i.getMethods().toArray();
+
+  const methodCases: ts.CaseOrDefaultClause[] = [];
+
+  methods.forEach(function(method, index) {
+    const name = method.getName();
+
+    const paramNode = lookupNode(ctx, method.getParamStructType());
+    const resultNode = lookupNode(ctx, method.getResultStructType());
+
+    const paramTypeName = getFullClassName(paramNode);
+    const resultTypeName = getFullClassName(resultNode);
+
+    const paramType = ts.createTypeReferenceNode(paramTypeName, __);
+    const resultType = ts.createTypeReferenceNode(resultTypeName, __);
+
+    const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [paramType, resultType]);
 
     const promiseType = ts.createTypeReferenceNode('Promise', [VOID_TYPE]);
     const parameters = [ts.createParameter(__, __, __, ts.createIdentifier('_context'), __, callContextType, __)];
@@ -269,10 +335,6 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
         ),
       ]),
     );
-
-    // Generate the parameter and result structs first.
-    generateNode(ctx, paramNode);
-    generateNode(ctx, resultNode);
   });
 
   serverMethods.push(
@@ -345,9 +407,6 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
     )
   );
 
-  ctx.statements.push(
-    ts.createClassDeclaration(__, [EXPORT], clientName, __, [createClassExtends('capnp.Capability_Client')], clientMethods)
-  );
   ctx.statements.push(
     ts.createClassDeclaration(__, [EXPORT], serverName, __, [createClassExtends('capnp.Capability_Server')], serverMethods)
   );
