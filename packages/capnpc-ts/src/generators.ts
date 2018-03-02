@@ -202,11 +202,6 @@ export function generateMethodStructs(ctx: CodeGeneratorFileContext, node: s.Nod
 
   trace('generateMethodStructs(%s) [%s]', node, node.getDisplayName());
 
-  // TODO: handle superclasses
-
-  // Note: we don't sort by code order here, because we need methods to
-  // be identified by their index!
-
   node.getInterface().getMethods().toArray().forEach(function(method) {
     const paramNode = lookupNode(ctx, method.getParamStructType());
     const resultNode = lookupNode(ctx, method.getResultStructType());
