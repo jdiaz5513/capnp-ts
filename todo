@@ -1,0 +1,23 @@
+todo items for rpc support
+==========================
+
+- generate code for interfaces
+  - interface generation
+    * root interface
+    * method params & results
+    * client basics
+      * forwarding methods
+    * server basics
+      * implementation stubs
+      * forwarding method
+  - interface type references
+    * name resolution
+    - has, adopt, and disown methods for interface references
+    - lists of interfaces
+  - generic methods
+  - ??
+- runtime support
+  * stub types to support generation
+  - complete support type definitions
+  - rpc frameworks
+  - ??
