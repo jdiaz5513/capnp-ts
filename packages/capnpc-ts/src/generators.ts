@@ -202,7 +202,7 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
 
   const methods = i.getMethods().toArray().sort(compareCodeOrder);
 
-  methods.forEach(function(method) {
+  methods.forEach(function(method, index) {
     const name = method.getName();
 
     const paramNode = lookupNode(ctx, method.getParamStructType());
@@ -221,21 +221,33 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
     ]);
 
     clientMethods.push(
-      ts.createMethod(__, __, __, `${name}Request`, __, __, [], requestType,
-        ts.createBlock([
-          ts.createThrow(ts.createNew(ts.createIdentifier('Error'), __, [ts.createLiteral("unimplemented!")])),
-        ], true)
-      )
+      createMethod(`${name}Request`, [], requestType, [
+        ts.createCall(
+          ts.createPropertyAccess(THIS, 'newCall'),
+          [
+            ts.createTypeReferenceNode(paramTypeName, __),
+            ts.createTypeReferenceNode(resultTypeName, __),
+          ],
+          [
+            ts.createLiteral(node.getId().toHexString()),
+            ts.createLiteral(index),
+            // TODO: size hint?
+          ],
+        )
+      ])
     );
 
     const promiseType = ts.createTypeReferenceNode('Promise', [VOID_TYPE]);
     const parameters = [ts.createParameter(__, __, __, ts.createIdentifier('_context'), __, callContextType, __)];
     serverMethods.push(
-      ts.createMethod(__, __, __, name, __, __, parameters, promiseType,
-        ts.createBlock([
-          ts.createThrow(ts.createNew(ts.createIdentifier('Error'), __, [ts.createLiteral("unimplemented!")])),
-        ], true)
-      )
+      createMethod(name, parameters, promiseType, [
+        ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+          ts.createLiteral(node.getDisplayName()),
+          ts.createLiteral(name),
+          ts.createLiteral(node.getId().toHexString()),
+          ts.createLiteral(index),
+        ]),
+      ])
     );
 
     generateNode(ctx, paramNode);
