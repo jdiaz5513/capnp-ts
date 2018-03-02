@@ -187,7 +187,7 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
   trace('generateInterfaceClasses(%s) [%s]', node, node.getDisplayName());
 
   /* tslint:disable-next-line */
-  console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet complete.`);
+  console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`);
 
   // Generate the parameter and result structs first.
   generateMethodStructs(ctx, node);
@@ -240,6 +240,8 @@ export function generateClientMethod(
   index: number
 ): ts.MethodDeclaration {
 
+  trace('generateClientMethod(%s, %s, %d) [%s]', node, method, index, node.getDisplayName());
+
   const name = method.getName();
 
   const paramType = getMethodParamType(ctx, method);
@@ -291,6 +293,8 @@ export function generateServerMethod(
   index: number
 ): ts.MethodDeclaration {
 
+  trace('generateServerMethod(%s, %s, %d) [%s]', node, method, index, node.getDisplayName());
+
   const name = method.getName();
 
   const paramType = getMethodParamType(ctx, method);
@@ -314,11 +318,59 @@ export function generateServerMethod(
 
 }
 
+export function generateServerDispatchCall(
+  node: s.Node,
+): ts.MethodDeclaration {
+
+  trace('generateServerDispatchCall(%s) [%s]', node, node.getDisplayName());
+
+  return ts.createMethod(
+    __, __, __, 'dispatchCall', __, __,
+    [
+      createParameter('interfaceId', STRING_TYPE),
+      createParameter('methodId', NUMBER_TYPE),
+      createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
+    ],
+    ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
+    ts.createBlock([
+      ts.createSwitch(
+        ts.createIdentifier('interfaceId'),
+        ts.createCaseBlock([
+          ts.createCaseClause(ts.createLiteral(node.getId().toHexString()), [
+            ts.createReturn(
+              ts.createCall(
+                ts.createPropertyAccess(THIS, 'dispatchCallInternal'), __, [
+                  ts.createIdentifier('methodId'),
+                  ts.createIdentifier('context'),
+                ]
+              )
+            ),
+          ]),
+          ts.createDefaultClause([
+            ts.createReturn(
+              ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+                createObjectLiteral({
+                  actualInterfaceName: ts.createLiteral(node.getDisplayName()),
+                  requestedTypeId: ts.createIdentifier('interfaceId'),
+                }),
+              ])
+            ),
+          ]),
+        ]),
+      ),
+    ], true)
+  );
+
+}
+
 export function generateServerDispatchCase(
   ctx: CodeGeneratorFileContext,
+  node: s.Node,
   method: s.Method,
   index: number
 ): ts.CaseClause {
+
+  trace('generateServerDispatchCase(%s, %s, %d) [%s]', node, method, index, node.getDisplayName());
 
   const name = method.getName();
 
@@ -341,65 +393,20 @@ export function generateServerDispatchCase(
 
 }
 
-export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): void {
+export function generateServerDispatchCallInternal(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node,
+): ts.MethodDeclaration {
 
-  trace('generateServer(%s) [%s]', node, node.getDisplayName());
-
-  const fullClassName = getFullClassName(node);
-  const serverName = `${fullClassName}_Server`;
+  trace('generateServerDispatchCallInternal(%s) [%s]', node, node.getDisplayName());
 
   // Note: we don't sort by code order here, because we need methods to
   // be identified by their index!
   const methods = node.getInterface().getMethods().toArray();
 
-  const serverMethods = methods.map(function(method, index) {
-    return generateServerMethod(ctx, node, method, index);
-  });
-
   const methodCases: ts.CaseOrDefaultClause[] = methods.map(function(method, index) {
-    return generateServerDispatchCase(ctx, method, index);
+    return generateServerDispatchCase(ctx, node, method, index);
   });
-
-  // TODO: handle superclasses
-
-  serverMethods.push(
-    ts.createMethod(
-      __, __, __, 'dispatchCall', __, __,
-      [
-        createParameter('interfaceId', STRING_TYPE),
-        createParameter('methodId', NUMBER_TYPE),
-        createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
-      ],
-      ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
-      ts.createBlock([
-        ts.createSwitch(
-          ts.createIdentifier('interfaceId'),
-          ts.createCaseBlock([
-            ts.createCaseClause(ts.createLiteral(node.getId().toHexString()), [
-              ts.createReturn(
-                ts.createCall(
-                  ts.createPropertyAccess(THIS, 'dispatchCallInternal'), __, [
-                    ts.createIdentifier('methodId'),
-                    ts.createIdentifier('context'),
-                  ]
-                )
-              ),
-            ]),
-            ts.createDefaultClause([
-              ts.createReturn(
-                ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
-                  createObjectLiteral({
-                    actualInterfaceName: ts.createLiteral(node.getDisplayName()),
-                    requestedTypeId: ts.createIdentifier('interfaceId'),
-                  }),
-                ])
-              ),
-            ]),
-          ]),
-        ),
-      ], true)
-    )
-  );
 
   methodCases.push(
     ts.createDefaultClause([
@@ -415,22 +422,42 @@ export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): voi
     ]),
   );
 
-  serverMethods.push(
-    ts.createMethod(
-      __, __, __, 'dispatchCallInternal', __, __,
-      [
-        createParameter('methodId', NUMBER_TYPE),
-        createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
-      ],
-      ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
-      ts.createBlock([
-        ts.createSwitch(
-          ts.createIdentifier('methodId'),
-          ts.createCaseBlock(methodCases)
-        ),
-      ], true)
-    )
+  return ts.createMethod(
+    __, __, __, 'dispatchCallInternal', __, __,
+    [
+      createParameter('methodId', NUMBER_TYPE),
+      createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
+    ],
+    ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
+    ts.createBlock([
+      ts.createSwitch(
+        ts.createIdentifier('methodId'),
+        ts.createCaseBlock(methodCases)
+      ),
+    ], true)
   );
+
+}
+
+export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('generateServer(%s) [%s]', node, node.getDisplayName());
+
+  const fullClassName = getFullClassName(node);
+  const serverName = `${fullClassName}_Server`;
+
+  // TODO: handle superclasses
+
+  // Note: we don't sort by code order here, because we need methods to
+  // be identified by their index!
+  const methods = node.getInterface().getMethods().toArray();
+
+  const serverMethods = methods.map(function(method, index) {
+    return generateServerMethod(ctx, node, method, index);
+  });
+
+  serverMethods.push(generateServerDispatchCall(node));
+  serverMethods.push(generateServerDispatchCallInternal(ctx, node));
 
   ctx.statements.push(
     ts.createClassDeclaration(__, [EXPORT], serverName, __, [createClassExtends('capnp.Capability_Server')], serverMethods)
