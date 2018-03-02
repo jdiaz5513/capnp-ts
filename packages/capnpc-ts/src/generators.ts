@@ -324,6 +324,29 @@ export function generateServerDispatchCall(
 
   trace('generateServerDispatchCall(%s) [%s]', node, node.getDisplayName());
 
+  const interfaceCases = [
+    ts.createCaseClause(ts.createLiteral(node.getId().toHexString()), [
+      ts.createReturn(
+        ts.createCall(
+          ts.createPropertyAccess(THIS, 'dispatchCallInternal'), __, [
+            ts.createIdentifier('methodId'),
+            ts.createIdentifier('context'),
+          ]
+        )
+      ),
+    ]),
+    ts.createDefaultClause([
+      ts.createReturn(
+        ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+          createObjectLiteral({
+            actualInterfaceName: ts.createLiteral(node.getDisplayName()),
+            requestedTypeId: ts.createIdentifier('interfaceId'),
+          }),
+        ])
+      ),
+    ]),
+  ];
+
   return ts.createMethod(
     __, __, __, 'dispatchCall', __, __,
     [
@@ -335,28 +358,7 @@ export function generateServerDispatchCall(
     ts.createBlock([
       ts.createSwitch(
         ts.createIdentifier('interfaceId'),
-        ts.createCaseBlock([
-          ts.createCaseClause(ts.createLiteral(node.getId().toHexString()), [
-            ts.createReturn(
-              ts.createCall(
-                ts.createPropertyAccess(THIS, 'dispatchCallInternal'), __, [
-                  ts.createIdentifier('methodId'),
-                  ts.createIdentifier('context'),
-                ]
-              )
-            ),
-          ]),
-          ts.createDefaultClause([
-            ts.createReturn(
-              ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
-                createObjectLiteral({
-                  actualInterfaceName: ts.createLiteral(node.getDisplayName()),
-                  requestedTypeId: ts.createIdentifier('interfaceId'),
-                }),
-              ])
-            ),
-          ]),
-        ]),
+        ts.createCaseBlock(interfaceCases),
       ),
     ], true)
   );
