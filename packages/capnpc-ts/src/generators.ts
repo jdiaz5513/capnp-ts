@@ -233,6 +233,34 @@ export function getMethodResultType(ctx: CodeGeneratorFileContext, method: s.Met
 
 }
 
+export function generateClientMethod(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node,
+  method: s.Method,
+  index: number
+): ts.MethodDeclaration {
+
+  const name = method.getName();
+
+  const paramType = getMethodParamType(ctx, method);
+  const resultType = getMethodResultType(ctx, method);
+
+  const requestType = ts.createTypeReferenceNode('capnp.Request', [paramType, resultType]);
+
+  return createMethod(`${name}Request`, [], requestType, [
+    ts.createCall(
+      ts.createPropertyAccess(THIS, 'newCall'),
+      [paramType, resultType],
+      [
+        ts.createLiteral(node.getId().toHexString()),
+        ts.createLiteral(index),
+        // TODO: size hint?
+      ],
+    )
+  ]);
+
+}
+
 export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): void {
 
   trace('generateClient(%s) [%s]', node, node.getDisplayName());
@@ -240,34 +268,15 @@ export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): voi
   const fullClassName = getFullClassName(node);
   const clientName = `${fullClassName}_Client`;
 
-  const clientMethods: ts.ClassElement[] = [];
-
   // TODO: handle superclasses
 
   // Note: we don't sort by code order here, because we need methods to
   // be identified by their index!
-  node.getInterface().getMethods().toArray().forEach(function(method, index) {
-    const name = method.getName();
-
-    const paramType = getMethodParamType(ctx, method);
-    const resultType = getMethodResultType(ctx, method);
-
-    const requestType = ts.createTypeReferenceNode('capnp.Request', [paramType, resultType]);
-
-    clientMethods.push(
-      createMethod(`${name}Request`, [], requestType, [
-        ts.createCall(
-          ts.createPropertyAccess(THIS, 'newCall'),
-          [paramType, resultType],
-          [
-            ts.createLiteral(node.getId().toHexString()),
-            ts.createLiteral(index),
-            // TODO: size hint?
-          ],
-        )
-      ])
-    );
-  });
+  const clientMethods = node
+    .getInterface()
+    .getMethods()
+    .toArray()
+    .map(function(method, index) { return generateClientMethod(ctx, node, method, index); });
 
   ctx.statements.push(
     ts.createClassDeclaration(__, [EXPORT], clientName, __, [createClassExtends('capnp.Capability_Client')], clientMethods)
