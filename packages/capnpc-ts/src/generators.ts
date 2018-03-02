@@ -257,7 +257,7 @@ export function generateClientMethod(
         // TODO: size hint?
       ],
     )
-  ]);
+  ], false /* allowSingleLine */);
 
 }
 
@@ -272,15 +272,72 @@ export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): voi
 
   // Note: we don't sort by code order here, because we need methods to
   // be identified by their index!
-  const clientMethods = node
-    .getInterface()
-    .getMethods()
-    .toArray()
-    .map(function(method, index) { return generateClientMethod(ctx, node, method, index); });
+  const methods = node.getInterface().getMethods().toArray();
+
+  const clientMethods = methods.map(function(method, index) {
+    return generateClientMethod(ctx, node, method, index);
+  });
 
   ctx.statements.push(
     ts.createClassDeclaration(__, [EXPORT], clientName, __, [createClassExtends('capnp.Capability_Client')], clientMethods)
   );
+
+}
+
+export function generateServerMethod(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node,
+  method: s.Method,
+  index: number
+): ts.MethodDeclaration {
+
+  const name = method.getName();
+
+  const paramType = getMethodParamType(ctx, method);
+  const resultType = getMethodResultType(ctx, method);
+
+  const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [paramType, resultType]);
+
+  const promiseType = ts.createTypeReferenceNode('Promise', [VOID_TYPE]);
+  const parameters = [ts.createParameter(__, __, __, ts.createIdentifier('_context'), __, callContextType, __)];
+
+  return createMethod(name, parameters, promiseType, [
+    ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+      createObjectLiteral({
+        interfaceName: ts.createLiteral(node.getDisplayName()),
+        methodName: ts.createLiteral(name),
+        typeId: ts.createLiteral(node.getId().toHexString()),
+        methodId: ts.createLiteral(index),
+      }),
+    ]),
+  ], false /* allowSingleLine */);
+
+}
+
+export function generateServerDispatchCase(
+  ctx: CodeGeneratorFileContext,
+  method: s.Method,
+  index: number
+): ts.CaseClause {
+
+  const name = method.getName();
+
+  const paramType = getMethodParamType(ctx, method);
+  const resultType = getMethodResultType(ctx, method);
+
+  return ts.createCaseClause(ts.createLiteral(index), [
+    ts.createReturn(
+      ts.createCall(
+        ts.createPropertyAccess(THIS, name), __, [
+          ts.createCall(
+            ts.createPropertyAccess(THIS, 'internalGetTypedContext'),
+            [paramType, resultType],
+            [ts.createIdentifier('context')]
+          ),
+        ]
+      )
+    ),
+  ]);
 
 }
 
@@ -291,52 +348,19 @@ export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): voi
   const fullClassName = getFullClassName(node);
   const serverName = `${fullClassName}_Server`;
 
-  const serverMethods: ts.ClassElement[] = [];
-  const methodCases: ts.CaseOrDefaultClause[] = [];
-
-  // TODO: handle superclasses
-
   // Note: we don't sort by code order here, because we need methods to
   // be identified by their index!
-  node.getInterface().getMethods().toArray().forEach(function(method, index) {
-    const name = method.getName();
+  const methods = node.getInterface().getMethods().toArray();
 
-    const paramType = getMethodParamType(ctx, method);
-    const resultType = getMethodResultType(ctx, method);
-
-    const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [paramType, resultType]);
-
-    const promiseType = ts.createTypeReferenceNode('Promise', [VOID_TYPE]);
-    const parameters = [ts.createParameter(__, __, __, ts.createIdentifier('_context'), __, callContextType, __)];
-    serverMethods.push(
-      createMethod(name, parameters, promiseType, [
-        ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
-          createObjectLiteral({
-            interfaceName: ts.createLiteral(node.getDisplayName()),
-            methodName: ts.createLiteral(name),
-            typeId: ts.createLiteral(node.getId().toHexString()),
-            methodId: ts.createLiteral(index),
-          }),
-        ]),
-      ])
-    );
-
-    methodCases.push(
-      ts.createCaseClause(ts.createLiteral(index), [
-        ts.createReturn(
-          ts.createCall(
-            ts.createPropertyAccess(THIS, name), __, [
-              ts.createCall(
-                ts.createPropertyAccess(THIS, 'internalGetTypedContext'),
-                [paramType, resultType],
-                [ts.createIdentifier('context')]
-              ),
-            ]
-          )
-        ),
-      ]),
-    );
+  const serverMethods = methods.map(function(method, index) {
+    return generateServerMethod(ctx, node, method, index);
   });
+
+  const methodCases: ts.CaseOrDefaultClause[] = methods.map(function(method, index) {
+    return generateServerDispatchCase(ctx, method, index);
+  });
+
+  // TODO: handle superclasses
 
   serverMethods.push(
     ts.createMethod(
