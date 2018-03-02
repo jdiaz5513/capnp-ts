@@ -23,17 +23,29 @@ export class Foo_Client extends capnp.Capability_Client {
     barRequest(): capnp.Request<Foo_Bar$Params, Foo_Bar$Results> { return this.newCall<Foo_Bar$Params, Foo_Bar$Results>("e0de5c805a7c7d44", 0); }
 }
 export class Foo_Server extends capnp.Capability_Server {
-    bar(_context: capnp.CallContext<Foo_Bar$Params, Foo_Bar$Results>): Promise<void> { return this.internalUnimplemented("/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo", "bar", "e0de5c805a7c7d44", 0); }
+    bar(_context: capnp.CallContext<Foo_Bar$Params, Foo_Bar$Results>): Promise<void> { return this.internalUnimplemented({
+        interfaceName: "/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo",
+        methodName: "bar",
+        typeId: "e0de5c805a7c7d44",
+        methodId: 0
+    }); }
     dispatchCall(interfaceId: string, methodId: number, context: capnp.CallContext<capnp.Pointer, capnp.Pointer>): Promise<void> {
         switch (interfaceId) {
             case "e0de5c805a7c7d44": return this.dispatchCallInternal(methodId, context);
-            default: return this.internalUnimplemented("/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo", interfaceId);
+            default: return this.internalUnimplemented({
+                actualInterfaceName: "/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo",
+                requestedTypeId: interfaceId
+            });
         }
     }
     dispatchCallInternal(methodId: number, context: capnp.CallContext<capnp.Pointer, capnp.Pointer>): Promise<void> {
         switch (methodId) {
             case 0: return this.bar(this.internalGetTypedContext<Foo_Bar$Params, Foo_Bar$Results>(context));
-            default: return this.internalUnimplemented("/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo", "e0de5c805a7c7d44", methodId);
+            default: return this.internalUnimplemented({
+                interfaceName: "/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo",
+                typeId: "e0de5c805a7c7d44",
+                methodId: methodId
+            });
         }
     }
 }

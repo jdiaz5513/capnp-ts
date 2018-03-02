@@ -11,6 +11,7 @@ import {
   createConstProperty,
   createMethod,
   createNestedNodeProperty,
+  createObjectLiteral,
   createParameter,
   createUnionConstProperty,
   createValueExpression,
@@ -243,10 +244,12 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
     serverMethods.push(
       createMethod(name, parameters, promiseType, [
         ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
-          ts.createLiteral(node.getDisplayName()),
-          ts.createLiteral(name),
-          ts.createLiteral(node.getId().toHexString()),
-          ts.createLiteral(index),
+          createObjectLiteral({
+            interfaceName: ts.createLiteral(node.getDisplayName()),
+            methodName: ts.createLiteral(name),
+            typeId: ts.createLiteral(node.getId().toHexString()),
+            methodId: ts.createLiteral(index),
+          }),
         ]),
       ])
     );
@@ -296,14 +299,14 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
               ),
             ]),
             ts.createDefaultClause([
-              ts.createReturn(ts.createCall(
-                ts.createPropertyAccess(THIS, 'internalUnimplemented'),
-                __,
-                [
-                  ts.createLiteral(node.getDisplayName()),
-                  ts.createIdentifier('interfaceId'),
-                ]
-              )),
+              ts.createReturn(
+                ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+                  createObjectLiteral({
+                    actualInterfaceName: ts.createLiteral(node.getDisplayName()),
+                    requestedTypeId: ts.createIdentifier('interfaceId'),
+                  }),
+                ])
+              ),
             ]),
           ]),
         ),
@@ -313,15 +316,15 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
 
   methodCases.push(
     ts.createDefaultClause([
-      ts.createReturn(ts.createCall(
-        ts.createPropertyAccess(THIS, 'internalUnimplemented'),
-        __,
-        [
-          ts.createLiteral(node.getDisplayName()),
-          ts.createLiteral(node.getId().toHexString()),
-          ts.createIdentifier('methodId'),
-        ]
-      )),
+      ts.createReturn(
+        ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+          createObjectLiteral({
+            interfaceName: ts.createLiteral(node.getDisplayName()),
+            typeId: ts.createLiteral(node.getId().toHexString()),
+            methodId: ts.createIdentifier('methodId'),
+          }),
+        ])
+      ),
     ]),
   );
 
