@@ -24,6 +24,18 @@ export class Foo_Client extends capnp.Capability_Client {
 }
 export class Foo_Server extends capnp.Capability_Server {
     bar(_context: capnp.CallContext<Foo_Bar$Params, Foo_Bar$Results>): Promise<void> { return this.internalUnimplemented("/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo", "bar", "e0de5c805a7c7d44", 0); }
+    dispatchCall(interfaceId: string, methodId: number, context: capnp.CallContext<capnp.Pointer, capnp.Pointer>): Promise<void> {
+        switch (interfaceId) {
+            case "e0de5c805a7c7d44": return this.dispatchCallInternal(methodId, context);
+            default: return this.internalUnimplemented("/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo", interfaceId);
+        }
+    }
+    dispatchCallInternal(methodId: number, context: capnp.CallContext<capnp.Pointer, capnp.Pointer>): Promise<void> {
+        switch (methodId) {
+            case 0: return this.bar(this.internalGetTypedContext<Foo_Bar$Params, Foo_Bar$Results>(context));
+            default: return this.internalUnimplemented("/media/local/capnp-ts/packages/capnpc-ts/test/integration/interface.capnp:Foo", "e0de5c805a7c7d44", methodId);
+        }
+    }
 }
 export class Foo extends __S {
     static readonly Client = Foo_Client;

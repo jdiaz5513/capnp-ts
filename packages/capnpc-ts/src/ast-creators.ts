@@ -68,6 +68,13 @@ export function createNestedNodeProperty(node: s.Node): ts.PropertyDeclaration {
 
 }
 
+export function createParameter(
+  name: string, type: ts.TypeNode): ts.ParameterDeclaration {
+
+  return ts.createParameter(__, __, __, ts.createIdentifier(name), __, type, __);
+
+}
+
 export function createUnionConstProperty(fullClassName: string, field: s.Field): ts.PropertyDeclaration {
 
   const name = util.c2s(field.getName());

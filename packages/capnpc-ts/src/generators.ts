@@ -11,6 +11,7 @@ import {
   createConstProperty,
   createMethod,
   createNestedNodeProperty,
+  createParameter,
   createUnionConstProperty,
   createValueExpression,
 } from './ast-creators';
@@ -23,6 +24,7 @@ import {
   EXPORT,
   LENGTH,
   NUMBER_TYPE,
+  POINTER_TYPE,
   Primitive,
   READONLY,
   STATIC,
@@ -200,7 +202,9 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
 
   // TODO: handle superclasses
 
-  const methods = i.getMethods().toArray().sort(compareCodeOrder);
+  const methods = i.getMethods().toArray();
+
+  const methodCases: ts.CaseOrDefaultClause[] = [];
 
   methods.forEach(function(method, index) {
     const name = method.getName();
@@ -211,14 +215,11 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
     const paramTypeName = getFullClassName(paramNode);
     const resultTypeName = getFullClassName(resultNode);
 
-    const requestType = ts.createTypeReferenceNode('capnp.Request', [
-      ts.createTypeReferenceNode(paramTypeName, __),
-      ts.createTypeReferenceNode(resultTypeName, __),
-    ]);
-    const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [
-      ts.createTypeReferenceNode(paramTypeName, __),
-      ts.createTypeReferenceNode(resultTypeName, __),
-    ]);
+    const paramType = ts.createTypeReferenceNode(paramTypeName, __);
+    const resultType = ts.createTypeReferenceNode(resultTypeName, __);
+
+    const requestType = ts.createTypeReferenceNode('capnp.Request', [paramType, resultType]);
+    const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [paramType, resultType]);
 
     clientMethods.push(
       createMethod(`${name}Request`, [], requestType, [
@@ -250,9 +251,96 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
       ])
     );
 
+    methodCases.push(
+      ts.createCaseClause(ts.createLiteral(index), [
+        ts.createReturn(
+          ts.createCall(
+            ts.createPropertyAccess(THIS, name), __, [
+              ts.createCall(
+                ts.createPropertyAccess(THIS, 'internalGetTypedContext'),
+                [paramType, resultType],
+                [ts.createIdentifier('context')]
+              ),
+            ]
+          )
+        ),
+      ]),
+    );
+
+    // Generate the parameter and result structs first.
     generateNode(ctx, paramNode);
     generateNode(ctx, resultNode);
   });
+
+  serverMethods.push(
+    ts.createMethod(
+      __, __, __, 'dispatchCall', __, __,
+      [
+        createParameter('interfaceId', STRING_TYPE),
+        createParameter('methodId', NUMBER_TYPE),
+        createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
+      ],
+      ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
+      ts.createBlock([
+        ts.createSwitch(
+          ts.createIdentifier('interfaceId'),
+          ts.createCaseBlock([
+            ts.createCaseClause(ts.createLiteral(node.getId().toHexString()), [
+              ts.createReturn(
+                ts.createCall(
+                  ts.createPropertyAccess(THIS, 'dispatchCallInternal'), __, [
+                    ts.createIdentifier('methodId'),
+                    ts.createIdentifier('context'),
+                  ]
+                )
+              ),
+            ]),
+            ts.createDefaultClause([
+              ts.createReturn(ts.createCall(
+                ts.createPropertyAccess(THIS, 'internalUnimplemented'),
+                __,
+                [
+                  ts.createLiteral(node.getDisplayName()),
+                  ts.createIdentifier('interfaceId'),
+                ]
+              )),
+            ]),
+          ]),
+        ),
+      ], true)
+    )
+  );
+
+  methodCases.push(
+    ts.createDefaultClause([
+      ts.createReturn(ts.createCall(
+        ts.createPropertyAccess(THIS, 'internalUnimplemented'),
+        __,
+        [
+          ts.createLiteral(node.getDisplayName()),
+          ts.createLiteral(node.getId().toHexString()),
+          ts.createIdentifier('methodId'),
+        ]
+      )),
+    ]),
+  );
+
+  serverMethods.push(
+    ts.createMethod(
+      __, __, __, 'dispatchCallInternal', __, __,
+      [
+        createParameter('methodId', NUMBER_TYPE),
+        createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
+      ],
+      ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
+      ts.createBlock([
+        ts.createSwitch(
+          ts.createIdentifier('methodId'),
+          ts.createCaseBlock(methodCases)
+        ),
+      ], true)
+    )
+  );
 
   ctx.statements.push(
     ts.createClassDeclaration(__, [EXPORT], clientName, __, [createClassExtends('capnp.Capability_Client')], clientMethods)

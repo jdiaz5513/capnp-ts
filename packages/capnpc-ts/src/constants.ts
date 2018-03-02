@@ -79,6 +79,10 @@ export const NUMBER_TYPE = ts.createTypeReferenceNode('number', __);
 // This is referenced so frequently it gets a shorthand!
 export const OBJECT_SIZE = ts.createIdentifier('__O');
 
+/** pointer */
+
+export const POINTER_TYPE = ts.createTypeReferenceNode('capnp.Pointer', __);
+
 /** readonly */
 
 export const READONLY = ts.createToken(ts.SyntaxKind.ReadonlyKeyword);
