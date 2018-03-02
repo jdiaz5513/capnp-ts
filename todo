@@ -10,11 +10,11 @@ todo items for rpc support
     * server basics
       * implementation stubs
       * forwarding method
+    - generic methods
   - interface type references
     * name resolution
     - has, adopt, and disown methods for interface references
     - lists of interfaces
-  - generic methods
   - ??
 - runtime support
   * stub types to support generation
