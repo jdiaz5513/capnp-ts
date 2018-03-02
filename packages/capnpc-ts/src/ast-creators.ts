@@ -68,6 +68,27 @@ export function createNestedNodeProperty(node: s.Node): ts.PropertyDeclaration {
 
 }
 
+export function createObjectLiteral(properties: { [key: string]: ts.Expression }): ts.Expression {
+
+  const propertyAssignments = [];
+
+  for (const key in properties) {
+    if (properties.hasOwnProperty(key)) {
+      propertyAssignments.push(ts.createPropertyAssignment(key, properties[key]));
+    }
+  }
+
+  return ts.createObjectLiteral(propertyAssignments, true);
+
+}
+
+export function createParameter(
+  name: string, type: ts.TypeNode): ts.ParameterDeclaration {
+
+  return ts.createParameter(__, __, __, ts.createIdentifier(name), __, type, __);
+
+}
+
 export function createUnionConstProperty(fullClassName: string, field: s.Field): ts.PropertyDeclaration {
 
   const name = util.c2s(field.getName());

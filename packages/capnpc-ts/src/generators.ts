@@ -11,6 +11,8 @@ import {
   createConstProperty,
   createMethod,
   createNestedNodeProperty,
+  createObjectLiteral,
+  createParameter,
   createUnionConstProperty,
   createValueExpression,
 } from './ast-creators';
@@ -23,6 +25,7 @@ import {
   EXPORT,
   LENGTH,
   NUMBER_TYPE,
+  POINTER_TYPE,
   Primitive,
   READONLY,
   STATIC,
@@ -179,12 +182,283 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
 
 }
 
-export function generateInterfaceClasses(_ctx: CodeGeneratorFileContext, node: s.Node): void {
+export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.Node): void {
 
-  trace('Interface generation is not yet implemented.');
+  trace('generateInterfaceClasses(%s) [%s]', node, node.getDisplayName());
 
   /* tslint:disable-next-line */
   console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`);
+
+  // Generate the parameter and result structs first.
+  generateMethodStructs(ctx, node);
+
+  // Now generate the client & server classes.
+  generateClient(ctx, node);
+  generateServer(ctx, node);
+
+}
+
+export function generateMethodStructs(ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('generateMethodStructs(%s) [%s]', node, node.getDisplayName());
+
+  node.getInterface().getMethods().toArray().forEach(function(method) {
+    const paramNode = lookupNode(ctx, method.getParamStructType());
+    const resultNode = lookupNode(ctx, method.getResultStructType());
+
+    generateNode(ctx, paramNode);
+    generateNode(ctx, resultNode);
+  });
+
+}
+
+export function getMethodParamType(ctx: CodeGeneratorFileContext, method: s.Method): ts.TypeReferenceNode {
+
+  const paramNode = lookupNode(ctx, method.getParamStructType());
+
+  return ts.createTypeReferenceNode(getFullClassName(paramNode), __);
+
+}
+
+export function getMethodResultType(ctx: CodeGeneratorFileContext, method: s.Method): ts.TypeReferenceNode {
+
+  const resultNode = lookupNode(ctx, method.getResultStructType());
+
+  return ts.createTypeReferenceNode(getFullClassName(resultNode), __);
+
+}
+
+export function generateClientMethod(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node,
+  method: s.Method,
+  index: number
+): ts.MethodDeclaration {
+
+  trace('generateClientMethod(%s, %s, %d) [%s]', node, method, index, node.getDisplayName());
+
+  const name = method.getName();
+
+  const paramType = getMethodParamType(ctx, method);
+  const resultType = getMethodResultType(ctx, method);
+
+  const requestType = ts.createTypeReferenceNode('capnp.Request', [paramType, resultType]);
+
+  return createMethod(`${name}Request`, [], requestType, [
+    ts.createCall(
+      ts.createPropertyAccess(THIS, 'newCall'),
+      [paramType, resultType],
+      [
+        ts.createLiteral(node.getId().toHexString()),
+        ts.createLiteral(index),
+        // TODO: size hint?
+      ],
+    )
+  ], false /* allowSingleLine */);
+
+}
+
+export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('generateClient(%s) [%s]', node, node.getDisplayName());
+
+  const fullClassName = getFullClassName(node);
+  const clientName = `${fullClassName}_Client`;
+
+  // TODO: handle superclasses
+
+  // Note: we don't sort by code order here, because we need methods to
+  // be identified by their index!
+  const methods = node.getInterface().getMethods().toArray();
+
+  const clientMethods = methods.map(function(method, index) {
+    return generateClientMethod(ctx, node, method, index);
+  });
+
+  ctx.statements.push(
+    ts.createClassDeclaration(__, [EXPORT], clientName, __, [createClassExtends('capnp.Capability_Client')], clientMethods)
+  );
+
+}
+
+export function generateServerMethod(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node,
+  method: s.Method,
+  index: number
+): ts.MethodDeclaration {
+
+  trace('generateServerMethod(%s, %s, %d) [%s]', node, method, index, node.getDisplayName());
+
+  const name = method.getName();
+
+  const paramType = getMethodParamType(ctx, method);
+  const resultType = getMethodResultType(ctx, method);
+
+  const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [paramType, resultType]);
+
+  const promiseType = ts.createTypeReferenceNode('Promise', [VOID_TYPE]);
+  const parameters = [ts.createParameter(__, __, __, ts.createIdentifier('_context'), __, callContextType, __)];
+
+  return createMethod(name, parameters, promiseType, [
+    ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+      createObjectLiteral({
+        interfaceName: ts.createLiteral(node.getDisplayName()),
+        methodName: ts.createLiteral(name),
+        typeId: ts.createLiteral(node.getId().toHexString()),
+        methodId: ts.createLiteral(index),
+      }),
+    ]),
+  ], false /* allowSingleLine */);
+
+}
+
+export function generateServerDispatchCall(
+  node: s.Node,
+): ts.MethodDeclaration {
+
+  trace('generateServerDispatchCall(%s) [%s]', node, node.getDisplayName());
+
+  const interfaceCases = [
+    ts.createCaseClause(ts.createLiteral(node.getId().toHexString()), [
+      ts.createReturn(
+        ts.createCall(
+          ts.createPropertyAccess(THIS, 'dispatchCallInternal'), __, [
+            ts.createIdentifier('methodId'),
+            ts.createIdentifier('context'),
+          ]
+        )
+      ),
+    ]),
+    ts.createDefaultClause([
+      ts.createReturn(
+        ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+          createObjectLiteral({
+            actualInterfaceName: ts.createLiteral(node.getDisplayName()),
+            requestedTypeId: ts.createIdentifier('interfaceId'),
+          }),
+        ])
+      ),
+    ]),
+  ];
+
+  return ts.createMethod(
+    __, __, __, 'dispatchCall', __, __,
+    [
+      createParameter('interfaceId', STRING_TYPE),
+      createParameter('methodId', NUMBER_TYPE),
+      createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
+    ],
+    ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
+    ts.createBlock([
+      ts.createSwitch(
+        ts.createIdentifier('interfaceId'),
+        ts.createCaseBlock(interfaceCases),
+      ),
+    ], true)
+  );
+
+}
+
+export function generateServerDispatchCase(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node,
+  method: s.Method,
+  index: number
+): ts.CaseClause {
+
+  trace('generateServerDispatchCase(%s, %s, %d) [%s]', node, method, index, node.getDisplayName());
+
+  const name = method.getName();
+
+  const paramType = getMethodParamType(ctx, method);
+  const resultType = getMethodResultType(ctx, method);
+
+  return ts.createCaseClause(ts.createLiteral(index), [
+    ts.createReturn(
+      ts.createCall(
+        ts.createPropertyAccess(THIS, name), __, [
+          ts.createCall(
+            ts.createPropertyAccess(THIS, 'internalGetTypedContext'),
+            [paramType, resultType],
+            [ts.createIdentifier('context')]
+          ),
+        ]
+      )
+    ),
+  ]);
+
+}
+
+export function generateServerDispatchCallInternal(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node,
+): ts.MethodDeclaration {
+
+  trace('generateServerDispatchCallInternal(%s) [%s]', node, node.getDisplayName());
+
+  // Note: we don't sort by code order here, because we need methods to
+  // be identified by their index!
+  const methods = node.getInterface().getMethods().toArray();
+
+  const methodCases: ts.CaseOrDefaultClause[] = methods.map(function(method, index) {
+    return generateServerDispatchCase(ctx, node, method, index);
+  });
+
+  methodCases.push(
+    ts.createDefaultClause([
+      ts.createReturn(
+        ts.createCall(ts.createPropertyAccess(THIS, 'internalUnimplemented'), __, [
+          createObjectLiteral({
+            interfaceName: ts.createLiteral(node.getDisplayName()),
+            typeId: ts.createLiteral(node.getId().toHexString()),
+            methodId: ts.createIdentifier('methodId'),
+          }),
+        ])
+      ),
+    ]),
+  );
+
+  return ts.createMethod(
+    __, __, __, 'dispatchCallInternal', __, __,
+    [
+      createParameter('methodId', NUMBER_TYPE),
+      createParameter('context', ts.createTypeReferenceNode('capnp.CallContext', [POINTER_TYPE, POINTER_TYPE])),
+    ],
+    ts.createTypeReferenceNode('Promise', [VOID_TYPE]),
+    ts.createBlock([
+      ts.createSwitch(
+        ts.createIdentifier('methodId'),
+        ts.createCaseBlock(methodCases)
+      ),
+    ], true)
+  );
+
+}
+
+export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): void {
+
+  trace('generateServer(%s) [%s]', node, node.getDisplayName());
+
+  const fullClassName = getFullClassName(node);
+  const serverName = `${fullClassName}_Server`;
+
+  // TODO: handle superclasses
+
+  // Note: we don't sort by code order here, because we need methods to
+  // be identified by their index!
+  const methods = node.getInterface().getMethods().toArray();
+
+  const serverMethods = methods.map(function(method, index) {
+    return generateServerMethod(ctx, node, method, index);
+  });
+
+  serverMethods.push(generateServerDispatchCall(node));
+  serverMethods.push(generateServerDispatchCallInternal(ctx, node));
+
+  ctx.statements.push(
+    ts.createClassDeclaration(__, [EXPORT], serverName, __, [createClassExtends('capnp.Capability_Server')], serverMethods)
+  );
 
 }
 
@@ -610,14 +884,14 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   // static readonly Client = MyInterface_Client;
   // static readonly Server = MyInterface_Server;
-  // if (interfaceNode) {
+  if (interfaceNode) {
 
-  //   members.push(
-  //     ts.createProperty(__, [STATIC, READONLY], 'Client', __, __, ts.createLiteral(`${fullClassName}_Client`)));
-  //   members.push(
-  //     ts.createProperty(__, [STATIC, READONLY], 'Server', __, __, ts.createLiteral(`${fullClassName}_Server`)));
+    members.push(
+      ts.createProperty(__, [STATIC, READONLY], 'Client', __, __, ts.createIdentifier(`${fullClassName}_Client`)));
+    members.push(
+      ts.createProperty(__, [STATIC, READONLY], 'Server', __, __, ts.createIdentifier(`${fullClassName}_Server`)));
 
-  // }
+  }
 
   // static reaodnly _capnp = { displayName: 'MyStruct', id: '4732bab4310f81', size = new __O(8, 8) };
   members.push(
