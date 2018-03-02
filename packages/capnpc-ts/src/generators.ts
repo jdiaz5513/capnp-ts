@@ -192,7 +192,7 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
   // Generate the parameter and result structs first.
   generateMethodStructs(ctx, node);
 
-  // Now generate the client & server classes
+  // Now generate the client & server classes.
   generateClient(ctx, node);
   generateServer(ctx, node);
 
@@ -217,6 +217,22 @@ export function generateMethodStructs(ctx: CodeGeneratorFileContext, node: s.Nod
 
 }
 
+export function getMethodParamType(ctx: CodeGeneratorFileContext, method: s.Method): ts.TypeReferenceNode {
+
+  const paramNode = lookupNode(ctx, method.getParamStructType());
+
+  return ts.createTypeReferenceNode(getFullClassName(paramNode), __);
+
+}
+
+export function getMethodResultType(ctx: CodeGeneratorFileContext, method: s.Method): ts.TypeReferenceNode {
+
+  const resultNode = lookupNode(ctx, method.getResultStructType());
+
+  return ts.createTypeReferenceNode(getFullClassName(resultNode), __);
+
+}
+
 export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): void {
 
   trace('generateClient(%s) [%s]', node, node.getDisplayName());
@@ -224,27 +240,17 @@ export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): voi
   const fullClassName = getFullClassName(node);
   const clientName = `${fullClassName}_Client`;
 
-  const i = node.getInterface();
-
   const clientMethods: ts.ClassElement[] = [];
 
   // TODO: handle superclasses
 
   // Note: we don't sort by code order here, because we need methods to
   // be identified by their index!
-  const methods = i.getMethods().toArray();
-
-  methods.forEach(function(method, index) {
+  node.getInterface().getMethods().toArray().forEach(function(method, index) {
     const name = method.getName();
 
-    const paramNode = lookupNode(ctx, method.getParamStructType());
-    const resultNode = lookupNode(ctx, method.getResultStructType());
-
-    const paramTypeName = getFullClassName(paramNode);
-    const resultTypeName = getFullClassName(resultNode);
-
-    const paramType = ts.createTypeReferenceNode(paramTypeName, __);
-    const resultType = ts.createTypeReferenceNode(resultTypeName, __);
+    const paramType = getMethodParamType(ctx, method);
+    const resultType = getMethodResultType(ctx, method);
 
     const requestType = ts.createTypeReferenceNode('capnp.Request', [paramType, resultType]);
 
@@ -252,10 +258,7 @@ export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): voi
       createMethod(`${name}Request`, [], requestType, [
         ts.createCall(
           ts.createPropertyAccess(THIS, 'newCall'),
-          [
-            ts.createTypeReferenceNode(paramTypeName, __),
-            ts.createTypeReferenceNode(resultTypeName, __),
-          ],
+          [paramType, resultType],
           [
             ts.createLiteral(node.getId().toHexString()),
             ts.createLiteral(index),
@@ -279,29 +282,18 @@ export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): voi
   const fullClassName = getFullClassName(node);
   const serverName = `${fullClassName}_Server`;
 
-  const i = node.getInterface();
-
   const serverMethods: ts.ClassElement[] = [];
+  const methodCases: ts.CaseOrDefaultClause[] = [];
 
   // TODO: handle superclasses
 
   // Note: we don't sort by code order here, because we need methods to
   // be identified by their index!
-  const methods = i.getMethods().toArray();
-
-  const methodCases: ts.CaseOrDefaultClause[] = [];
-
-  methods.forEach(function(method, index) {
+  node.getInterface().getMethods().toArray().forEach(function(method, index) {
     const name = method.getName();
 
-    const paramNode = lookupNode(ctx, method.getParamStructType());
-    const resultNode = lookupNode(ctx, method.getResultStructType());
-
-    const paramTypeName = getFullClassName(paramNode);
-    const resultTypeName = getFullClassName(resultNode);
-
-    const paramType = ts.createTypeReferenceNode(paramTypeName, __);
-    const resultType = ts.createTypeReferenceNode(resultTypeName, __);
+    const paramType = getMethodParamType(ctx, method);
+    const resultType = getMethodResultType(ctx, method);
 
     const callContextType = ts.createTypeReferenceNode('capnp.CallContext', [paramType, resultType]);
 
