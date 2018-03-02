@@ -21,12 +21,12 @@ export class Capability_Server {
     else if (typeof interfaceIdOrMethodId !== 'undefined') {
       const interfaceId = methodNameOrInterfaceId;
       const methodId = interfaceIdOrMethodId as number;
-      throw new Error(format('Method not implemented. %s %s %s %d', interfaceName, interfaceId, methodId));
+      throw new Error(format('Method not implemented. %s %s %d', interfaceName, interfaceId, methodId));
     }
 
     else {
       const interfaceId = methodNameOrInterfaceId;
-      throw new Error(format('Method not implemented. %s %s %s %d', interfaceName, interfaceId));
+      throw new Error(format('Requested interface not implemented. %s %s', interfaceName, interfaceId));
     }
 
   }
