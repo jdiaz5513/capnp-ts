@@ -160,7 +160,7 @@ export function initMessage(
 
   let buf: ArrayBuffer = src as ArrayBuffer;
 
-  if (isArrayBufferView(buf)) buf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  if (isArrayBufferView(buf)) buf = (buf.buffer as ArrayBuffer).slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
   if (packed) buf = unpack(buf);
 
@@ -428,7 +428,7 @@ export function toArrayBuffer(m: Message): ArrayBuffer {
 
   });
 
-  return out.buffer;
+  return out.buffer as ArrayBuffer;
 
 }
 
@@ -459,7 +459,7 @@ export function toPackedArrayBuffer(m: Message): ArrayBuffer {
 
   });
 
-  return out.buffer;
+  return out.buffer as ArrayBuffer;
 
 }
 
@@ -471,7 +471,7 @@ export function getStreamFrame(m: Message): ArrayBuffer {
 
     // Don't bother allocating the first segment, just return a single zero word for the frame header.
 
-    return new Float64Array(1).buffer;
+    return new Float64Array(1).buffer as ArrayBuffer;
 
   }
 

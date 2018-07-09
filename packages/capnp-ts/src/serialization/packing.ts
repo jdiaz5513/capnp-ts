@@ -342,7 +342,7 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
 
   }
 
-  return new Uint8Array(dst).buffer;
+  return new Uint8Array(dst).buffer as ArrayBuffer;
 
 }
 
@@ -417,6 +417,6 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
   }
 
-  return dst.buffer;
+  return dst.buffer as ArrayBuffer;
 
 }
