@@ -1,13 +1,13 @@
-import initTrace from 'debug';
+import initTrace from "debug";
 
-import * as fs from 'fs';
+import * as fs from "fs";
 
-import * as ts from 'typescript';
+import * as ts from "typescript";
 
-import * as capnpc_ts from 'capnpc-ts';
+import * as capnpc_ts from "capnpc-ts";
 
-const trace = initTrace('capnpc');
-trace('load');
+const trace = initTrace("capnpc");
+trace("load");
 
 /**
  * The equivalent of tsconfig.json used when compiling the emitted .ts file to .js.
@@ -30,63 +30,65 @@ const COMPILE_OPTIONS: ts.CompilerOptions = {
   sourceMap: false,
   strict: true,
   stripInternal: true,
-  target: ts.ScriptTarget.ES2015,
+  target: ts.ScriptTarget.ES2015
 };
 
 export async function main() {
-  return capnpc_ts.run().then((ctx) => {
-    transpileAll(ctx);
-  }).thenReturn().tapCatch((reason) => {
-    // tslint:disable-next-line:no-console
-    console.error(reason);
-    process.exit(1);
-  });
+  return capnpc_ts
+    .run()
+    .then(ctx => {
+      transpileAll(ctx);
+    })
+    .thenReturn()
+    .tapCatch(reason => {
+      // tslint:disable-next-line:no-console
+      console.error(reason);
+      process.exit(1);
+    });
 }
 
 export function transpileAll(ctx: capnpc_ts.CodeGeneratorContext): void {
+  trace("transpileAll()", ctx.files);
 
-  trace('transpileAll()', ctx.files);
-
-  const tsFilePaths = ctx.files.map((f) => f.tsPath);
+  const tsFilePaths = ctx.files.map(f => f.tsPath);
 
   const program = ts.createProgram(tsFilePaths, COMPILE_OPTIONS);
 
   const emitResult = program.emit();
 
   if (!emitResult.emitSkipped) {
-
-    trace('emit succeeded');
+    trace("emit succeeded");
 
     tsFilePaths.forEach(fs.unlinkSync);
-
   } else {
+    trace("emit failed");
 
-    trace('emit failed');
+    const allDiagnostics = ts
+      .getPreEmitDiagnostics(program)
+      .concat(emitResult.diagnostics);
 
-    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-
-    allDiagnostics.forEach((diagnostic) => {
-
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+    allDiagnostics.forEach(diagnostic => {
+      const message = ts.flattenDiagnosticMessageText(
+        diagnostic.messageText,
+        "\n"
+      );
 
       if (diagnostic.file && diagnostic.start) {
-
-        const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+        const {
+          line,
+          character
+        } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
 
         /* tslint:disable-next-line:no-console */
-        console.log(`${diagnostic.file.fileName}:${line + 1}:${character + 1} ${message}`);
-
+        console.log(
+          `${diagnostic.file.fileName}:${line + 1}:${character + 1} ${message}`
+        );
       } else {
-
         /* tslint:disable-next-line:no-console */
         console.log(`==> ${message}`);
-
       }
-
     });
 
     throw new Error(capnpc_ts.errors.GEN_TS_EMIT_FAILED);
-
   }
-
 }

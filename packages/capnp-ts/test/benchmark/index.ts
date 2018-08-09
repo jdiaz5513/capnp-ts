@@ -1,1 +1,1 @@
-import './serialization-demo.bench';
+import "./serialization-demo.bench";

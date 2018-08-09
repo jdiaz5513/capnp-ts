@@ -2,8 +2,8 @@
  * @author jdiaz5513
  */
 
-import { PACK_SPAN_THRESHOLD } from '../constants';
-import { MSG_PACK_NOT_WORD_ALIGNED } from '../errors';
+import { PACK_SPAN_THRESHOLD } from "../constants";
+import { MSG_PACK_NOT_WORD_ALIGNED } from "../errors";
 
 /**
  * When packing a message there are two tags that are interpreted in a special way: `0x00` and `0xff`.
@@ -12,7 +12,6 @@ import { MSG_PACK_NOT_WORD_ALIGNED } from '../errors';
  */
 
 const enum PackedTag {
-
   /**
    * The tag is followed by a single byte which indicates a count of consecutive zero-valued words, minus 1. E.g. if the
    * tag 0x00 is followed by 0x05, the sequence unpacks to 6 words of zero.
@@ -36,8 +35,7 @@ const enum PackedTag {
    * input (256 words = 2KiB).
    */
 
-  SPAN = 0xff,
-
+  SPAN = 0xff
 }
 
 /**
@@ -51,13 +49,11 @@ const enum PackedTag {
  */
 
 export function getHammingWeight(x: number) {
-
   // Thanks, HACKMEM!
 
   let w = x - ((x >> 1) & 0x55555555);
   w = (w & 0x33333333) + ((w >> 2) & 0x33333333);
-  return ((w + (w >> 4) & 0x0f0f0f0f) * 0x01010101) >> 24;
-
+  return (((w + (w >> 4)) & 0x0f0f0f0f) * 0x01010101) >> 24;
 }
 
 export type byte = number;
@@ -76,19 +72,28 @@ export type byte = number;
  * @returns {number} The tag byte.
  */
 
-export function getTagByte(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte, g: byte, h: byte): number {
-
+export function getTagByte(
+  a: byte,
+  b: byte,
+  c: byte,
+  d: byte,
+  e: byte,
+  f: byte,
+  g: byte,
+  h: byte
+): number {
   // Yes, it's pretty. Don't touch it.
 
-  return (a === 0 ? 0 : 0b00000001) |
+  return (
+    (a === 0 ? 0 : 0b00000001) |
     (b === 0 ? 0 : 0b00000010) |
     (c === 0 ? 0 : 0b00000100) |
     (d === 0 ? 0 : 0b00001000) |
     (e === 0 ? 0 : 0b00010000) |
     (f === 0 ? 0 : 0b00100000) |
     (g === 0 ? 0 : 0b01000000) |
-    (h === 0 ? 0 : 0b10000000);
-
+    (h === 0 ? 0 : 0b10000000)
+  );
 }
 
 /**
@@ -100,46 +105,35 @@ export function getTagByte(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte,
  */
 
 export function getUnpackedByteLength(packed: ArrayBuffer): number {
-
   const p = new Uint8Array(packed);
   let wordLength = 0;
   let lastTag = 0x77;
 
-  for (let i = 0; i < p.byteLength;) {
-
+  for (let i = 0; i < p.byteLength; ) {
     const tag = p[i];
 
     if (lastTag === PackedTag.ZERO) {
-
       wordLength += tag;
 
       i++;
 
       lastTag = 0x77;
-
     } else if (lastTag === PackedTag.SPAN) {
-
       wordLength += tag;
 
       i += tag * 8 + 1;
 
       lastTag = 0x77;
-
     } else {
-
       wordLength++;
 
       i += getHammingWeight(tag) + 1;
 
       lastTag = tag;
-
     }
-
-
   }
 
   return wordLength * 8;
-
 }
 
 /**
@@ -156,17 +150,26 @@ export function getUnpackedByteLength(packed: ArrayBuffer): number {
  * @returns {number} The number of these bytes that are zero.
  */
 
-export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte, g: byte, h: byte): number {
-
-  return (a === 0 ? 1 : 0) +
+export function getZeroByteCount(
+  a: byte,
+  b: byte,
+  c: byte,
+  d: byte,
+  e: byte,
+  f: byte,
+  g: byte,
+  h: byte
+): number {
+  return (
+    (a === 0 ? 1 : 0) +
     (b === 0 ? 1 : 0) +
     (c === 0 ? 1 : 0) +
     (d === 0 ? 1 : 0) +
     (e === 0 ? 1 : 0) +
     (f === 0 ? 1 : 0) +
     (g === 0 ? 1 : 0) +
-    (h === 0 ? 1 : 0);
-
+    (h === 0 ? 1 : 0)
+  );
 }
 
 /**
@@ -186,8 +189,11 @@ export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f:
  * @returns {ArrayBuffer} A packed version of the message.
  */
 
-export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number): ArrayBuffer {
-
+export function pack(
+  unpacked: ArrayBuffer,
+  byteOffset = 0,
+  byteLength?: number
+): ArrayBuffer {
   if (unpacked.byteLength % 8 !== 0) throw new Error(MSG_PACK_NOT_WORD_ALIGNED);
 
   const src = new Uint8Array(unpacked, byteOffset, byteLength);
@@ -214,8 +220,11 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
 
   let spanThreshold = PACK_SPAN_THRESHOLD;
 
-  for (let srcByteOffset = 0; srcByteOffset < src.byteLength; srcByteOffset += 8) {
-
+  for (
+    let srcByteOffset = 0;
+    srcByteOffset < src.byteLength;
+    srcByteOffset += 8
+  ) {
     /** Read in the entire word. Yes, this feels silly but it's fast! */
 
     const a = src[srcByteOffset];
@@ -234,32 +243,25 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
     let skipWriteWord = true;
 
     switch (lastTag) {
-
       case PackedTag.ZERO:
-
         // We're writing a span of words with all zeroes in them. See if we need to bail out of the fast path.
 
         if (tag !== PackedTag.ZERO || spanWordLength >= 0xff) {
-
           // There's a bit in there or we got too many zeroes. Damn, we need to bail.
 
           dst.push(spanWordLength);
           spanWordLength = 0;
 
           skipWriteWord = false;
-
         } else {
-
           // Kay, let's quickly inc this and go.
 
           spanWordLength++;
-
         }
 
         break;
 
       case PackedTag.SPAN:
-
         // We're writing a span of nonzero words.
 
         const zeroCount = getZeroByteCount(a, b, c, d, e, f, g, h);
@@ -269,7 +271,6 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
         spanThreshold -= zeroCount;
 
         if (spanThreshold <= 0 || spanWordLength >= 0xff) {
-
           // Alright, time to get packing again. Write the number of words we skipped to the beginning of the span.
 
           dst[spanTagOffset] = spanWordLength;
@@ -280,27 +281,22 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
           // We have to write this word normally.
 
           skipWriteWord = false;
-
         } else {
-
           // Just write this word verbatim.
 
           dst.push(a, b, c, d, e, f, g, h);
 
           spanWordLength++;
-
         }
 
         break;
 
       default:
-
         // Didn't get a special tag last time, let's write this as normal.
 
         skipWriteWord = false;
 
         break;
-
     }
 
     // A goto is fast, idk why people keep hatin'.
@@ -321,29 +317,21 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
     // Record the span tag offset if needed, making sure to actually leave room for it.
 
     if (tag === PackedTag.SPAN) {
-
       spanTagOffset = dst.length;
 
       dst.push(0);
-
     }
-
   }
 
   // We're done. If we were writing a span let's finish it.
 
   if (lastTag === PackedTag.ZERO) {
-
     dst.push(spanWordLength);
-
   } else if (lastTag === PackedTag.SPAN) {
-
     dst[spanTagOffset] = spanWordLength;
-
   }
 
   return new Uint8Array(dst).buffer;
-
 }
 
 /**
@@ -358,7 +346,6 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
  */
 
 export function unpack(packed: ArrayBuffer): ArrayBuffer {
-
   // We have no choice but to read the packed buffer one byte at a time.
 
   const src = new Uint8Array(packed);
@@ -368,12 +355,14 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
   let lastTag = 0x77;
 
-  for (let srcByteOffset = 0, dstByteOffset = 0; srcByteOffset < src.byteLength;) {
+  for (
+    let srcByteOffset = 0, dstByteOffset = 0;
+    srcByteOffset < src.byteLength;
 
+  ) {
     const tag = src[srcByteOffset];
 
     if (lastTag === PackedTag.ZERO) {
-
       // We have a span of zeroes. New array buffers are guaranteed to be initialized to zero so we just seek ahead.
 
       dstByteOffset += tag * 8;
@@ -381,42 +370,36 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
       srcByteOffset++;
 
       lastTag = 0x77;
-
     } else if (lastTag === PackedTag.SPAN) {
-
       // We have a span of unpacked bytes. Copy them verbatim from the source buffer.
 
       const spanByteLength = tag * 8;
 
-      dst.set(src.subarray(srcByteOffset + 1, srcByteOffset + 1 + spanByteLength), dstByteOffset);
+      dst.set(
+        src.subarray(srcByteOffset + 1, srcByteOffset + 1 + spanByteLength),
+        dstByteOffset
+      );
 
       dstByteOffset += spanByteLength;
       srcByteOffset += 1 + spanByteLength;
 
       lastTag = 0x77;
-
     } else {
-
       // Okay, a normal tag. Let's read past the tag and copy bytes that have a bit set in the tag.
 
       srcByteOffset++;
 
       for (let i = 1; i <= 0b10000000; i <<= 1) {
-
         // We only need to actually touch `dst` if there's a nonzero byte (it's already initialized to zeroes).
 
         if ((tag & i) !== 0) dst[dstByteOffset] = src[srcByteOffset++];
 
         dstByteOffset++;
-
       }
 
       lastTag = tag;
-
     }
-
   }
 
   return dst.buffer;
-
 }

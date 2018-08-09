@@ -2,15 +2,15 @@
  * @author jdiaz5513
  */
 
-import initTrace from 'debug';
+import initTrace from "debug";
 
-import { ListElementSize } from '../list-element-size';
-import { List } from './list';
-import { Pointer, validate, getContent } from './pointer';
-import { PointerType } from './pointer-type';
+import { ListElementSize } from "../list-element-size";
+import { List } from "./list";
+import { Pointer, validate, getContent } from "./pointer";
+import { PointerType } from "./pointer-type";
 
-const trace = initTrace('capnp:data');
-trace('load');
+const trace = initTrace("capnp:data");
+trace("load");
 
 /**
  * A generic blob of bytes. Can be converted to a DataView or Uint8Array to access its contents using `toDataView()` and
@@ -22,19 +22,18 @@ trace('load');
  */
 
 export class Data extends List<number> {
-
   static fromPointer(pointer: Pointer): Data {
-
     validate(PointerType.LIST, pointer, ListElementSize.BYTE);
 
     return this._fromPointerUnchecked(pointer);
-
   }
 
   protected static _fromPointerUnchecked(pointer: Pointer): Data {
-
-    return new this(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
-
+    return new this(
+      pointer.segment,
+      pointer.byteOffset,
+      pointer._capnp.depthLimit
+    );
   }
 
   /**
@@ -49,32 +48,39 @@ export class Data extends List<number> {
   // buffer data.
 
   copyBuffer(src: ArrayBuffer | ArrayBufferView): void {
-
     const c = getContent(this);
 
     const dstLength = this.getLength();
     const srcLength = src.byteLength;
 
-    const i = src instanceof ArrayBuffer
-      ? new Uint8Array(src)
-      : new Uint8Array(src.buffer, src.byteOffset, Math.min(dstLength, srcLength));
+    const i =
+      src instanceof ArrayBuffer
+        ? new Uint8Array(src)
+        : new Uint8Array(
+            src.buffer,
+            src.byteOffset,
+            Math.min(dstLength, srcLength)
+          );
 
     const o = new Uint8Array(c.segment.buffer, c.byteOffset, this.getLength());
 
     o.set(i);
 
     if (dstLength > srcLength) {
-
-      trace('Zeroing out remaining %d bytes after copy into %s.', dstLength - srcLength, this);
+      trace(
+        "Zeroing out remaining %d bytes after copy into %s.",
+        dstLength - srcLength,
+        this
+      );
 
       o.fill(0, srcLength, dstLength);
-
     } else if (dstLength < srcLength) {
-
-      trace('Truncated %d bytes from source buffer while copying to %s.', srcLength - dstLength, this);
-
+      trace(
+        "Truncated %d bytes from source buffer while copying to %s.",
+        srcLength - dstLength,
+        this
+      );
     }
-
   }
 
   /**
@@ -85,10 +91,8 @@ export class Data extends List<number> {
    */
 
   get(byteOffset: number): number {
-
     const c = getContent(this);
     return c.segment.getUint8(c.byteOffset + byteOffset);
-
   }
 
   /**
@@ -100,10 +104,8 @@ export class Data extends List<number> {
    */
 
   set(byteOffset: number, value: number): void {
-
     const c = getContent(this);
     c.segment.setUint8(c.byteOffset + byteOffset, value);
-
   }
 
   /**
@@ -115,10 +117,11 @@ export class Data extends List<number> {
    */
 
   toArrayBuffer(): ArrayBuffer {
-
     const c = getContent(this);
-    return c.segment.buffer.slice(c.byteOffset, c.byteOffset + this.getLength());
-
+    return c.segment.buffer.slice(
+      c.byteOffset,
+      c.byteOffset + this.getLength()
+    );
   }
 
   /**
@@ -131,16 +134,12 @@ export class Data extends List<number> {
    */
 
   toDataView(): DataView {
-
     const c = getContent(this);
     return new DataView(c.segment.buffer, c.byteOffset, this.getLength());
-
   }
 
   toString(): string {
-
     return `Data_${super.toString()}`;
-
   }
 
   /**
@@ -153,10 +152,7 @@ export class Data extends List<number> {
    */
 
   toUint8Array(): Uint8Array {
-
     const c = getContent(this);
     return new Uint8Array(c.segment.buffer, c.byteOffset, this.getLength());
-
   }
-
 }

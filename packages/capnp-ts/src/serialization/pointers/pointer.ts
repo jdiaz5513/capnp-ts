@@ -2,44 +2,55 @@
  * @author jdiaz5513
  */
 
-import initTrace from 'debug';
+import initTrace from "debug";
 
-import { LIST_SIZE_MASK, MAX_DEPTH, POINTER_DOUBLE_FAR_MASK, POINTER_TYPE_MASK } from '../../constants';
-import { bufferToHex, format, padToWord } from '../../util';
-import { ListElementSize } from '../list-element-size';
 import {
-  ObjectSize, getByteLength, padToWord as padObjectToWord, getWordLength, getDataWordLength,
-} from '../object-size';
-import { Segment } from '../segment';
-import { Orphan } from './orphan';
-import { PointerAllocationResult } from './pointer-allocation-result';
-import { PointerType } from './pointer-type';
-import { Message } from '../message';
+  LIST_SIZE_MASK,
+  MAX_DEPTH,
+  POINTER_DOUBLE_FAR_MASK,
+  POINTER_TYPE_MASK
+} from "../../constants";
+import { bufferToHex, format, padToWord } from "../../util";
+import { ListElementSize } from "../list-element-size";
 import {
-  PTR_TRAVERSAL_LIMIT_EXCEEDED, PTR_DEPTH_LIMIT_EXCEEDED, PTR_OFFSET_OUT_OF_BOUNDS, PTR_INVALID_LIST_SIZE,
-  PTR_INVALID_POINTER_TYPE, PTR_INVALID_FAR_TARGET, TYPE_COMPOSITE_SIZE_UNDEFINED, PTR_WRONG_POINTER_TYPE,
-  PTR_WRONG_LIST_TYPE, INVARIANT_UNREACHABLE_CODE,
-} from '../../errors';
+  ObjectSize,
+  getByteLength,
+  padToWord as padObjectToWord,
+  getWordLength,
+  getDataWordLength
+} from "../object-size";
+import { Segment } from "../segment";
+import { Orphan } from "./orphan";
+import { PointerAllocationResult } from "./pointer-allocation-result";
+import { PointerType } from "./pointer-type";
+import { Message } from "../message";
+import {
+  PTR_TRAVERSAL_LIMIT_EXCEEDED,
+  PTR_DEPTH_LIMIT_EXCEEDED,
+  PTR_OFFSET_OUT_OF_BOUNDS,
+  PTR_INVALID_LIST_SIZE,
+  PTR_INVALID_POINTER_TYPE,
+  PTR_INVALID_FAR_TARGET,
+  TYPE_COMPOSITE_SIZE_UNDEFINED,
+  PTR_WRONG_POINTER_TYPE,
+  PTR_WRONG_LIST_TYPE,
+  INVARIANT_UNREACHABLE_CODE
+} from "../../errors";
 
-const trace = initTrace('capnp:pointer');
-trace('load');
+const trace = initTrace("capnp:pointer");
+trace("load");
 
 export interface _PointerCtor {
-
   readonly displayName: string;
-
 }
 
 export interface PointerCtor<T extends Pointer> {
-
   readonly _capnp: _PointerCtor;
 
-  new(segment: Segment, byteOffset: number, depthLimit?: number): T;
-
+  new (segment: Segment, byteOffset: number, depthLimit?: number): T;
 }
 
 export interface _Pointer {
-
   compositeIndex?: number;
 
   compositeList: boolean;
@@ -49,7 +60,6 @@ export interface _Pointer {
    */
 
   depthLimit: number;
-
 }
 
 /**
@@ -61,7 +71,6 @@ export interface _Pointer {
  */
 
 export class Pointer {
-
   static readonly adopt = adopt;
   static readonly copyFrom = copyFrom;
   static readonly disown = disown;
@@ -69,7 +78,7 @@ export class Pointer {
   static readonly isNull = isNull;
 
   static readonly _capnp: _PointerCtor = {
-    displayName: 'Pointer' as string,
+    displayName: "Pointer" as string
   };
 
   readonly _capnp: _Pointer;
@@ -86,8 +95,9 @@ export class Pointer {
   segment: Segment;
 
   constructor(segment: Segment, byteOffset: number, depthLimit = MAX_DEPTH) {
-
-    if (depthLimit === 0) throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
+    if (depthLimit === 0) {
+      throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
+    }
 
     // Make sure we keep track of all pointer allocations; there's a limit per message (prevent DoS).
 
@@ -99,27 +109,25 @@ export class Pointer {
     // code anyway.
 
     if (byteOffset < 0 || byteOffset > segment.byteLength) {
-
       throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
-
     }
 
     this._capnp = { compositeList: false, depthLimit };
     this.segment = segment;
     this.byteOffset = byteOffset;
 
-    trace('new %s', this);
-
+    trace("new %s", this);
   }
-
 
   toString(): string {
-
     return format(
-      'Pointer_%d@%a,%s,limit:%x', this.segment.id, this.byteOffset, dump(this), this._capnp.depthLimit);
-
+      "Pointer_%d@%a,%s,limit:%x",
+      this.segment.id,
+      this.byteOffset,
+      dump(this),
+      this._capnp.depthLimit
+    );
   }
-
 }
 
 /**
@@ -131,9 +139,7 @@ export class Pointer {
  */
 
 export function adopt<T extends Pointer>(src: Orphan<T>, p: T): void {
-
   src._moveTo(p);
-
 }
 
 /**
@@ -148,15 +154,11 @@ export function adopt<T extends Pointer>(src: Orphan<T>, p: T): void {
  */
 
 export function disown<T extends Pointer>(p: T) {
-
   return new Orphan(p);
-
 }
 
 export function dump(p: Pointer) {
-
   return bufferToHex(p.segment.buffer.slice(p.byteOffset, p.byteOffset + 8));
-
 }
 
 /**
@@ -170,13 +172,14 @@ export function dump(p: Pointer) {
  * @returns {number} The number of bytes required to hold an element of that size, or `NaN` if that is undefined.
  */
 
-export function getListByteLength(elementSize: ListElementSize, length: number, compositeSize?: ObjectSize): number {
-
+export function getListByteLength(
+  elementSize: ListElementSize,
+  length: number,
+  compositeSize?: ObjectSize
+): number {
   switch (elementSize) {
-
     case ListElementSize.BIT:
-
-      return padToWord(length + 7 >>> 3);
+      return padToWord((length + 7) >>> 3);
 
     case ListElementSize.BYTE:
     case ListElementSize.BYTE_2:
@@ -184,23 +187,20 @@ export function getListByteLength(elementSize: ListElementSize, length: number, 
     case ListElementSize.BYTE_8:
     case ListElementSize.POINTER:
     case ListElementSize.VOID:
-
       return padToWord(getListElementByteLength(elementSize) * length);
 
     /* istanbul ignore next */
     case ListElementSize.COMPOSITE:
-
-      if (compositeSize === undefined) throw new Error(format(PTR_INVALID_LIST_SIZE, NaN));
+      if (compositeSize === undefined) {
+        throw new Error(format(PTR_INVALID_LIST_SIZE, NaN));
+      }
 
       return length * padToWord(getByteLength(compositeSize));
 
     /* istanbul ignore next */
     default:
-
       throw new Error(PTR_INVALID_LIST_SIZE);
-
   }
-
 }
 
 /**
@@ -212,50 +212,38 @@ export function getListByteLength(elementSize: ListElementSize, length: number, 
  */
 
 export function getListElementByteLength(elementSize: ListElementSize): number {
-
   switch (elementSize) {
-
     /* istanbul ignore next */
     case ListElementSize.BIT:
-
       return NaN;
 
     case ListElementSize.BYTE:
-
       return 1;
 
     case ListElementSize.BYTE_2:
-
       return 2;
 
     case ListElementSize.BYTE_4:
-
       return 4;
 
     case ListElementSize.BYTE_8:
     case ListElementSize.POINTER:
-
       return 8;
 
     /* istanbul ignore next */
     case ListElementSize.COMPOSITE:
-
       // Caller has to figure it out based on the tag word.
 
       return NaN;
 
     /* istanbul ignore next */
     case ListElementSize.VOID:
-
       return 0;
 
     /* istanbul ignore next */
     default:
-
       throw new Error(format(PTR_INVALID_LIST_SIZE, elementSize));
-
   }
-
 }
 
 /**
@@ -267,9 +255,7 @@ export function getListElementByteLength(elementSize: ListElementSize): number {
  */
 
 export function add(offset: number, p: Pointer): Pointer {
-
   return new Pointer(p.segment, p.byteOffset + offset, p._capnp.depthLimit);
-
 }
 
 /**
@@ -281,44 +267,37 @@ export function add(offset: number, p: Pointer): Pointer {
  */
 
 export function copyFrom(src: Pointer, p: Pointer): void {
-
   // If the pointer is the same then this is a noop.
 
   if (p.segment === src.segment && p.byteOffset === src.byteOffset) {
-
-    trace('ignoring copy operation from identical pointer %s', src);
+    trace("ignoring copy operation from identical pointer %s", src);
 
     return;
-
   }
 
   // Make sure we erase this pointer's contents before moving on. If src is null, that's all we do.
 
-  erase(p);    // noop if null
+  erase(p); // noop if null
 
   if (isNull(src)) return;
 
   switch (getTargetPointerType(src)) {
-
     case PointerType.STRUCT:
-
       copyFromStruct(src, p);
 
       break;
 
     case PointerType.LIST:
-
       copyFromList(src, p);
 
       break;
 
     /* istanbul ignore next */
     default:
-
-      throw new Error(format(PTR_INVALID_POINTER_TYPE, getTargetPointerType(p)));
-
+      throw new Error(
+        format(PTR_INVALID_POINTER_TYPE, getTargetPointerType(p))
+      );
   }
-
 }
 
 /**
@@ -334,7 +313,6 @@ export function copyFrom(src: Pointer, p: Pointer): void {
  */
 
 export function erase(p: Pointer): void {
-
   if (isNull(p)) return;
 
   // First deal with the contents.
@@ -342,9 +320,7 @@ export function erase(p: Pointer): void {
   let c: Pointer;
 
   switch (getTargetPointerType(p)) {
-
     case PointerType.STRUCT:
-
       const size = getTargetStructSize(p);
       c = getContent(p);
 
@@ -355,34 +331,34 @@ export function erase(p: Pointer): void {
       // Iterate over all the pointers and nuke them.
 
       for (let i = 0; i < size.pointerLength; i++) {
-
         erase(add(i * 8, c));
-
       }
 
       break;
 
     case PointerType.LIST:
-
       const elementSize = getTargetListElementSize(p);
       const length = getTargetListLength(p);
-      let contentWords = padToWord(length * getListElementByteLength(elementSize));
+      let contentWords = padToWord(
+        length * getListElementByteLength(elementSize)
+      );
       c = getContent(p);
 
       if (elementSize === ListElementSize.POINTER) {
-
         for (let i = 0; i < length; i++) {
-
-          erase(new Pointer(c.segment, c.byteOffset + i * 8, p._capnp.depthLimit - 1));
-
+          erase(
+            new Pointer(
+              c.segment,
+              c.byteOffset + i * 8,
+              p._capnp.depthLimit - 1
+            )
+          );
         }
 
         // Calling erase on each pointer takes care of the content, nothing left to do here.
 
         break;
-
       } else if (elementSize === ListElementSize.COMPOSITE) {
-
         // Read some stuff from the tag word.
         const tag = add(-8, c);
         const compositeSize = getStructSize(tag);
@@ -394,15 +370,16 @@ export function erase(p: Pointer): void {
 
         // Recursively erase each pointer.
         for (let i = 0; i < length; i++) {
-
           for (let j = 0; j < compositeSize.pointerLength; j++) {
-
-            erase(new Pointer(c.segment, c.byteOffset + i * compositeByteLength + j * 8, p._capnp.depthLimit - 1));
-
+            erase(
+              new Pointer(
+                c.segment,
+                c.byteOffset + i * compositeByteLength + j * 8,
+                p._capnp.depthLimit - 1
+              )
+            );
           }
-
         }
-
       }
 
       c.segment.fillZeroWords(c.byteOffset, contentWords);
@@ -410,19 +387,17 @@ export function erase(p: Pointer): void {
       break;
 
     case PointerType.OTHER:
-
       // No content.
 
       break;
 
     default:
-
-      throw new Error(format(PTR_INVALID_POINTER_TYPE, getTargetPointerType(p)));
-
+      throw new Error(
+        format(PTR_INVALID_POINTER_TYPE, getTargetPointerType(p))
+      );
   }
 
   erasePointer(p);
-
 }
 
 /**
@@ -433,29 +408,23 @@ export function erase(p: Pointer): void {
  */
 
 export function erasePointer(p: Pointer): void {
-
   if (getPointerType(p) === PointerType.FAR) {
-
     const landingPad = followFar(p);
 
     if (isDoubleFar(p)) {
-
       // Kill the double-far tag word.
 
       landingPad.segment.setWordZero(landingPad.byteOffset + 8);
-
     }
 
     // Kill the landing pad.
 
     landingPad.segment.setWordZero(landingPad.byteOffset);
-
   }
 
   // Finally! Kill the pointer itself...
 
   p.segment.setWordZero(p.byteOffset);
-
 }
 
 /**
@@ -466,12 +435,16 @@ export function erasePointer(p: Pointer): void {
  */
 
 export function followFar(p: Pointer): Pointer {
-
-  const targetSegment = p.segment.message.getSegment(p.segment.getUint32(p.byteOffset + 4));
+  const targetSegment = p.segment.message.getSegment(
+    p.segment.getUint32(p.byteOffset + 4)
+  );
   const targetWordOffset = p.segment.getUint32(p.byteOffset) >>> 3;
 
-  return new Pointer(targetSegment, targetWordOffset * 8, p._capnp.depthLimit - 1);
-
+  return new Pointer(
+    targetSegment,
+    targetWordOffset * 8,
+    p._capnp.depthLimit - 1
+  );
 }
 
 /**
@@ -483,31 +456,26 @@ export function followFar(p: Pointer): Pointer {
  */
 
 export function followFars(p: Pointer): Pointer {
-
   if (getPointerType(p) === PointerType.FAR) {
-
     const landingPad = followFar(p);
 
     if (isDoubleFar(p)) landingPad.byteOffset += 8;
 
     return landingPad;
-
   }
 
   return p;
-
 }
 
 export function getCapabilityId(p: Pointer): number {
-
   return p.segment.getUint32(p.byteOffset + 4);
-
 }
 
 function isCompositeList(p: Pointer): boolean {
-
-  return getTargetPointerType(p) === PointerType.LIST && getTargetListElementSize(p) === ListElementSize.COMPOSITE;
-
+  return (
+    getTargetPointerType(p) === PointerType.LIST &&
+    getTargetListElementSize(p) === ListElementSize.COMPOSITE
+  );
 }
 
 /**
@@ -520,38 +488,42 @@ function isCompositeList(p: Pointer): boolean {
  * @returns {Pointer} A pointer to the beginning of the pointer's content.
  */
 
-export function getContent(p: Pointer, ignoreCompositeIndex?: boolean): Pointer {
-
+export function getContent(
+  p: Pointer,
+  ignoreCompositeIndex?: boolean
+): Pointer {
   let c: Pointer;
 
   if (isDoubleFar(p)) {
-
     const landingPad = followFar(p);
-    c = new Pointer(p.segment.message.getSegment(getFarSegmentId(landingPad)), getOffsetWords(landingPad) * 8);
-
+    c = new Pointer(
+      p.segment.message.getSegment(getFarSegmentId(landingPad)),
+      getOffsetWords(landingPad) * 8
+    );
   } else {
-
     const target = followFars(p);
-    c = new Pointer(target.segment, target.byteOffset + 8 + getOffsetWords(target) * 8);
-
+    c = new Pointer(
+      target.segment,
+      target.byteOffset + 8 + getOffsetWords(target) * 8
+    );
   }
 
   if (isCompositeList(p)) c.byteOffset += 8;
 
   if (!ignoreCompositeIndex && p._capnp.compositeIndex !== undefined) {
-
     // Seek backwards by one word so we can read the struct size off the tag word.
 
     c.byteOffset -= 8;
 
     // Seek ahead by `compositeIndex` multiples of the struct's total size.
 
-    c.byteOffset += 8 + p._capnp.compositeIndex * getByteLength(padObjectToWord(getStructSize(c)));
-
+    c.byteOffset +=
+      8 +
+      p._capnp.compositeIndex *
+        getByteLength(padObjectToWord(getStructSize(c)));
   }
 
   return c;
-
 }
 
 /**
@@ -562,9 +534,7 @@ export function getContent(p: Pointer, ignoreCompositeIndex?: boolean): Pointer 
  */
 
 export function getFarSegmentId(p: Pointer): number {
-
   return p.segment.getUint32(p.byteOffset + 4);
-
 }
 
 /**
@@ -575,9 +545,7 @@ export function getFarSegmentId(p: Pointer): number {
  */
 
 export function getListElementSize(p: Pointer): ListElementSize {
-
   return p.segment.getUint32(p.byteOffset + 4) & LIST_SIZE_MASK;
-
 }
 
 /**
@@ -592,9 +560,7 @@ export function getListElementSize(p: Pointer): ListElementSize {
  */
 
 export function getListLength(p: Pointer): number {
-
   return p.segment.getUint32(p.byteOffset + 4) >>> 3;
-
 }
 
 /**
@@ -607,12 +573,10 @@ export function getListLength(p: Pointer): number {
  */
 
 export function getOffsetWords(p: Pointer): number {
-
   const o = p.segment.getInt32(p.byteOffset);
 
   // Far pointers only have 29 offset bits.
   return o & 2 ? o >> 3 : o >> 2;
-
 }
 
 /**
@@ -623,9 +587,7 @@ export function getOffsetWords(p: Pointer): number {
  */
 
 export function getPointerType(p: Pointer): PointerType {
-
   return p.segment.getUint32(p.byteOffset) & POINTER_TYPE_MASK;
-
 }
 
 /**
@@ -636,9 +598,7 @@ export function getPointerType(p: Pointer): PointerType {
  */
 
 export function getStructDataWords(p: Pointer): number {
-
   return p.segment.getUint16(p.byteOffset + 4);
-
 }
 
 /**
@@ -649,9 +609,7 @@ export function getStructDataWords(p: Pointer): number {
  */
 
 export function getStructPointerLength(p: Pointer): number {
-
   return p.segment.getUint16(p.byteOffset + 6);
-
 }
 
 /**
@@ -662,9 +620,7 @@ export function getStructPointerLength(p: Pointer): number {
  */
 
 export function getStructSize(p: Pointer): ObjectSize {
-
   return new ObjectSize(getStructDataWords(p) * 8, getStructPointerLength(p));
-
 }
 
 /**
@@ -675,7 +631,6 @@ export function getStructSize(p: Pointer): ObjectSize {
  */
 
 export function getTargetCompositeListTag(p: Pointer): Pointer {
-
   const c = getContent(p);
 
   // The composite list tag is always one word before the content.
@@ -683,7 +638,6 @@ export function getTargetCompositeListTag(p: Pointer): Pointer {
   c.byteOffset -= 8;
 
   return c;
-
 }
 
 /**
@@ -694,9 +648,7 @@ export function getTargetCompositeListTag(p: Pointer): Pointer {
  */
 
 export function getTargetCompositeListSize(p: Pointer): ObjectSize {
-
   return getStructSize(getTargetCompositeListTag(p));
-
 }
 
 /**
@@ -707,11 +659,8 @@ export function getTargetCompositeListSize(p: Pointer): ObjectSize {
  */
 
 export function getTargetListElementSize(p: Pointer): ListElementSize {
-
   return getListElementSize(followFars(p));
-
 }
-
 
 /**
  * Get the length of the list referenced by this pointer, following far pointers if necessary. If the list is a
@@ -722,19 +671,15 @@ export function getTargetListElementSize(p: Pointer): ListElementSize {
  */
 
 export function getTargetListLength(p: Pointer): number {
-
   const t = followFars(p);
 
   if (getListElementSize(t) === ListElementSize.COMPOSITE) {
-
     // The content is prefixed by a tag word; it's a struct pointer whose offset contains the list's length.
 
     return getOffsetWords(getTargetCompositeListTag(p));
-
   }
 
   return getListLength(t);
-
 }
 
 /**
@@ -749,13 +694,11 @@ export function getTargetListLength(p: Pointer): number {
  */
 
 export function getTargetPointerType(p: Pointer): PointerType {
-
   const t = getPointerType(followFars(p));
 
   if (t === PointerType.FAR) throw new Error(format(PTR_INVALID_FAR_TARGET, p));
 
   return t;
-
 }
 
 /**
@@ -766,9 +709,7 @@ export function getTargetPointerType(p: Pointer): PointerType {
  */
 
 export function getTargetStructSize(p: Pointer): ObjectSize {
-
   return getStructSize(followFars(p));
-
 }
 
 /**
@@ -785,21 +726,27 @@ export function getTargetStructSize(p: Pointer): ObjectSize {
  * the value to use as the offset for that pointer.
  */
 
-export function initPointer(contentSegment: Segment, contentOffset: number, p: Pointer): PointerAllocationResult {
-
+export function initPointer(
+  contentSegment: Segment,
+  contentOffset: number,
+  p: Pointer
+): PointerAllocationResult {
   if (p.segment !== contentSegment) {
-
     // Need a far pointer.
 
-    trace('Initializing far pointer %s -> %s.', p, contentSegment);
+    trace("Initializing far pointer %s -> %s.", p, contentSegment);
 
     if (!contentSegment.hasCapacity(8)) {
-
       // GAH! Not enough space in the content segment for a landing pad so we need a double far pointer.
 
       const landingPad = p.segment.allocate(16);
 
-      trace('GAH! Initializing double-far pointer in %s from %s -> %s.', p, contentSegment, landingPad);
+      trace(
+        "GAH! Initializing double-far pointer in %s from %s -> %s.",
+        p,
+        contentSegment,
+        landingPad
+      );
 
       setFarPointer(true, landingPad.byteOffset / 8, landingPad.segment.id, p);
       setFarPointer(false, contentOffset / 8, contentSegment.id, landingPad);
@@ -807,7 +754,6 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
       landingPad.byteOffset += 8;
 
       return new PointerAllocationResult(landingPad, 0);
-
     }
 
     // Allocate a far pointer landing pad in the target segment.
@@ -815,21 +761,20 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
     const landingPad = contentSegment.allocate(8);
 
     if (landingPad.segment.id !== contentSegment.id) {
-
       throw new Error(INVARIANT_UNREACHABLE_CODE);
-
     }
 
     setFarPointer(false, landingPad.byteOffset / 8, landingPad.segment.id, p);
 
-    return new PointerAllocationResult(landingPad, (contentOffset - landingPad.byteOffset - 8) / 8);
-
+    return new PointerAllocationResult(
+      landingPad,
+      (contentOffset - landingPad.byteOffset - 8) / 8
+    );
   }
 
-  trace('Initializing intra-segment pointer %s -> %a.', p, contentOffset);
+  trace("Initializing intra-segment pointer %s -> %a.", p, contentOffset);
 
   return new PointerAllocationResult(p, (contentOffset - p.byteOffset - 8) / 8);
-
 }
 
 /**
@@ -840,9 +785,10 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
  */
 
 export function isDoubleFar(p: Pointer): boolean {
-
-  return getPointerType(p) === PointerType.FAR && (p.segment.getUint32(p.byteOffset) & POINTER_DOUBLE_FAR_MASK) !== 0;
-
+  return (
+    getPointerType(p) === PointerType.FAR &&
+    (p.segment.getUint32(p.byteOffset) & POINTER_DOUBLE_FAR_MASK) !== 0
+  );
 }
 
 /**
@@ -854,9 +800,7 @@ export function isDoubleFar(p: Pointer): boolean {
  */
 
 export function isNull(p: Pointer): boolean {
-
   return p.segment.isWordZero(p.byteOffset);
-
 }
 
 /**
@@ -871,23 +815,28 @@ export function isNull(p: Pointer): boolean {
  */
 
 export function relocateTo(dst: Pointer, src: Pointer): void {
-
   const t = followFars(src);
-  const lo = t.segment.getUint8(t.byteOffset) & 0x03;   // discard the offset
+  const lo = t.segment.getUint8(t.byteOffset) & 0x03; // discard the offset
   const hi = t.segment.getUint32(t.byteOffset + 4);
 
   // Make sure anything dst was pointing to is wiped out.
   erase(dst);
 
-  const res = initPointer(t.segment, t.byteOffset + 8 + getOffsetWords(t) * 8, dst);
+  const res = initPointer(
+    t.segment,
+    t.byteOffset + 8 + getOffsetWords(t) * 8,
+    dst
+  );
 
   // Keep the low 2 bits and write the new offset.
-  res.pointer.segment.setUint32(res.pointer.byteOffset, lo | (res.offsetWords << 2));
+  res.pointer.segment.setUint32(
+    res.pointer.byteOffset,
+    lo | (res.offsetWords << 2)
+  );
   // Keep the high 32 bits intact.
   res.pointer.segment.setUint32(res.pointer.byteOffset + 4, hi);
 
   erasePointer(src);
-
 }
 
 /**
@@ -900,16 +849,19 @@ export function relocateTo(dst: Pointer, src: Pointer): void {
  * @returns {void}
  */
 
-export function setFarPointer(doubleFar: boolean, offsetWords: number, segmentId: number, p: Pointer): void {
-
+export function setFarPointer(
+  doubleFar: boolean,
+  offsetWords: number,
+  segmentId: number,
+  p: Pointer
+): void {
   const A = PointerType.FAR;
   const B = doubleFar ? 1 : 0;
   const C = offsetWords;
   const D = segmentId;
 
-  p.segment.setUint32(p.byteOffset, A | B << 2 | C << 3);
+  p.segment.setUint32(p.byteOffset, A | (B << 2) | (C << 3));
   p.segment.setUint32(p.byteOffset + 4, D);
-
 }
 
 /**
@@ -921,10 +873,8 @@ export function setFarPointer(doubleFar: boolean, offsetWords: number, segmentId
  */
 
 export function setInterfacePointer(capId: number, p: Pointer): void {
-
   p.segment.setUint32(p.byteOffset, PointerType.OTHER);
   p.segment.setUint32(p.byteOffset + 4, capId);
-
 }
 
 /**
@@ -940,26 +890,27 @@ export function setInterfacePointer(capId: number, p: Pointer): void {
  */
 
 export function setListPointer(
-  offsetWords: number, size: ListElementSize, length: number, p: Pointer, compositeSize?: ObjectSize): void {
-
-  if (p === undefined) throw new Error(INVARIANT_UNREACHABLE_CODE);
-
+  offsetWords: number,
+  size: ListElementSize,
+  length: number,
+  p: Pointer,
+  compositeSize?: ObjectSize
+): void {
   const A = PointerType.LIST;
   const B = offsetWords;
   const C = size;
   let D = length;
 
   if (size === ListElementSize.COMPOSITE) {
-
-    if (compositeSize === undefined) throw new TypeError(TYPE_COMPOSITE_SIZE_UNDEFINED);
+    if (compositeSize === undefined) {
+      throw new TypeError(TYPE_COMPOSITE_SIZE_UNDEFINED);
+    }
 
     D *= getWordLength(compositeSize);
-
   }
 
-  p.segment.setUint32(p.byteOffset, A | B << 2);
-  p.segment.setUint32(p.byteOffset + 4, C | D << 3);
-
+  p.segment.setUint32(p.byteOffset, A | (B << 2));
+  p.segment.setUint32(p.byteOffset + 4, C | (D << 3));
 }
 
 /**
@@ -972,17 +923,19 @@ export function setListPointer(
  * @returns {void}
  */
 
-export function setStructPointer(offsetWords: number, size: ObjectSize, p: Pointer): void {
-
+export function setStructPointer(
+  offsetWords: number,
+  size: ObjectSize,
+  p: Pointer
+): void {
   const A = PointerType.STRUCT;
   const B = offsetWords;
   const C = getDataWordLength(size);
   const D = size.pointerLength;
 
-  p.segment.setUint32(p.byteOffset, A | B << 2);
+  p.segment.setUint32(p.byteOffset, A | (B << 2));
   p.segment.setUint16(p.byteOffset + 4, C);
   p.segment.setUint16(p.byteOffset + 6, D);
-
 }
 
 /**
@@ -995,8 +948,11 @@ export function setStructPointer(offsetWords: number, size: ObjectSize, p: Point
  * @returns {void}
  */
 
-export function validate(pointerType: PointerType, p: Pointer, elementSize?: ListElementSize): void {
-
+export function validate(
+  pointerType: PointerType,
+  p: Pointer,
+  elementSize?: ListElementSize
+): void {
   if (isNull(p)) return;
 
   const t = followFars(p);
@@ -1005,22 +961,24 @@ export function validate(pointerType: PointerType, p: Pointer, elementSize?: Lis
 
   const A = t.segment.getUint32(t.byteOffset) & POINTER_TYPE_MASK;
 
-  if (A !== pointerType) throw new Error(format(PTR_WRONG_POINTER_TYPE, p, pointerType));
+  if (A !== pointerType) {
+    throw new Error(format(PTR_WRONG_POINTER_TYPE, p, pointerType));
+  }
 
   // Check the list element size, if provided.
 
   if (elementSize !== undefined) {
-
     const C = t.segment.getUint32(t.byteOffset + 4) & LIST_SIZE_MASK;
 
-    if (C !== elementSize) throw new Error(format(PTR_WRONG_LIST_TYPE, p, ListElementSize[elementSize]));
-
+    if (C !== elementSize) {
+      throw new Error(
+        format(PTR_WRONG_LIST_TYPE, p, ListElementSize[elementSize])
+      );
+    }
   }
-
 }
 
 export function copyFromList(src: Pointer, dst: Pointer): void {
-
   if (dst._capnp.depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
 
   const srcContent = getContent(src);
@@ -1031,88 +989,109 @@ export function copyFromList(src: Pointer, dst: Pointer): void {
   let dstContent;
 
   if (srcElementSize === ListElementSize.POINTER) {
-
     dstContent = dst.segment.allocate(srcLength << 3);
 
     // Recursively copy each pointer in the list.
 
     for (let i = 0; i < srcLength; i++) {
-
       const srcPtr = new Pointer(
-        srcContent.segment, srcContent.byteOffset + (i << 3), src._capnp.depthLimit - 1);
+        srcContent.segment,
+        srcContent.byteOffset + (i << 3),
+        src._capnp.depthLimit - 1
+      );
       const dstPtr = new Pointer(
-        dstContent.segment, dstContent.byteOffset + (i << 3), dst._capnp.depthLimit - 1);
+        dstContent.segment,
+        dstContent.byteOffset + (i << 3),
+        dst._capnp.depthLimit - 1
+      );
 
       copyFrom(srcPtr, dstPtr);
-
     }
-
   } else if (srcElementSize === ListElementSize.COMPOSITE) {
-
     srcCompositeSize = padObjectToWord(getTargetCompositeListSize(src));
     srcStructByteLength = getByteLength(srcCompositeSize);
 
-    dstContent = dst.segment.allocate(getByteLength(srcCompositeSize) * srcLength + 8);
+    dstContent = dst.segment.allocate(
+      getByteLength(srcCompositeSize) * srcLength + 8
+    );
 
     // Copy the tag word.
 
-    dstContent.segment.copyWord(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset - 8);
+    dstContent.segment.copyWord(
+      dstContent.byteOffset,
+      srcContent.segment,
+      srcContent.byteOffset - 8
+    );
 
     // Copy the entire contents, including all pointers. This should be more efficient than making `srcLength`
     // copies to skip the pointer sections, and we're about to rewrite all those pointers anyway.
 
     // PERF: Skip this step if the composite struct only contains pointers.
     if (srcCompositeSize.dataByteLength > 0) {
-
       const wordLength = getWordLength(srcCompositeSize) * srcLength;
 
-      dstContent.segment.copyWords(dstContent.byteOffset + 8, srcContent.segment, srcContent.byteOffset, wordLength);
-
+      dstContent.segment.copyWords(
+        dstContent.byteOffset + 8,
+        srcContent.segment,
+        srcContent.byteOffset,
+        wordLength
+      );
     }
 
     // Recursively copy all the pointers in each struct.
 
     for (let i = 0; i < srcLength; i++) {
-
       for (let j = 0; j < srcCompositeSize.pointerLength; j++) {
-
-        const offset = i * srcStructByteLength + srcCompositeSize.dataByteLength + (j << 3);
+        const offset =
+          i * srcStructByteLength + srcCompositeSize.dataByteLength + (j << 3);
 
         const srcPtr = new Pointer(
-          srcContent.segment, srcContent.byteOffset + offset, src._capnp.depthLimit - 1);
+          srcContent.segment,
+          srcContent.byteOffset + offset,
+          src._capnp.depthLimit - 1
+        );
         const dstPtr = new Pointer(
-          dstContent.segment, dstContent.byteOffset + offset + 8, dst._capnp.depthLimit - 1);
+          dstContent.segment,
+          dstContent.byteOffset + offset + 8,
+          dst._capnp.depthLimit - 1
+        );
 
         copyFrom(srcPtr, dstPtr);
-
       }
-
     }
-
   } else {
-
-    const byteLength = padToWord(srcElementSize === ListElementSize.BIT
-      ? srcLength + 7 >>> 3
-      : getListElementByteLength(srcElementSize) * srcLength);
+    const byteLength = padToWord(
+      srcElementSize === ListElementSize.BIT
+        ? (srcLength + 7) >>> 3
+        : getListElementByteLength(srcElementSize) * srcLength
+    );
     const wordLength = byteLength >>> 3;
 
     dstContent = dst.segment.allocate(byteLength);
 
     // Copy all of the list contents word-by-word.
 
-    dstContent.segment.copyWords(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset, wordLength);
-
+    dstContent.segment.copyWords(
+      dstContent.byteOffset,
+      srcContent.segment,
+      srcContent.byteOffset,
+      wordLength
+    );
   }
 
   // Initialize the list pointer.
 
   const res = initPointer(dstContent.segment, dstContent.byteOffset, dst);
-  setListPointer(res.offsetWords, srcElementSize, srcLength, res.pointer, srcCompositeSize);
-
+  setListPointer(
+    res.offsetWords,
+    srcElementSize,
+    srcLength,
+    res.pointer,
+    srcCompositeSize
+  );
 }
 
 export function copyFromStruct(src: Pointer, dst: Pointer): void {
-
   if (dst._capnp.depthLimit <= 0) throw new Error(PTR_DEPTH_LIMIT_EXCEEDED);
 
   const srcContent = getContent(src);
@@ -1125,19 +1104,30 @@ export function copyFromStruct(src: Pointer, dst: Pointer): void {
 
   // Copy the data section.
 
-  dstContent.segment.copyWords(dstContent.byteOffset, srcContent.segment, srcContent.byteOffset, srcDataWordLength);
+  dstContent.segment.copyWords(
+    dstContent.byteOffset,
+    srcContent.segment,
+    srcContent.byteOffset,
+    srcDataWordLength
+  );
 
   // Copy the pointer section.
 
   for (let i = 0; i < srcSize.pointerLength; i++) {
-
     const offset = srcSize.dataByteLength + i * 8;
 
-    const srcPtr = new Pointer(srcContent.segment, srcContent.byteOffset + offset, src._capnp.depthLimit - 1);
-    const dstPtr = new Pointer(dstContent.segment, dstContent.byteOffset + offset, dst._capnp.depthLimit - 1);
+    const srcPtr = new Pointer(
+      srcContent.segment,
+      srcContent.byteOffset + offset,
+      src._capnp.depthLimit - 1
+    );
+    const dstPtr = new Pointer(
+      dstContent.segment,
+      dstContent.byteOffset + offset,
+      dst._capnp.depthLimit - 1
+    );
 
     copyFrom(srcPtr, dstPtr);
-
   }
 
   // Don't touch dst if it's already initialized as a composite list pointer. With composite struct pointers there's
@@ -1149,7 +1139,6 @@ export function copyFromStruct(src: Pointer, dst: Pointer): void {
 
   const res = initPointer(dstContent.segment, dstContent.byteOffset, dst);
   setStructPointer(res.offsetWords, srcSize, res.pointer);
-
 }
 
 /**
@@ -1164,13 +1153,9 @@ export function copyFromStruct(src: Pointer, dst: Pointer): void {
  */
 
 export function trackPointerAllocation(message: Message, p: Pointer) {
-
   message._capnp.traversalLimit -= 8;
 
   if (message._capnp.traversalLimit <= 0) {
-
     throw new Error(format(PTR_TRAVERSAL_LIMIT_EXCEEDED, p));
-
   }
-
 }

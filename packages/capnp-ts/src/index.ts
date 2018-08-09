@@ -3,12 +3,10 @@
  */
 
 export {
-
   ListElementSize,
   Message,
   ObjectSize,
   readRawPointer,
-
   AnyPointerList,
   BoolList,
   CompositeList,
@@ -38,7 +36,6 @@ export {
   Uint8List,
   VoidList,
   Void,
-
   getBitMask,
   getFloat32Mask,
   getFloat64Mask,
@@ -49,13 +46,7 @@ export {
   getUint16Mask,
   getUint32Mask,
   getUint64Mask,
-  getUint8Mask,
+  getUint8Mask
+} from "./serialization";
 
-} from './serialization';
-
-export {
-
-  Int64,
-  Uint64,
-
-} from './types';
+export { Int64, Uint64 } from "./types";

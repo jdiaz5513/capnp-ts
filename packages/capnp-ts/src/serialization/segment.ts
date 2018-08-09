@@ -2,20 +2,19 @@
  * @author jdiaz5513
  */
 
-import initTrace from 'debug';
+import initTrace from "debug";
 
-import { MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN } from '../constants';
-import { SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from '../errors';
-import { Int64, Uint64 } from '../types';
-import { format, padToWord } from '../util';
-import { Message } from './message';
-import { Pointer } from './pointers';
+import { MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN } from "../constants";
+import { SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from "../errors";
+import { Int64, Uint64 } from "../types";
+import { format, padToWord } from "../util";
+import { Message } from "./message";
+import { Pointer } from "./pointers";
 
-const trace = initTrace('capnp:segment');
-trace('load');
+const trace = initTrace("capnp:segment");
+trace("load");
 
 export class Segment implements DataView {
-
   buffer: ArrayBuffer;
 
   /** The number of bytes currently allocated in the segment. */
@@ -31,7 +30,7 @@ export class Segment implements DataView {
 
   byteOffset: number;
 
-  readonly [Symbol.toStringTag] = 'Segment' as 'DataView';
+  readonly [Symbol.toStringTag] = "Segment" as "DataView";
 
   readonly id: number;
 
@@ -39,8 +38,12 @@ export class Segment implements DataView {
 
   private _dv: DataView;
 
-  constructor(id: number, message: Message, buffer: ArrayBuffer, byteLength = 0) {
-
+  constructor(
+    id: number,
+    message: Message,
+    buffer: ArrayBuffer,
+    byteLength = 0
+  ) {
     this.id = id;
     this.message = message;
     this.buffer = buffer;
@@ -48,7 +51,6 @@ export class Segment implements DataView {
 
     this.byteOffset = 0;
     this.byteLength = byteLength;
-
   }
 
   /**
@@ -60,25 +62,32 @@ export class Segment implements DataView {
    */
 
   allocate(byteLength: number): Pointer {
-
-    trace('allocate(%d)', byteLength);
+    trace("allocate(%d)", byteLength);
 
     let segment: Segment = this;
 
     byteLength = padToWord(byteLength);
 
-    if (byteLength > MAX_SEGMENT_LENGTH - 8) throw new Error(format(SEG_SIZE_OVERFLOW, byteLength));
+    if (byteLength > MAX_SEGMENT_LENGTH - 8) {
+      throw new Error(format(SEG_SIZE_OVERFLOW, byteLength));
+    }
 
-    if (!segment.hasCapacity(byteLength)) segment = segment.message.allocateSegment(byteLength);
+    if (!segment.hasCapacity(byteLength)) {
+      segment = segment.message.allocateSegment(byteLength);
+    }
 
     const byteOffset = segment.byteLength;
 
     segment.byteLength = segment.byteLength + byteLength;
 
-    trace('Allocated %x bytes in %s (requested segment: %s).', byteLength, this, segment);
+    trace(
+      "Allocated %x bytes in %s (requested segment: %s).",
+      byteLength,
+      this,
+      segment
+    );
 
     return new Pointer(segment, byteOffset);
-
   }
 
   /**
@@ -90,12 +99,17 @@ export class Segment implements DataView {
    * @returns {void}
    */
 
-  copyWord(byteOffset: number, srcSegment: Segment, srcByteOffset: number): void {
-
-    const value = srcSegment._dv.getFloat64(srcByteOffset, NATIVE_LITTLE_ENDIAN);
+  copyWord(
+    byteOffset: number,
+    srcSegment: Segment,
+    srcByteOffset: number
+  ): void {
+    const value = srcSegment._dv.getFloat64(
+      srcByteOffset,
+      NATIVE_LITTLE_ENDIAN
+    );
 
     this._dv.setFloat64(byteOffset, value, NATIVE_LITTLE_ENDIAN);
-
   }
 
   /**
@@ -108,13 +122,16 @@ export class Segment implements DataView {
    * @returns {void}
    */
 
-  copyWords(byteOffset: number, srcSegment: Segment, srcByteOffset: number, wordLength: number): void {
-
+  copyWords(
+    byteOffset: number,
+    srcSegment: Segment,
+    srcByteOffset: number,
+    wordLength: number
+  ): void {
     const dst = new Float64Array(this.buffer, byteOffset, wordLength);
     const src = new Float64Array(srcSegment.buffer, srcByteOffset, wordLength);
 
     dst.set(src);
-
   }
 
   /**
@@ -126,9 +143,7 @@ export class Segment implements DataView {
    */
 
   fillZeroWords(byteOffset: number, wordLength: number): void {
-
     new Float64Array(this.buffer, byteOffset, wordLength).fill(0);
-
   }
 
   /**
@@ -138,9 +153,7 @@ export class Segment implements DataView {
    */
 
   getCapacity(): number {
-
     return this.buffer.byteLength;
-
   }
 
   /**
@@ -151,9 +164,7 @@ export class Segment implements DataView {
    */
 
   getFloat32(byteOffset: number): number {
-
     return this._dv.getFloat32(byteOffset, true);
-
   }
 
   /**
@@ -164,9 +175,7 @@ export class Segment implements DataView {
    */
 
   getFloat64(byteOffset: number): number {
-
     return this._dv.getFloat64(byteOffset, true);
-
   }
 
   /**
@@ -177,9 +186,7 @@ export class Segment implements DataView {
    */
 
   getInt16(byteOffset: number): number {
-
     return this._dv.getInt16(byteOffset, true);
-
   }
 
   /**
@@ -190,9 +197,7 @@ export class Segment implements DataView {
    */
 
   getInt32(byteOffset: number): number {
-
     return this._dv.getInt32(byteOffset, true);
-
   }
 
   /**
@@ -203,9 +208,9 @@ export class Segment implements DataView {
    */
 
   getInt64(byteOffset: number): Int64 {
-
-    return new Int64(new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8)));
-
+    return new Int64(
+      new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8))
+    );
   }
 
   /**
@@ -216,9 +221,7 @@ export class Segment implements DataView {
    */
 
   getInt8(byteOffset: number): number {
-
     return this._dv.getInt8(byteOffset);
-
   }
 
   /**
@@ -229,9 +232,7 @@ export class Segment implements DataView {
    */
 
   getUint16(byteOffset: number): number {
-
     return this._dv.getUint16(byteOffset, true);
-
   }
 
   /**
@@ -242,9 +243,7 @@ export class Segment implements DataView {
    */
 
   getUint32(byteOffset: number): number {
-
     return this._dv.getUint32(byteOffset, true);
-
   }
 
   /**
@@ -256,9 +255,9 @@ export class Segment implements DataView {
    */
 
   getUint64(byteOffset: number): Uint64 {
-
-    return new Uint64(new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8)));
-
+    return new Uint64(
+      new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8))
+    );
   }
 
   /**
@@ -269,19 +268,15 @@ export class Segment implements DataView {
    */
 
   getUint8(byteOffset: number): number {
-
     return this._dv.getUint8(byteOffset);
-
   }
 
   hasCapacity(byteLength: number): boolean {
-
-    trace('hasCapacity(%d)', byteLength);
+    trace("hasCapacity(%d)", byteLength);
 
     // capacity - allocated >= requested
 
     return this.buffer.byteLength - this.byteLength >= byteLength;
-
   }
 
   /**
@@ -297,11 +292,8 @@ export class Segment implements DataView {
    */
 
   isWordZero(byteOffset: number): boolean {
-
     return this._dv.getFloat64(byteOffset, NATIVE_LITTLE_ENDIAN) === 0;
-
   }
-
 
   /**
    * Swap out this segment's underlying buffer with a new one. It's assumed that the new buffer has the same content but
@@ -312,16 +304,16 @@ export class Segment implements DataView {
    */
 
   replaceBuffer(buffer: ArrayBuffer): void {
-
-    trace('replaceBuffer(%p)', buffer);
+    trace("replaceBuffer(%p)", buffer);
 
     if (this.buffer === buffer) return;
 
-    if (buffer.byteLength < this.byteLength) throw new Error(SEG_REPLACEMENT_BUFFER_TOO_SMALL);
+    if (buffer.byteLength < this.byteLength) {
+      throw new Error(SEG_REPLACEMENT_BUFFER_TOO_SMALL);
+    }
 
     this._dv = new DataView(buffer);
     this.buffer = buffer;
-
   }
 
   /**
@@ -333,9 +325,7 @@ export class Segment implements DataView {
    */
 
   setFloat32(byteOffset: number, val: number): void {
-
     this._dv.setFloat32(byteOffset, val, true);
-
   }
 
   /**
@@ -347,9 +337,7 @@ export class Segment implements DataView {
    */
 
   setFloat64(byteOffset: number, val: number): void {
-
     this._dv.setFloat64(byteOffset, val, true);
-
   }
 
   /**
@@ -361,9 +349,7 @@ export class Segment implements DataView {
    */
 
   setInt16(byteOffset: number, val: number): void {
-
     this._dv.setInt16(byteOffset, val, true);
-
   }
 
   /**
@@ -375,9 +361,7 @@ export class Segment implements DataView {
    */
 
   setInt32(byteOffset: number, val: number): void {
-
     this._dv.setInt32(byteOffset, val, true);
-
   }
 
   /**
@@ -389,9 +373,7 @@ export class Segment implements DataView {
    */
 
   setInt8(byteOffset: number, val: number): void {
-
     this._dv.setInt8(byteOffset, val);
-
   }
 
   /**
@@ -403,7 +385,6 @@ export class Segment implements DataView {
    */
 
   setInt64(byteOffset: number, val: Int64): void {
-
     this._dv.setUint8(byteOffset, val.buffer[0]);
     this._dv.setUint8(byteOffset + 1, val.buffer[1]);
     this._dv.setUint8(byteOffset + 2, val.buffer[2]);
@@ -412,7 +393,6 @@ export class Segment implements DataView {
     this._dv.setUint8(byteOffset + 5, val.buffer[5]);
     this._dv.setUint8(byteOffset + 6, val.buffer[6]);
     this._dv.setUint8(byteOffset + 7, val.buffer[7]);
-
   }
 
   /**
@@ -424,9 +404,7 @@ export class Segment implements DataView {
    */
 
   setUint16(byteOffset: number, val: number): void {
-
     this._dv.setUint16(byteOffset, val, true);
-
   }
 
   /**
@@ -438,9 +416,7 @@ export class Segment implements DataView {
    */
 
   setUint32(byteOffset: number, val: number): void {
-
     this._dv.setUint32(byteOffset, val, true);
-
   }
 
   /**
@@ -453,7 +429,6 @@ export class Segment implements DataView {
    */
 
   setUint64(byteOffset: number, val: Uint64): void {
-
     this._dv.setUint8(byteOffset + 0, val.buffer[0]);
     this._dv.setUint8(byteOffset + 1, val.buffer[1]);
     this._dv.setUint8(byteOffset + 2, val.buffer[2]);
@@ -462,7 +437,6 @@ export class Segment implements DataView {
     this._dv.setUint8(byteOffset + 5, val.buffer[5]);
     this._dv.setUint8(byteOffset + 6, val.buffer[6]);
     this._dv.setUint8(byteOffset + 7, val.buffer[7]);
-
   }
 
   /**
@@ -474,9 +448,7 @@ export class Segment implements DataView {
    */
 
   setUint8(byteOffset: number, val: number): void {
-
     this._dv.setUint8(byteOffset, val);
-
   }
 
   /**
@@ -490,16 +462,16 @@ export class Segment implements DataView {
    */
 
   setWordZero(byteOffset: number): void {
-
     this._dv.setFloat64(byteOffset, 0, NATIVE_LITTLE_ENDIAN);
-
   }
 
   toString() {
-
-    return format('Segment_id:%d,off:%a,len:%a,cap:%a', this.id, this.byteLength, this.byteOffset,
-      this.buffer.byteLength);
-
+    return format(
+      "Segment_id:%d,off:%a,len:%a,cap:%a",
+      this.id,
+      this.byteLength,
+      this.byteOffset,
+      this.buffer.byteLength
+    );
   }
-
 }

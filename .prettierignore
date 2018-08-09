@@ -1,0 +1,4 @@
+*.capnp.ts
+*.capnp.js
+**/lib/
+
