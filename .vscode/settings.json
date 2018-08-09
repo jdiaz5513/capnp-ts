@@ -17,5 +17,6 @@
     "**/bower_components": true,
     "**/lib": true,
     "**/lib-test": true
-  }
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

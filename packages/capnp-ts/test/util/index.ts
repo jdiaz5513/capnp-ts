@@ -1,12 +1,12 @@
-import Benchmark, {Suite} from 'benchmark';
-import {readFileSync} from 'fs';
+import Benchmark, { Suite } from 'benchmark';
+import { readFileSync } from 'fs';
 import * as path from 'path';
-import {check, CheckOptions, Property} from 'testcheck';
+import { check, CheckOptions, Property } from 'testcheck';
 
-import {format, pad} from '../../lib/util';
-import {Test} from './tap';
+import { format, pad } from '../../lib/util';
+import { Test } from './tap';
 
-export {default as tap} from './tap';
+export { default as tap } from './tap';
 
 function diffHex(found: ArrayBuffer, wanted: ArrayBuffer): string {
 
@@ -38,7 +38,7 @@ function diffHex(found: ArrayBuffer, wanted: ArrayBuffer): string {
 }
 
 export async function compareBuffers(parentTest: Test, found: ArrayBuffer, wanted: ArrayBuffer,
-                                     name='should have the same buffer contents'): Promise<Test> {
+  name = 'should have the same buffer contents'): Promise<Test> {
 
   return parentTest.test(name, (t) => {
 
@@ -85,7 +85,7 @@ export function logBench(suite: Suite) {
 
   return suite
 
-    .on('start', function(this: any) {
+    .on('start', function (this: any) {
 
       console.log(`\nStarting benchmark: ${this.name}`);
 
@@ -97,7 +97,7 @@ export function logBench(suite: Suite) {
 
     })
 
-    .on('complete', function(this: any) {
+    .on('complete', function (this: any) {
 
       const name = this.name as string;
       const fastest = this.filter('fastest');
@@ -119,8 +119,8 @@ export function readFileBuffer(filePath: string): ArrayBuffer {
 }
 
 export async function runTestCheck<TArgs>(parentTest: Test, property: Property<TArgs>,
-                                          options?: CheckOptions,
-                                          name='should satisfy property check'): Promise<Test> {
+  options?: CheckOptions,
+  name = 'should satisfy property check'): Promise<Test> {
 
   return parentTest.test(name, (t) => {
 

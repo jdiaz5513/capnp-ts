@@ -10,7 +10,7 @@ import {
 import { dumpBuffer, format, padToWord } from '../util';
 import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena } from './arena';
 import { pack, unpack } from './packing';
-import { StructCtor, PointerType, Struct } from './pointers';
+import { Pointer, StructCtor, PointerType, Struct } from './pointers';
 import { Segment } from './segment';
 import { getTargetStructSize, validate } from './pointers/pointer';
 import { resize, initStruct } from './pointers/struct';
@@ -32,6 +32,7 @@ export class Message {
   static readonly getRoot = getRoot;
   static readonly getSegment = getSegment;
   static readonly initRoot = initRoot;
+  static readonly readRawPointer = readRawPointer;
   static readonly toArrayBuffer = toArrayBuffer;
   static readonly toPackedArrayBuffer = toPackedArrayBuffer;
 
@@ -119,6 +120,16 @@ export class Message {
    */
 
   initRoot<T extends Struct>(RootStruct: StructCtor<T>) { return initRoot(RootStruct, this); }
+
+  /**
+   * Set the root of the message to a copy of the given pointer. Used internally
+   * to make copies of pointers for default values.
+   *
+   * @param {Pointer} src The source pointer to copy.
+   * @returns {void}
+   */
+
+   setRoot(src: Pointer) { return setRoot(src, this); }
 
   /**
    * Combine the contents of this message's segments into a single array buffer and prepend a stream framing header
@@ -398,6 +409,30 @@ export function initRoot<T extends Struct>(RootStruct: StructCtor<T>, m: Message
   trace('Initialized root pointer %s for %s.', root, m);
 
   return root;
+
+}
+
+/**
+ * Read a pointer in raw form (a packed message with framing headers). Does not
+ * care or attempt to validate the input beyond parsing the message
+ * segments.
+ *
+ * This is typically used by the compiler to load default values, but can be
+ * useful to work with messages with an unknown schema.
+ *
+ * @param {ArrayBuffer} data The raw data to read.
+ * @returns {Pointer} A root pointer.
+ */
+
+export function readRawPointer(data: ArrayBuffer): Pointer {
+
+  return new Pointer(new Message(data).getSegment(0), 0);
+
+}
+
+export function setRoot(src: Pointer, m: Message): void {
+
+  Pointer.copyFrom(src, new Pointer(m.getSegment(0), 0));
 
 }
 

@@ -3,14 +3,17 @@
  */
 
 import * as s from 'capnp-ts/lib/std/schema.capnp';
+import * as capnp from 'capnp-ts';
 import { format, pad } from 'capnp-ts/lib/util';
 import * as ts from 'typescript';
-
+import * as initTrace from 'debug';
 import { CodeGeneratorFileContext } from './code-generator-file-context';
-import { __, READONLY, STATIC, VOID_TYPE } from './constants';
+import { __, READONLY, STATIC, VOID_TYPE, STRUCT, CAPNP } from './constants';
 import * as E from './errors';
 import { getDisplayNamePrefix, getFullClassName, getJsType } from './file';
 import * as util from './util';
+
+const trace = initTrace('capnpc:ast-creators');
 
 export function createClassExtends(identifierText: string): ts.HeritageClause {
 
@@ -79,6 +82,10 @@ export function createUnionConstProperty(fullClassName: string, field: s.Field):
 
 export function createValueExpression(value: s.Value): ts.Expression {
 
+  trace('createValueExpression(%s)', value);
+
+  let p: capnp.Pointer;
+
   switch (value.which()) {
 
     case s.Value.BOOL:
@@ -110,7 +117,7 @@ export function createValueExpression(value: s.Value): ts.Expression {
       const int64 = value.getInt64();
       const int64Bytes: string[] = [];
 
-      for (let i = 0; i < 4; i++) int64Bytes.push(`0x${pad(int64.buffer[i].toString(16), 2)}`);
+      for (let i = 0; i < 8; i++) int64Bytes.push(`0x${pad(int64.buffer[i].toString(16), 2)}`);
 
       const int64ByteArray = ts.createArrayLiteral(int64Bytes.map(ts.createNumericLiteral), false);
       const int64ArrayBuffer = ts.createNew(ts.createIdentifier('Uint8Array'), __, [int64ByteArray]);
@@ -134,10 +141,10 @@ export function createValueExpression(value: s.Value): ts.Expression {
 
     case s.Value.UINT64:
 
-      const uint64 = value.getInt64();
+      const uint64 = value.getUint64();
       const uint64Bytes: string[] = [];
 
-      for (let i = 0; i < 4; i++) uint64Bytes.push(`0x${pad(uint64.buffer[i].toString(16), 2)}`);
+      for (let i = 0; i < 8; i++) uint64Bytes.push(`0x${pad(uint64.buffer[i].toString(16), 2)}`);
 
       const uint64ByteArray = ts.createArrayLiteral(uint64Bytes.map(ts.createNumericLiteral), false);
       const uint64ArrayBuffer = ts.createNew(ts.createIdentifier('Uint8Array'), __, [uint64ByteArray]);
@@ -152,14 +159,47 @@ export function createValueExpression(value: s.Value): ts.Expression {
       return ts.createIdentifier('undefined');
 
     case s.Value.ANY_POINTER:
+
+      p = value.getAnyPointer();
+
+      break;
+
     case s.Value.DATA:
-    case s.Value.INTERFACE:
+
+      p = value.getData();
+
+      break;
+
     case s.Value.LIST:
+
+      p = value.getList();
+
+      break;
+
     case s.Value.STRUCT:
+
+      p = value.getStruct();
+
+      break;
+
+    case s.Value.INTERFACE:
     default:
 
-      throw new Error(format(E.GEN_SERIALIZE_UNKNOWN_VALUE, value.which()));
+      throw new Error(format(E.GEN_SERIALIZE_UNKNOWN_VALUE, s.Value_Which[value.which()]));
 
   }
+
+  const m = new capnp.Message();
+  m.setRoot(p);
+
+  const buf = new Uint8Array(m.toPackedArrayBuffer());
+  const bytes = new Array<ts.NumericLiteral>(buf.byteLength);
+
+  for (let i = 0; i < buf.byteLength; i++) bytes[i] = ts.createNumericLiteral(`0x${pad(buf[i].toString(16), 2)}`);
+
+  return ts.createCall(
+    ts.createPropertyAccess(CAPNP, 'readRawPointer'), __,
+    [ts.createPropertyAccess(
+      ts.createNew(ts.createIdentifier('Uint8Array'), __, [ts.createArrayLiteral(bytes, false)]), 'buffer')]);
 
 }

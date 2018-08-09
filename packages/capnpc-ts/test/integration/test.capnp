@@ -21,7 +21,7 @@
 
 @0xd508eebdc2dc42b8;
 
-using Cxx = import "c++.capnp";
+using Cxx = import "/capnp/c++.capnp";
 
 # Use a namespace likely to cause trouble if the generated code doesn't use fully-qualified
 # names for stuff in the capnproto namespace.
@@ -744,9 +744,9 @@ const derivedConstant :TestAllTypes = (
 const genericConstant :TestGenerics(TestAllTypes, Text) =
     (foo = (int16Field = 123), rev = (foo = "text", rev = (foo = (int16Field = 321))));
 
-const embeddedData :Data = embed "testdata/packed";
-const embeddedText :Text = embed "testdata/short.txt";
-const embeddedStruct :TestAllTypes = embed "testdata/binary";
+const embeddedData :Data = embed "../data/packed.bin";
+const embeddedText :Text = embed "../data/short.txt";
+const embeddedStruct :TestAllTypes = embed "../data/binary.bin";
 
 const nonAsciiText :Text = "♫ é ✓";
 

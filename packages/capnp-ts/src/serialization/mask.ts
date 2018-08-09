@@ -2,7 +2,9 @@
  * @author jdiaz5513
  */
 
-import {Int64, Uint64} from '../types';
+import { Int64, Uint64 } from '../types';
+import { Struct } from './pointers';
+import { ObjectSize } from './object-size';
 
 type DataViewSetter = (byteOffset: number, value: number, littleEndian?: boolean) => void;
 

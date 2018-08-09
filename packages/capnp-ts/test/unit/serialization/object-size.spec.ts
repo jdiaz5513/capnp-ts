@@ -1,5 +1,5 @@
-import {ObjectSize} from '../../../lib';
-import {tap} from '../../util';
+import { ObjectSize } from '../../../lib';
+import { tap } from '../../util';
 
 tap.test('ObjectSize.toString()', (t) => {
 

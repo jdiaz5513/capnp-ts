@@ -22,7 +22,7 @@ import { PointerType } from './pointer-type';
 import { Text } from './text';
 import {
   PTR_INIT_COMPOSITE_STRUCT, PTR_ADOPT_COMPOSITE_STRUCT, PTR_DISOWN_COMPOSITE_STRUCT, PTR_INVALID_UNION_ACCESS,
-  PTR_STRUCT_DATA_OUT_OF_BOUNDS, PTR_STRUCT_POINTER_OUT_OF_BOUNDS,
+  PTR_STRUCT_DATA_OUT_OF_BOUNDS, PTR_STRUCT_POINTER_OUT_OF_BOUNDS, INVARIANT_UNREACHABLE_CODE,
 } from '../../errors';
 
 const trace = initTrace('capnp:struct');
@@ -289,7 +289,7 @@ export function getBit(bitOffset: number, s: Struct, defaultMask?: DataView): bo
 
 }
 
-export function getData(index: number, s: Struct): Data {
+export function getData(index: number, s: Struct, defaultValue?: Pointer): Data {
 
   checkPointerBounds(index, s);
 
@@ -301,7 +301,15 @@ export function getData(index: number, s: Struct): Data {
 
   if (isNull(l)) {
 
-    List.initList(ListElementSize.BYTE, 0, l);
+    if (defaultValue) {
+
+      Pointer.copyFrom(defaultValue, l);
+
+    } else {
+
+      List.initList(ListElementSize.BYTE, 0, l);
+
+    }
 
   }
 
@@ -460,7 +468,7 @@ export function getInt8(byteOffset: number, s: Struct, defaultMask?: DataView): 
 
 }
 
-export function getList<T>(index: number, ListClass: ListCtor<T>, s: Struct): List<T> {
+export function getList<T>(index: number, ListClass: ListCtor<T>, s: Struct, defaultValue?: Pointer): List<T> {
 
   checkPointerBounds(index, s);
 
@@ -472,7 +480,15 @@ export function getList<T>(index: number, ListClass: ListCtor<T>, s: Struct): Li
 
   if (isNull(l)) {
 
-    List.initList(ListClass._capnp.size, 0, l, ListClass._capnp.compositeSize);
+    if (defaultValue) {
+
+      Pointer.copyFrom(defaultValue, l);
+
+    } else {
+
+      List.initList(ListClass._capnp.size, 0, l, ListClass._capnp.compositeSize);
+
+    }
 
   } else if (ListClass._capnp.compositeSize !== undefined) {
 
@@ -612,13 +628,23 @@ export function getSize(s: Struct): ObjectSize {
 
 }
 
-export function getStruct<T extends Struct>(index: number, StructClass: StructCtor<T>, s: Struct): T {
+export function getStruct<T extends Struct>(
+  index: number, StructClass: StructCtor<T>, s: Struct, defaultValue?: Pointer,
+): T {
 
   const t = getPointerAs(index, StructClass, s);
 
   if (isNull(t)) {
 
-    initStruct(StructClass._capnp.size, t);
+    if (defaultValue) {
+
+      Pointer.copyFrom(defaultValue, t);
+
+    } else {
+
+      initStruct(StructClass._capnp.size, t);
+
+    }
 
   } else {
 
@@ -646,9 +672,14 @@ export function getStruct<T extends Struct>(index: number, StructClass: StructCt
 
 }
 
-export function getText(index: number, s: Struct): string {
+export function getText(index: number, s: Struct, defaultValue?: string): string {
 
-  return Text.fromPointer(getPointer(index, s)).get(0);
+  const t = Text.fromPointer(getPointer(index, s));
+
+  // FIXME: This will perform an unnecessary string<>ArrayBuffer roundtrip.
+  if (isNull(t) && defaultValue) t.set(0, defaultValue);
+
+  return t.get(0);
 
 }
 

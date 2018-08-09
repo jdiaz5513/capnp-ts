@@ -1,6 +1,5 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node -r ts-node/register
 
-import 'source-map-support/register';
 import { main } from '../src';
 
 main();

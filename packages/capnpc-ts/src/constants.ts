@@ -21,7 +21,6 @@ export const BOOLEAN_TYPE = ts.createTypeReferenceNode('boolean', __);
 
 export const CAPNP = ts.createIdentifier('capnp');
 
-
 /** A Mapping of various types to their list type constructor. */
 
 export const ConcreteListType = {

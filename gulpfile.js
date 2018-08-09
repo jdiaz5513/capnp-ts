@@ -20,7 +20,8 @@ const CAPNP_WHITELIST = [
   'capnp-ts/test/integration/list-mania.capnp',
   'capnp-ts/test/integration/upgrade-v1.capnp',
   'capnpc-ts/test/integration/import-bar.capnp',
-  'capnpc-ts/test/integration/import-foo.capnp'
+  'capnpc-ts/test/integration/import-foo.capnp',
+  'capnpc-ts/test/integration/test.capnp'
 ];
 
 
@@ -38,7 +39,8 @@ function compileCapnp() {
     files.filter(function (file) {
       return file.path.endsWith('.capnp') && CAPNP_WHITELIST.some((p) => file.path.endsWith(p));
     }).forEach(function (file) {
-      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.js', '-I', path.join(__dirname, 'src', 'std'), file.path];
+      gutil.log('Compiling', "'" + gutil.colors.cyan(path.relative(__dirname, file.path)) + "'...");
+      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.ts', '-I', path.join(__dirname, 'src', 'std'), file.path];
       var result = spawnSync('capnpc', options, { stdio: 'inherit' });
       if (result.status !== 0) {
         throw new Error('Process exited with non-zero status: ' + result.status);

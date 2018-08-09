@@ -6,8 +6,8 @@
 /* tslint:disable:no-any no-unsafe-any */
 import initTrace from 'debug';
 
-import {MAX_BUFFER_DUMP_BYTES, MAX_INT32, MAX_UINT32} from './constants';
-import {RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_UINT32_OVERFLOW} from './errors';
+import { MAX_BUFFER_DUMP_BYTES, MAX_INT32, MAX_UINT32 } from './constants';
+import { RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_UINT32_OVERFLOW } from './errors';
 
 const trace = initTrace('capnp:util');
 trace('load');

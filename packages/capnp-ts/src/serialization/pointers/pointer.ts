@@ -1032,7 +1032,7 @@ export function copyFromList(src: Pointer, dst: Pointer): void {
 
   if (srcElementSize === ListElementSize.POINTER) {
 
-    dstContent = dst.segment.allocate(getByteLength(getTargetCompositeListSize(src)) * srcLength);
+    dstContent = dst.segment.allocate(srcLength << 3);
 
     // Recursively copy each pointer in the list.
 
