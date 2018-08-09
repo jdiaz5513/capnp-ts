@@ -6,14 +6,12 @@
  * @author jdiaz5513
  */
 
-import * as capnp from '../../lib';
-import { tap } from '../util';
-import { ListMania } from './list-mania.capnp';
+import * as capnp from "../../lib";
+import { tap } from "../util";
+import { ListMania } from "./list-mania.capnp";
 
-tap.test('loop de loop', (t) => {
-
+tap.test("loop de loop", t => {
   t.doesNotThrow(() => {
-
     const m = new capnp.Message();
     const listMania = m.initRoot(ListMania);
 
@@ -27,22 +25,18 @@ tap.test('loop de loop', (t) => {
     compositeList.set(0, compositeList.get(0));
     compositeList.get(0).setSelf(listMania);
 
-    t.comment('should zero out overwritten regions');
+    t.comment("should zero out overwritten regions");
 
     const s = m.getSegment(0);
     t.ok(s.isWordZero(0x0a0));
     t.ok(s.isWordZero(0x118));
-
   });
 
   t.end();
-
 });
 
-tap.test('1 of each list', (t) => {
-
+tap.test("1 of each list", t => {
   t.doesNotThrow(() => {
-
     const m = new capnp.Message();
     const listMania = m.initRoot(ListMania);
 
@@ -89,7 +83,7 @@ tap.test('1 of each list', (t) => {
     int16List.set(0, 1);
     int32List.set(0, 1);
     int64List.set(0, capnp.Int64.fromNumber(1));
-    textList.set(0, 'hi');
+    textList.set(0, "hi");
     uint8List.set(0, 1);
     uint16List.set(0, 1);
     uint32List.set(0, 1);
@@ -114,13 +108,11 @@ tap.test('1 of each list', (t) => {
 
     // Everything after the root pointer should be zero now.
 
-    t.comment('should zero out disposed orphans');
+    t.comment("should zero out disposed orphans");
 
     const s = m.getSegment(0);
     for (let i = 8; i < s.byteLength; i += 8) t.ok(s.isWordZero(i));
-
   });
 
   t.end();
-
 });

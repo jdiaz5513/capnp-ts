@@ -7,7 +7,6 @@
 /* tslint:disable:no-any promise-function-async no-unsafe-any no-var-requires */
 
 export declare class Test {
-
   // Assertions
   ok: Assertions.Basic;
   true: Assertions.Basic;
@@ -117,114 +116,134 @@ export declare class Test {
   threw(er: Error, extra?: Error, proxy?: Test): void;
   pragma(set: Options.Pragma): void;
   plan(n: number, comment?: string): void;
-  test(name: string, extra?: Options.Test, cb?: (t: Test) => Promise<any> | void): Promise<Test>;
+  test(
+    name: string,
+    extra?: Options.Test,
+    cb?: (t: Test) => Promise<any> | void
+  ): Promise<Test>;
   test(name: string, cb?: (t: Test) => Promise<any> | void): Promise<Test>;
   current(): Test;
   stdin(name: string, extra?: Options.Bag): Promise<any>;
-  spawn(cmd: string, args: string, options?: Options.Bag, name?: string, extra?: Options.Spawn): Promise<any>;
+  spawn(
+    cmd: string,
+    args: string,
+    options?: Options.Bag,
+    name?: string,
+    extra?: Options.Spawn
+  ): Promise<any>;
   done(): void;
   passing(): boolean;
   pass(message?: string, extra?: Options.Assert): boolean;
   fail(message?: string, extra?: Options.Assert): boolean;
-  addAssert(name: string, length: number, fn: (...args: any[]) => boolean): boolean;
+  addAssert(
+    name: string,
+    length: number,
+    fn: (...args: any[]) => boolean
+  ): boolean;
   comment(message: string, ...args: any[]): void;
   bailout(message?: string): void;
   beforeEach(fn: (cb: () => any) => Promise<any> | void): void;
   afterEach(fn: (cb: () => any) => Promise<any> | void): void;
   end(): void;
-
 }
 
 // Little hack to simulate the Test class on the tap export.
 
 export declare interface TestConstructor {
-
   prototype: Test;
 
-  new(options?: Options.Test): Test;
-
+  new (options?: Options.Test): Test;
 }
 
 export declare interface Tap extends Test {
-
   Test: TestConstructor;
   mocha: Mocha;
 
   mochaGlobals(): void;
-
 }
 
-
 export declare namespace Options {
-
   export interface Bag {
-
     [propName: string]: any;
-
   }
 
   export interface Pragma {
-
     [propName: string]: boolean;
-
   }
 
   export interface Assert extends Bag {
-
     todo?: boolean | string;
     skip?: boolean | string;
-
   }
 
   export interface Spawn extends Assert {
-
     bail?: boolean;
     timeout?: number;
-
   }
 
   export interface Test extends Assert {
-
     name?: string;
     timeout?: number;
     bail?: boolean;
     autoend?: boolean;
-
   }
-
 }
 
 export declare namespace Assertions {
-  export type Basic =
-    (obj: any, message?: string, extra?: Options.Assert) => boolean;
+  export type Basic = (
+    obj: any,
+    message?: string,
+    extra?: Options.Assert
+  ) => boolean;
 
-  export type Throws =
-    (fn?: (a: any) => any, expectedError?: Error, message?: string, extra?: Options.Assert) => boolean;
+  export type Throws = (
+    fn?: (a: any) => any,
+    expectedError?: Error,
+    message?: string,
+    extra?: Options.Assert
+  ) => boolean;
 
-  export type DoesNotThrow =
-    (fn?: (a: any) => any, message?: string, extra?: Options.Assert) => boolean;
+  export type DoesNotThrow = (
+    fn?: (a: any) => any,
+    message?: string,
+    extra?: Options.Assert
+  ) => boolean;
 
-  export type Equal =
-    (found: any, wanted: any, message?: string, extra?: Options.Assert) => boolean;
+  export type Equal = (
+    found: any,
+    wanted: any,
+    message?: string,
+    extra?: Options.Assert
+  ) => boolean;
 
-  export type NotEqual =
-    (found: any, notWanted: any, message?: string, extra?: Options.Assert) => boolean;
+  export type NotEqual = (
+    found: any,
+    notWanted: any,
+    message?: string,
+    extra?: Options.Assert
+  ) => boolean;
 
-  export type Match =
-    (found: any, pattern: any, message?: string, extra?: Options.Assert) => boolean;
+  export type Match = (
+    found: any,
+    pattern: any,
+    message?: string,
+    extra?: Options.Assert
+  ) => boolean;
 
-  export type Type =
-    (found: any, type: string | Function, message?: string, extra?: Options.Assert) => boolean;
+  export type Type = (
+    found: any,
+    type: string | Function,
+    message?: string,
+    extra?: Options.Assert
+  ) => boolean;
 }
 
 // Super minimal description of returned Promise (which are really Bluebird promises).
 
 export declare interface Mocha {
-
   it(name?: string, fn?: (a: any) => any): void;
   describe(name?: string, fn?: (a: any) => any): void;
   global(): void;
-
 }
 
 /**
@@ -236,6 +255,6 @@ export declare interface Mocha {
  * @author jdiaz5513
  */
 
-const tap = require('tap') as Tap;
+const tap = require("tap") as Tap;
 
 export default tap;

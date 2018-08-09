@@ -1,3 +1,3 @@
 export const Slot = {
-  NO_DISCRIMINANT: 65535,
+  NO_DISCRIMINANT: 65535
 };

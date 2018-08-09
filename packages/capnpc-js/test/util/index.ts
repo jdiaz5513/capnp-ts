@@ -1,1 +1,1 @@
-export {default as tap} from './tap';
+export { default as tap } from "./tap";

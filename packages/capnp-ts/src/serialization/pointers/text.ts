@@ -2,25 +2,22 @@
  * @author jdiaz5513
  */
 
-import initTrace from 'debug';
+import initTrace from "debug";
 
-import { decodeUtf8, encodeUtf8 } from '../../util';
-import { ListElementSize } from '../list-element-size';
-import { List, initList } from './list';
-import { Pointer, validate, isNull, getContent, erase } from './pointer';
-import { PointerType } from './pointer-type';
+import { decodeUtf8, encodeUtf8 } from "../../util";
+import { ListElementSize } from "../list-element-size";
+import { List, initList } from "./list";
+import { Pointer, validate, isNull, getContent, erase } from "./pointer";
+import { PointerType } from "./pointer-type";
 
-const trace = initTrace('capnp:text');
-trace('load');
+const trace = initTrace("capnp:text");
+trace("load");
 
 export class Text extends List<string> {
-
   static fromPointer(pointer: Pointer): Text {
-
     validate(PointerType.LIST, pointer, ListElementSize.BYTE);
 
     return textFromPointerUnchecked(pointer);
-
   }
 
   /**
@@ -31,17 +28,23 @@ export class Text extends List<string> {
    */
 
   get(index = 0): string {
+    if (index !== 0) {
+      trace("Called get() on %s with a strange index (%d).", this, index);
+    }
 
-    if (index !== 0) trace('Called get() on %s with a strange index (%d).', this, index);
-
-    if (isNull(this)) return '';
+    if (isNull(this)) return "";
 
     const c = getContent(this);
 
     // Remember to exclude the NUL byte.
 
-    return decodeUtf8(new Uint8Array(c.segment.buffer, c.byteOffset + index, this.getLength() - index));
-
+    return decodeUtf8(
+      new Uint8Array(
+        c.segment.buffer,
+        c.byteOffset + index,
+        this.getLength() - index
+      )
+    );
   }
 
   /**
@@ -51,9 +54,7 @@ export class Text extends List<string> {
    */
 
   getLength(): number {
-
     return super.getLength() - 1;
-
   }
 
   /**
@@ -66,8 +67,9 @@ export class Text extends List<string> {
    */
 
   set(index: number, value: string): void {
-
-    if (index !== 0) trace('Called set() on %s with a strange index (%d).', this, index);
+    if (index !== 0) {
+      trace("Called set() on %s with a strange index (%d).", this, index);
+    }
 
     const src = encodeUtf8(value);
     const dstLength = src.byteLength + index;
@@ -77,7 +79,6 @@ export class Text extends List<string> {
     // TODO: Consider reusing existing space if list is already initialized and there's enough room for the value.
 
     if (!isNull(this)) {
-
       c = getContent(this);
 
       // Only copy bytes that will remain after copying. Everything after `index` should end up truncated.
@@ -85,19 +86,23 @@ export class Text extends List<string> {
       let originalLength = this.getLength();
 
       if (originalLength >= index) {
-
         originalLength = index;
-
       } else {
-
-        trace('%d byte gap exists between original text and new text in %s.', index - originalLength, this);
-
+        trace(
+          "%d byte gap exists between original text and new text in %s.",
+          index - originalLength,
+          this
+        );
       }
 
-      original = new Uint8Array(c.segment.buffer.slice(c.byteOffset, c.byteOffset + Math.min(originalLength, index)));
+      original = new Uint8Array(
+        c.segment.buffer.slice(
+          c.byteOffset,
+          c.byteOffset + Math.min(originalLength, index)
+        )
+      );
 
       erase(this);
-
     }
 
     // Always allocate an extra byte for the NUL byte.
@@ -110,19 +115,17 @@ export class Text extends List<string> {
     if (original) dst.set(original);
 
     dst.set(src, index);
-
   }
 
   toString(): string {
-
     return `Text_${super.toString()}`;
-
   }
-
 }
 
 function textFromPointerUnchecked(pointer: Pointer): Text {
-
-  return new Text(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
-
+  return new Text(
+    pointer.segment,
+    pointer.byteOffset,
+    pointer._capnp.depthLimit
+  );
 }

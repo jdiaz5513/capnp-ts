@@ -7,7 +7,7 @@ export interface INode {
   isGeneric: boolean;
   nestedNodes: INode_NestedNode[];
   annotations: IAnnotation[];
-  file?: 'void';
+  file?: "void";
   struct?: INode_Struct;
   enum?: INode_Enum;
   interface?: INode_Interface;
@@ -21,7 +21,7 @@ export enum Node_Which {
   ENUM,
   INTERFACE,
   CONST,
-  ANNOTATION,
+  ANNOTATION
 }
 
 export interface INode_Struct {
@@ -86,7 +86,7 @@ export interface IField {
 export enum Field_Which {
   SLOT,
   GROUP,
-  ORDINAL,
+  ORDINAL
 }
 
 export interface IField_Slot {
@@ -102,13 +102,13 @@ export interface IField_Group {
 }
 
 export interface IField_Ordinal {
-  implicit?: 'void';
+  implicit?: "void";
   explicit?: number;
 }
 
 export enum Field_Ordinal_Which {
   IMPLICIT,
-  EXPLICIT,
+  EXPLICIT
 }
 
 export interface IEnumerant {
@@ -134,20 +134,20 @@ export interface IMethod {
 }
 
 export interface IType {
-  void?: 'void';
-  bool?: 'void';
-  int8?: 'void';
-  int16?: 'void';
-  int32?: 'void';
-  int64?: 'void';
-  uint8?: 'void';
-  uint16?: 'void';
-  uint32?: 'void';
-  uint64?: 'void';
-  float32?: 'void';
-  float64?: 'void';
-  text?: 'void';
-  data?: 'void';
+  void?: "void";
+  bool?: "void";
+  int8?: "void";
+  int16?: "void";
+  int32?: "void";
+  int64?: "void";
+  uint8?: "void";
+  uint16?: "void";
+  uint32?: "void";
+  uint64?: "void";
+  float32?: "void";
+  float64?: "void";
+  text?: "void";
+  data?: "void";
   list?: IType_List;
   enum?: IType_Enum;
   struct?: IType_Struct;
@@ -174,7 +174,7 @@ export enum Type_Which {
   ENUM,
   STRUCT,
   INTERFACE,
-  ANY_POINTER,
+  ANY_POINTER
 }
 
 export interface IType_List {
@@ -203,17 +203,17 @@ export interface IType_AnyPointer {
 }
 
 export interface IType_AnyPointer_Unconstrained {
-  anyKind?: 'void';
-  struct?: 'void';
-  list?: 'void';
-  capability?: 'void';
+  anyKind?: "void";
+  struct?: "void";
+  list?: "void";
+  capability?: "void";
 }
 
 export enum Type_AnyPointer_Unconstrained_Which {
   ANY_KIND,
   STRUCT,
   LIST,
-  CAPABILITY,
+  CAPABILITY
 }
 
 export interface IType_AnyPointer_Parameter {
@@ -232,26 +232,26 @@ export interface IBrand {
 export interface IBrand_Scope {
   scopeId: string;
   bind?: IBrand_Binding[];
-  inherit?: 'void';
+  inherit?: "void";
 }
 
 export enum Brand_Scope_Which {
   BIND,
-  INHERIT,
+  INHERIT
 }
 
 export interface IBrand_Binding {
-  unbound?: 'void';
+  unbound?: "void";
   type?: IType;
 }
 
 export enum Brand_Binding_Which {
   UNBOUND,
-  TYPE,
+  TYPE
 }
 
 export interface IValue {
-  void?: 'void';
+  void?: "void";
   bool?: boolean;
   int8?: number;
   int16?: number;
@@ -265,11 +265,11 @@ export interface IValue {
   float64?: number;
   text?: string;
   data?: string;
-  list?: '<opaque pointer>';
+  list?: "<opaque pointer>";
   enum?: number;
-  struct?: '<opaque pointer>';
-  interface?: 'void';
-  anyPointer?: '<opaque pointer>';
+  struct?: "<opaque pointer>";
+  interface?: "void";
+  anyPointer?: "<opaque pointer>";
 }
 
 export enum Value_Which {
@@ -291,7 +291,7 @@ export enum Value_Which {
   ENUM,
   STRUCT,
   INTERFACE,
-  ANY_POINTER,
+  ANY_POINTER
 }
 
 export interface IAnnotation {
@@ -308,7 +308,7 @@ export enum ElementSize {
   FOUR_BYTES,
   EIGHT_BYTES,
   POINTER,
-  INLINE_COMPOSITE,
+  INLINE_COMPOSITE
 }
 
 export interface ICapnpVersion {

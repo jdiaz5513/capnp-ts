@@ -10,16 +10,16 @@ export enum ListElementSize {
   BYTE_4 = 4,
   BYTE_8 = 5,
   POINTER = 6,
-  COMPOSITE = 7,
+  COMPOSITE = 7
 }
 
 export const ListElementOffset = [
-  0,      // void
-  0.125,  // bit
-  1,      // byte
-  2,      // two byte
-  4,      // four byte
-  8,      // eight byte
-  8,      // pointer
-  NaN,    // composite
+  0, // void
+  0.125, // bit
+  1, // byte
+  2, // two byte
+  4, // four byte
+  8, // eight byte
+  8, // pointer
+  NaN // composite
 ];

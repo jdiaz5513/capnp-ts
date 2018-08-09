@@ -2,16 +2,15 @@
  * @author jdiaz5513
  */
 
-import * as capnp from '../../lib';
-import { CodeGeneratorRequest } from '../../lib/std/schema.capnp';
-import { compareBuffers, readFileBuffer, tap } from '../util';
+import * as capnp from "../../lib";
+import { CodeGeneratorRequest } from "../../lib/std/schema.capnp";
+import { compareBuffers, readFileBuffer, tap } from "../util";
 
-const SCHEMA_MESSAGE = readFileBuffer('test/data/schema.bin');
+const SCHEMA_MESSAGE = readFileBuffer("test/data/schema.bin");
 
-const SCHEMA_FILE_ID = capnp.Int64.fromHexString('a93fc509624c72d9');
+const SCHEMA_FILE_ID = capnp.Int64.fromHexString("a93fc509624c72d9");
 
-tap.test('schema roundtrip', (t) => {
-
+tap.test("schema roundtrip", t => {
   const message = new capnp.Message(SCHEMA_MESSAGE, false);
   const req = message.getRoot(CodeGeneratorRequest);
 
@@ -30,16 +29,19 @@ tap.test('schema roundtrip', (t) => {
   const requestedFile = requestedFiles.get(0);
   const filename = requestedFile.getFilename();
 
-  t.equal(filename, 'packages/capnp-ts/src/std/schema.capnp');
+  t.equal(filename, "packages/capnp-ts/src/std/schema.capnp");
 
   const requestedFileId = requestedFile.getId();
 
-  compareBuffers(t, requestedFileId.buffer.buffer, SCHEMA_FILE_ID.buffer.buffer);
+  compareBuffers(
+    t,
+    requestedFileId.buffer.buffer,
+    SCHEMA_FILE_ID.buffer.buffer
+  );
 
   const out = message.toArrayBuffer();
 
   compareBuffers(t, out, SCHEMA_MESSAGE);
 
   t.end();
-
 });

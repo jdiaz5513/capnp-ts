@@ -2,11 +2,10 @@
  * @author jdiaz5513
  */
 
-import * as s from 'capnp-ts/lib/std/schema.capnp';
-import * as ts from 'typescript';
+import * as s from "capnp-ts/lib/std/schema.capnp";
+import * as ts from "typescript";
 
 export class CodeGeneratorFileContext {
-
   tsPath: string;
   concreteLists: Array<[string, s.Field]>;
   file: s.CodeGeneratorRequest_RequestedFile;
@@ -16,7 +15,10 @@ export class CodeGeneratorFileContext {
   statements: ts.Statement[];
   namedImports: string[];
 
-  constructor(req: s.CodeGeneratorRequest, file: s.CodeGeneratorRequest_RequestedFile) {
+  constructor(
+    req: s.CodeGeneratorRequest,
+    file: s.CodeGeneratorRequest_RequestedFile
+  ) {
     this.req = req;
     this.file = file;
     this.nodes = req.getNodes().toArray();
@@ -26,9 +28,6 @@ export class CodeGeneratorFileContext {
   }
 
   toString() {
-
-    return this.file ? this.file.getFilename() : 'CodeGeneratorFileContext()';
-
+    return this.file ? this.file.getFilename() : "CodeGeneratorFileContext()";
   }
-
 }

@@ -1,5 +1,5 @@
-import 'source-map-support/register';
+import "source-map-support/register";
 
-import './benchmark';
-import './integration';
-import './unit';
+import "./benchmark";
+import "./integration";
+import "./unit";

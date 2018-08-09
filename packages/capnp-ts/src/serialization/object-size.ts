@@ -2,12 +2,12 @@
  * @author jdiaz5513
  */
 
-import initTrace from 'debug';
+import initTrace from "debug";
 
-import * as _ from '../util';
+import * as _ from "../util";
 
-const trace = initTrace('capnp:object-size');
-trace('load');
+const trace = initTrace("capnp:object-size");
+trace("load");
 
 /**
  * A simple object that describes the size of a struct.
@@ -17,7 +17,6 @@ trace('load');
  */
 
 export class ObjectSize {
-
   /** The number of bytes required for the data section. */
 
   readonly dataByteLength: number;
@@ -27,41 +26,31 @@ export class ObjectSize {
   readonly pointerLength: number;
 
   constructor(dataByteLength: number, pointerCount: number) {
-
     this.dataByteLength = dataByteLength;
     this.pointerLength = pointerCount;
-
   }
 
   toString(): string {
-
-    return _.format('ObjectSize_dw:%d,pc:%d', getDataWordLength(this), this.pointerLength);
-
+    return _.format(
+      "ObjectSize_dw:%d,pc:%d",
+      getDataWordLength(this),
+      this.pointerLength
+    );
   }
-
 }
 
 export function getByteLength(o: ObjectSize): number {
-
   return o.dataByteLength + o.pointerLength * 8;
-
 }
 
 export function getDataWordLength(o: ObjectSize): number {
-
   return o.dataByteLength / 8;
-
 }
 
 export function getWordLength(o: ObjectSize): number {
-
   return o.dataByteLength / 8 + o.pointerLength;
-
 }
 
 export function padToWord(o: ObjectSize): ObjectSize {
-
   return new ObjectSize(_.padToWord(o.dataByteLength), o.pointerLength);
-
 }
-

@@ -1,1 +1,1 @@
-import './orphan.spec';
+import "./orphan.spec";

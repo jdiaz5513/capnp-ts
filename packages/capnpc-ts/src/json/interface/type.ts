@@ -1,6 +1,6 @@
-import * as R from 'ramda';
+import * as R from "ramda";
 
-import {IType, Type_Which} from '../types';
+import { IType, Type_Which } from "../types";
 
 export const Type = {
   ANY_POINTER: Type_Which.ANY_POINTER,
@@ -28,7 +28,7 @@ export const Type = {
     Type_Which.DATA,
     Type_Which.INTERFACE,
     Type_Which.LIST,
-    Type_Which.STRUCT,
+    Type_Which.STRUCT
   ],
   _pointerTypes: [
     Type_Which.ANY_POINTER,
@@ -36,23 +36,18 @@ export const Type = {
     Type_Which.INTERFACE,
     Type_Which.LIST,
     Type_Which.STRUCT,
-    Type_Which.TEXT,
+    Type_Which.TEXT
   ],
 
   isAdoptable(type: IType): boolean {
-
     return R.contains(Type.which(type), Type._adoptableTypes);
-
   },
 
   isPointer(type: IType): boolean {
-
     return R.contains(Type.which(type), Type._pointerTypes);
-
   },
 
   which(type: IType): Type_Which {
-
     if (type.anyPointer !== undefined) return Type.ANY_POINTER;
     if (type.bool !== undefined) return Type.BOOL;
     if (type.data !== undefined) return Type.DATA;
@@ -74,7 +69,5 @@ export const Type = {
     if (type.void !== undefined) return Type.VOID;
 
     throw new Error(`unknown union value for type: ${type}`);
-
-  },
-
+  }
 };
