@@ -4,11 +4,11 @@
     "url": "https://github.com/jdiaz5513/capnp-ts/issues"
   },
   "dependencies": {
-    "capnp-ts": "^0.1.6"
+    "capnp-ts": "^0.2.4"
   },
   "description": "Example of using capnproto-ts in a JavaScript project.",
   "devDependencies": {
-    "capnpc-js": "^0.1.6"
+    "capnpc-js": "^0.2.4"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [
@@ -18,11 +18,11 @@
     "example"
   ],
   "license": "MIT",
-  "name": "capnproto-ts/js-examples",
+  "name": "capnp-ts-js-examples",
   "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
-  "version": "0.1.6"
+  "version": "0.2.4"
 }

@@ -45,7 +45,6 @@
     ]
   },
   "main": "lib/index",
-  "name": "capnp-ts-all",
   "private": true,
   "repository": {
     "type": "git",
@@ -56,7 +55,7 @@
     "benchmark": "gulp benchmark",
     "build": "gulp build",
     "build:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn build",
-    "ci": "gulp lint && gulp coverage && codecov --disable=gcov && js-examples/test.sh",
+    "ci": "gulp lint && gulp coverage && codecov --disable=gcov && packages/js-examples/test.sh",
     "coverage": "gulp coverage",
     "coverage:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn coverage",
     "lerna": "lerna",

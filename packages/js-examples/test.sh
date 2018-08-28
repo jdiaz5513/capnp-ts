@@ -7,6 +7,7 @@ set -exuo pipefail
 
 cd `dirname $0`
 
+yarn install
 capnpc -o node_modules/.bin/capnpc-js addressbook.capnp
 node addressbook.js write | node addressbook.js read
 node addressbook.js dwrite | node addressbook.js dread
