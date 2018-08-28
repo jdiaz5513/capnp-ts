@@ -357,130 +357,6 @@ export class TestOutOfOrder extends __S {
     setWaldo(value: string): void { __S.setText(5, value, this); }
     toString(): string { return "TestOutOfOrder_" + super.toString(); }
 }
-export enum TestUnion_Union2_Which {
-    U2F0S64 = 4,
-    U2F0S32 = 3,
-    U2F0S16 = 2,
-    U2F0S8 = 1,
-    U2F0S1 = 0
-}
-export class TestUnion_Union2 extends __S {
-    static readonly U2F0S64 = TestUnion_Union2_Which.U2F0S64;
-    static readonly U2F0S32 = TestUnion_Union2_Which.U2F0S32;
-    static readonly U2F0S16 = TestUnion_Union2_Which.U2F0S16;
-    static readonly U2F0S8 = TestUnion_Union2_Which.U2F0S8;
-    static readonly U2F0S1 = TestUnion_Union2_Which.U2F0S1;
-    static readonly _capnp = { displayName: "union2", id: "afc5fd419f0d66d4", size: new __O(64, 2) };
-    getU2f0s64(): capnp.Int64 {
-        __S.testWhich("u2f0s64", __S.getUint16(4, this), 4, this);
-        return __S.getInt64(48, this);
-    }
-    isU2f0s64(): boolean { return __S.getUint16(4, this) === 4; }
-    setU2f0s64(value: capnp.Int64): void {
-        __S.setUint16(4, 4, this);
-        __S.setInt64(48, value, this);
-    }
-    getU2f0s32(): number {
-        __S.testWhich("u2f0s32", __S.getUint16(4, this), 3, this);
-        return __S.getInt32(40, this);
-    }
-    isU2f0s32(): boolean { return __S.getUint16(4, this) === 3; }
-    setU2f0s32(value: number): void {
-        __S.setUint16(4, 3, this);
-        __S.setInt32(40, value, this);
-    }
-    getU2f0s16(): number {
-        __S.testWhich("u2f0s16", __S.getUint16(4, this), 2, this);
-        return __S.getInt16(36, this);
-    }
-    isU2f0s16(): boolean { return __S.getUint16(4, this) === 2; }
-    setU2f0s16(value: number): void {
-        __S.setUint16(4, 2, this);
-        __S.setInt16(36, value, this);
-    }
-    getU2f0s8(): number {
-        __S.testWhich("u2f0s8", __S.getUint16(4, this), 1, this);
-        return __S.getInt8(33, this);
-    }
-    isU2f0s8(): boolean { return __S.getUint16(4, this) === 1; }
-    setU2f0s8(value: number): void {
-        __S.setUint16(4, 1, this);
-        __S.setInt8(33, value, this);
-    }
-    getU2f0s1(): boolean {
-        __S.testWhich("u2f0s1", __S.getUint16(4, this), 0, this);
-        return __S.getBit(256, this);
-    }
-    isU2f0s1(): boolean { return __S.getUint16(4, this) === 0; }
-    setU2f0s1(value: boolean): void {
-        __S.setUint16(4, 0, this);
-        __S.setBit(256, value, this);
-    }
-    toString(): string { return "TestUnion_Union2_" + super.toString(); }
-    which(): TestUnion_Union2_Which { return __S.getUint16(4, this); }
-}
-export enum TestUnion_Union3_Which {
-    U3F0S64 = 4,
-    U3F0S32 = 3,
-    U3F0S16 = 2,
-    U3F0S8 = 1,
-    U3F0S1 = 0
-}
-export class TestUnion_Union3 extends __S {
-    static readonly U3F0S64 = TestUnion_Union3_Which.U3F0S64;
-    static readonly U3F0S32 = TestUnion_Union3_Which.U3F0S32;
-    static readonly U3F0S16 = TestUnion_Union3_Which.U3F0S16;
-    static readonly U3F0S8 = TestUnion_Union3_Which.U3F0S8;
-    static readonly U3F0S1 = TestUnion_Union3_Which.U3F0S1;
-    static readonly _capnp = { displayName: "union3", id: "a2fb022ec7f30053", size: new __O(64, 2) };
-    getU3f0s64(): capnp.Int64 {
-        __S.testWhich("u3f0s64", __S.getUint16(6, this), 4, this);
-        return __S.getInt64(56, this);
-    }
-    isU3f0s64(): boolean { return __S.getUint16(6, this) === 4; }
-    setU3f0s64(value: capnp.Int64): void {
-        __S.setUint16(6, 4, this);
-        __S.setInt64(56, value, this);
-    }
-    getU3f0s32(): number {
-        __S.testWhich("u3f0s32", __S.getUint16(6, this), 3, this);
-        return __S.getInt32(44, this);
-    }
-    isU3f0s32(): boolean { return __S.getUint16(6, this) === 3; }
-    setU3f0s32(value: number): void {
-        __S.setUint16(6, 3, this);
-        __S.setInt32(44, value, this);
-    }
-    getU3f0s16(): number {
-        __S.testWhich("u3f0s16", __S.getUint16(6, this), 2, this);
-        return __S.getInt16(38, this);
-    }
-    isU3f0s16(): boolean { return __S.getUint16(6, this) === 2; }
-    setU3f0s16(value: number): void {
-        __S.setUint16(6, 2, this);
-        __S.setInt16(38, value, this);
-    }
-    getU3f0s8(): number {
-        __S.testWhich("u3f0s8", __S.getUint16(6, this), 1, this);
-        return __S.getInt8(34, this);
-    }
-    isU3f0s8(): boolean { return __S.getUint16(6, this) === 1; }
-    setU3f0s8(value: number): void {
-        __S.setUint16(6, 1, this);
-        __S.setInt8(34, value, this);
-    }
-    getU3f0s1(): boolean {
-        __S.testWhich("u3f0s1", __S.getUint16(6, this), 0, this);
-        return __S.getBit(257, this);
-    }
-    isU3f0s1(): boolean { return __S.getUint16(6, this) === 0; }
-    setU3f0s1(value: boolean): void {
-        __S.setUint16(6, 0, this);
-        __S.setBit(257, value, this);
-    }
-    toString(): string { return "TestUnion_Union3_" + super.toString(); }
-    which(): TestUnion_Union3_Which { return __S.getUint16(6, this); }
-}
 export enum TestUnion_Union1_Which {
     U1F0S0 = 0,
     U1F0S1 = 1,
@@ -693,6 +569,130 @@ export class TestUnion_Union1 extends __S {
     }
     toString(): string { return "TestUnion_Union1_" + super.toString(); }
     which(): TestUnion_Union1_Which { return __S.getUint16(2, this); }
+}
+export enum TestUnion_Union2_Which {
+    U2F0S64 = 4,
+    U2F0S32 = 3,
+    U2F0S16 = 2,
+    U2F0S8 = 1,
+    U2F0S1 = 0
+}
+export class TestUnion_Union2 extends __S {
+    static readonly U2F0S64 = TestUnion_Union2_Which.U2F0S64;
+    static readonly U2F0S32 = TestUnion_Union2_Which.U2F0S32;
+    static readonly U2F0S16 = TestUnion_Union2_Which.U2F0S16;
+    static readonly U2F0S8 = TestUnion_Union2_Which.U2F0S8;
+    static readonly U2F0S1 = TestUnion_Union2_Which.U2F0S1;
+    static readonly _capnp = { displayName: "union2", id: "afc5fd419f0d66d4", size: new __O(64, 2) };
+    getU2f0s64(): capnp.Int64 {
+        __S.testWhich("u2f0s64", __S.getUint16(4, this), 4, this);
+        return __S.getInt64(48, this);
+    }
+    isU2f0s64(): boolean { return __S.getUint16(4, this) === 4; }
+    setU2f0s64(value: capnp.Int64): void {
+        __S.setUint16(4, 4, this);
+        __S.setInt64(48, value, this);
+    }
+    getU2f0s32(): number {
+        __S.testWhich("u2f0s32", __S.getUint16(4, this), 3, this);
+        return __S.getInt32(40, this);
+    }
+    isU2f0s32(): boolean { return __S.getUint16(4, this) === 3; }
+    setU2f0s32(value: number): void {
+        __S.setUint16(4, 3, this);
+        __S.setInt32(40, value, this);
+    }
+    getU2f0s16(): number {
+        __S.testWhich("u2f0s16", __S.getUint16(4, this), 2, this);
+        return __S.getInt16(36, this);
+    }
+    isU2f0s16(): boolean { return __S.getUint16(4, this) === 2; }
+    setU2f0s16(value: number): void {
+        __S.setUint16(4, 2, this);
+        __S.setInt16(36, value, this);
+    }
+    getU2f0s8(): number {
+        __S.testWhich("u2f0s8", __S.getUint16(4, this), 1, this);
+        return __S.getInt8(33, this);
+    }
+    isU2f0s8(): boolean { return __S.getUint16(4, this) === 1; }
+    setU2f0s8(value: number): void {
+        __S.setUint16(4, 1, this);
+        __S.setInt8(33, value, this);
+    }
+    getU2f0s1(): boolean {
+        __S.testWhich("u2f0s1", __S.getUint16(4, this), 0, this);
+        return __S.getBit(256, this);
+    }
+    isU2f0s1(): boolean { return __S.getUint16(4, this) === 0; }
+    setU2f0s1(value: boolean): void {
+        __S.setUint16(4, 0, this);
+        __S.setBit(256, value, this);
+    }
+    toString(): string { return "TestUnion_Union2_" + super.toString(); }
+    which(): TestUnion_Union2_Which { return __S.getUint16(4, this); }
+}
+export enum TestUnion_Union3_Which {
+    U3F0S64 = 4,
+    U3F0S32 = 3,
+    U3F0S16 = 2,
+    U3F0S8 = 1,
+    U3F0S1 = 0
+}
+export class TestUnion_Union3 extends __S {
+    static readonly U3F0S64 = TestUnion_Union3_Which.U3F0S64;
+    static readonly U3F0S32 = TestUnion_Union3_Which.U3F0S32;
+    static readonly U3F0S16 = TestUnion_Union3_Which.U3F0S16;
+    static readonly U3F0S8 = TestUnion_Union3_Which.U3F0S8;
+    static readonly U3F0S1 = TestUnion_Union3_Which.U3F0S1;
+    static readonly _capnp = { displayName: "union3", id: "a2fb022ec7f30053", size: new __O(64, 2) };
+    getU3f0s64(): capnp.Int64 {
+        __S.testWhich("u3f0s64", __S.getUint16(6, this), 4, this);
+        return __S.getInt64(56, this);
+    }
+    isU3f0s64(): boolean { return __S.getUint16(6, this) === 4; }
+    setU3f0s64(value: capnp.Int64): void {
+        __S.setUint16(6, 4, this);
+        __S.setInt64(56, value, this);
+    }
+    getU3f0s32(): number {
+        __S.testWhich("u3f0s32", __S.getUint16(6, this), 3, this);
+        return __S.getInt32(44, this);
+    }
+    isU3f0s32(): boolean { return __S.getUint16(6, this) === 3; }
+    setU3f0s32(value: number): void {
+        __S.setUint16(6, 3, this);
+        __S.setInt32(44, value, this);
+    }
+    getU3f0s16(): number {
+        __S.testWhich("u3f0s16", __S.getUint16(6, this), 2, this);
+        return __S.getInt16(38, this);
+    }
+    isU3f0s16(): boolean { return __S.getUint16(6, this) === 2; }
+    setU3f0s16(value: number): void {
+        __S.setUint16(6, 2, this);
+        __S.setInt16(38, value, this);
+    }
+    getU3f0s8(): number {
+        __S.testWhich("u3f0s8", __S.getUint16(6, this), 1, this);
+        return __S.getInt8(34, this);
+    }
+    isU3f0s8(): boolean { return __S.getUint16(6, this) === 1; }
+    setU3f0s8(value: number): void {
+        __S.setUint16(6, 1, this);
+        __S.setInt8(34, value, this);
+    }
+    getU3f0s1(): boolean {
+        __S.testWhich("u3f0s1", __S.getUint16(6, this), 0, this);
+        return __S.getBit(257, this);
+    }
+    isU3f0s1(): boolean { return __S.getUint16(6, this) === 0; }
+    setU3f0s1(value: boolean): void {
+        __S.setUint16(6, 0, this);
+        __S.setBit(257, value, this);
+    }
+    toString(): string { return "TestUnion_Union3_" + super.toString(); }
+    which(): TestUnion_Union3_Which { return __S.getUint16(6, this); }
 }
 export enum TestUnion_Union0_Which {
     U0F0S0 = 0,
@@ -969,16 +969,6 @@ export class TestUnionInUnion extends __S {
     initOuter(): TestUnionInUnion_Outer { return __S.getAs(TestUnionInUnion_Outer, this); }
     toString(): string { return "TestUnionInUnion_" + super.toString(); }
 }
-export class TestGroups_Groups_Baz extends __S {
-    static readonly _capnp = { displayName: "baz", id: "f0fa30304066a4b3", size: new __O(16, 2) };
-    getCorge(): number { return __S.getInt32(0, this); }
-    setCorge(value: number): void { __S.setInt32(0, value, this); }
-    getGrault(): string { return __S.getText(0, this); }
-    setGrault(value: string): void { __S.setText(0, value, this); }
-    getGarply(): string { return __S.getText(1, this); }
-    setGarply(value: string): void { __S.setText(1, value, this); }
-    toString(): string { return "TestGroups_Groups_Baz_" + super.toString(); }
-}
 export class TestGroups_Groups_Bar extends __S {
     static readonly _capnp = { displayName: "bar", id: "b727c0d0091a001d", size: new __O(16, 2) };
     getCorge(): number { return __S.getInt32(0, this); }
@@ -998,6 +988,16 @@ export class TestGroups_Groups_Foo extends __S {
     getGarply(): string { return __S.getText(0, this); }
     setGarply(value: string): void { __S.setText(0, value, this); }
     toString(): string { return "TestGroups_Groups_Foo_" + super.toString(); }
+}
+export class TestGroups_Groups_Baz extends __S {
+    static readonly _capnp = { displayName: "baz", id: "f0fa30304066a4b3", size: new __O(16, 2) };
+    getCorge(): number { return __S.getInt32(0, this); }
+    setCorge(value: number): void { __S.setInt32(0, value, this); }
+    getGrault(): string { return __S.getText(0, this); }
+    setGrault(value: string): void { __S.setText(0, value, this); }
+    getGarply(): string { return __S.getText(1, this); }
+    setGarply(value: string): void { __S.setText(1, value, this); }
+    toString(): string { return "TestGroups_Groups_Baz_" + super.toString(); }
 }
 export enum TestGroups_Groups_Which {
     FOO = 0,
@@ -1047,65 +1047,6 @@ export class TestGroups extends __S {
     getGroups(): TestGroups_Groups { return __S.getAs(TestGroups_Groups, this); }
     initGroups(): TestGroups_Groups { return __S.getAs(TestGroups_Groups, this); }
     toString(): string { return "TestGroups_" + super.toString(); }
-}
-export class TestInterleavedGroups_Group1_Corge extends __S {
-    static readonly _capnp = { displayName: "corge", id: "db0afd413f4a313a", size: new __O(48, 6) };
-    getGrault(): capnp.Uint64 { return __S.getUint64(32, this); }
-    setGrault(value: capnp.Uint64): void { __S.setUint64(32, value, this); }
-    getGarply(): number { return __S.getUint16(24, this); }
-    setGarply(value: number): void { __S.setUint16(24, value, this); }
-    getPlugh(): string { return __S.getText(2, this); }
-    setPlugh(value: string): void { __S.setText(2, value, this); }
-    getXyzzy(): string { return __S.getText(4, this); }
-    setXyzzy(value: string): void { __S.setText(4, value, this); }
-    toString(): string { return "TestInterleavedGroups_Group1_Corge_" + super.toString(); }
-}
-export enum TestInterleavedGroups_Group1_Which {
-    QUX = 0,
-    CORGE = 1,
-    FRED = 2
-}
-export class TestInterleavedGroups_Group1 extends __S {
-    static readonly QUX = TestInterleavedGroups_Group1_Which.QUX;
-    static readonly CORGE = TestInterleavedGroups_Group1_Which.CORGE;
-    static readonly FRED = TestInterleavedGroups_Group1_Which.FRED;
-    static readonly _capnp = { displayName: "group1", id: "c7485a3516c7d3c8", size: new __O(48, 6) };
-    getFoo(): number { return __S.getUint32(0, this); }
-    setFoo(value: number): void { __S.setUint32(0, value, this); }
-    getBar(): capnp.Uint64 { return __S.getUint64(8, this); }
-    setBar(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
-    getQux(): number {
-        __S.testWhich("qux", __S.getUint16(28, this), 0, this);
-        return __S.getUint16(24, this);
-    }
-    isQux(): boolean { return __S.getUint16(28, this) === 0; }
-    setQux(value: number): void {
-        __S.setUint16(28, 0, this);
-        __S.setUint16(24, value, this);
-    }
-    getCorge(): TestInterleavedGroups_Group1_Corge {
-        __S.testWhich("corge", __S.getUint16(28, this), 1, this);
-        return __S.getAs(TestInterleavedGroups_Group1_Corge, this);
-    }
-    initCorge(): TestInterleavedGroups_Group1_Corge {
-        __S.setUint16(28, 1, this);
-        return __S.getAs(TestInterleavedGroups_Group1_Corge, this);
-    }
-    isCorge(): boolean { return __S.getUint16(28, this) === 1; }
-    setCorge(): void { __S.setUint16(28, 1, this); }
-    getFred(): string {
-        __S.testWhich("fred", __S.getUint16(28, this), 2, this);
-        return __S.getText(2, this);
-    }
-    isFred(): boolean { return __S.getUint16(28, this) === 2; }
-    setFred(value: string): void {
-        __S.setUint16(28, 2, this);
-        __S.setText(2, value, this);
-    }
-    getWaldo(): string { return __S.getText(0, this); }
-    setWaldo(value: string): void { __S.setText(0, value, this); }
-    toString(): string { return "TestInterleavedGroups_Group1_" + super.toString(); }
-    which(): TestInterleavedGroups_Group1_Which { return __S.getUint16(28, this); }
 }
 export class TestInterleavedGroups_Group2_Corge extends __S {
     static readonly _capnp = { displayName: "corge", id: "a017f0366827ee37", size: new __O(48, 6) };
@@ -1165,6 +1106,65 @@ export class TestInterleavedGroups_Group2 extends __S {
     setWaldo(value: string): void { __S.setText(1, value, this); }
     toString(): string { return "TestInterleavedGroups_Group2_" + super.toString(); }
     which(): TestInterleavedGroups_Group2_Which { return __S.getUint16(30, this); }
+}
+export class TestInterleavedGroups_Group1_Corge extends __S {
+    static readonly _capnp = { displayName: "corge", id: "db0afd413f4a313a", size: new __O(48, 6) };
+    getGrault(): capnp.Uint64 { return __S.getUint64(32, this); }
+    setGrault(value: capnp.Uint64): void { __S.setUint64(32, value, this); }
+    getGarply(): number { return __S.getUint16(24, this); }
+    setGarply(value: number): void { __S.setUint16(24, value, this); }
+    getPlugh(): string { return __S.getText(2, this); }
+    setPlugh(value: string): void { __S.setText(2, value, this); }
+    getXyzzy(): string { return __S.getText(4, this); }
+    setXyzzy(value: string): void { __S.setText(4, value, this); }
+    toString(): string { return "TestInterleavedGroups_Group1_Corge_" + super.toString(); }
+}
+export enum TestInterleavedGroups_Group1_Which {
+    QUX = 0,
+    CORGE = 1,
+    FRED = 2
+}
+export class TestInterleavedGroups_Group1 extends __S {
+    static readonly QUX = TestInterleavedGroups_Group1_Which.QUX;
+    static readonly CORGE = TestInterleavedGroups_Group1_Which.CORGE;
+    static readonly FRED = TestInterleavedGroups_Group1_Which.FRED;
+    static readonly _capnp = { displayName: "group1", id: "c7485a3516c7d3c8", size: new __O(48, 6) };
+    getFoo(): number { return __S.getUint32(0, this); }
+    setFoo(value: number): void { __S.setUint32(0, value, this); }
+    getBar(): capnp.Uint64 { return __S.getUint64(8, this); }
+    setBar(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    getQux(): number {
+        __S.testWhich("qux", __S.getUint16(28, this), 0, this);
+        return __S.getUint16(24, this);
+    }
+    isQux(): boolean { return __S.getUint16(28, this) === 0; }
+    setQux(value: number): void {
+        __S.setUint16(28, 0, this);
+        __S.setUint16(24, value, this);
+    }
+    getCorge(): TestInterleavedGroups_Group1_Corge {
+        __S.testWhich("corge", __S.getUint16(28, this), 1, this);
+        return __S.getAs(TestInterleavedGroups_Group1_Corge, this);
+    }
+    initCorge(): TestInterleavedGroups_Group1_Corge {
+        __S.setUint16(28, 1, this);
+        return __S.getAs(TestInterleavedGroups_Group1_Corge, this);
+    }
+    isCorge(): boolean { return __S.getUint16(28, this) === 1; }
+    setCorge(): void { __S.setUint16(28, 1, this); }
+    getFred(): string {
+        __S.testWhich("fred", __S.getUint16(28, this), 2, this);
+        return __S.getText(2, this);
+    }
+    isFred(): boolean { return __S.getUint16(28, this) === 2; }
+    setFred(value: string): void {
+        __S.setUint16(28, 2, this);
+        __S.setText(2, value, this);
+    }
+    getWaldo(): string { return __S.getText(0, this); }
+    setWaldo(value: string): void { __S.setText(0, value, this); }
+    toString(): string { return "TestInterleavedGroups_Group1_" + super.toString(); }
+    which(): TestInterleavedGroups_Group1_Which { return __S.getUint16(28, this); }
 }
 export class TestInterleavedGroups extends __S {
     static readonly _capnp = { displayName: "TestInterleavedGroups", id: "f77ed6f7454eec40", size: new __O(48, 6) };
@@ -1446,56 +1446,6 @@ export class TestListDefaults extends __S {
     setLists(value: TestLists): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "TestListDefaults_" + super.toString(); }
 }
-export enum TestLateUnion_TheUnion_Which {
-    QUX = 0,
-    CORGE = 1,
-    GRAULT = 2
-}
-export class TestLateUnion_TheUnion extends __S {
-    static readonly QUX = TestLateUnion_TheUnion_Which.QUX;
-    static readonly CORGE = TestLateUnion_TheUnion_Which.CORGE;
-    static readonly GRAULT = TestLateUnion_TheUnion_Which.GRAULT;
-    static readonly _capnp = { displayName: "theUnion", id: "807280a2901aa079", size: new __O(24, 3) };
-    getQux(): string {
-        __S.testWhich("qux", __S.getUint16(6, this), 0, this);
-        return __S.getText(1, this);
-    }
-    isQux(): boolean { return __S.getUint16(6, this) === 0; }
-    setQux(value: string): void {
-        __S.setUint16(6, 0, this);
-        __S.setText(1, value, this);
-    }
-    adoptCorge(value: capnp.Orphan<capnp.List<number>>): void {
-        __S.setUint16(6, 1, this);
-        __S.adopt(value, __S.getPointer(1, this));
-    }
-    disownCorge(): capnp.Orphan<capnp.List<number>> { return __S.disown(this.getCorge()); }
-    getCorge(): capnp.List<number> {
-        __S.testWhich("corge", __S.getUint16(6, this), 1, this);
-        return __S.getList(1, capnp.Int32List, this);
-    }
-    hasCorge(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
-    initCorge(length: number): capnp.List<number> {
-        __S.setUint16(6, 1, this);
-        return __S.initList(1, capnp.Int32List, length, this);
-    }
-    isCorge(): boolean { return __S.getUint16(6, this) === 1; }
-    setCorge(value: capnp.List<number>): void {
-        __S.setUint16(6, 1, this);
-        __S.copyFrom(value, __S.getPointer(1, this));
-    }
-    getGrault(): number {
-        __S.testWhich("grault", __S.getUint16(6, this), 2, this);
-        return __S.getFloat32(8, this);
-    }
-    isGrault(): boolean { return __S.getUint16(6, this) === 2; }
-    setGrault(value: number): void {
-        __S.setUint16(6, 2, this);
-        __S.setFloat32(8, value, this);
-    }
-    toString(): string { return "TestLateUnion_TheUnion_" + super.toString(); }
-    which(): TestLateUnion_TheUnion_Which { return __S.getUint16(6, this); }
-}
 export enum TestLateUnion_AnotherUnion_Which {
     QUX = 0,
     CORGE = 1,
@@ -1545,6 +1495,56 @@ export class TestLateUnion_AnotherUnion extends __S {
     }
     toString(): string { return "TestLateUnion_AnotherUnion_" + super.toString(); }
     which(): TestLateUnion_AnotherUnion_Which { return __S.getUint16(12, this); }
+}
+export enum TestLateUnion_TheUnion_Which {
+    QUX = 0,
+    CORGE = 1,
+    GRAULT = 2
+}
+export class TestLateUnion_TheUnion extends __S {
+    static readonly QUX = TestLateUnion_TheUnion_Which.QUX;
+    static readonly CORGE = TestLateUnion_TheUnion_Which.CORGE;
+    static readonly GRAULT = TestLateUnion_TheUnion_Which.GRAULT;
+    static readonly _capnp = { displayName: "theUnion", id: "807280a2901aa079", size: new __O(24, 3) };
+    getQux(): string {
+        __S.testWhich("qux", __S.getUint16(6, this), 0, this);
+        return __S.getText(1, this);
+    }
+    isQux(): boolean { return __S.getUint16(6, this) === 0; }
+    setQux(value: string): void {
+        __S.setUint16(6, 0, this);
+        __S.setText(1, value, this);
+    }
+    adoptCorge(value: capnp.Orphan<capnp.List<number>>): void {
+        __S.setUint16(6, 1, this);
+        __S.adopt(value, __S.getPointer(1, this));
+    }
+    disownCorge(): capnp.Orphan<capnp.List<number>> { return __S.disown(this.getCorge()); }
+    getCorge(): capnp.List<number> {
+        __S.testWhich("corge", __S.getUint16(6, this), 1, this);
+        return __S.getList(1, capnp.Int32List, this);
+    }
+    hasCorge(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initCorge(length: number): capnp.List<number> {
+        __S.setUint16(6, 1, this);
+        return __S.initList(1, capnp.Int32List, length, this);
+    }
+    isCorge(): boolean { return __S.getUint16(6, this) === 1; }
+    setCorge(value: capnp.List<number>): void {
+        __S.setUint16(6, 1, this);
+        __S.copyFrom(value, __S.getPointer(1, this));
+    }
+    getGrault(): number {
+        __S.testWhich("grault", __S.getUint16(6, this), 2, this);
+        return __S.getFloat32(8, this);
+    }
+    isGrault(): boolean { return __S.getUint16(6, this) === 2; }
+    setGrault(value: number): void {
+        __S.setUint16(6, 2, this);
+        __S.setFloat32(8, value, this);
+    }
+    toString(): string { return "TestLateUnion_TheUnion_" + super.toString(); }
+    which(): TestLateUnion_TheUnion_Which { return __S.getUint16(6, this); }
 }
 export class TestLateUnion extends __S {
     static readonly _capnp = { displayName: "TestLateUnion", id: "a76e3c9bb7fd56d3", size: new __O(24, 3) };
@@ -1753,8 +1753,8 @@ export class TestPrintInlineStructs extends __S {
     toString(): string { return "TestPrintInlineStructs_" + super.toString(); }
 }
 export class TestWholeFloatDefault extends __S {
-    static readonly CONSTANT = 456;
     static readonly BIG_CONSTANT = 4.000000060189865e+30;
+    static readonly CONSTANT = 456;
     static readonly _capnp = { displayName: "TestWholeFloatDefault", id: "91afd4a864dbb030", size: new __O(8, 0), defaultField: capnp.getFloat32Mask(123), defaultBigField: capnp.getFloat32Mask(2.0000000300949324e+30) };
     getField(): number { return __S.getFloat32(0, this, TestWholeFloatDefault._capnp.defaultField); }
     setField(value: number): void { __S.setFloat32(0, value, this); }
@@ -2108,38 +2108,38 @@ export class TestEmptyStruct extends __S {
     toString(): string { return "TestEmptyStruct_" + super.toString(); }
 }
 export class TestConstants extends __S {
-    static readonly TEXT_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x07, 0x11, 0x01, 0x1e, 0x11, 0x09, 0x32, 0x11, 0x09, 0x32, 0x11, 0x09, 0x2a, 0x1f, 0x70, 0x6c, 0x75, 0x67, 0x68, 0x1f, 0x78, 0x79, 0x7a, 0x7a, 0x79, 0x0f, 0x74, 0x68, 0x75, 0x64]).buffer);
-    static readonly ENUM_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x13, 0x04, 0x07]).buffer);
-    static readonly FLOAT64LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x05, 0x11, 0x01, 0x25, 0xf0, 0xc0, 0x61, 0xbe, 0x40, 0xc0, 0xf0, 0x7f, 0xc0, 0xf0, 0xff, 0xc0, 0xf8, 0x7f]).buffer);
-    static readonly FLOAT32LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x03, 0x11, 0x01, 0x24, 0xce, 0x9c, 0xad, 0x45, 0x80, 0x7f, 0xcc, 0x80, 0xff, 0xc0, 0x7f]).buffer);
-    static readonly UINT64LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x0d, 0xff, 0xc7, 0x71, 0xac, 0xb5, 0xaf, 0x98, 0x32, 0x9a, 0x00]).buffer);
-    static readonly UINT32LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x0c, 0x0f, 0x55, 0xa1, 0xae, 0xc6]).buffer);
-    static readonly UINT8LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x12, 0x03, 0x6f, 0xde]).buffer);
-    static readonly INT64LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x03, 0x11, 0x01, 0x15, 0xff, 0xc7, 0x71, 0xc4, 0x2b, 0xab, 0x75, 0x6b, 0x0f, 0x01, 0x39, 0x8e, 0x3b, 0xd4, 0x54, 0x8a, 0x94, 0xf0]).buffer);
-    static readonly INT32LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x14, 0xff, 0xc7, 0x6b, 0x9f, 0x06, 0x39, 0x94, 0x60, 0xf9, 0x00]).buffer);
-    static readonly INT16LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x13, 0x0f, 0x67, 0x2b, 0x99, 0xd4]).buffer);
-    static readonly INT8LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x12, 0x03, 0x6f, 0x91]).buffer);
-    static readonly BOOL_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x21, 0x01, 0x09]).buffer);
-    static readonly ENUM_CONST = 5;
-    static readonly FLOAT64CONST = -1.23e+47;
-    static readonly TEXT_CONST = "foo";
-    static readonly STRUCT_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0xd0, 0x50, 0x06, 0x14, 0xff, 0x01, 0xf4, 0x80, 0x0d, 0x0e, 0x10, 0x4c, 0xfb, 0x00, 0x3f, 0x4e, 0x73, 0xe8, 0x38, 0xa6, 0x33, 0xfd, 0x5a, 0xd2, 0x04, 0x14, 0x88, 0x62, 0x03, 0xff, 0xd2, 0x0a, 0x6f, 0x12, 0x21, 0x19, 0xcc, 0x04, 0x00, 0x1f, 0x5f, 0x70, 0x09, 0xaf, 0x02, 0xe0, 0x90, 0x75, 0x40, 0x11, 0x4d, 0x22, 0x11, 0x4d, 0x1a, 0x51, 0x4c, 0x06, 0x14, 0x13, 0x25, 0x01, 0x18, 0x13, 0x21, 0x01, 0x29, 0x13, 0x21, 0x01, 0x22, 0x13, 0x21, 0x01, 0x23, 0x13, 0x21, 0x01, 0x24, 0x13, 0x25, 0x01, 0x25, 0x13, 0x31, 0x01, 0x22, 0x13, 0x31, 0x01, 0x23, 0x13, 0x31, 0x01, 0x24, 0x13, 0x35, 0x01, 0x25, 0x13, 0x41, 0x01, 0x34, 0x13, 0x49, 0x01, 0x35, 0x13, 0x5d, 0x01, 0x1e, 0x13, 0x71, 0x01, 0x1e, 0x33, 0x85, 0x01, 0x77, 0x02, 0x13, 0xd5, 0x02, 0x1b, 0x00, 0x00, 0x07, 0x62, 0x61, 0x7a, 0x07, 0x71, 0x75, 0x78, 0x00, 0x05, 0x11, 0x4d, 0x3a, 0x00, 0x00, 0x51, 0x48, 0x06, 0x14, 0x00, 0x10, 0x3f, 0x6e, 0x65, 0x73, 0x74, 0x65, 0x64, 0x00, 0x05, 0x11, 0x4d, 0x72, 0x00, 0x12, 0xff, 0x72, 0x65, 0x61, 0x6c, 0x6c, 0x79, 0x20, 0x6e, 0x00, 0x1f, 0x65, 0x73, 0x74, 0x65, 0x64, 0x01, 0x1a, 0x0f, 0x0c, 0xde, 0x80, 0x7f, 0xef, 0xd2, 0x04, 0xd2, 0xe9, 0x80, 0xff, 0x7f, 0xf7, 0x4e, 0x61, 0xbc, 0x40, 0xd3, 0xa0, 0xfa, 0xf8, 0x80, 0xff, 0xff, 0xff, 0x7f, 0x3f, 0x79, 0xdf, 0x0d, 0x86, 0x48, 0x70, 0xff, 0x2e, 0x75, 0x13, 0xfd, 0x8a, 0x96, 0xfd, 0xff, 0x00, 0x80, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x0b, 0x0c, 0x22, 0xff, 0xcf, 0xd2, 0x04, 0x2e, 0x16, 0xff, 0xff, 0xf7, 0x4e, 0x61, 0xbc, 0xc0, 0x2c, 0x5f, 0x05, 0xf0, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x79, 0xdf, 0x0d, 0x86, 0x48, 0x70, 0x7f, 0xd2, 0x8a, 0xec, 0x02, 0x75, 0x69, 0x02, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0xf0, 0x38, 0xb4, 0x96, 0x49, 0xff, 0xc2, 0xbd, 0xf0, 0x7c, 0xc2, 0xbd, 0xf0, 0xfc, 0x01, 0xea, 0x1c, 0x08, 0x02, 0xea, 0x1c, 0x08, 0x82, 0x00, 0x00, 0xff, 0x40, 0xde, 0x77, 0x83, 0x21, 0x12, 0xdc, 0x42, 0x04, 0x29, 0x90, 0x23, 0xca, 0xe5, 0xc8, 0x76, 0x7f, 0x29, 0x90, 0x23, 0xca, 0xe5, 0xc8, 0x76, 0xff, 0x91, 0xf7, 0x50, 0x37, 0x9e, 0x78, 0x66, 0x00, 0x91, 0xf7, 0x50, 0x37, 0x9e, 0x78, 0x66, 0x80, 0x11, 0x09, 0x2a, 0x11, 0x09, 0x32, 0x11, 0x09, 0x3a, 0x0f, 0x71, 0x75, 0x75, 0x78, 0x1f, 0x63, 0x6f, 0x72, 0x67, 0x65, 0x3f, 0x67, 0x72, 0x61, 0x75, 0x6c, 0x74, 0x11, 0x09, 0x32, 0x11, 0x09, 0x2a, 0x11, 0x09, 0x22, 0x3f, 0x67, 0x61, 0x72, 0x70, 0x6c, 0x79, 0x1f, 0x77, 0x61, 0x6c, 0x64, 0x6f, 0x0f, 0x66, 0x72, 0x65, 0x64, 0x51, 0x0c, 0x06, 0x14, 0x00, 0x05, 0x13, 0x1d, 0x01, 0x7a, 0x00, 0x18, 0x11, 0xbd, 0x7a, 0x00, 0x18, 0x11, 0x5d, 0x7a, 0x00, 0x12, 0xff, 0x78, 0x20, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x00, 0x3f, 0x6c, 0x69, 0x73, 0x74, 0x20, 0x31, 0xff, 0x78, 0x20, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x00, 0x3f, 0x6c, 0x69, 0x73, 0x74, 0x20, 0x32, 0xff, 0x78, 0x20, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x00, 0x3f, 0x6c, 0x69, 0x73, 0x74, 0x20, 0x33, 0x15, 0x03, 0x01, 0x06]).buffer);
-    static readonly DATA_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x08, 0x11, 0x01, 0x1e, 0x11, 0x09, 0x22, 0x11, 0x09, 0x4a, 0x11, 0x0d, 0x3a, 0x0f, 0x6f, 0x6f, 0x70, 0x73, 0xff, 0x65, 0x78, 0x68, 0x61, 0x75, 0x73, 0x74, 0x65, 0x00, 0x01, 0x64, 0x7f, 0x72, 0x66, 0x63, 0x33, 0x30, 0x39, 0x32]).buffer);
-    static readonly DATA_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x1a, 0x07, 0x62, 0x61, 0x72]).buffer);
-    static readonly UINT32CONST = 3456789012;
     static readonly STRUCT_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x56, 0x31, 0x01, 0x77, 0x02, 0x51, 0x0c, 0x06, 0x14, 0x00, 0x05, 0x13, 0x1d, 0x01, 0x6a, 0x00, 0x18, 0x11, 0xbd, 0x6a, 0x00, 0x18, 0x11, 0x5d, 0x6a, 0x00, 0x12, 0xff, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x6c, 0x69, 0x00, 0x0f, 0x73, 0x74, 0x20, 0x31, 0xff, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x6c, 0x69, 0x00, 0x0f, 0x73, 0x74, 0x20, 0x32, 0xff, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x6c, 0x69, 0x00, 0x0f, 0x73, 0x74, 0x20, 0x33]).buffer);
-    static readonly INT64CONST = new capnp.Int64(new Uint8Array([0x87, 0x20, 0xf2, 0x79, 0xb7, 0x8f, 0xff, 0xff]));
-    static readonly INT32CONST = -12345678;
-    static readonly INT8CONST = -123;
-    static readonly BOOL_CONST = true;
-    static readonly VOID_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x01, 0x11, 0x01, 0x30]).buffer);
-    static readonly UINT64CONST = new capnp.Int64(new Uint8Array([0xd2, 0x0a, 0x1f, 0xeb, 0x8c, 0xa9, 0x54, 0xab]));
+    static readonly INT16LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x13, 0x0f, 0x67, 0x2b, 0x99, 0xd4]).buffer);
+    static readonly ENUM_CONST = 5;
     static readonly VOID_CONST = undefined;
-    static readonly UINT16LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x13, 0x0f, 0x35, 0x82, 0x9c, 0xad]).buffer);
-    static readonly UINT16CONST = 45678;
-    static readonly FLOAT32CONST = 1234.5;
+    static readonly VOID_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x01, 0x11, 0x01, 0x30]).buffer);
+    static readonly UINT8LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x12, 0x03, 0x6f, 0xde]).buffer);
+    static readonly STRUCT_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0xd0, 0x50, 0x06, 0x14, 0xff, 0x01, 0xf4, 0x80, 0x0d, 0x0e, 0x10, 0x4c, 0xfb, 0x00, 0x3f, 0x4e, 0x73, 0xe8, 0x38, 0xa6, 0x33, 0xfd, 0x5a, 0xd2, 0x04, 0x14, 0x88, 0x62, 0x03, 0xff, 0xd2, 0x0a, 0x6f, 0x12, 0x21, 0x19, 0xcc, 0x04, 0x00, 0x1f, 0x5f, 0x70, 0x09, 0xaf, 0x02, 0xe0, 0x90, 0x75, 0x40, 0x11, 0x4d, 0x22, 0x11, 0x4d, 0x1a, 0x51, 0x4c, 0x06, 0x14, 0x13, 0x25, 0x01, 0x18, 0x13, 0x21, 0x01, 0x29, 0x13, 0x21, 0x01, 0x22, 0x13, 0x21, 0x01, 0x23, 0x13, 0x21, 0x01, 0x24, 0x13, 0x25, 0x01, 0x25, 0x13, 0x31, 0x01, 0x22, 0x13, 0x31, 0x01, 0x23, 0x13, 0x31, 0x01, 0x24, 0x13, 0x35, 0x01, 0x25, 0x13, 0x41, 0x01, 0x34, 0x13, 0x49, 0x01, 0x35, 0x13, 0x5d, 0x01, 0x1e, 0x13, 0x71, 0x01, 0x1e, 0x33, 0x85, 0x01, 0x77, 0x02, 0x13, 0xd5, 0x02, 0x1b, 0x00, 0x00, 0x07, 0x62, 0x61, 0x7a, 0x07, 0x71, 0x75, 0x78, 0x00, 0x05, 0x11, 0x4d, 0x3a, 0x00, 0x00, 0x51, 0x48, 0x06, 0x14, 0x00, 0x10, 0x3f, 0x6e, 0x65, 0x73, 0x74, 0x65, 0x64, 0x00, 0x05, 0x11, 0x4d, 0x72, 0x00, 0x12, 0xff, 0x72, 0x65, 0x61, 0x6c, 0x6c, 0x79, 0x20, 0x6e, 0x00, 0x1f, 0x65, 0x73, 0x74, 0x65, 0x64, 0x01, 0x1a, 0x0f, 0x0c, 0xde, 0x80, 0x7f, 0xef, 0xd2, 0x04, 0xd2, 0xe9, 0x80, 0xff, 0x7f, 0xf7, 0x4e, 0x61, 0xbc, 0x40, 0xd3, 0xa0, 0xfa, 0xf8, 0x80, 0xff, 0xff, 0xff, 0x7f, 0x3f, 0x79, 0xdf, 0x0d, 0x86, 0x48, 0x70, 0xff, 0x2e, 0x75, 0x13, 0xfd, 0x8a, 0x96, 0xfd, 0xff, 0x00, 0x80, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x00, 0x0b, 0x0c, 0x22, 0xff, 0xcf, 0xd2, 0x04, 0x2e, 0x16, 0xff, 0xff, 0xf7, 0x4e, 0x61, 0xbc, 0xc0, 0x2c, 0x5f, 0x05, 0xf0, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x79, 0xdf, 0x0d, 0x86, 0x48, 0x70, 0x7f, 0xd2, 0x8a, 0xec, 0x02, 0x75, 0x69, 0x02, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0xf0, 0x38, 0xb4, 0x96, 0x49, 0xff, 0xc2, 0xbd, 0xf0, 0x7c, 0xc2, 0xbd, 0xf0, 0xfc, 0x01, 0xea, 0x1c, 0x08, 0x02, 0xea, 0x1c, 0x08, 0x82, 0x00, 0x00, 0xff, 0x40, 0xde, 0x77, 0x83, 0x21, 0x12, 0xdc, 0x42, 0x04, 0x29, 0x90, 0x23, 0xca, 0xe5, 0xc8, 0x76, 0x7f, 0x29, 0x90, 0x23, 0xca, 0xe5, 0xc8, 0x76, 0xff, 0x91, 0xf7, 0x50, 0x37, 0x9e, 0x78, 0x66, 0x00, 0x91, 0xf7, 0x50, 0x37, 0x9e, 0x78, 0x66, 0x80, 0x11, 0x09, 0x2a, 0x11, 0x09, 0x32, 0x11, 0x09, 0x3a, 0x0f, 0x71, 0x75, 0x75, 0x78, 0x1f, 0x63, 0x6f, 0x72, 0x67, 0x65, 0x3f, 0x67, 0x72, 0x61, 0x75, 0x6c, 0x74, 0x11, 0x09, 0x32, 0x11, 0x09, 0x2a, 0x11, 0x09, 0x22, 0x3f, 0x67, 0x61, 0x72, 0x70, 0x6c, 0x79, 0x1f, 0x77, 0x61, 0x6c, 0x64, 0x6f, 0x0f, 0x66, 0x72, 0x65, 0x64, 0x51, 0x0c, 0x06, 0x14, 0x00, 0x05, 0x13, 0x1d, 0x01, 0x7a, 0x00, 0x18, 0x11, 0xbd, 0x7a, 0x00, 0x18, 0x11, 0x5d, 0x7a, 0x00, 0x12, 0xff, 0x78, 0x20, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x00, 0x3f, 0x6c, 0x69, 0x73, 0x74, 0x20, 0x31, 0xff, 0x78, 0x20, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x00, 0x3f, 0x6c, 0x69, 0x73, 0x74, 0x20, 0x32, 0xff, 0x78, 0x20, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x00, 0x3f, 0x6c, 0x69, 0x73, 0x74, 0x20, 0x33, 0x15, 0x03, 0x01, 0x06]).buffer);
+    static readonly TEXT_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x07, 0x11, 0x01, 0x1e, 0x11, 0x09, 0x32, 0x11, 0x09, 0x32, 0x11, 0x09, 0x2a, 0x1f, 0x70, 0x6c, 0x75, 0x67, 0x68, 0x1f, 0x78, 0x79, 0x7a, 0x7a, 0x79, 0x0f, 0x74, 0x68, 0x75, 0x64]).buffer);
+    static readonly INT64CONST = new capnp.Int64(new Uint8Array([0x87, 0x20, 0xf2, 0x79, 0xb7, 0x8f, 0xff, 0xff]));
+    static readonly BOOL_CONST = true;
+    static readonly INT8CONST = -123;
     static readonly INT16CONST = -12345;
+    static readonly INT32CONST = -12345678;
+    static readonly ENUM_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x13, 0x04, 0x07]).buffer);
     static readonly UINT8CONST = 234;
+    static readonly UINT16CONST = 45678;
+    static readonly UINT32CONST = 3456789012;
+    static readonly BOOL_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x21, 0x01, 0x09]).buffer);
+    static readonly UINT64CONST = new capnp.Int64(new Uint8Array([0xd2, 0x0a, 0x1f, 0xeb, 0x8c, 0xa9, 0x54, 0xab]));
+    static readonly FLOAT32CONST = 1234.5;
+    static readonly TEXT_CONST = "foo";
+    static readonly FLOAT32LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x03, 0x11, 0x01, 0x24, 0xce, 0x9c, 0xad, 0x45, 0x80, 0x7f, 0xcc, 0x80, 0xff, 0xc0, 0x7f]).buffer);
+    static readonly DATA_LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x08, 0x11, 0x01, 0x1e, 0x11, 0x09, 0x22, 0x11, 0x09, 0x4a, 0x11, 0x0d, 0x3a, 0x0f, 0x6f, 0x6f, 0x70, 0x73, 0xff, 0x65, 0x78, 0x68, 0x61, 0x75, 0x73, 0x74, 0x65, 0x00, 0x01, 0x64, 0x7f, 0x72, 0x66, 0x63, 0x33, 0x30, 0x39, 0x32]).buffer);
+    static readonly INT32LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x14, 0xff, 0xc7, 0x6b, 0x9f, 0x06, 0x39, 0x94, 0x60, 0xf9, 0x00]).buffer);
+    static readonly INT64LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x03, 0x11, 0x01, 0x15, 0xff, 0xc7, 0x71, 0xc4, 0x2b, 0xab, 0x75, 0x6b, 0x0f, 0x01, 0x39, 0x8e, 0x3b, 0xd4, 0x54, 0x8a, 0x94, 0xf0]).buffer);
+    static readonly UINT16LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x13, 0x0f, 0x35, 0x82, 0x9c, 0xad]).buffer);
+    static readonly FLOAT64CONST = -1.23e+47;
+    static readonly FLOAT64LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x05, 0x11, 0x01, 0x25, 0xf0, 0xc0, 0x61, 0xbe, 0x40, 0xc0, 0xf0, 0x7f, 0xc0, 0xf0, 0xff, 0xc0, 0xf8, 0x7f]).buffer);
+    static readonly UINT32LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x0c, 0x0f, 0x55, 0xa1, 0xae, 0xc6]).buffer);
+    static readonly DATA_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x1a, 0x07, 0x62, 0x61, 0x72]).buffer);
+    static readonly UINT64LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x0d, 0xff, 0xc7, 0x71, 0xac, 0xb5, 0xaf, 0x98, 0x32, 0x9a, 0x00]).buffer);
+    static readonly INT8LIST_CONST = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x11, 0x01, 0x12, 0x03, 0x6f, 0x91]).buffer);
     static readonly _capnp = { displayName: "TestConstants", id: "abed745cd8c92095", size: new __O(0, 0) };
     toString(): string { return "TestConstants_" + super.toString(); }
 }

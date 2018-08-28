@@ -21,63 +21,6 @@ export class Node_NestedNode extends __S {
     setId(value: capnp.Uint64): void { __S.setUint64(0, value, this); }
     toString(): string { return "Node_NestedNode_" + super.toString(); }
 }
-export class Node_Const extends __S {
-    static readonly _capnp = { displayName: "const", id: "b18aa5ac7a0d9420", size: new __O(40, 6) };
-    adoptType(value: capnp.Orphan<Type>): void { __S.adopt(value, __S.getPointer(3, this)); }
-    disownType(): capnp.Orphan<Type> { return __S.disown(this.getType()); }
-    getType(): Type { return __S.getStruct(3, Type, this); }
-    hasType(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
-    initType(): Type { return __S.initStructAt(3, Type, this); }
-    setType(value: Type): void { __S.copyFrom(value, __S.getPointer(3, this)); }
-    adoptValue(value: capnp.Orphan<Value>): void { __S.adopt(value, __S.getPointer(4, this)); }
-    disownValue(): capnp.Orphan<Value> { return __S.disown(this.getValue()); }
-    getValue(): Value { return __S.getStruct(4, Value, this); }
-    hasValue(): boolean { return !__S.isNull(__S.getPointer(4, this)); }
-    initValue(): Value { return __S.initStructAt(4, Value, this); }
-    setValue(value: Value): void { __S.copyFrom(value, __S.getPointer(4, this)); }
-    toString(): string { return "Node_Const_" + super.toString(); }
-}
-export class Node_Interface extends __S {
-    static readonly _capnp = { displayName: "interface", id: "e82753cff0c2218f", size: new __O(40, 6) };
-    static _Methods: capnp.ListCtor<Method>;
-    static _Superclasses: capnp.ListCtor<Superclass>;
-    adoptMethods(value: capnp.Orphan<capnp.List<Method>>): void { __S.adopt(value, __S.getPointer(3, this)); }
-    disownMethods(): capnp.Orphan<capnp.List<Method>> { return __S.disown(this.getMethods()); }
-    getMethods(): capnp.List<Method> { return __S.getList(3, Node_Interface._Methods, this); }
-    hasMethods(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
-    initMethods(length: number): capnp.List<Method> { return __S.initList(3, Node_Interface._Methods, length, this); }
-    setMethods(value: capnp.List<Method>): void { __S.copyFrom(value, __S.getPointer(3, this)); }
-    adoptSuperclasses(value: capnp.Orphan<capnp.List<Superclass>>): void { __S.adopt(value, __S.getPointer(4, this)); }
-    disownSuperclasses(): capnp.Orphan<capnp.List<Superclass>> { return __S.disown(this.getSuperclasses()); }
-    getSuperclasses(): capnp.List<Superclass> { return __S.getList(4, Node_Interface._Superclasses, this); }
-    hasSuperclasses(): boolean { return !__S.isNull(__S.getPointer(4, this)); }
-    initSuperclasses(length: number): capnp.List<Superclass> { return __S.initList(4, Node_Interface._Superclasses, length, this); }
-    setSuperclasses(value: capnp.List<Superclass>): void { __S.copyFrom(value, __S.getPointer(4, this)); }
-    toString(): string { return "Node_Interface_" + super.toString(); }
-}
-export class Node_Struct extends __S {
-    static readonly _capnp = { displayName: "struct", id: "9ea0b19b37fb4435", size: new __O(40, 6) };
-    static _Fields: capnp.ListCtor<Field>;
-    getDataWordCount(): number { return __S.getUint16(14, this); }
-    setDataWordCount(value: number): void { __S.setUint16(14, value, this); }
-    getPointerCount(): number { return __S.getUint16(24, this); }
-    setPointerCount(value: number): void { __S.setUint16(24, value, this); }
-    getPreferredListEncoding(): ElementSize { return __S.getUint16(26, this); }
-    setPreferredListEncoding(value: ElementSize): void { __S.setUint16(26, value, this); }
-    getIsGroup(): boolean { return __S.getBit(224, this); }
-    setIsGroup(value: boolean): void { __S.setBit(224, value, this); }
-    getDiscriminantCount(): number { return __S.getUint16(30, this); }
-    setDiscriminantCount(value: number): void { __S.setUint16(30, value, this); }
-    getDiscriminantOffset(): number { return __S.getUint32(32, this); }
-    setDiscriminantOffset(value: number): void { __S.setUint32(32, value, this); }
-    adoptFields(value: capnp.Orphan<capnp.List<Field>>): void { __S.adopt(value, __S.getPointer(3, this)); }
-    disownFields(): capnp.Orphan<capnp.List<Field>> { return __S.disown(this.getFields()); }
-    getFields(): capnp.List<Field> { return __S.getList(3, Node_Struct._Fields, this); }
-    hasFields(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
-    initFields(length: number): capnp.List<Field> { return __S.initList(3, Node_Struct._Fields, length, this); }
-    setFields(value: capnp.List<Field>): void { __S.copyFrom(value, __S.getPointer(3, this)); }
-    toString(): string { return "Node_Struct_" + super.toString(); }
-}
 export class Node_Annotation extends __S {
     static readonly _capnp = { displayName: "annotation", id: "ec1619d4400a0290", size: new __O(40, 6) };
     adoptType(value: capnp.Orphan<Type>): void { __S.adopt(value, __S.getPointer(3, this)); }
@@ -111,6 +54,63 @@ export class Node_Annotation extends __S {
     getTargetsAnnotation(): boolean { return __S.getBit(123, this); }
     setTargetsAnnotation(value: boolean): void { __S.setBit(123, value, this); }
     toString(): string { return "Node_Annotation_" + super.toString(); }
+}
+export class Node_Struct extends __S {
+    static readonly _capnp = { displayName: "struct", id: "9ea0b19b37fb4435", size: new __O(40, 6) };
+    static _Fields: capnp.ListCtor<Field>;
+    getDataWordCount(): number { return __S.getUint16(14, this); }
+    setDataWordCount(value: number): void { __S.setUint16(14, value, this); }
+    getPointerCount(): number { return __S.getUint16(24, this); }
+    setPointerCount(value: number): void { __S.setUint16(24, value, this); }
+    getPreferredListEncoding(): ElementSize { return __S.getUint16(26, this); }
+    setPreferredListEncoding(value: ElementSize): void { __S.setUint16(26, value, this); }
+    getIsGroup(): boolean { return __S.getBit(224, this); }
+    setIsGroup(value: boolean): void { __S.setBit(224, value, this); }
+    getDiscriminantCount(): number { return __S.getUint16(30, this); }
+    setDiscriminantCount(value: number): void { __S.setUint16(30, value, this); }
+    getDiscriminantOffset(): number { return __S.getUint32(32, this); }
+    setDiscriminantOffset(value: number): void { __S.setUint32(32, value, this); }
+    adoptFields(value: capnp.Orphan<capnp.List<Field>>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownFields(): capnp.Orphan<capnp.List<Field>> { return __S.disown(this.getFields()); }
+    getFields(): capnp.List<Field> { return __S.getList(3, Node_Struct._Fields, this); }
+    hasFields(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initFields(length: number): capnp.List<Field> { return __S.initList(3, Node_Struct._Fields, length, this); }
+    setFields(value: capnp.List<Field>): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    toString(): string { return "Node_Struct_" + super.toString(); }
+}
+export class Node_Const extends __S {
+    static readonly _capnp = { displayName: "const", id: "b18aa5ac7a0d9420", size: new __O(40, 6) };
+    adoptType(value: capnp.Orphan<Type>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownType(): capnp.Orphan<Type> { return __S.disown(this.getType()); }
+    getType(): Type { return __S.getStruct(3, Type, this); }
+    hasType(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initType(): Type { return __S.initStructAt(3, Type, this); }
+    setType(value: Type): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    adoptValue(value: capnp.Orphan<Value>): void { __S.adopt(value, __S.getPointer(4, this)); }
+    disownValue(): capnp.Orphan<Value> { return __S.disown(this.getValue()); }
+    getValue(): Value { return __S.getStruct(4, Value, this); }
+    hasValue(): boolean { return !__S.isNull(__S.getPointer(4, this)); }
+    initValue(): Value { return __S.initStructAt(4, Value, this); }
+    setValue(value: Value): void { __S.copyFrom(value, __S.getPointer(4, this)); }
+    toString(): string { return "Node_Const_" + super.toString(); }
+}
+export class Node_Interface extends __S {
+    static readonly _capnp = { displayName: "interface", id: "e82753cff0c2218f", size: new __O(40, 6) };
+    static _Methods: capnp.ListCtor<Method>;
+    static _Superclasses: capnp.ListCtor<Superclass>;
+    adoptMethods(value: capnp.Orphan<capnp.List<Method>>): void { __S.adopt(value, __S.getPointer(3, this)); }
+    disownMethods(): capnp.Orphan<capnp.List<Method>> { return __S.disown(this.getMethods()); }
+    getMethods(): capnp.List<Method> { return __S.getList(3, Node_Interface._Methods, this); }
+    hasMethods(): boolean { return !__S.isNull(__S.getPointer(3, this)); }
+    initMethods(length: number): capnp.List<Method> { return __S.initList(3, Node_Interface._Methods, length, this); }
+    setMethods(value: capnp.List<Method>): void { __S.copyFrom(value, __S.getPointer(3, this)); }
+    adoptSuperclasses(value: capnp.Orphan<capnp.List<Superclass>>): void { __S.adopt(value, __S.getPointer(4, this)); }
+    disownSuperclasses(): capnp.Orphan<capnp.List<Superclass>> { return __S.disown(this.getSuperclasses()); }
+    getSuperclasses(): capnp.List<Superclass> { return __S.getList(4, Node_Interface._Superclasses, this); }
+    hasSuperclasses(): boolean { return !__S.isNull(__S.getPointer(4, this)); }
+    initSuperclasses(length: number): capnp.List<Superclass> { return __S.initList(4, Node_Interface._Superclasses, length, this); }
+    setSuperclasses(value: capnp.List<Superclass>): void { __S.copyFrom(value, __S.getPointer(4, this)); }
+    toString(): string { return "Node_Interface_" + super.toString(); }
 }
 export class Node_Enum extends __S {
     static readonly _capnp = { displayName: "enum", id: "b54ab3364333f598", size: new __O(40, 6) };
@@ -227,12 +227,6 @@ export class Node extends __S {
     toString(): string { return "Node_" + super.toString(); }
     which(): Node_Which { return __S.getUint16(12, this); }
 }
-export class Field_Group extends __S {
-    static readonly _capnp = { displayName: "group", id: "cafccddb68db1d11", size: new __O(24, 4) };
-    getTypeId(): capnp.Uint64 { return __S.getUint64(16, this); }
-    setTypeId(value: capnp.Uint64): void { __S.setUint64(16, value, this); }
-    toString(): string { return "Field_Group_" + super.toString(); }
-}
 export enum Field_Ordinal_Which {
     IMPLICIT = 0,
     EXPLICIT = 1
@@ -254,6 +248,12 @@ export class Field_Ordinal extends __S {
     }
     toString(): string { return "Field_Ordinal_" + super.toString(); }
     which(): Field_Ordinal_Which { return __S.getUint16(10, this); }
+}
+export class Field_Group extends __S {
+    static readonly _capnp = { displayName: "group", id: "cafccddb68db1d11", size: new __O(24, 4) };
+    getTypeId(): capnp.Uint64 { return __S.getUint64(16, this); }
+    setTypeId(value: capnp.Uint64): void { __S.setUint64(16, value, this); }
+    toString(): string { return "Field_Group_" + super.toString(); }
 }
 export class Field_Slot extends __S {
     static readonly _capnp = { displayName: "slot", id: "c42305476bb4746f", size: new __O(24, 4) };
@@ -387,6 +387,30 @@ export class Method extends __S {
     setAnnotations(value: capnp.List<Annotation>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
     toString(): string { return "Method_" + super.toString(); }
 }
+export class Type_Enum extends __S {
+    static readonly _capnp = { displayName: "enum", id: "9e0e78711a7f87a9", size: new __O(24, 1) };
+    getTypeId(): capnp.Uint64 { return __S.getUint64(8, this); }
+    setTypeId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
+    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
+    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
+    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
+    toString(): string { return "Type_Enum_" + super.toString(); }
+}
+export class Type_Struct extends __S {
+    static readonly _capnp = { displayName: "struct", id: "ac3a6f60ef4cc6d3", size: new __O(24, 1) };
+    getTypeId(): capnp.Uint64 { return __S.getUint64(8, this); }
+    setTypeId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
+    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
+    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
+    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
+    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
+    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
+    toString(): string { return "Type_Struct_" + super.toString(); }
+}
 export enum Type_AnyPointer_Unconstrained_Which {
     ANY_KIND = 0,
     STRUCT = 1,
@@ -466,30 +490,6 @@ export class Type_AnyPointer extends __S {
     setImplicitMethodParameter(): void { __S.setUint16(8, 2, this); }
     toString(): string { return "Type_AnyPointer_" + super.toString(); }
     which(): Type_AnyPointer_Which { return __S.getUint16(8, this); }
-}
-export class Type_Struct extends __S {
-    static readonly _capnp = { displayName: "struct", id: "ac3a6f60ef4cc6d3", size: new __O(24, 1) };
-    getTypeId(): capnp.Uint64 { return __S.getUint64(8, this); }
-    setTypeId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
-    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
-    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
-    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
-    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
-    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
-    toString(): string { return "Type_Struct_" + super.toString(); }
-}
-export class Type_Enum extends __S {
-    static readonly _capnp = { displayName: "enum", id: "9e0e78711a7f87a9", size: new __O(24, 1) };
-    getTypeId(): capnp.Uint64 { return __S.getUint64(8, this); }
-    setTypeId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
-    adoptBrand(value: capnp.Orphan<Brand>): void { __S.adopt(value, __S.getPointer(0, this)); }
-    disownBrand(): capnp.Orphan<Brand> { return __S.disown(this.getBrand()); }
-    getBrand(): Brand { return __S.getStruct(0, Brand, this); }
-    hasBrand(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
-    initBrand(): Brand { return __S.initStructAt(0, Brand, this); }
-    setBrand(value: Brand): void { __S.copyFrom(value, __S.getPointer(0, this)); }
-    toString(): string { return "Type_Enum_" + super.toString(); }
 }
 export class Type_List extends __S {
     static readonly _capnp = { displayName: "list", id: "87e739250a60ea97", size: new __O(24, 1) };
@@ -1033,9 +1033,9 @@ export class CodeGeneratorRequest extends __S {
     setRequestedFiles(value: capnp.List<CodeGeneratorRequest_RequestedFile>): void { __S.copyFrom(value, __S.getPointer(1, this)); }
     toString(): string { return "CodeGeneratorRequest_" + super.toString(); }
 }
+Node_Struct._Fields = capnp.CompositeList(Field);
 Node_Interface._Methods = capnp.CompositeList(Method);
 Node_Interface._Superclasses = capnp.CompositeList(Superclass);
-Node_Struct._Fields = capnp.CompositeList(Field);
 Node_Enum._Enumerants = capnp.CompositeList(Enumerant);
 Node._Parameters = capnp.CompositeList(Node_Parameter);
 Node._NestedNodes = capnp.CompositeList(Node_NestedNode);

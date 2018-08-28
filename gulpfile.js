@@ -40,7 +40,7 @@ function compileCapnp() {
       return file.path.endsWith('.capnp') && CAPNP_WHITELIST.some((p) => file.path.endsWith(p));
     }).forEach(function (file) {
       gutil.log('Compiling', "'" + gutil.colors.cyan(path.relative(__dirname, file.path)) + "'...");
-      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.ts', '-I', path.join(__dirname, 'src', 'std'), file.path];
+      var options = ['-o./packages/capnpc-ts/bin/capnpc-ts.js', '-I', path.join(__dirname, 'src', 'std'), file.path];
       var result = spawnSync('capnpc', options, { stdio: 'inherit' });
       if (result.status !== 0) {
         throw new Error('Process exited with non-zero status: ' + result.status);
