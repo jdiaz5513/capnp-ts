@@ -25,6 +25,8 @@ export class CodeGeneratorFileContext {
     this.concreteLists = [];
     this.generatedNodeIds = [];
     this.statements = [];
+    this.tsPath = "";
+    this.namedImports = [];
   }
 
   toString() {
