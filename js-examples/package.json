@@ -18,7 +18,7 @@
     "example"
   ],
   "license": "MIT",
-  "name": "capnproto-ts/js-examples",
+  "name": "capnp-ts-js-examples",
   "private": true,
   "repository": {
     "type": "git",
