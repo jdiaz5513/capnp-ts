@@ -504,6 +504,35 @@ camelcase@^4.0.0, camelcase@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
 
+capnp-ts@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/capnp-ts/-/capnp-ts-0.1.6.tgz#c4db1c2927729b4e28ab0bdf45c25a26fbf8894f"
+  dependencies:
+    debug "^2.6.3"
+    format "^0.2.2"
+    tslib "^1.7.1"
+    utf8-encoding "^0.1.2"
+
+capnpc-js@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/capnpc-js/-/capnpc-js-0.1.6.tgz#b7ee57aecfda5199bf3ef9eb07e900447160b089"
+  dependencies:
+    capnpc-ts "^0.1.6"
+    debug "^2.6.3"
+    typescript "^2.4.1"
+
+capnpc-ts@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/capnpc-ts/-/capnpc-ts-0.1.6.tgz#244c9215a6ea645f00101a911873f75224303c98"
+  dependencies:
+    bluebird "^3.5.0"
+    capnp-ts "^0.1.6"
+    hex2dec "^1.0.1"
+    mkdirp "^0.5.1"
+    ramda "^0.24.1"
+    tslib "^1.7.1"
+    typescript "^2.4.1"
+
 capture-stack-trace@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/capture-stack-trace/-/capture-stack-trace-1.0.0.tgz#4a6fa07399c26bba47f0b2496b4d0fb408c5550d"
