@@ -95,6 +95,10 @@ export class Pointer {
   segment: Segment;
 
   constructor(segment: Segment, byteOffset: number, depthLimit = MAX_DEPTH) {
+    this._capnp = { compositeList: false, depthLimit };
+    this.segment = segment;
+    this.byteOffset = byteOffset;
+
     if (depthLimit === 0) {
       throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
     }
@@ -111,10 +115,6 @@ export class Pointer {
     if (byteOffset < 0 || byteOffset > segment.byteLength) {
       throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
     }
-
-    this._capnp = { compositeList: false, depthLimit };
-    this.segment = segment;
-    this.byteOffset = byteOffset;
 
     trace("new %s", this);
   }
