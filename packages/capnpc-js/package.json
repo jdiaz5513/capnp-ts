@@ -7,7 +7,7 @@
     "url": "https://github.com/jdiaz5513/capnp-ts/issues"
   },
   "dependencies": {
-    "capnpc-ts": "^0.3.0",
+    "capnpc-ts": "^0.3.1",
     "debug": "^2.6.3",
     "typescript": "^2.4.1"
   },
@@ -33,5 +33,5 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "typings": "lib/index",
-  "version": "0.3.0"
+  "version": "0.3.1"
 }

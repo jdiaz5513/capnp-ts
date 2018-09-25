@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/jdiaz5513/capnp-ts/compare/v0.3.0...v0.3.1) (2018-09-25)
+
+
+### Bug Fixes
+
+* **serialization:** fix parse crash on null pointer dereference in resize ([#107](https://github.com/jdiaz5513/capnp-ts/issues/107)) ([3f8b307](https://github.com/jdiaz5513/capnp-ts/commit/3f8b307)), closes [#78](https://github.com/jdiaz5513/capnp-ts/issues/78)
+
+
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.2.4...v0.3.0) (2018-08-29)
 

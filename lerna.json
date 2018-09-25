@@ -5,7 +5,7 @@
     "js-examples"
   ],
   "npmClient": "yarn",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "useWorkspaces": true,
   "command": {
     "publish": {
