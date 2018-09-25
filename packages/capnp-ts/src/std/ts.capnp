@@ -10,4 +10,4 @@
 
 annotation importPath(file): Text;
 
-$importPath("capnp-ts");
+$importPath("../index");

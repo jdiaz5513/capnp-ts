@@ -4,9 +4,9 @@
 
 set -exuo pipefail
 
-curl -O https://capnproto.org/capnproto-c++-0.6.1.tar.gz
-tar zxf capnproto-c++-0.6.1.tar.gz
-cd capnproto-c++-0.6.1
+curl -O https://capnproto.org/capnproto-c++-0.7.0.tar.gz
+tar zxf capnproto-c++-0.7.0.tar.gz
+cd capnproto-c++-0.7.0
 ./configure --prefix=$HOME/opt
 make -j6
 make install
