@@ -6,7 +6,7 @@
 
 import * as capnp from "capnp-ts";
 import { ObjectSize as __O, Struct as __S } from 'capnp-ts';
-import { TestAllTypes } from "../../../../test.capnp";
+import { TestAllTypes } from "./test.capnp";
 export const _capnpFileId = "f36d7b330303c66e";
 export class TestImport extends __S {
     static readonly _capnp = { displayName: "TestImport", id: "bc55b08b672b5d97", size: new __O(0, 1) };
