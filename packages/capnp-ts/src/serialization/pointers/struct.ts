@@ -238,6 +238,10 @@ export function resize(dstSize: ObjectSize, s: Struct): void {
       srcContent.segment,
       srcContent.byteOffset + srcSize.dataByteLength + i * 8
     );
+    if (isNull(srcPtr)) {
+      // If source pointer is null, leave the destination pointer as default null.
+      continue
+    }
     const srcPtrTarget = followFars(srcPtr);
     const srcPtrContent = getContent(srcPtr);
     const dstPtr = new Pointer(
