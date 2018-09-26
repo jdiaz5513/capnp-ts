@@ -59,6 +59,7 @@
     "coverage:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn coverage",
     "lerna": "lerna",
     "lint": "gulp lint",
+    "publish": "yarn install && lerna publish",
     "prepublish": "gulp build",
     "test": "gulp test",
     "test:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn test",
