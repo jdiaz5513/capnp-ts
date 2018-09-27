@@ -37,10 +37,15 @@
   ],
   "license": "MIT",
   "lint-staged": {
-    "*.ts": [
-      "prettier --write",
-      "tslint -p .",
-      "git add"
+    "linters": {
+      "*.ts": [
+        "prettier --write",
+        "tslint -p .",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "packages/capnpc-ts/bin/**/*.ts"
     ]
   },
   "main": "lib/index",

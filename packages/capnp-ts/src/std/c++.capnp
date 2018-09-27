@@ -20,6 +20,10 @@
 # THE SOFTWARE.
 
 @0xbdf87d7bb8304e81;
+
+using TS = import "./ts.capnp";
+$TS.importPath("../index");
+
 $namespace("capnp::annotations");
 
 annotation namespace(file): Text;

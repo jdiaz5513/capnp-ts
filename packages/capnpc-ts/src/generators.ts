@@ -47,6 +47,7 @@ import {
   needsConcreteListClass
 } from "./file";
 import * as util from "./util";
+import { lookup } from "dns";
 
 const trace = initTrace("capnpc:generators");
 trace("load");
@@ -100,33 +101,32 @@ export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
 }
 
 export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
-  const dirname = path.dirname(ctx.file.getFilename());
+  ctx.imports.forEach(i => {
+    const name = i.getName();
+    let importPath: string;
 
-  ctx.nodes
-    .filter(n => n.isFile() && !n.getId().equals(ctx.file.getId()))
-    .forEach(n => {
-      const imports = n
-        .getNestedNodes()
-        .filter(nested => hasNode(ctx, nested))
-        .filter(nested => lookupNode(ctx, nested).isStruct())
-        .map(nested => nested.getName())
-        .join(", ");
+    if (name.substr(0, 7) === "/capnp/") {
+      importPath = "capnp-ts/lib/std/" + name.substr(7);
+    } else {
+      importPath = name[0] === "." ? name : `./${name}`;
+    }
 
-      if (imports.length < 1) return;
+    const imports = lookupNode(ctx, i)
+      .getNestedNodes()
+      .filter(n => hasNode(ctx, n))
+      .filter(n => lookupNode(ctx, n).isStruct())
+      .map(n => n.getName())
+      .join(", ");
 
-      let importPath = path.relative(dirname, n.getDisplayName());
+    if (imports.length < 1) return;
 
-      // Make sure the import path is interpreted by nodejs as relative (must start with a period).
-      if (importPath[0] !== ".") importPath = `./${importPath}`;
+    const importStatement = `import { ${imports} } from "${importPath}"`;
 
-      const importStatement = `import { ${imports} } from '${importPath}'`;
-
-      trace("adding import statement", importStatement);
-
-      ctx.statements.push(
-        ts.createStatement(ts.createIdentifier(importStatement))
-      );
-    });
+    trace("emitting import statement:", importStatement);
+    ctx.statements.push(
+      ts.createStatement(ts.createIdentifier(importStatement))
+    );
+  });
 }
 
 export function generateConcreteListInitializer(

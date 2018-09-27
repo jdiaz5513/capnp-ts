@@ -6,14 +6,14 @@ import * as s from "capnp-ts/lib/std/schema.capnp";
 import * as ts from "typescript";
 
 export class CodeGeneratorFileContext {
-  tsPath: string;
   concreteLists: Array<[string, s.Field]>;
   file: s.CodeGeneratorRequest_RequestedFile;
   generatedNodeIds: string[];
+  imports: s.CodeGeneratorRequest_RequestedFile_Import[];
   nodes: s.Node[];
   req: s.CodeGeneratorRequest;
   statements: ts.Statement[];
-  namedImports: string[];
+  tsPath: string;
 
   constructor(
     req: s.CodeGeneratorRequest,
@@ -26,7 +26,7 @@ export class CodeGeneratorFileContext {
     this.generatedNodeIds = [];
     this.statements = [];
     this.tsPath = "";
-    this.namedImports = [];
+    this.imports = file.getImports().toArray();
   }
 
   toString() {

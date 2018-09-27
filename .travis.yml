@@ -4,16 +4,20 @@ language: node_js
 node_js:
   - "10"
   - "8"
-
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
 before_install:
+  - export CXX="g++-5"
   - bash ci/install-capnproto.sh
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s
   - export PATH="$HOME/opt/bin:$HOME/.yarn/bin:$PATH"
 install:
   - yarn --frozen-lockfile
-
 script: yarn run ci
-
 cache:
   yarn: true
   directories:
