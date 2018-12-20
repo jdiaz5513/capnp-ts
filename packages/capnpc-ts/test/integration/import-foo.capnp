@@ -5,6 +5,9 @@ using Bar = import "import-bar.capnp";
 
 $Cxx.namespace("Initrode");
 
+const baz :Bar.Baz = ();
+
 struct Foo {
+  const bazC :Bar.Baz = ();
   baz @0 :Bar.Baz;
 }
