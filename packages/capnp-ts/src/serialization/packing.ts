@@ -27,8 +27,8 @@ const enum PackedTag {
    * The tag is followed by the bytes of the word (as if it weren’t special), but after those bytes is another byte with
    * value N. Following that byte is N unpacked words that should be copied directly.
    *
-   * These unpacked words may contain zeroes; in this implementation a minimum of PACK_SPAN_THRESHOLD zero bytes are
-   * written before ending the span.
+   * These unpacked words may contain zeroes; in this implementation PACK_SPAN_THRESHOLD (or more) zero bytes within a
+   * single word of a span terminates that span.
    *
    * The purpose of this rule is to minimize the impact of packing on data that doesn’t contain any zeros – in
    * particular, long text blobs. Because of this rule, the worst-case space overhead of packing is 2 bytes per 2 KiB of
@@ -218,12 +218,6 @@ export function pack(
 
   let spanWordLength = 0;
 
-  /**
-   * When this hits zero, we've had PACK_SPAN_THRESHOLD zero bytes pass by and it's time to bail from the span.
-   */
-
-  let spanThreshold = PACK_SPAN_THRESHOLD;
-
   for (
     let srcByteOffset = 0;
     srcByteOffset < src.byteLength;
@@ -272,15 +266,11 @@ export function pack(
 
         // See if we need to bail now.
 
-        spanThreshold -= zeroCount;
-
-        if (spanThreshold <= 0 || spanWordLength >= 0xff) {
+        if (zeroCount >= PACK_SPAN_THRESHOLD || spanWordLength >= 0xff) {
           // Alright, time to get packing again. Write the number of words we skipped to the beginning of the span.
 
           dst[spanTagOffset] = spanWordLength;
           spanWordLength = 0;
-
-          spanThreshold = PACK_SPAN_THRESHOLD;
 
           // We have to write this word normally.
 
