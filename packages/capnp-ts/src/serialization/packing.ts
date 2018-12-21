@@ -214,9 +214,9 @@ export function pack(
 
   let spanWordLengthOffset = 0;
 
-  /** How many words have been copied during the current span. */
+  /** How many words have been copied during the current range. */
 
-  let spanWordLength = 0;
+  let rangeWordLength = 0;
 
   for (
     let srcByteOffset = 0;
@@ -242,19 +242,19 @@ export function pack(
 
     switch (lastTag) {
       case PackedTag.ZERO:
-        // We're writing a span of words with all zeroes in them. See if we need to bail out of the fast path.
+        // We're writing a range of words with all zeroes in them. See if we need to bail out of the fast path.
 
-        if (tag !== PackedTag.ZERO || spanWordLength >= 0xff) {
+        if (tag !== PackedTag.ZERO || rangeWordLength >= 0xff) {
           // There's a bit in there or we got too many zeroes. Damn, we need to bail.
 
-          dst.push(spanWordLength);
-          spanWordLength = 0;
+          dst.push(rangeWordLength);
+          rangeWordLength = 0;
 
           skipWriteWord = false;
         } else {
           // Kay, let's quickly inc this and go.
 
-          spanWordLength++;
+          rangeWordLength++;
         }
 
         break;
@@ -266,11 +266,11 @@ export function pack(
 
         // See if we need to bail now.
 
-        if (zeroCount >= PACK_SPAN_THRESHOLD || spanWordLength >= 0xff) {
+        if (zeroCount >= PACK_SPAN_THRESHOLD || rangeWordLength >= 0xff) {
           // Alright, time to get packing again. Write the number of words we skipped to the beginning of the span.
 
-          dst[spanWordLengthOffset] = spanWordLength;
-          spanWordLength = 0;
+          dst[spanWordLengthOffset] = rangeWordLength;
+          rangeWordLength = 0;
 
           // We have to write this word normally.
 
@@ -280,7 +280,7 @@ export function pack(
 
           dst.push(a, b, c, d, e, f, g, h);
 
-          spanWordLength++;
+          rangeWordLength++;
         }
 
         break;
@@ -317,12 +317,12 @@ export function pack(
     }
   }
 
-  // We're done. If we were writing a span let's finish it.
+  // We're done. If we were writing a range let's finish it.
 
   if (lastTag === PackedTag.ZERO) {
-    dst.push(spanWordLength);
+    dst.push(rangeWordLength);
   } else if (lastTag === PackedTag.SPAN) {
-    dst[spanWordLengthOffset] = spanWordLength;
+    dst[spanWordLengthOffset] = rangeWordLength;
   }
 
   return new Uint8Array(dst).buffer;
