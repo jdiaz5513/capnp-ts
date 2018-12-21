@@ -35,7 +35,13 @@ const enum PackedTag {
    * input (256 words = 2KiB).
    */
 
-  SPAN = 0xff
+  SPAN = 0xff,
+
+  /**
+   * A randomly chosen non-ZERO, non-SPAN tag that proves useful in state initiation.
+   *
+   */
+  NONZERO_NONSPAN = 0x77
 }
 
 /**
@@ -107,7 +113,7 @@ export function getTagByte(
 export function getUnpackedByteLength(packed: ArrayBuffer): number {
   const p = new Uint8Array(packed);
   let wordLength = 0;
-  let lastTag = 0x77;
+  let lastTag = PackedTag.NONZERO_NONSPAN;
 
   for (let i = 0; i < p.byteLength; ) {
     const tag = p[i];
@@ -117,13 +123,13 @@ export function getUnpackedByteLength(packed: ArrayBuffer): number {
 
       i++;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else if (lastTag === PackedTag.SPAN) {
       wordLength += tag;
 
       i += tag * 8 + 1;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else {
       wordLength++;
 
@@ -202,9 +208,7 @@ export function pack(
 
   const dst: number[] = [];
 
-  /* Just have to be sure it's neither ZERO nor SPAN. */
-
-  let lastTag = 0x77;
+  let lastTag = PackedTag.NONZERO_NONSPAN;
 
   /** This is where we need to remember to write the SPAN tag (0xff). */
 
@@ -353,7 +357,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
   /** The last tag byte that we've seen - it starts at a "neutral" value. */
 
-  let lastTag = 0x77;
+  let lastTag = PackedTag.NONZERO_NONSPAN;
 
   for (
     let srcByteOffset = 0, dstByteOffset = 0;
@@ -369,7 +373,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
       srcByteOffset++;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else if (lastTag === PackedTag.SPAN) {
       // We have a span of unpacked bytes. Copy them verbatim from the source buffer.
 
@@ -383,7 +387,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
       dstByteOffset += spanByteLength;
       srcByteOffset += 1 + spanByteLength;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else {
       // Okay, a normal tag. Let's read past the tag and copy bytes that have a bit set in the tag.
 
