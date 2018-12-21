@@ -27,15 +27,21 @@ const enum PackedTag {
    * The tag is followed by the bytes of the word (as if it weren’t special), but after those bytes is another byte with
    * value N. Following that byte is N unpacked words that should be copied directly.
    *
-   * These unpacked words may contain zeroes; in this implementation a minimum of PACK_SPAN_THRESHOLD zero bytes are
-   * written before ending the span.
+   * These unpacked words may contain zeroes; in this implementation PACK_SPAN_THRESHOLD (or more) zero bytes within a
+   * single word of a span terminates that span.
    *
    * The purpose of this rule is to minimize the impact of packing on data that doesn’t contain any zeros – in
    * particular, long text blobs. Because of this rule, the worst-case space overhead of packing is 2 bytes per 2 KiB of
    * input (256 words = 2KiB).
    */
 
-  SPAN = 0xff
+  SPAN = 0xff,
+
+  /**
+   * A randomly chosen non-ZERO, non-SPAN tag that proves useful in state initiation.
+   *
+   */
+  NONZERO_NONSPAN = 0x77
 }
 
 /**
@@ -106,26 +112,26 @@ export function getTagByte(
 
 export function getUnpackedByteLength(packed: ArrayBuffer): number {
   const p = new Uint8Array(packed);
-  let wordLength = 0;
-  let lastTag = 0x77;
+  let wordCount = 0;
+  let lastTag = PackedTag.NONZERO_NONSPAN;
 
   for (let i = 0; i < p.byteLength; ) {
     const tag = p[i];
 
     if (lastTag === PackedTag.ZERO) {
-      wordLength += tag;
+      wordCount += tag;
 
       i++;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else if (lastTag === PackedTag.SPAN) {
-      wordLength += tag;
+      wordCount += tag;
 
       i += tag * 8 + 1;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else {
-      wordLength++;
+      wordCount++;
 
       i += getHammingWeight(tag) + 1;
 
@@ -133,7 +139,7 @@ export function getUnpackedByteLength(packed: ArrayBuffer): number {
     }
   }
 
-  return wordLength * 8;
+  return wordCount * 8;
 }
 
 /**
@@ -202,23 +208,15 @@ export function pack(
 
   const dst: number[] = [];
 
-  /* Just have to be sure it's neither ZERO nor SPAN. */
-
-  let lastTag = 0x77;
+  let lastTag = PackedTag.NONZERO_NONSPAN;
 
   /** This is where we need to remember to write the SPAN tag (0xff). */
 
-  let spanTagOffset = NaN;
+  let spanWordCountOffset = 0;
 
-  /** How many words have been copied during the current span. */
+  /** How many words have been copied during the current range. */
 
-  let spanWordLength = 0;
-
-  /**
-   * When this hits zero, we've had PACK_SPAN_THRESHOLD zero bytes pass by and it's time to bail from the span.
-   */
-
-  let spanThreshold = PACK_SPAN_THRESHOLD;
+  let rangeWordCount = 0;
 
   for (
     let srcByteOffset = 0;
@@ -244,19 +242,19 @@ export function pack(
 
     switch (lastTag) {
       case PackedTag.ZERO:
-        // We're writing a span of words with all zeroes in them. See if we need to bail out of the fast path.
+        // We're writing a range of words with all zeroes in them. See if we need to bail out of the fast path.
 
-        if (tag !== PackedTag.ZERO || spanWordLength >= 0xff) {
+        if (tag !== PackedTag.ZERO || rangeWordCount >= 0xff) {
           // There's a bit in there or we got too many zeroes. Damn, we need to bail.
 
-          dst.push(spanWordLength);
-          spanWordLength = 0;
+          dst.push(rangeWordCount);
+          rangeWordCount = 0;
 
           skipWriteWord = false;
         } else {
           // Kay, let's quickly inc this and go.
 
-          spanWordLength++;
+          rangeWordCount++;
         }
 
         break;
@@ -268,15 +266,11 @@ export function pack(
 
         // See if we need to bail now.
 
-        spanThreshold -= zeroCount;
-
-        if (spanThreshold <= 0 || spanWordLength >= 0xff) {
+        if (zeroCount >= PACK_SPAN_THRESHOLD || rangeWordCount >= 0xff) {
           // Alright, time to get packing again. Write the number of words we skipped to the beginning of the span.
 
-          dst[spanTagOffset] = spanWordLength;
-          spanWordLength = 0;
-
-          spanThreshold = PACK_SPAN_THRESHOLD;
+          dst[spanWordCountOffset] = rangeWordCount;
+          rangeWordCount = 0;
 
           // We have to write this word normally.
 
@@ -286,7 +280,7 @@ export function pack(
 
           dst.push(a, b, c, d, e, f, g, h);
 
-          spanWordLength++;
+          rangeWordCount++;
         }
 
         break;
@@ -317,18 +311,18 @@ export function pack(
     // Record the span tag offset if needed, making sure to actually leave room for it.
 
     if (tag === PackedTag.SPAN) {
-      spanTagOffset = dst.length;
+      spanWordCountOffset = dst.length;
 
       dst.push(0);
     }
   }
 
-  // We're done. If we were writing a span let's finish it.
+  // We're done. If we were writing a range let's finish it.
 
   if (lastTag === PackedTag.ZERO) {
-    dst.push(spanWordLength);
+    dst.push(rangeWordCount);
   } else if (lastTag === PackedTag.SPAN) {
-    dst[spanTagOffset] = spanWordLength;
+    dst[spanWordCountOffset] = rangeWordCount;
   }
 
   return new Uint8Array(dst).buffer;
@@ -353,7 +347,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
   /** The last tag byte that we've seen - it starts at a "neutral" value. */
 
-  let lastTag = 0x77;
+  let lastTag = PackedTag.NONZERO_NONSPAN;
 
   for (
     let srcByteOffset = 0, dstByteOffset = 0;
@@ -369,7 +363,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
       srcByteOffset++;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else if (lastTag === PackedTag.SPAN) {
       // We have a span of unpacked bytes. Copy them verbatim from the source buffer.
 
@@ -383,7 +377,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
       dstByteOffset += spanByteLength;
       srcByteOffset += 1 + spanByteLength;
 
-      lastTag = 0x77;
+      lastTag = PackedTag.NONZERO_NONSPAN;
     } else {
       // Okay, a normal tag. Let's read past the tag and copy bytes that have a bit set in the tag.
 
