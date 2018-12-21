@@ -8,6 +8,7 @@ import * as capnp from "capnp-ts";
 import { ObjectSize as __O, Struct as __S } from 'capnp-ts';
 import { Foo } from "./import-foo.capnp";
 export const _capnpFileId = "9cbc682922e84ff9";
+export const FOO = new Foo((null as any), (null as any), (null as any));
 export class Baz extends __S {
     static readonly FOO_C = capnp.readRawPointer(new Uint8Array([0x10, 0x02, 0x40, 0x01, 0x00, 0x00]).buffer);
     static readonly _capnp = { displayName: "Baz", id: "f2f28862b8e82db7", size: new __O(0, 1) };

@@ -128,7 +128,7 @@ gulp.task("test:capnp-ts", ["build:capnp", "build:capnp-ts"], function() {
 });
 
 /** Run tests for the capnpc-ts schema compiler. */
-gulp.task("test:capnpc-ts", ["build:capnp", "build:capnpc-ts"], function() {
+gulp.task("test:capnpc-ts", function() {
   return build(
     "./packages/capnpc-ts/test/**/*.ts",
     "packages/capnpc-ts/lib-test",
