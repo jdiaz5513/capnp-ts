@@ -112,26 +112,26 @@ export function getTagByte(
 
 export function getUnpackedByteLength(packed: ArrayBuffer): number {
   const p = new Uint8Array(packed);
-  let wordLength = 0;
+  let wordCount = 0;
   let lastTag = PackedTag.NONZERO_NONSPAN;
 
   for (let i = 0; i < p.byteLength; ) {
     const tag = p[i];
 
     if (lastTag === PackedTag.ZERO) {
-      wordLength += tag;
+      wordCount += tag;
 
       i++;
 
       lastTag = PackedTag.NONZERO_NONSPAN;
     } else if (lastTag === PackedTag.SPAN) {
-      wordLength += tag;
+      wordCount += tag;
 
       i += tag * 8 + 1;
 
       lastTag = PackedTag.NONZERO_NONSPAN;
     } else {
-      wordLength++;
+      wordCount++;
 
       i += getHammingWeight(tag) + 1;
 
@@ -139,7 +139,7 @@ export function getUnpackedByteLength(packed: ArrayBuffer): number {
     }
   }
 
-  return wordLength * 8;
+  return wordCount * 8;
 }
 
 /**
@@ -212,11 +212,11 @@ export function pack(
 
   /** This is where we need to remember to write the SPAN tag (0xff). */
 
-  let spanWordLengthOffset = 0;
+  let spanWordCountOffset = 0;
 
   /** How many words have been copied during the current range. */
 
-  let rangeWordLength = 0;
+  let rangeWordCount = 0;
 
   for (
     let srcByteOffset = 0;
@@ -244,17 +244,17 @@ export function pack(
       case PackedTag.ZERO:
         // We're writing a range of words with all zeroes in them. See if we need to bail out of the fast path.
 
-        if (tag !== PackedTag.ZERO || rangeWordLength >= 0xff) {
+        if (tag !== PackedTag.ZERO || rangeWordCount >= 0xff) {
           // There's a bit in there or we got too many zeroes. Damn, we need to bail.
 
-          dst.push(rangeWordLength);
-          rangeWordLength = 0;
+          dst.push(rangeWordCount);
+          rangeWordCount = 0;
 
           skipWriteWord = false;
         } else {
           // Kay, let's quickly inc this and go.
 
-          rangeWordLength++;
+          rangeWordCount++;
         }
 
         break;
@@ -266,11 +266,11 @@ export function pack(
 
         // See if we need to bail now.
 
-        if (zeroCount >= PACK_SPAN_THRESHOLD || rangeWordLength >= 0xff) {
+        if (zeroCount >= PACK_SPAN_THRESHOLD || rangeWordCount >= 0xff) {
           // Alright, time to get packing again. Write the number of words we skipped to the beginning of the span.
 
-          dst[spanWordLengthOffset] = rangeWordLength;
-          rangeWordLength = 0;
+          dst[spanWordCountOffset] = rangeWordCount;
+          rangeWordCount = 0;
 
           // We have to write this word normally.
 
@@ -280,7 +280,7 @@ export function pack(
 
           dst.push(a, b, c, d, e, f, g, h);
 
-          rangeWordLength++;
+          rangeWordCount++;
         }
 
         break;
@@ -311,7 +311,7 @@ export function pack(
     // Record the span tag offset if needed, making sure to actually leave room for it.
 
     if (tag === PackedTag.SPAN) {
-      spanWordLengthOffset = dst.length;
+      spanWordCountOffset = dst.length;
 
       dst.push(0);
     }
@@ -320,9 +320,9 @@ export function pack(
   // We're done. If we were writing a range let's finish it.
 
   if (lastTag === PackedTag.ZERO) {
-    dst.push(rangeWordLength);
+    dst.push(rangeWordCount);
   } else if (lastTag === PackedTag.SPAN) {
-    dst[spanWordLengthOffset] = rangeWordLength;
+    dst[spanWordCountOffset] = rangeWordCount;
   }
 
   return new Uint8Array(dst).buffer;
