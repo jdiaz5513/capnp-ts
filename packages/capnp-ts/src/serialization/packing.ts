@@ -212,7 +212,7 @@ export function pack(
 
   /** This is where we need to remember to write the SPAN tag (0xff). */
 
-  let spanTagOffset = NaN;
+  let spanWordLengthOffset = 0;
 
   /** How many words have been copied during the current span. */
 
@@ -269,7 +269,7 @@ export function pack(
         if (zeroCount >= PACK_SPAN_THRESHOLD || spanWordLength >= 0xff) {
           // Alright, time to get packing again. Write the number of words we skipped to the beginning of the span.
 
-          dst[spanTagOffset] = spanWordLength;
+          dst[spanWordLengthOffset] = spanWordLength;
           spanWordLength = 0;
 
           // We have to write this word normally.
@@ -311,7 +311,7 @@ export function pack(
     // Record the span tag offset if needed, making sure to actually leave room for it.
 
     if (tag === PackedTag.SPAN) {
-      spanTagOffset = dst.length;
+      spanWordLengthOffset = dst.length;
 
       dst.push(0);
     }
@@ -322,7 +322,7 @@ export function pack(
   if (lastTag === PackedTag.ZERO) {
     dst.push(spanWordLength);
   } else if (lastTag === PackedTag.SPAN) {
-    dst[spanTagOffset] = spanWordLength;
+    dst[spanWordLengthOffset] = spanWordLength;
   }
 
   return new Uint8Array(dst).buffer;
