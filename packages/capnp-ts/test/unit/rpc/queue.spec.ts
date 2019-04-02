@@ -1,4 +1,4 @@
-import { Queue } from "../../../lib/internal/queue";
+import { Queue } from "../../../lib/rpc/queue";
 import { tap } from "../../util";
 
 class Ints {
