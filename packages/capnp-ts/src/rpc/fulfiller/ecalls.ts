@@ -4,29 +4,20 @@ import { Call } from "../call";
 import { Struct } from "../../serialization/pointers/struct";
 
 // ecall is a queued embargoed call
-export interface ecall<
-  FulfillerResult extends Struct,
-  CallParams extends Struct,
-  CallResult extends Struct
-> {
-  call: Call<CallParams, CallResult>;
-  f: Fulfiller<FulfillerResult>;
+export interface ecall {
+  // tslint:disable-next-line:no-any
+  call: Call<any, any>;
+  // tslint:disable-next-line:no-any
+  f: Fulfiller<any>;
 }
 
 // pcall is a queued pipeline call
-export interface pcall<
-  FulfillerResult extends Struct,
-  CallParams extends Struct,
-  CallResult extends Struct
-> extends ecall<FulfillerResult, CallParams, CallResult> {
+export interface pcall extends ecall {
   transform: PipelineOp[];
 }
 
 // tslint:disable-next-line:no-any
-export type pcallAny = pcall<any, any, any>;
-
-// tslint:disable-next-line:no-any
-export type ecallSlot = ecall<any, any, any> | null;
+export type ecallSlot = ecall | null;
 
 export class Ecalls {
   data: ecallSlot[];

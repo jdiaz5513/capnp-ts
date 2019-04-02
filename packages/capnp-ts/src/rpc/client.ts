@@ -1,6 +1,11 @@
 import { Struct } from "../serialization/pointers/struct";
 import { Call } from "./call";
 import { Answer } from "./answer";
+import { PipelineOp } from "./pipeline-op";
+import { Pointer } from "../serialization/pointers/pointer";
+import { ErrorClient, clientOrNull } from "./error-client";
+import { transformPtr } from "./transform-ptr";
+import { pointerToInterface, interfaceToClient } from "./interface";
 
 // A Client represents an Cap'n Proto interface type.
 export interface Client {
@@ -28,4 +33,25 @@ export function isSameClient(c: Client, d: Client): boolean {
     return c;
   };
   return norm(c) === norm(d);
+}
+
+/*
+ * clientFromResolution retrieves a client from a resolved question or answer
+ * by applying a transform.
+ */
+export function clientFromResolution(
+  transform: PipelineOp[],
+  obj?: Struct,
+  err?: Error
+): Client {
+  if (err) {
+    return new ErrorClient(err);
+  }
+
+  if (!obj) {
+    return new ErrorClient(new Error(`null obj!`));
+  }
+
+  const out = transformPtr(obj, transform);
+  return clientOrNull(interfaceToClient(pointerToInterface(out)));
 }

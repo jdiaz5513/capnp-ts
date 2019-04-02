@@ -1,6 +1,6 @@
 import { PipelineOp } from "./pipeline-op";
 import { PromisedAnswer, PromisedAnswer_Op } from "../std/rpc.capnp";
-import { List } from "../../lib/serialization/pointers/list";
+import { List } from "../serialization/pointers/list";
 
 export function transformToPromisedAnswer(
   answer: PromisedAnswer,

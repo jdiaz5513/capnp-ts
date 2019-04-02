@@ -3,14 +3,17 @@ import { Answer } from "../../rpc/answer";
 import { Deferred } from "../deferred";
 import { ImmediateAnswer } from "../immediate-answer";
 import { EmbargoClient } from "./embargo-client";
-import { pcallAny, Ecalls } from "./ecalls";
+import { Ecalls, pcall } from "./ecalls";
 import { Call, copyCall } from "../call";
 import { PipelineOp } from "../pipeline-op";
-import { RPC_CALL_QUEUE_FULL, RPC_NULL_CLIENT } from "../../errors";
+import {
+  RPC_CALL_QUEUE_FULL,
+  RPC_NULL_CLIENT,
+  INVARIANT_UNREACHABLE_CODE
+} from "../../errors";
 import { Pointer } from "../../serialization/pointers/pointer";
 import { transformPtr } from "../transform-ptr";
 import { pointerToInterface, isInterfaceValid } from "../interface";
-import { INVARIANT_UNREACHABLE_CODE } from "../../../lib/errors";
 import { ErrorAnswer } from "../error-answer";
 
 const callQueueSize = 64;
@@ -22,7 +25,7 @@ const callQueueSize = 64;
 export class Fulfiller<R extends Struct> implements Answer<R> {
   resolved = false;
   answer?: Answer<R>;
-  queue: pcallAny[] = [];
+  queue: pcall[] = [];
   queueCap = callQueueSize;
   deferred = new Deferred<R>();
 

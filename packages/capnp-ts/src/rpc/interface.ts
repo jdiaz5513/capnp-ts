@@ -18,7 +18,7 @@ export function pointerToInterface(p: Pointer): Interface {
   // "other" pointers.
   if (getTargetPointerType(p) === PointerType.OTHER) {
     return <Interface>{
-      cap: p.segment.getUint32(p.byteOffset + 4), // FIXME: that definitely belongs in capnp-ts somewhere
+      cap: p.segment.getUint32(p.byteOffset + 4), // FIXME: that belongs somewhere else
       seg: p.segment
     };
   }
