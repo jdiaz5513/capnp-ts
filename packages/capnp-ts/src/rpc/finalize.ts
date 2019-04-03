@@ -1,17 +1,12 @@
+import { RPC_NO_FINALIZE_RUNTIME } from "../errors";
+
 export type Finalize = (obj: Object, finalizer: Finalizer) => void;
 export type Finalizer = () => void;
 
 let _finalize: Finalize = defaultFinalize;
-let triedWeak = false;
 
-function defaultFinalize(obj: Object, finalizer: Finalizer) {
-  try {
-    _finalize = require("weak") as Finalize;
-    _finalize(obj, finalizer);
-  } catch (e) {
-    triedWeak = true;
-    throw new Error();
-  }
+function defaultFinalize(_obj: Object, _finalizer: Finalizer) {
+  throw new Error(RPC_NO_FINALIZE_RUNTIME);
 }
 
 export function setFinalize(finalize: Finalize) {

@@ -129,7 +129,7 @@ export const RPC_CALL_QUEUE_FULL =
 export const RPC_QUEUE_CALL_CANCEL = "CAPNP-TS102 Queue call canceled";
 
 export const RPC_NO_FINALIZE_RUNTIME =
-  "CAPNP-TS103 No finalize runtime available: add dependency 'weak' or call setFinalize()";
+  'CAPNP-TS103 No finalize runtime available: call setFinalize(require("weak"))';
 
 export const RPC_CLOSED_CLIENT = "CAPNP-TS104 Close() called on closed client";
 
