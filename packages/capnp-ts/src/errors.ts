@@ -133,3 +133,5 @@ export const RPC_CLOSED_CLIENT = "CAPNP-TS104 Close() called on closed client";
 export const RPC_ZERO_REF = "CAPNP-TS105 Ref() called on zeroed refcount";
 
 export const RPC_IMPORT_CLOSED = "CAPNP-TS106 Call on closed import";
+
+export const RPC_UNIMPLEMENTED = "CAPNP-TS107 Method not implemented";

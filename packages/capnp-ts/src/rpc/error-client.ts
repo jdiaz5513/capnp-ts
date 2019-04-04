@@ -3,6 +3,7 @@ import { RPC_NULL_CLIENT } from "../errors";
 import { Answer } from "./answer";
 import { Struct } from "../serialization/pointers/struct";
 import { Call } from "./call";
+import { ErrorAnswer } from "./error-answer";
 
 export class ErrorClient implements Client {
   err: Error;
@@ -12,8 +13,7 @@ export class ErrorClient implements Client {
   }
 
   call<P extends Struct, R extends Struct>(_call: Call<P, R>): Answer<R> {
-    // FIXME: ErrorAnswer ?
-    throw this.err;
+    return new ErrorAnswer(this.err);
   }
 
   close() {

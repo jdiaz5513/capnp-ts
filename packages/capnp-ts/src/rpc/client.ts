@@ -2,7 +2,6 @@ import { Struct } from "../serialization/pointers/struct";
 import { Call } from "./call";
 import { Answer } from "./answer";
 import { PipelineOp } from "./pipeline-op";
-import { Pointer } from "../serialization/pointers/pointer";
 import { ErrorClient, clientOrNull } from "./error-client";
 import { transformPtr } from "./transform-ptr";
 import { pointerToInterface, interfaceToClient } from "./interface";

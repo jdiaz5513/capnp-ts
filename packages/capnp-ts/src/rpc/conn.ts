@@ -4,7 +4,6 @@ import { Client, isSameClient, clientFromResolution } from "./client";
 import { Transport } from "./transport";
 import { Question, QuestionState } from "./question";
 import {
-  Message,
   Message_Which,
   Return,
   Return_Which,
@@ -33,6 +32,7 @@ import { FixedAnswer } from "./fixed-answer";
 import { LocalAnswerClient } from "./local-answer-client";
 import initTrace from "debug";
 import { Finalize } from "./finalize";
+import { RPCMessage } from "./rpc-message";
 
 const trace = initTrace("capnp:conn");
 trace("load");
@@ -102,17 +102,17 @@ export class Conn {
     });
   }
 
-  handleMessage(m: Message) {
+  handleMessage(m: RPCMessage) {
     switch (m.which()) {
-      case Message.UNIMPLEMENTED: {
+      case RPCMessage.UNIMPLEMENTED: {
         // no-op for now to avoid feedback loop
         break;
       }
-      case Message.ABORT: {
+      case RPCMessage.ABORT: {
         this.shutdown(new RPCError(m.getAbort()));
         break;
       }
-      case Message.RETURN: {
+      case RPCMessage.RETURN: {
         this.handleReturnMessage(m);
         break;
       }
@@ -122,7 +122,7 @@ export class Conn {
     }
   }
 
-  handleReturnMessage(m: Message): Error | null {
+  handleReturnMessage(m: RPCMessage): Error | null {
     const ret = m.getReturn();
     const id = ret.getAnswerId();
     const q = this.popQuestion(id);

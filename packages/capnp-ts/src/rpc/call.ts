@@ -1,6 +1,6 @@
-import { Message as capnpMessage } from "../serialization/message";
 import { Struct } from "../serialization/pointers/struct";
 import { Segment } from "../serialization/segment";
+import { Message } from "../serialization/message";
 import { Method } from "./method";
 
 // The Call type holds the record for an outgoing interface call.
@@ -73,7 +73,7 @@ export function placeParams<P extends Struct, R extends Struct>(
     // tslint:disable
     console.warn(`placeParams: ignoring specified segment for now`);
   }
-  const msg = new capnpMessage();
+  const msg = new Message();
   let p = new call.method.ParamsClass(msg.getSegment(0), 0);
   Struct.initStruct(call.method.ParamsClass._capnp.size, p);
   call.paramsFunc(p);

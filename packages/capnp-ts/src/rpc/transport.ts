@@ -1,7 +1,7 @@
-import { Message } from "../std/rpc.capnp";
+import { RPCMessage } from "./rpc-message";
 
 export interface Transport {
-  sendMessage(msg: Message): void;
-  recvMessage(): Promise<Message>;
+  sendMessage(msg: RPCMessage): void;
+  recvMessage(): Promise<RPCMessage>;
   close(): void;
 }

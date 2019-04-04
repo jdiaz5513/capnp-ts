@@ -37,6 +37,15 @@ export class Question<P extends Struct, R extends Struct> implements Answer<R> {
     return await this.deferred.promise;
   }
 
+  // start signals the question has been sent
+  start() {
+    // TODO: send finishMessage in case it gets cancelled
+    // tslint:disable-next-line:max-line-length
+    // see https://sourcegraph.com/github.com/capnproto/go-capnproto2@e1ae1f982d9908a41db464f02861a850a0880a5a/-/blob/rpc/question.go#L77
+  }
+
+  // fulfill is called to resolve a question successfully.
+  // The caller must be holding onto q.conn.mu.
   fulfill(obj: Pointer) {
     // tslint:disable-next-line:max-line-length
     // TODO: derived, see https://sourcegraph.com/github.com/capnproto/go-capnproto2@e1ae1f982d9908a41db464f02861a850a0880a5a/-/blob/rpc/question.go#L105
@@ -51,6 +60,30 @@ export class Question<P extends Struct, R extends Struct> implements Answer<R> {
     }
     this.state = QuestionState.RESOLVED;
     this.deferred.resolve(this.obj);
+  }
+
+  // reject is called to resolve a question with failure
+  reject(err: Error) {
+    if (!err) {
+      throw new Error(`Question.reject called with null`);
+    }
+    if (this.state !== QuestionState.IN_PROGRESS) {
+      throw new Error(`Question.reject called more than once`);
+    }
+    this.err = err;
+    this.state = QuestionState.RESOLVED;
+    this.deferred.reject(err);
+  }
+
+  // cancel is called to resolve a question with cancellation.
+  cancel(err: Error): boolean {
+    if (this.state === QuestionState.IN_PROGRESS) {
+      this.err = err;
+      this.state = QuestionState.CANCELED;
+      this.deferred.reject(err);
+      return true;
+    }
+    return false;
   }
 
   pipelineCall<CallParams extends Struct, CallResults extends Struct>(
