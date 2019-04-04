@@ -196,11 +196,145 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
   );
 }
 
-export function generateInterfaceClasses(_ctx: CodeGeneratorFileContext, node: s.Node): void {
+export function generateInterfaceClasses(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node
+): void {
   trace("Interface generation is not yet implemented.");
 
   /* tslint:disable-next-line */
-  console.error(`CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`);
+  console.error(
+    `CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`
+  );
+
+  // Generate the parameter and result structs first
+  generateMethodStructs(ctx, node);
+
+  // Now generate the client & server classes
+  generateClient(ctx, node);
+  generateServer(ctx, node);
+}
+
+export function generateMethodStructs(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node
+): void {
+  trace("generateMethodStructs(%s) [%s]", node, node.getDisplayName());
+
+  node
+    .getInterface()
+    .getMethods()
+    .forEach(method => {
+      const paramNode = lookupNode(ctx, method.getParamStructType());
+      const resultNode = lookupNode(ctx, method.getResultStructType());
+
+      generateNode(ctx, paramNode);
+      generateNode(ctx, resultNode);
+    });
+}
+
+export function generateServerMethod(
+  _ctx: CodeGeneratorFileContext,
+  node: s.Node,
+  method: s.Method,
+  index: number
+): ts.MethodDeclaration {
+  trace(
+    "generateServerMethod(%s, %s, %d) [%s]",
+    node,
+    method,
+    index,
+    node.getDisplayName()
+  );
+
+  // TODO: fill out
+  const name = method.getName();
+  const parameters: ts.ParameterDeclaration[] = [];
+  const promiseType = VOID_TYPE;
+
+  return createMethod(
+    name,
+    parameters,
+    promiseType,
+    [],
+    false /* allowSingleLine */
+  );
+}
+
+export function generateServer(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node
+): void {
+  trace("generateServer(%s) [%s]", node, node.getDisplayName());
+
+  const fullClassName = getFullClassName(node);
+  const serverName = `${fullClassName}_Server`;
+
+  // TODO: handle superclasses
+
+  // Note: we don't sort by code order here, because we need methods
+  // to be identified by their index.
+  const methods = node.getInterface().getMethods();
+
+  const serverMethods = methods.map((method, index) => {
+    return generateServerMethod(ctx, node, method, index);
+  });
+
+  ctx.statements.push(
+    ts.createClassDeclaration(__, [EXPORT], serverName, __, [], serverMethods)
+  );
+}
+
+export function generateClientMethod(
+  _ctx: CodeGeneratorFileContext,
+  node: s.Node,
+  method: s.Method,
+  index: number
+): ts.MethodDeclaration {
+  trace(
+    "generateClientMethod(%s, %s, %d) [%s]",
+    node,
+    method,
+    index,
+    node.getDisplayName()
+  );
+
+  // TODO: fill out
+  const name = method.getName();
+  const parameters: ts.ParameterDeclaration[] = [];
+  const promiseType = VOID_TYPE;
+
+  return createMethod(
+    name,
+    parameters,
+    promiseType,
+    [],
+    false /* allowSingleLine */
+  );
+}
+
+export function generateClient(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node
+): void {
+  trace("generateClient(%s) [%s]", node, node.getDisplayName());
+
+  const fullClassName = getFullClassName(node);
+  const clientName = `${fullClassName}_Client`;
+
+  // TODO: handle superclasses
+
+  // Note: we don't sort by code order here, because we need methods
+  // to be identified by their index.
+  const methods = node.getInterface().getMethods();
+
+  const clientMethods = methods.map((method, index) => {
+    return generateClientMethod(ctx, node, method, index);
+  });
+
+  ctx.statements.push(
+    ts.createClassDeclaration(__, [EXPORT], clientName, __, [], clientMethods)
+  );
 }
 
 export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void {
@@ -612,14 +746,28 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
 
   // static readonly Client = MyInterface_Client;
   // static readonly Server = MyInterface_Server;
-  // if (interfaceNode) {
-
-  //   members.push(
-  //     ts.createProperty(__, [STATIC, READONLY], 'Client', __, __, ts.createLiteral(`${fullClassName}_Client`)));
-  //   members.push(
-  //     ts.createProperty(__, [STATIC, READONLY], 'Server', __, __, ts.createLiteral(`${fullClassName}_Server`)));
-
-  // }
+  if (interfaceNode) {
+    members.push(
+      ts.createProperty(
+        __,
+        [STATIC, READONLY],
+        "Client",
+        __,
+        __,
+        ts.createIdentifier(`${fullClassName}_Client`)
+      )
+    );
+    members.push(
+      ts.createProperty(
+        __,
+        [STATIC, READONLY],
+        "Server",
+        __,
+        __,
+        ts.createIdentifier(`${fullClassName}_Server`)
+      )
+    );
+  }
 
   const defaultValues = fields.reduce(
     (acc, f) =>
