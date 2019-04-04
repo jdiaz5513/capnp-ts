@@ -128,6 +128,7 @@ export function generateDefaultValue(field: s.Field): ts.PropertyAssignment {
     case s.Type_Which.DATA:
     case s.Type_Which.LIST:
     case s.Type_Which.STRUCT:
+    case s.Type_Which.INTERFACE:
       initializer = createValueExpression(slot.getDefaultValue());
 
       break;
@@ -200,7 +201,7 @@ export function generateInterfaceClasses(
   ctx: CodeGeneratorFileContext,
   node: s.Node
 ): void {
-  trace("Interface generation is not yet implemented.");
+  trace("generateInterfaceClasses(%s) [%s]", node, node.getDisplayName());
 
   /* tslint:disable-next-line */
   console.error(
@@ -516,9 +517,11 @@ export function generateStructFieldMethods(
       break;
 
     case s.Type.INTERFACE:
-      if (hadExplicitDefault) {
-        throw new Error(format(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE, "INTERFACE"));
-      }
+      // if (hadExplicitDefault) {
+      //   throw new Error(
+      //     format(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE, "INTERFACE")
+      //   );
+      // }
 
       /** __S.getPointerAs(0, Foo, this) */
       get = ts.createCall(ts.createPropertyAccess(STRUCT, "getPointerAs"), __, [

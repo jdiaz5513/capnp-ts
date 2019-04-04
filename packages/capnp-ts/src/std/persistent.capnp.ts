@@ -24,13 +24,61 @@ export class Persistent_SaveResults extends __S {
     setSturdyRef(value: capnp.Pointer): void { __S.copyFrom(value, __S.getPointer(0, this)); }
     toString(): string { return "Persistent_SaveResults_" + super.toString(); }
 }
+export class Persistent_Client {
+    save(): void {
+    }
+}
+export class Persistent_Server {
+    save(): void {
+    }
+}
 export class Persistent extends __S {
     static readonly SaveParams = Persistent_SaveParams;
     static readonly SaveResults = Persistent_SaveResults;
+    static readonly Client = Persistent_Client;
+    static readonly Server = Persistent_Server;
     static readonly _capnp = { displayName: "Persistent", id: "c8cb212fcd9f5691", size: new __O(0, 0) };
     toString(): string { return "Persistent_" + super.toString(); }
 }
+export class RealmGateway_Import$Params extends __S {
+    static readonly _capnp = { displayName: "import$Params", id: "f0c2cc1d3909574d", size: new __O(0, 2) };
+    getCap(): capnp.Interface { return __S.getPointerAs(0, capnp.Interface, this); }
+    setCap(value: capnp.Interface): void { __S.copyFrom(value, __S.getPointer(0, this)); }
+    adoptParams(value: capnp.Orphan<Persistent_SaveParams>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownParams(): capnp.Orphan<Persistent_SaveParams> { return __S.disown(this.getParams()); }
+    getParams(): Persistent_SaveParams { return __S.getStruct(1, Persistent_SaveParams, this); }
+    hasParams(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initParams(): Persistent_SaveParams { return __S.initStructAt(1, Persistent_SaveParams, this); }
+    setParams(value: Persistent_SaveParams): void { __S.copyFrom(value, __S.getPointer(1, this)); }
+    toString(): string { return "RealmGateway_Import$Params_" + super.toString(); }
+}
+export class RealmGateway_Export$Params extends __S {
+    static readonly _capnp = { displayName: "export$Params", id: "ecafa18b482da3aa", size: new __O(0, 2) };
+    getCap(): capnp.Interface { return __S.getPointerAs(0, capnp.Interface, this); }
+    setCap(value: capnp.Interface): void { __S.copyFrom(value, __S.getPointer(0, this)); }
+    adoptParams(value: capnp.Orphan<Persistent_SaveParams>): void { __S.adopt(value, __S.getPointer(1, this)); }
+    disownParams(): capnp.Orphan<Persistent_SaveParams> { return __S.disown(this.getParams()); }
+    getParams(): Persistent_SaveParams { return __S.getStruct(1, Persistent_SaveParams, this); }
+    hasParams(): boolean { return !__S.isNull(__S.getPointer(1, this)); }
+    initParams(): Persistent_SaveParams { return __S.initStructAt(1, Persistent_SaveParams, this); }
+    setParams(value: Persistent_SaveParams): void { __S.copyFrom(value, __S.getPointer(1, this)); }
+    toString(): string { return "RealmGateway_Export$Params_" + super.toString(); }
+}
+export class RealmGateway_Client {
+    import(): void {
+    }
+    export(): void {
+    }
+}
+export class RealmGateway_Server {
+    import(): void {
+    }
+    export(): void {
+    }
+}
 export class RealmGateway extends __S {
+    static readonly Client = RealmGateway_Client;
+    static readonly Server = RealmGateway_Server;
     static readonly _capnp = { displayName: "RealmGateway", id: "84ff286cd00a3ed4", size: new __O(0, 0) };
     toString(): string { return "RealmGateway_" + super.toString(); }
 }

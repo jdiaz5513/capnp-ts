@@ -167,6 +167,12 @@ export function createValueExpression(value: s.Value): ts.Expression {
       break;
 
     case s.Value.INTERFACE:
+      const __S = capnp.Struct;
+      __S.testWhich("interface", __S.getUint16(0, value), 17, value);
+      p = __S.getPointer(0, value);
+
+      break;
+
     default:
       throw new Error(format(E.GEN_SERIALIZE_UNKNOWN_VALUE, s.Value_Which[value.which()]));
   }
