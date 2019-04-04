@@ -32,6 +32,7 @@ import { PipelineClient } from "./pipeline-client";
 import { FixedAnswer } from "./fixed-answer";
 import { LocalAnswerClient } from "./local-answer-client";
 import initTrace from "debug";
+import { Finalize } from "./finalize";
 
 const trace = initTrace("capnp:conn");
 trace("load");
@@ -41,6 +42,7 @@ type QuestionSlot = Question<any, any> | null;
 
 export class Conn {
   transport: Transport;
+  finalize: Finalize;
 
   questionID = new IDGen();
   questions = [] as QuestionSlot[];
@@ -54,8 +56,18 @@ export class Conn {
 
   onError?: (err: Error) => void;
 
-  constructor(transport: Transport) {
+  /**
+   * Create a new connection
+   * @param {Transport} transport The transport used to receive/send messages.
+   * @param {Finalize} finalize Weak reference implementation. Compatible with
+   * the 'weak' module on node.js (just add weak as a dependency and pass
+   * require("weak")), but alternative implementations can be provided for
+   * other platforms like Electron.
+   * @returns {Conn} A new connection.
+   */
+  constructor(transport: Transport, finalize: Finalize) {
     this.transport = transport;
+    this.finalize = finalize;
     this.questionID = new IDGen();
     this.questions = [];
 
@@ -212,7 +224,7 @@ export class Conn {
       return importEntry.rc.ref();
     }
     const client = new ImportClient(this, id);
-    const [rc, ref] = RefCount.new(client);
+    const [rc, ref] = RefCount.new(client, this.finalize);
     this.imports[id] = {
       rc,
       refs: 1
@@ -237,7 +249,7 @@ export class Conn {
     }
 
     const id = this.exportID.next();
-    const [rc, ref] = RefCount.new(client);
+    const [rc, ref] = RefCount.new(client, this.finalize);
     const _export: Export = {
       client: ref,
       id,

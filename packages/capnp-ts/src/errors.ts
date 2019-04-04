@@ -128,9 +128,6 @@ export const RPC_CALL_QUEUE_FULL =
   "CAPNP-TS101 Promised answer call queue full";
 export const RPC_QUEUE_CALL_CANCEL = "CAPNP-TS102 Queue call canceled";
 
-export const RPC_NO_FINALIZE_RUNTIME =
-  'CAPNP-TS103 No finalize runtime available: call setFinalize(require("weak"))';
-
 export const RPC_CLOSED_CLIENT = "CAPNP-TS104 Close() called on closed client";
 
 export const RPC_ZERO_REF = "CAPNP-TS105 Ref() called on zeroed refcount";

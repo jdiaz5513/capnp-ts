@@ -1,6 +1,6 @@
 import { Client } from "./client";
 import { RefCount } from "./refcount";
-import { finalize } from "./finalize";
+import { Finalize } from "./finalize";
 import { Struct } from "../serialization/pointers/struct";
 import { Call } from "./call";
 import { Answer } from "./answer";
@@ -10,7 +10,7 @@ export class Ref implements Client {
   rc: RefCount;
   closeState: { closed: boolean };
 
-  constructor(rc: RefCount) {
+  constructor(rc: RefCount, finalize: Finalize) {
     this.rc = rc;
     const closeState = { closed: false };
     this.closeState = closeState;
