@@ -6,7 +6,7 @@ import { transformPtr } from "./transform-ptr";
 import { Call } from "./call";
 import { Answer } from "./answer";
 import { clientOrNull } from "./error-client";
-import { interfaceToClient, pointerToInterface } from "./interface";
+import { Interface } from "../serialization/pointers/interface";
 
 export class ImmediateAnswer<R extends Struct> extends FixedAnswer<R> {
   s: R;
@@ -22,7 +22,7 @@ export class ImmediateAnswer<R extends Struct> extends FixedAnswer<R> {
 
   findClient(transform: PipelineOp[]): Client {
     const p = transformPtr(this.s, transform);
-    return clientOrNull(interfaceToClient(pointerToInterface(p)));
+    return clientOrNull(Interface.fromPointer(p).getClient());
   }
 
   pipelineCall<CallParams extends Struct, CallResults extends Struct>(

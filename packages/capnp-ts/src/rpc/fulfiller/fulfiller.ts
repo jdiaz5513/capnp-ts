@@ -13,8 +13,8 @@ import {
 } from "../../errors";
 import { Pointer } from "../../serialization/pointers/pointer";
 import { transformPtr } from "../transform-ptr";
-import { pointerToInterface, isInterfaceValid } from "../interface";
 import { ErrorAnswer } from "../error-answer";
+import { Interface } from "../../serialization/pointers/interface";
 
 const callQueueSize = 64;
 
@@ -114,12 +114,12 @@ export class Fulfiller<R extends Struct> implements Answer<R> {
         pc.f.reject(e); // tslint:disable-line:no-unsafe-any
         continue;
       }
-      const iface = pointerToInterface(c);
-      if (!isInterfaceValid(iface)) {
+      const iface = Interface.fromPointer(c);
+      if (!iface.isValid()) {
         pc.f.reject(new Error(RPC_NULL_CLIENT));
         continue;
       }
-      const cn = iface.cap;
+      const cn = iface.getCapID();
       if (!qs[cn]) {
         qs[cn] = new Ecalls([]);
       }

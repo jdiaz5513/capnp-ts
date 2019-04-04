@@ -4,7 +4,7 @@ import { Answer } from "./answer";
 import { PipelineOp } from "./pipeline-op";
 import { ErrorClient, clientOrNull } from "./error-client";
 import { transformPtr } from "./transform-ptr";
-import { pointerToInterface, interfaceToClient } from "./interface";
+import { Interface } from "../serialization";
 
 // A Client represents an Cap'n Proto interface type.
 export interface Client {
@@ -52,5 +52,5 @@ export function clientFromResolution(
   }
 
   const out = transformPtr(obj, transform);
-  return clientOrNull(interfaceToClient(pointerToInterface(out)));
+  return clientOrNull(Interface.fromPointer(out).getClient());
 }

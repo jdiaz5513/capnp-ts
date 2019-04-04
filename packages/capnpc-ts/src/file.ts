@@ -74,7 +74,11 @@ export function getJsType(ctx: CodeGeneratorFileContext, type: s.Type, construct
       return "capnp.Int64";
 
     case s.Type.INTERFACE:
-      return "capnp.Interface";
+      const i = getFullClassName(
+        lookupNode(ctx, type.getInterface().getTypeId())
+      );
+
+      return i;
 
     case s.Type.LIST:
       return `capnp.List${constructor ? "Ctor" : ""}<${getJsType(ctx, type.getList().getElementType(), false)}>`;
