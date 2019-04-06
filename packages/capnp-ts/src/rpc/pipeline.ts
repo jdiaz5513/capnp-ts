@@ -52,13 +52,17 @@ export class Pipeline<
 
   // Struct waits until the answer is resolved and returns the struct
   // this pipeline represents.
-  async struct(): Promise<Results | null> {
+  async struct(): Promise<Results> {
     const s = await this.answer.struct();
-    const ptr = transformPtr(s, this.transform());
-    if (!ptr) {
-      return null;
+    const t = transformPtr(s, this.transform());
+    if (!t) {
+      if (this.op.defaultValue) {
+        Pointer.copyFrom(this.op.defaultValue, t);
+      } else {
+        Struct.initStruct(this.ResultsClass._capnp.size, t);
+      }
     }
-    return Struct.getAs(this.ResultsClass, ptr);
+    return Struct.getAs(this.ResultsClass, t);
   }
 
   // client returns the client version of this pipeline

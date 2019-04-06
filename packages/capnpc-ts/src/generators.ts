@@ -702,12 +702,7 @@ export function generateResultPromise(
         [], // parameters
         ts.createTypeReferenceNode(
           "Promise",
-          [
-            ts.createUnionTypeNode([
-              ts.createTypeReferenceNode(resultsClassName, __),
-              ts.createTypeReferenceNode("null", __)
-            ])
-          ] // typeArguments
+          [ts.createTypeReferenceNode(resultsClassName, __)] // typeArguments
         ),
         createExpressionBlock(
           [
