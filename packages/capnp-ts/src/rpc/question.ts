@@ -104,8 +104,8 @@ export class Question<P extends Struct, R extends Struct> implements Answer<R> {
     const msg = newMessage();
     const msgCall = msg.initCall();
     msgCall.setQuestionId(pipeq.id);
-    msgCall.setInterfaceId(ccall.method.interfaceID);
-    msgCall.setMethodId(ccall.method.methodID);
+    msgCall.setInterfaceId(ccall.method.interfaceId);
+    msgCall.setMethodId(ccall.method.methodId);
     const target = msgCall.initTarget();
     const a = target.initPromisedAnswer();
     a.setQuestionId(this.id);

@@ -4,8 +4,8 @@ import { Uint64 } from "../types";
 // A Method identifies a method along with an optional
 // human-readable description of the method
 export interface Method<P extends Struct, R extends Struct> {
-  interfaceID: Uint64;
-  methodID: number;
+  interfaceId: Uint64;
+  methodId: number;
 
   // Canonical name of the interface. May be empty.
   interfaceName?: string;

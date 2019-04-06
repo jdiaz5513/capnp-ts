@@ -4,3 +4,4 @@ export * from "./call";
 export * from "./client";
 export * from "./pipeline";
 export * from "./rpc-message";
+export * from "./method";

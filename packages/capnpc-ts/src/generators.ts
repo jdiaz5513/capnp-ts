@@ -242,34 +242,6 @@ export function generateMethodStructs(
     });
 }
 
-export function generateServerMethod(
-  _ctx: CodeGeneratorFileContext,
-  node: s.Node,
-  method: s.Method,
-  index: number
-): ts.MethodDeclaration {
-  trace(
-    "generateServerMethod(%s, %s, %d) [%s]",
-    node,
-    method,
-    index,
-    node.getDisplayName()
-  );
-
-  // TODO: fill out
-  const name = method.getName();
-  const parameters: ts.ParameterDeclaration[] = [];
-  const promiseType = VOID_TYPE;
-
-  return createMethod(
-    name,
-    parameters,
-    promiseType,
-    [],
-    false /* allowSingleLine */
-  );
-}
-
 export function generateServer(
   ctx: CodeGeneratorFileContext,
   node: s.Node
@@ -281,25 +253,21 @@ export function generateServer(
 
   // TODO: handle superclasses
 
-  // Note: we don't sort by code order here, because we need methods
-  // to be identified by their index.
-  const methods = node.getInterface().getMethods();
-
-  const serverMethods = methods.map((method, index) => {
-    return generateServerMethod(ctx, node, method, index);
-  });
+  const members: ts.ClassElement[] = [];
 
   ctx.statements.push(
-    ts.createClassDeclaration(__, [EXPORT], serverName, __, [], serverMethods)
+    ts.createClassDeclaration(__, [EXPORT], serverName, __, [], members)
   );
 }
 
 export function generateClientMethod(
-  _ctx: CodeGeneratorFileContext,
+  ctx: CodeGeneratorFileContext,
   node: s.Node,
+  clientName: string,
+  members: ts.ClassElement[],
   method: s.Method,
   index: number
-): ts.MethodDeclaration {
+): void {
   trace(
     "generateClientMethod(%s, %s, %d) [%s]",
     node,
@@ -313,12 +281,63 @@ export function generateClientMethod(
   const parameters: ts.ParameterDeclaration[] = [];
   const promiseType = VOID_TYPE;
 
-  return createMethod(
-    name,
-    parameters,
-    promiseType,
-    [],
-    false /* allowSingleLine */
+  const paramTypeName = getFullClassName(
+    lookupNode(ctx, method.getParamStructType())
+  );
+  const resultTypeName = getFullClassName(
+    lookupNode(ctx, method.getResultStructType())
+  );
+
+  members.push(
+    ts.createProperty(
+      __, // decorators
+      [STATIC, READONLY], // modifiers
+      `${name}$method`,
+      __, // questionOrExclamationToken
+      ts.createTypeReferenceNode(
+        "capnp.Method",
+        [
+          ts.createTypeReferenceNode(paramTypeName, __),
+          ts.createTypeReferenceNode(resultTypeName, __)
+        ] // typeParameters
+      ),
+      ts.createObjectLiteral(
+        [
+          ts.createPropertyAssignment(
+            "ParamsClass",
+            ts.createIdentifier(paramTypeName)
+          ),
+          ts.createPropertyAssignment(
+            "ResultsClass",
+            ts.createIdentifier(resultTypeName)
+          ),
+          ts.createPropertyAssignment(
+            "interfaceId",
+            ts.createPropertyAccess(
+              ts.createIdentifier(clientName),
+              "interfaceId"
+            )
+          ),
+          ts.createPropertyAssignment(
+            "methodId",
+            ts.createNumericLiteral(index.toString())
+          ),
+          ts.createPropertyAssignment(
+            "interfaceName",
+            ts.createStringLiteral(node.getDisplayName())
+          ),
+          ts.createPropertyAssignment(
+            "methodName",
+            ts.createStringLiteral(method.getName())
+          )
+        ],
+        true /* multiline */
+      )
+    )
+  );
+
+  members.push(
+    createMethod(name, parameters, promiseType, [], false /* allowSingleLine */)
   );
 }
 
@@ -332,10 +351,29 @@ export function generateClient(
   const clientName = `${fullClassName}$Client`;
 
   // TODO: handle superclasses
-  let members: ts.ClassElement[] = [];
+  const members: ts.ClassElement[] = [];
 
   const ClientType = ts.createTypeReferenceNode("capnp.Client", __);
+
   members.push(ts.createProperty(__, __, "client", __, ClientType, __));
+
+  members.push(
+    ts.createProperty(
+      __,
+      [STATIC, READONLY],
+      "interfaceId",
+      __,
+      ts.createTypeReferenceNode("capnp.Uint64", __),
+      ts.createCall(
+        ts.createPropertyAccess(
+          ts.createIdentifier("capnp.Uint64"),
+          "fromHexString"
+        ),
+        __, // typeArgs
+        [ts.createStringLiteral(node.getId().toHexString())]
+      )
+    )
+  );
 
   members.push(
     ts.createConstructor(
@@ -356,13 +394,12 @@ export function generateClient(
     )
   );
 
-  const methods = node
+  node
     .getInterface()
     .getMethods()
-    .map<ts.ClassElement>((method, index) => {
-      return generateClientMethod(ctx, node, method, index);
+    .forEach((method, index) => {
+      generateClientMethod(ctx, node, clientName, members, method, index);
     });
-  members = [...members, ...methods];
 
   ctx.statements.push(
     ts.createClassDeclaration(__, [EXPORT], clientName, __, [], members)

@@ -51,4 +51,12 @@ export {
 
 export { Int64, Uint64 } from "./types";
 
-export { Transport, Conn, Call, Client, Pipeline, RPCMessage } from "./rpc";
+export {
+  Transport,
+  Conn,
+  Call,
+  Client,
+  Pipeline,
+  RPCMessage,
+  Method
+} from "./rpc";

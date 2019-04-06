@@ -29,8 +29,8 @@ export class ImportClient implements Client {
     const msg = newMessage();
     const msgCall = msg.initCall();
     msgCall.setQuestionId(q.id);
-    msgCall.setInterfaceId(cl.method.interfaceID);
-    msgCall.setMethodId(cl.method.methodID);
+    msgCall.setInterfaceId(cl.method.interfaceId);
+    msgCall.setMethodId(cl.method.methodId);
     const target = msgCall.initTarget();
     target.setImportedCap(this.id);
     const payload = msgCall.initParams();
