@@ -25,6 +25,7 @@ import {
   LENGTH,
   NUMBER_TYPE,
   Primitive,
+  QUESTION_TOKEN,
   READONLY,
   STATIC,
   STRING_TYPE,
@@ -279,7 +280,6 @@ export function generateClientMethod(
   // TODO: fill out
   const name = method.getName();
   const parameters: ts.ParameterDeclaration[] = [];
-  const promiseType = VOID_TYPE;
 
   const paramTypeName = getFullClassName(
     lookupNode(ctx, method.getParamStructType())
@@ -288,11 +288,13 @@ export function generateClientMethod(
     lookupNode(ctx, method.getResultStructType())
   );
 
+  const methodDefName = `${name}$method`;
+
   members.push(
     ts.createProperty(
       __, // decorators
       [STATIC, READONLY], // modifiers
-      `${name}$method`,
+      methodDefName,
       __, // questionOrExclamationToken
       ts.createTypeReferenceNode(
         "capnp.Method",
@@ -337,7 +339,103 @@ export function generateClientMethod(
   );
 
   members.push(
-    createMethod(name, parameters, promiseType, [], false /* allowSingleLine */)
+    ts.createMethod(
+      __, // decorators
+      __, // modifiers
+      __, // asteriskToken
+      name,
+      __, // typeParameters
+      __, // questionToken
+      [
+        ts.createParameter(
+          __, // decorators
+          __, // modifiers
+          __, // dotDotToken
+          "paramsFunc",
+          QUESTION_TOKEN, // questionToken
+          ts.createFunctionTypeNode(
+            __, // typeParameters
+            [
+              ts.createParameter(
+                __, // decorators
+                __, // modifiers
+                __, // dotDotToken
+                "params", // name
+                __, // questionToken
+                ts.createTypeReferenceNode(paramTypeName, __) // type
+              )
+            ],
+            VOID_TYPE // type
+          )
+        )
+      ], // parameters
+      ts.createTypeReferenceNode(`${resultTypeName}$Promise`, __),
+      ts.createBlock(
+        [
+          ts.createVariableStatement(
+            __, // modifiers
+            [
+              ts.createVariableDeclaration(
+                "answer",
+                __,
+                ts.createCall(
+                  ts.createPropertyAccess(
+                    ts.createPropertyAccess(THIS, "client"),
+                    "call"
+                  ),
+                  __, // typeArgs
+                  [
+                    ts.createObjectLiteral(
+                      [
+                        ts.createPropertyAssignment(
+                          "method",
+                          ts.createPropertyAccess(
+                            ts.createIdentifier(clientName),
+                            methodDefName
+                          )
+                        ),
+                        ts.createPropertyAssignment(
+                          "paramsFunc",
+                          ts.createIdentifier("paramsFunc")
+                        )
+                      ],
+                      true // multiline
+                    )
+                  ]
+                )
+              )
+            ]
+          ), // const answer = ...
+
+          ts.createVariableStatement(
+            __, // modifiers
+            [
+              ts.createVariableDeclaration(
+                "pipeline",
+                __,
+                ts.createNew(
+                  ts.createIdentifier("capnp.Pipeline"),
+                  __, // typeArgs
+                  [
+                    ts.createIdentifier(resultTypeName),
+                    ts.createIdentifier("answer")
+                  ]
+                )
+              )
+            ]
+          ), // const pipeline = ...
+
+          ts.createReturn(
+            ts.createNew(
+              ts.createIdentifier(`${resultTypeName}$Promise`),
+              __, // typeArguments
+              [ts.createIdentifier("pipeline")]
+            )
+          )
+        ],
+        true // multiline
+      )
+    )
   );
 }
 

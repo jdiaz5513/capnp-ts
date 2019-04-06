@@ -166,6 +166,10 @@ export const STATIC = ts.createToken(ts.SyntaxKind.StaticKeyword);
 
 export const ASYNC = ts.createToken(ts.SyntaxKind.AsyncKeyword);
 
+/** ? */
+
+export const QUESTION_TOKEN = ts.createToken(ts.SyntaxKind.QuestionToken);
+
 /** string */
 
 export const STRING_TYPE = ts.createTypeReferenceNode("string", __);

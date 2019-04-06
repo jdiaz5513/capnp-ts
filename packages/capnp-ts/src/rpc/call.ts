@@ -20,7 +20,7 @@ type FuncCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
   // struct to allocate.  This is used when application code is using a
   // client.  These settings should be set together; they are mutually
   // exclusive with Params.
-  paramsFunc(params: P): void;
+  paramsFunc?(params: P): void;
 };
 
 type DataCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
@@ -34,13 +34,13 @@ type DataCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
 export function isFuncCall<P extends Struct, R extends Struct>(
   call: Call<P, R>
 ): call is FuncCall<P, R> {
-  return !!(call as FuncCall<P, R>).paramsFunc;
+  return !isDataCall(call);
 }
 
 export function isDataCall<P extends Struct, R extends Struct>(
   call: Call<P, R>
 ): call is DataCall<P, R> {
-  return !isFuncCall(call);
+  return !!(call as DataCall<P, R>).params;
 }
 
 // Copy clones a call, ensuring that its Params are placed.
@@ -76,6 +76,8 @@ export function placeParams<P extends Struct, R extends Struct>(
   const msg = new Message();
   let p = new call.method.ParamsClass(msg.getSegment(0), 0);
   Struct.initStruct(call.method.ParamsClass._capnp.size, p);
-  call.paramsFunc(p);
+  if (call.paramsFunc) {
+    call.paramsFunc(p);
+  }
   return p;
 }
