@@ -189,3 +189,7 @@ export const VALUE = ts.createIdentifier("value");
 /** void */
 
 export const VOID_TYPE = ts.createTypeReferenceNode("void", __);
+
+/** any */
+
+export const ANY_TYPE = ts.createTypeReferenceNode("any", __);

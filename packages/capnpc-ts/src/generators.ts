@@ -31,6 +31,7 @@ import {
   TS_FILE_ID,
   VALUE,
   VOID_TYPE,
+  ANY_TYPE,
   OBJECT_SIZE,
 } from "./constants";
 import * as E from "./errors";
@@ -235,6 +236,7 @@ export function generateMethodStructs(
 
       generateNode(ctx, paramNode);
       generateNode(ctx, resultNode);
+      generateResultPromise(ctx, resultNode);
     });
 }
 
@@ -420,6 +422,54 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
     default:
       throw new Error(format(E.GEN_NODE_UNKNOWN_TYPE, s.Node_Which[whichNode]));
   }
+}
+
+export function generateResultPromise(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node
+) {
+  trace("generateResultsPromise(%s) [%s]", node, node.getDisplayName());
+  const resultsClassName = getFullClassName(node);
+  const fullClassName = `${resultsClassName}$Promise`;
+
+  const PipelineType = ts.createTypeReferenceNode("capnp.Pipeline", [
+    ANY_TYPE,
+    ANY_TYPE,
+    ts.createTypeReferenceNode(resultsClassName, __)
+  ]);
+
+  const members: ts.ClassElement[] = [];
+  members.push(ts.createProperty(__, [], "pipeline", __, PipelineType, __));
+
+  members.push(
+    ts.createConstructor(
+      __, // decorators
+      __, // modifiers
+      [ts.createParameter(__, __, __, "pipeline", __, PipelineType)], // parameters
+      ts.createBlock(
+        [
+          ts.createStatement(
+            ts.createAssignment(
+              ts.createPropertyAccess(THIS, "pipeline"),
+              ts.createIdentifier("pipeline")
+            )
+          )
+        ],
+        true // multiline
+      ) // body
+    )
+  );
+
+  const c = ts.createClassDeclaration(
+    __,
+    [EXPORT],
+    fullClassName,
+    __,
+    [], // TODO: inheritance
+    members
+  );
+
+  ctx.statements.push(c);
 }
 
 const listLengthParameterName = "length";
