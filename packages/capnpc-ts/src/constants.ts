@@ -162,6 +162,10 @@ export const SOURCE_COMMENT = `/* tslint:disable */
 
 export const STATIC = ts.createToken(ts.SyntaxKind.StaticKeyword);
 
+/** async */
+
+export const ASYNC = ts.createToken(ts.SyntaxKind.AsyncKeyword);
+
 /** string */
 
 export const STRING_TYPE = ts.createTypeReferenceNode("string", __);

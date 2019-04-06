@@ -8,6 +8,7 @@ import {
   createClassExtends,
   createConcreteListProperty,
   createConstProperty,
+  createExpressionBlock,
   createMethod,
   createNestedNodeProperty,
   createUnionConstProperty,
@@ -16,6 +17,7 @@ import {
 import { CodeGeneratorFileContext } from "./code-generator-file-context";
 import {
   __,
+  ASYNC,
   BOOLEAN_TYPE,
   CAPNP,
   ConcreteListType,
@@ -503,7 +505,7 @@ export function generateResultPromise(
           ts.createPropertyAccess(THIS, "pipeline"),
           "getPipeline"
         ),
-        [], // typeArguments
+        __, // typeArguments
         [
           ts.createIdentifier(promisedJsType),
           ts.createNumericLiteral(slot.getOffset().toString())
@@ -513,14 +515,14 @@ export function generateResultPromise(
       // const client = pipeline.client()
       const client = ts.createCall(
         ts.createPropertyAccess(pipeline, ts.createIdentifier("client")),
-        [], // typeArguments
-        [] // arguments
+        __, // typeArguments
+        __ // arguments
       );
 
       // new RemoteInterface(client)
       const remoteInterface = ts.createNew(
         ts.createIdentifier(jsType), // expression
-        [], // typeArguments
+        __, // typeArguments
         [client] // argumentsArray
       );
 
@@ -536,7 +538,7 @@ export function generateResultPromise(
           jsTypeReference,
           ts.createBlock(
             [ts.createReturn(remoteInterface)],
-            true /* multiLine */
+            true // multiLine
           )
         )
       );
@@ -544,6 +546,45 @@ export function generateResultPromise(
   };
 
   fields.forEach(generatePromiseFieldMethod);
+
+  {
+    members.push(
+      ts.createMethod(
+        __, // decorators
+        [ASYNC], // modifiers
+        __, // asteriskToken
+        `promise`,
+        __,
+        __,
+        [], // parameters
+        ts.createTypeReferenceNode(
+          "Promise",
+          [
+            ts.createUnionTypeNode([
+              ts.createTypeReferenceNode(resultsClassName, __),
+              ts.createTypeReferenceNode("null", __)
+            ])
+          ] // typeArguments
+        ),
+        createExpressionBlock(
+          [
+            ts.createAwait(
+              ts.createCall(
+                ts.createPropertyAccess(
+                  ts.createPropertyAccess(THIS, "pipeline"),
+                  "struct"
+                ),
+                __, // typeArguments
+                __ // parameters
+              ) // call
+            ) // await
+          ],
+          true, // returns
+          false // allowSingleLine
+        )
+      )
+    );
+  }
 
   const c = ts.createClassDeclaration(
     __,
