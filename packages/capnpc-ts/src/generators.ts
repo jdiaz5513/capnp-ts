@@ -460,6 +460,91 @@ export function generateResultPromise(
     )
   );
 
+  const struct = node.getStruct();
+  const fields = struct
+    .getFields()
+    .toArray()
+    .sort(compareCodeOrder);
+
+  const generatePromiseFieldMethod = (field: s.Field) => {
+    let jsType: string;
+    let isInterface = false;
+    let slot: s.Field_Slot;
+
+    if (field.isSlot()) {
+      slot = field.getSlot();
+      const slotType = slot.getType();
+      if (slotType.which() !== s.Type.INTERFACE) {
+        // TODO: return a Promise<jsType> for non-interface slots
+        return;
+      }
+      isInterface = true;
+      jsType = getJsType(ctx, slotType, false);
+    } else if (field.isGroup()) {
+      // TODO: how should groups be handled?
+      return;
+    } else {
+      throw new Error(format(E.GEN_UNKNOWN_STRUCT_FIELD, field.which()));
+    }
+
+    const promisedJsType = jsType;
+    if (isInterface) {
+      jsType = `${jsType}$Client`;
+    }
+
+    const name = field.getName();
+    const properName = util.c2t(name);
+    const jsTypeReference = ts.createTypeReferenceNode(jsType, __);
+
+    {
+      // const pipeline = this.pipeline.getPipeline(SlotType, offset)
+      const pipeline = ts.createCall(
+        ts.createPropertyAccess(
+          ts.createPropertyAccess(THIS, "pipeline"),
+          "getPipeline"
+        ),
+        [], // typeArguments
+        [
+          ts.createIdentifier(promisedJsType),
+          ts.createNumericLiteral(slot.getOffset().toString())
+        ] // arguments
+      ); // call
+
+      // const client = pipeline.client()
+      const client = ts.createCall(
+        ts.createPropertyAccess(pipeline, ts.createIdentifier("client")),
+        [], // typeArguments
+        [] // arguments
+      );
+
+      // new RemoteInterface(client)
+      const remoteInterface = ts.createNew(
+        ts.createIdentifier(jsType), // expression
+        [], // typeArguments
+        [client] // argumentsArray
+      );
+
+      members.push(
+        ts.createMethod(
+          __, // decorators
+          __, // modifiers
+          __, // asteriskToken
+          `get${properName}`,
+          __,
+          __,
+          [], // parameters
+          jsTypeReference,
+          ts.createBlock(
+            [ts.createReturn(remoteInterface)],
+            true /* multiLine */
+          )
+        )
+      );
+    }
+  };
+
+  fields.forEach(generatePromiseFieldMethod);
+
   const c = ts.createClassDeclaration(
     __,
     [EXPORT],
