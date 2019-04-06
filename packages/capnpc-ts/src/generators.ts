@@ -431,6 +431,14 @@ export function generateResultPromise(
   node: s.Node
 ) {
   trace("generateResultsPromise(%s) [%s]", node, node.getDisplayName());
+
+  const nodeId = node.getId();
+  const nodeIdHex = nodeId.toHexString();
+
+  if (ctx.generatedResultsPromiseIds.indexOf(nodeIdHex) > -1) return;
+
+  ctx.generatedResultsPromiseIds.push(nodeIdHex);
+
   const resultsClassName = getFullClassName(node);
   const fullClassName = `${resultsClassName}$Promise`;
 
