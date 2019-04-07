@@ -757,8 +757,16 @@ export function generateStructFieldMethods(
   } else {
     throw new Error(format(E.GEN_UNKNOWN_STRUCT_FIELD, field.which()));
   }
+  let jsTypeReference = ts.createTypeReferenceNode(jsType, __);
 
-  const jsTypeReference = ts.createTypeReferenceNode(jsType, __);
+  const isInterface = whichType === s.Type.INTERFACE;
+  const originalJsType = jsType;
+  const originalJsTypeReference = jsTypeReference;
+  if (isInterface) {
+    jsType = `${jsType}$Client`;
+    jsTypeReference = ts.createTypeReferenceNode(jsType, __);
+  }
+
   const discriminantOffset = node.getStruct().getDiscriminantOffset();
   const name = field.getName();
   const properName = util.c2t(name);
@@ -858,20 +866,43 @@ export function generateStructFieldMethods(
       break;
 
     case s.Type.INTERFACE:
-      // if (hadExplicitDefault) {
-      //   throw new Error(
-      //     format(E.GEN_EXPLICIT_DEFAULT_NON_PRIMITIVE, "INTERFACE")
-      //   );
-      // }
+      // new SomeInterface$Client(__S.getInterfaceClientOrNull(0, this));
+      {
+        const client = ts.createCall(
+          ts.createPropertyAccess(STRUCT, "getInterfaceClientOrNull"),
+          __, // typeParams
+          [offsetLiteral, THIS]
+        );
+        const newClient = ts.createNew(
+          ts.createIdentifier(jsType),
+          __, // typeParams
+          [client]
+        );
+        get = newClient;
+      }
 
-      /** __S.getPointerAs(0, Foo, this) */
-      get = ts.createCall(ts.createPropertyAccess(STRUCT, "getPointerAs"), __, [
-        offsetLiteral,
-        ts.createIdentifier(jsType),
-        THIS,
-      ]);
-      set = copyFromValue;
+      {
+        const message = ts.createPropertyAccess(
+          ts.createPropertyAccess(THIS, ts.createIdentifier("segment")),
+          ts.createIdentifier("message")
+        );
+        const capId = ts.createCall(
+          ts.createPropertyAccess(message, "addCap"),
+          __, // typeParams
+          [ts.createPropertyAccess(ts.createIdentifier("value"), "client")]
+        );
+        const ptr = ts.createCall(
+          ts.createPropertyAccess(STRUCT, "getPointer"),
+          __, // typeParams
+          [offsetLiteral, THIS]
+        );
 
+        set = ts.createCall(
+          ts.createPropertyAccess(STRUCT, "setInterfacePointer"),
+          __, // typeParams
+          [capId, ptr]
+        );
+      }
       break;
 
     case s.Type.LIST: {
@@ -959,7 +990,7 @@ export function generateStructFieldMethods(
       break;
   }
 
-  // adoptFoo(value: capnp.Orphan<Foo>): void { __S.adopt(value, this._getPointer(3)); }}
+  // adoptFoo(value: capnp.Orphan<Foo>): void { __S.adopt(value, this._getPointer(3)); }
   if (adopt) {
     const parameters = [ts.createParameter(__, __, __, VALUE, __, orphanType, __)];
     const expressions = [ts.createCall(ts.createPropertyAccess(STRUCT, "adopt"), __, [VALUE, getPointer])];

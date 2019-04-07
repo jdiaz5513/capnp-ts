@@ -58,5 +58,6 @@ export {
   Client,
   Pipeline,
   RPCMessage,
-  Method
+  Method,
+  clientOrNull
 } from "./rpc";
