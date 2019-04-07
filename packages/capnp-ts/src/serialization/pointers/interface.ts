@@ -68,7 +68,7 @@ export function getAsInterface(p: Pointer): Interface {
 
 export function getCapID(i: Interface): CapabilityID {
   if (i.segment.getUint32(i.byteOffset) !== PointerType.OTHER) {
-    return 0;
+    return -1;
   }
   return i.segment.getUint32(i.byteOffset + 4);
 }

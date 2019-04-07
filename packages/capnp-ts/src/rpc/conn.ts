@@ -33,8 +33,9 @@ import { LocalAnswerClient } from "./local-answer-client";
 import initTrace from "debug";
 import { Finalize } from "./finalize";
 import { RPCMessage } from "./rpc-message";
+import { MethodError } from "./method-error";
 
-const trace = initTrace("capnp:conn");
+const trace = initTrace("capnp:rpc:conn");
 trace("load");
 
 // tslint:disable-next-line:no-any
@@ -146,6 +147,17 @@ export class Conn {
 
         const content = results.getContent();
         q.fulfill(content);
+        break;
+      }
+      case Return.EXCEPTION: {
+        const exc = ret.getException();
+        let err: Error;
+        if (q.method) {
+          err = new MethodError(q.method, exc);
+        } else {
+          err = new RPCError(exc);
+        }
+        q.reject(err);
         break;
       }
       default: {
