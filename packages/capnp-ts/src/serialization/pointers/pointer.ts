@@ -277,6 +277,12 @@ export function copyFrom(src: Pointer, p: Pointer): void {
 
       break;
 
+    case PointerType.OTHER: {
+      // no content section
+
+      break;
+    }
+
     /* istanbul ignore next */
     default:
       throw new Error(format(PTR_INVALID_POINTER_TYPE, getTargetPointerType(p)));

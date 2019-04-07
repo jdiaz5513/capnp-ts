@@ -339,7 +339,7 @@ export class Conn {
     payload: Payload,
     cl: Call<P, R>
   ) {
-    const params = placeParams(cl, payload.segment);
+    const params = placeParams(cl, payload.getContent());
     payload.setContent(params);
     this.makeCapTable(payload.segment, length => payload.initCapTable(length));
   }

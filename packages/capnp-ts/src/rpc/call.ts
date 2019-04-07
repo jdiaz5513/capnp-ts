@@ -1,7 +1,11 @@
 import { Struct } from "../serialization/pointers/struct";
+import { Pointer } from "../serialization/pointers/pointer";
 import { Segment } from "../serialization/segment";
 import { Message } from "../serialization/message";
 import { Method } from "./method";
+
+import initTrace from "debug";
+const trace = initTrace("capnp:rpc:call");
 
 // The Call type holds the record for an outgoing interface call.
 export type Call<P extends Struct, R extends Struct> =
@@ -43,38 +47,45 @@ export function isDataCall<P extends Struct, R extends Struct>(
   return !!(call as DataCall<P, R>).params;
 }
 
-// Copy clones a call, ensuring that its Params are placed.
+// Copy clones a call, ensuring that its params are placed.
 // If Call.ParamsFunc is nil, then the same Call will be returned.
 export function copyCall<P extends Struct, R extends Struct>(
-  call: Call<P, R>,
-  s?: Segment
+  call: Call<P, R>
 ): Call<P, R> {
   if (isDataCall(call)) {
     return call;
   }
 
-  const p = placeParams(call, s);
+  // FIXME: it's not clear to me why the Go implementation needed
+  // copyCall in the first place - and why it needed params to be
+  // placed.
   return {
     method: call.method,
-    params: p
+    params: placeParams(call, undefined)
   };
 }
 
 export function placeParams<P extends Struct, R extends Struct>(
   call: Call<P, R>,
-  s?: Segment
+  contentPtr: Pointer | undefined
 ): P {
   if (isDataCall(call)) {
     return call.params;
   }
 
-  if (s) {
-    // TODO: figure out how to place in same segment
-    // tslint:disable
-    console.warn(`placeParams: ignoring specified segment for now`);
+  // TODO: this needs to be reviewed, I'm pretty sure it's the wrong
+  // way to do it.
+  let p: P;
+  if (contentPtr) {
+    p = new call.method.ParamsClass(
+      contentPtr.segment,
+      contentPtr.byteOffset,
+      contentPtr._capnp.depthLimit
+    );
+  } else {
+    const msg = new Message();
+    p = new call.method.ParamsClass(msg.getSegment(0), 0);
   }
-  const msg = new Message();
-  let p = new call.method.ParamsClass(msg.getSegment(0), 0);
   Struct.initStruct(call.method.ParamsClass._capnp.size, p);
   if (call.paramsFunc) {
     call.paramsFunc(p);
