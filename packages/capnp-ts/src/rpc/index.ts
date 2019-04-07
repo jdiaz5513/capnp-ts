@@ -6,3 +6,4 @@ export * from "./pipeline";
 export * from "./rpc-message";
 export * from "./method";
 export * from "./error-client";
+export * from "./server";

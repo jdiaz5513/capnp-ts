@@ -153,7 +153,7 @@ export class Conn {
         const exc = ret.getException();
         let err: Error;
         if (q.method) {
-          err = new MethodError(q.method, exc);
+          err = new MethodError(q.method, exc.getReason());
         } else {
           err = new RPCError(exc);
         }

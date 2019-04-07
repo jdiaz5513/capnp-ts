@@ -12,13 +12,13 @@ export type Call<P extends Struct, R extends Struct> =
   | FuncCall<P, R>
   | DataCall<P, R>;
 
-interface BaseCall<P extends Struct, R extends Struct> {
+export interface BaseCall<P extends Struct, R extends Struct> {
   // Method is the interface ID and method ID, along with the optional name, of
   // the method to call.
   method: Method<P, R>;
 }
 
-type FuncCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
+export type FuncCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
   // ParamsFunc is a function that populates an allocated struct with
   // the parameters for the call.  ParamsSize determines the size of the
   // struct to allocate.  This is used when application code is using a
@@ -27,7 +27,7 @@ type FuncCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
   paramsFunc?(params: P): void;
 };
 
-type DataCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
+export type DataCall<P extends Struct, R extends Struct> = BaseCall<P, R> & {
   // Params is a struct containing parameters for the call.
   // This should be set when the RPC system receives a call for an
   // exported interface.  It is mutually exclusive with ParamsFunc
@@ -51,7 +51,7 @@ export function isDataCall<P extends Struct, R extends Struct>(
 // If Call.ParamsFunc is nil, then the same Call will be returned.
 export function copyCall<P extends Struct, R extends Struct>(
   call: Call<P, R>
-): Call<P, R> {
+): DataCall<P, R> {
   if (isDataCall(call)) {
     return call;
   }
