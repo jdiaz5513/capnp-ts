@@ -112,7 +112,7 @@ export class Question<P extends Struct, R extends Struct> implements Answer<R> {
     transformToPromisedAnswer(a, transform);
     const payload = msgCall.initParams();
     this.conn.fillParams(payload, ccall);
-    this.conn.transport.sendMessage(msg);
+    this.conn.sendMessage(msg);
     this.addPromise(transform);
     return pipeq;
   }

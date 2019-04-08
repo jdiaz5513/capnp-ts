@@ -111,6 +111,7 @@ export class Struct extends Pointer {
   static readonly setText = setText;
   static readonly setInterfacePointer = setInterfacePointer;
   static readonly getInterfaceClientOrNull = getInterfaceClientOrNull;
+  static readonly getInterfaceClientOrNullAt = getInterfaceClientOrNullAt;
   static readonly testWhich = testWhich;
 
   readonly _capnp!: _Struct;
@@ -180,9 +181,13 @@ export function initStructAt<T extends Struct>(index: number, StructClass: Struc
   return s;
 }
 
-export function getInterfaceClientOrNull(index: number, p: Pointer): Client {
+export function getInterfaceClientOrNullAt(index: number, s: Struct): Client {
+  return getInterfaceClientOrNull(getPointer(index, s));
+}
+
+export function getInterfaceClientOrNull(p: Pointer): Client {
   let client: Client | null = null;
-  const capId = getInterfacePointer(getPointer(index, p));
+  const capId = getInterfacePointer(p);
   const capTable = p.segment.message._capnp.capTable;
   if (capTable && capId >= 0 && capId < capTable.length) {
     client = capTable[capId];

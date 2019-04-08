@@ -1,4 +1,7 @@
-import { Struct } from "../serialization/pointers/struct";
+import {
+  Struct,
+  getInterfaceClientOrNull
+} from "../serialization/pointers/struct";
 import { Call } from "./call";
 import { Answer } from "./answer";
 import { PipelineOp } from "./pipeline-op";
@@ -52,5 +55,6 @@ export function clientFromResolution(
   }
 
   const out = transformPtr(obj, transform);
-  return clientOrNull(Interface.fromPointer(out).getClient());
+  return getInterfaceClientOrNull(out);
+  // return clientOrNull(Interface.fromPointer(out)!.getClient()); // tslint:disable-line
 }

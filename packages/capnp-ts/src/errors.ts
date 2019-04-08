@@ -134,4 +134,9 @@ export const RPC_ZERO_REF = "CAPNP-TS105 Ref() called on zeroed refcount";
 
 export const RPC_IMPORT_CLOSED = "CAPNP-TS106 Call on closed import";
 
-export const RPC_UNIMPLEMENTED = "CAPNP-TS107 Method not implemented";
+export const RPC_METHOD_NOT_IMPLEMENTED = "CAPNP-TS107 Method not implemented";
+
+export const RPC_UNIMPLEMENTED =
+  "CAPNP-TS108 Remote used unimplemented feature";
+
+export const RPC_BAD_TARGET = "CAPNP-TS109 Target not found";

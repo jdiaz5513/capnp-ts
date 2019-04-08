@@ -37,7 +37,7 @@ export class ImportClient implements Client {
     this.conn.fillParams(payload, cl);
     // TODO: handle thrown exceptions here?
 
-    this.conn.transport.sendMessage(msg);
+    this.conn.sendMessage(msg);
     // TODO: what about q.start()?
     return q;
   }

@@ -7,7 +7,7 @@ import { Client } from "./client";
 import { Answer } from "./answer";
 import { ErrorAnswer } from "./error-answer";
 import { MethodError } from "./method-error";
-import { RPC_UNIMPLEMENTED } from "../errors";
+import { RPC_METHOD_NOT_IMPLEMENTED } from "../errors";
 
 export interface ServerMethod<P extends Struct, R extends Struct>
   extends Method<P, R> {
@@ -42,7 +42,9 @@ export class Server implements Client {
   call<P extends Struct, R extends Struct>(call: Call<P, R>): Answer<R> {
     const serverMethod = this.methods[call.method.methodId];
     if (!serverMethod) {
-      return new ErrorAnswer(new MethodError(call.method, RPC_UNIMPLEMENTED));
+      return new ErrorAnswer(
+        new MethodError(call.method, RPC_METHOD_NOT_IMPLEMENTED)
+      );
     }
     const serverCall: ServerCall<P, R> = {
       ...copyCall(call),

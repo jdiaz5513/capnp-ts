@@ -866,10 +866,10 @@ export function generateStructFieldMethods(
       break;
 
     case s.Type.INTERFACE:
-      // new SomeInterface$Client(__S.getInterfaceClientOrNull(0, this));
+      // new SomeInterface$Client(__S.getInterfaceClientOrNullAt(0, this));
       {
         const client = ts.createCall(
-          ts.createPropertyAccess(STRUCT, "getInterfaceClientOrNull"),
+          ts.createPropertyAccess(STRUCT, "getInterfaceClientOrNullAt"),
           __, // typeParams
           [offsetLiteral, THIS]
         );

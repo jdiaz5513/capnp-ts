@@ -115,11 +115,11 @@ export class Fulfiller<R extends Struct> implements Answer<R> {
         continue;
       }
       const iface = Interface.fromPointer(c);
-      if (!iface.isValid()) {
+      if (!iface) {
         pc.f.reject(new Error(RPC_NULL_CLIENT));
         continue;
       }
-      const cn = iface.getCapID();
+      const cn = iface.getCapId();
       if (!qs[cn]) {
         qs[cn] = new Ecalls([]);
       }

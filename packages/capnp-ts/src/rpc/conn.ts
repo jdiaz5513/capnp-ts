@@ -9,13 +9,19 @@ import {
   Return_Which,
   Payload,
   CapDescriptor,
-  CapDescriptor_Which
+  CapDescriptor_Which,
+  MessageTarget_Which,
+  MessageTarget
 } from "../std/rpc.capnp";
 import { RPCError } from "./rpc-error";
 import { AnswerEntry, Answer } from "./answer";
-import { newMessage, newFinishMessage } from "./capability";
+import {
+  newMessage,
+  newFinishMessage,
+  newUnimplementedMessage
+} from "./capability";
 import { Pipeline } from "./pipeline";
-import { Struct } from "../serialization/pointers/struct";
+import { Struct, StructCtor } from "../serialization/pointers/struct";
 import {
   promisedAnswerOpsToTransform,
   transformToPromisedAnswer
@@ -34,6 +40,9 @@ import initTrace from "debug";
 import { Finalize } from "./finalize";
 import { RPCMessage } from "./rpc-message";
 import { MethodError } from "./method-error";
+import { Registry } from "./registry";
+import { joinAnswer } from "./join";
+import { INVARIANT_UNREACHABLE_CODE, RPC_BAD_TARGET } from "../errors";
 
 const trace = initTrace("capnp:rpc:conn");
 trace("load");
@@ -81,7 +90,7 @@ export class Conn {
     const boot = msg.initBootstrap();
     boot.setQuestionId(q.id);
 
-    this.transport.sendMessage(msg);
+    this.sendMessage(msg);
     // TODO: relint
     // tslint:disable-next-line:no-any
     return new Pipeline(Struct as any, q).client();
@@ -117,18 +126,24 @@ export class Conn {
         this.handleReturnMessage(m);
         break;
       }
+      case RPCMessage.CALL: {
+        // TODO: the Go implementation copies the RPC message here
+        // figure out why they do that.
+        this.handleCallMessage(m);
+        break;
+      }
       default: {
         trace(`Ignoring message ${Message_Which[m.which()]}`);
       }
     }
   }
 
-  handleReturnMessage(m: RPCMessage): Error | null {
+  handleReturnMessage(m: RPCMessage) {
     const ret = m.getReturn();
     const id = ret.getAnswerId();
     const q = this.popQuestion(id);
     if (!q) {
-      return new Error(`received return for unknown question id=${id}`);
+      throw new Error(`received return for unknown question id=${id}`);
     }
 
     if (ret.getReleaseParamCaps()) {
@@ -166,9 +181,120 @@ export class Conn {
     }
 
     const fin = newFinishMessage(id, releaseResultCaps);
-    this.transport.sendMessage(fin);
+    this.sendMessage(fin);
+  }
 
-    return null;
+  handleCallMessage(m: RPCMessage) {
+    const mcall = m.getCall();
+    const mt = mcall.getTarget();
+    if (
+      mt.which() !== MessageTarget_Which.IMPORTED_CAP &&
+      mt.which() !== MessageTarget_Which.PROMISED_ANSWER
+    ) {
+      const um = newUnimplementedMessage(m);
+      this.sendMessage(um);
+      return;
+    }
+
+    const mparams = mcall.getParams();
+    try {
+      this.populateMessageCapTable(mparams);
+    } catch (e) {
+      const um = newUnimplementedMessage(m);
+      this.sendMessage(um);
+      return;
+    }
+
+    const id = mcall.getQuestionId();
+    const a = this.insertAnswer(id);
+    if (!a) {
+      // TODO: this should abort the whole conn
+      // Question ID reused, error out
+      throw new Error(`question ID reused!`);
+    }
+
+    const interfaceDef = Registry.lookup(mcall.getInterfaceId());
+    if (!interfaceDef) {
+      trace(
+        `handleCallMessage: Unknown interface: ${mcall
+          .getInterfaceId()
+          .toHexString()}`
+      );
+      const um = newUnimplementedMessage(m);
+      this.sendMessage(um);
+      return;
+    }
+
+    const method = interfaceDef.methods[mcall.getMethodId()];
+    if (!method) {
+      trace(
+        `handleCallMessage: Unknown method ${mcall.getMethodId()} on interface ${mcall
+          .getInterfaceId()
+          .toHexString()}`
+      );
+      const um = newUnimplementedMessage(m);
+      this.sendMessage(um);
+      return;
+    }
+
+    const paramContent = mparams.getContent();
+    // tslint:disable-next-line:no-any
+    const call: Call<any, any> = {
+      method,
+      params: Struct.getAs(method.ParamsClass, paramContent)
+    };
+    try {
+      this.routeCallMessage(a, mt, call);
+    } catch (e) {
+      // tslint:disable-next-line:no-unsafe-any
+      a.reject(e);
+    }
+  }
+
+  routeCallMessage<P extends Struct, R extends Struct>(
+    result: AnswerEntry<R>,
+    mt: MessageTarget,
+    cl: Call<P, R>
+  ) {
+    switch (mt.which()) {
+      case MessageTarget_Which.IMPORTED_CAP: {
+        const id = mt.getImportedCap();
+        const e = this.findExport(id);
+        if (!e) {
+          throw new Error(`rpc: target not found`);
+        }
+        const answer = this.call(e.client, cl);
+        joinAnswer(result, answer);
+        break;
+      }
+      case MessageTarget_Which.PROMISED_ANSWER: {
+        const mpromise = mt.getPromisedAnswer();
+        const id = mpromise.getQuestionId();
+        if (id === result.id) {
+          // Grandfather paradox
+          throw new Error(RPC_BAD_TARGET);
+        }
+        const pa = this.answers[id] as AnswerEntry<R>;
+        if (!pa) {
+          throw new Error(RPC_BAD_TARGET);
+        }
+        const mtrans = mpromise.getTransform();
+        const transform = promisedAnswerOpsToTransform(mtrans);
+        if (pa.done) {
+          const { obj, err } = pa;
+          const client = clientFromResolution(transform, obj, err);
+          const answer = this.call(client, cl);
+          joinAnswer(result, answer);
+        } else {
+          pa.queueCall(cl, transform, result);
+        }
+
+        break;
+      }
+      default: {
+        throw new Error(INVARIANT_UNREACHABLE_CODE);
+      }
+    }
   }
 
   populateMessageCapTable(payload: Payload) {
@@ -333,6 +459,24 @@ export class Conn {
     return q;
   }
 
+  // TODO: cancel context?
+  // tslint:disable-next-line:no-any
+  insertAnswer(id: number): AnswerEntry<any> | null {
+    if (this.answers[id]) {
+      return null;
+    }
+    const a = new AnswerEntry(this, id);
+    this.answers[id] = a;
+    return a;
+  }
+
+  // tslint:disable-next-line:no-any
+  popAnswer(id: number): AnswerEntry<any> | null {
+    const a = this.answers[id];
+    delete this.answers[id];
+    return a;
+  }
+
   shutdown(err: Error) {
     // FIXME: unstub
     // tslint:disable-next-line:no-console
@@ -436,6 +580,10 @@ export class Conn {
 
     const id = this.addExport(_client);
     desc.setSenderHosted(id);
+  }
+
+  sendMessage(msg: RPCMessage) {
+    this.transport.sendMessage(msg);
   }
 
   private async work() {

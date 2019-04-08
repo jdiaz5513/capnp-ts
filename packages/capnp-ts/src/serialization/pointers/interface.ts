@@ -17,17 +17,18 @@ export class Interface extends Pointer {
   };
   static readonly getCapID = getCapID;
   static readonly getAsInterface = getAsInterface;
+  static readonly isInterface = isInterface;
   static readonly getClient = getClient;
 
   constructor(segment: Segment, byteOffset: number, depthLimit = MAX_DEPTH) {
     super(segment, byteOffset, depthLimit);
   }
 
-  static fromPointer(p: Pointer): Interface {
+  static fromPointer(p: Pointer): Interface | null {
     return getAsInterface(p);
   }
 
-  getCapID(): CapabilityID {
+  getCapId(): CapabilityID {
     return getCapID(this);
   }
 
@@ -35,35 +36,26 @@ export class Interface extends Pointer {
     return getClient(this);
   }
 
-  isValid(): boolean {
-    return !!this.segment;
-  }
-
   toString(): string {
     return format(
       "Interface_%d@%a,%d,limit:%x",
       this.segment.id,
       this.byteOffset,
-      this.getCapID(),
+      this.getCapId(),
       this._capnp.depthLimit
     );
   }
 }
 
-export function getAsInterface(p: Pointer): Interface {
-  // TODO: the RPC system uses Pointers throughout, so
-  // it uses this function to convert to real types, but..
-  // is there something better to do?
-  if (p instanceof Interface) {
-    return p as Interface;
-  }
-
+export function getAsInterface(p: Pointer): Interface | null {
   if (getTargetPointerType(p) === PointerType.OTHER) {
     return new Interface(p.segment, p.byteOffset, p._capnp.depthLimit);
   }
-  throw new Error(
-    `called pointerToInterface on pointer to non-interface: ${p}`
-  );
+  return null;
+}
+
+export function isInterface(p: Pointer): boolean {
+  return getTargetPointerType(p) === PointerType.OTHER;
 }
 
 export function getCapID(i: Interface): CapabilityID {
