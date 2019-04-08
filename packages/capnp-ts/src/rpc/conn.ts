@@ -485,10 +485,13 @@ export class Conn {
   }
 
   call<P extends Struct, R extends Struct>(
-    _client: Client,
-    _call: Call<P, R>
+    client: Client,
+    call: Call<P, R>
   ): Answer<R> {
-    throw new Error(`Conn.call: stub!`);
+    // TODO: this has a lot of complicated logic in the Go implementation
+    // (lockedCall).
+    // Some of it has to do with locking, which we don't need
+    return client.call(call);
   }
 
   fillParams<P extends Struct, R extends Struct>(

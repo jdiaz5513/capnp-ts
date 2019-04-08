@@ -32,10 +32,11 @@ export class Fulfiller<R extends Struct> implements Answer<R> {
   fulfill(s: R) {
     this.answer = new ImmediateAnswer(s);
     const queues = this.emptyQueue(s);
-    const ctab = s.segment.message._capnp.capTable;
-    if (!ctab) {
-      throw new Error(INVARIANT_UNREACHABLE_CODE);
+    const msgcap = s.segment.message._capnp;
+    if (!msgcap.capTable) {
+      msgcap.capTable = [];
     }
+    const ctab = msgcap.capTable;
 
     for (const _capIdx of Object.keys(queues)) {
       const capIdx = +_capIdx;

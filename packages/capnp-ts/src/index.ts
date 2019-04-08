@@ -59,5 +59,6 @@ export {
   Pipeline,
   RPCMessage,
   Method,
-  Server
+  Server,
+  Registry
 } from "./rpc";
