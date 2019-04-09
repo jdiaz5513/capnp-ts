@@ -247,17 +247,141 @@ export function generateServer(
   ctx: CodeGeneratorFileContext,
   node: s.Node
 ): void {
+  // TODO: handle superclasses
   trace("generateServer(%s) [%s]", node, node.getDisplayName());
 
   const fullClassName = getFullClassName(node);
   const serverName = `${fullClassName}$Server`;
+  const serverInterfaceName = `${serverName}$Interface`;
+  const clientName = `${fullClassName}$Client`;
 
-  // TODO: handle superclasses
+  // Generate the `Foobar$Server$Interface` interface
+  {
+    const elements = node
+      .getInterface()
+      .getMethods()
+      .map<ts.TypeElement>(method => {
+        const paramTypeName = getFullClassName(
+          lookupNode(ctx, method.getParamStructType())
+        );
+        const resultTypeName = getFullClassName(
+          lookupNode(ctx, method.getResultStructType())
+        );
+
+        return ts.createMethodSignature(
+          __, // typeParams
+          [
+            ts.createParameter(
+              __, // decorators
+              __, // modifiers
+              __, // dotDotToken
+              "params", // name
+              __, // questionToken
+              ts.createTypeReferenceNode(paramTypeName, __), // type,
+              __ // initializer
+            ),
+            ts.createParameter(
+              __, // decorators
+              __, // modifiers
+              __, // dotDotToken
+              "results", // name
+              __, // questionToken
+              ts.createTypeReferenceNode(resultTypeName, __), // type,
+              __ // initializer
+            )
+          ], // params
+          ts.createTypeReferenceNode("Promise", [VOID_TYPE]), // type
+          method.getName(), // name
+          __ // questionToken
+        );
+      });
+
+    ctx.statements.push(
+      ts.createInterfaceDeclaration(
+        __, // decorators
+        [EXPORT], // modifiers
+        serverInterfaceName, // name
+        __, // typeParams
+        __, // heritageClauses
+        elements
+      )
+    );
+  }
 
   const members: ts.ClassElement[] = [];
 
+  // Generate server constructor
+  {
+    const serverMethods: ts.Expression[] = [];
+    node
+      .getInterface()
+      .getMethods()
+      .forEach((method, index) => {
+        serverMethods.push(
+          ts.createObjectLiteral(
+            [
+              ts.createSpreadAssignment(
+                ts.createElementAccess(
+                  ts.createPropertyAccess(
+                    ts.createIdentifier(clientName),
+                    "methods"
+                  ),
+                  index
+                )
+              ),
+              ts.createPropertyAssignment(
+                "impl",
+                ts.createPropertyAccess(
+                  ts.createIdentifier("iface"),
+                  method.getName()
+                )
+              )
+            ],
+            true // multiline
+          )
+        );
+      });
+
+    members.push(
+      ts.createConstructor(
+        __, // decorators
+        __, // modifiers
+        [
+          ts.createParameter(
+            __, // decorators
+            __, // modifiers
+            __, // dotDotToken
+            "iface", // name
+            __, // questionToken
+            ts.createTypeReferenceNode(serverInterfaceName, __), // type
+            __ // initializer
+          )
+        ], // parameters
+        ts.createBlock(
+          [
+            ts.createExpressionStatement(
+              ts.createCall(
+                ts.createIdentifier("super"),
+                __, // typeArguments
+                [ts.createArrayLiteral(serverMethods, true /* multiline */)] // arguments
+              )
+            )
+          ],
+          true // multiline
+        ) // body
+      )
+    );
+  }
+
   ctx.statements.push(
-    ts.createClassDeclaration(__, [EXPORT], serverName, __, [], members)
+    ts.createClassDeclaration(
+      __, // decorators
+      [EXPORT], // modifiers
+      serverName, // name
+      __, // typeParams
+      [createClassExtends("capnp.Server")], // heritageClauses
+      members // members
+    )
   );
 }
 
