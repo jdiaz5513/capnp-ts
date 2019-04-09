@@ -266,6 +266,8 @@ export function generateClientMethod(
   node: s.Node,
   clientName: string,
   members: ts.ClassElement[],
+  methodDefs: ts.Expression[],
+  methodDefTypes: ts.TypeNode[],
   method: s.Method,
   index: number
 ): void {
@@ -290,51 +292,47 @@ export function generateClientMethod(
 
   const methodDefName = `${name}$method`;
 
-  members.push(
-    ts.createProperty(
-      __, // decorators
-      [STATIC, READONLY], // modifiers
-      methodDefName,
-      __, // questionOrExclamationToken
-      ts.createTypeReferenceNode(
-        "capnp.Method",
-        [
-          ts.createTypeReferenceNode(paramTypeName, __),
-          ts.createTypeReferenceNode(resultTypeName, __)
-        ] // typeParameters
-      ),
-      ts.createObjectLiteral(
-        [
-          ts.createPropertyAssignment(
-            "ParamsClass",
-            ts.createIdentifier(paramTypeName)
-          ),
-          ts.createPropertyAssignment(
-            "ResultsClass",
-            ts.createIdentifier(resultTypeName)
-          ),
-          ts.createPropertyAssignment(
-            "interfaceId",
-            ts.createPropertyAccess(
-              ts.createIdentifier(clientName),
-              "interfaceId"
-            )
-          ),
-          ts.createPropertyAssignment(
-            "methodId",
-            ts.createNumericLiteral(index.toString())
-          ),
-          ts.createPropertyAssignment(
-            "interfaceName",
-            ts.createStringLiteral(node.getDisplayName())
-          ),
-          ts.createPropertyAssignment(
-            "methodName",
-            ts.createStringLiteral(method.getName())
+  methodDefTypes.push(
+    ts.createTypeReferenceNode(
+      "capnp.Method",
+      [
+        ts.createTypeReferenceNode(paramTypeName, __),
+        ts.createTypeReferenceNode(resultTypeName, __)
+      ] // typeArgs
+    )
+  );
+  methodDefs.push(
+    ts.createObjectLiteral(
+      [
+        ts.createPropertyAssignment(
+          "ParamsClass",
+          ts.createIdentifier(paramTypeName)
+        ),
+        ts.createPropertyAssignment(
+          "ResultsClass",
+          ts.createIdentifier(resultTypeName)
+        ),
+        ts.createPropertyAssignment(
+          "interfaceId",
+          ts.createPropertyAccess(
+            ts.createIdentifier(clientName),
+            "interfaceId"
           )
-        ],
-        true /* multiline */
-      )
+        ),
+        ts.createPropertyAssignment(
+          "methodId",
+          ts.createNumericLiteral(index.toString())
+        ),
+        ts.createPropertyAssignment(
+          "interfaceName",
+          ts.createStringLiteral(node.getDisplayName())
+        ),
+        ts.createPropertyAssignment(
+          "methodName",
+          ts.createStringLiteral(method.getName())
+        )
+      ],
+      true /* multiline */
     )
   );
 
@@ -374,55 +372,64 @@ export function generateClientMethod(
         [
           ts.createVariableStatement(
             __, // modifiers
-            [
-              ts.createVariableDeclaration(
-                "answer",
-                __,
-                ts.createCall(
-                  ts.createPropertyAccess(
-                    ts.createPropertyAccess(THIS, "client"),
-                    "call"
-                  ),
-                  __, // typeArgs
-                  [
-                    ts.createObjectLiteral(
-                      [
-                        ts.createPropertyAssignment(
-                          "method",
-                          ts.createPropertyAccess(
-                            ts.createIdentifier(clientName),
-                            methodDefName
+            ts.createVariableDeclarationList(
+              [
+                ts.createVariableDeclaration(
+                  "answer",
+                  __,
+                  ts.createCall(
+                    ts.createPropertyAccess(
+                      ts.createPropertyAccess(THIS, "client"),
+                      "call"
+                    ),
+                    __, // typeArgs
+                    [
+                      ts.createObjectLiteral(
+                        [
+                          ts.createPropertyAssignment(
+                            "method",
+                            ts.createElementAccess(
+                              ts.createPropertyAccess(
+                                ts.createIdentifier(clientName),
+                                "methods"
+                              ),
+                              index
+                            )
+                          ),
+                          ts.createPropertyAssignment(
+                            "paramsFunc",
+                            ts.createIdentifier("paramsFunc")
                           )
-                        ),
-                        ts.createPropertyAssignment(
-                          "paramsFunc",
-                          ts.createIdentifier("paramsFunc")
-                        )
-                      ],
-                      true // multiline
-                    )
-                  ]
+                        ],
+                        true // multiline
+                      )
+                    ]
+                  )
                 )
-              )
-            ]
+              ],
+              ts.NodeFlags.Const
+            )
           ), // const answer = ...
 
           ts.createVariableStatement(
             __, // modifiers
-            [
-              ts.createVariableDeclaration(
-                "pipeline",
-                __,
-                ts.createNew(
-                  ts.createIdentifier("capnp.Pipeline"),
-                  __, // typeArgs
-                  [
-                    ts.createIdentifier(resultTypeName),
-                    ts.createIdentifier("answer")
-                  ]
+            ts.createVariableDeclarationList(
+              [
+                ts.createVariableDeclaration(
+                  "pipeline",
+                  __,
+                  ts.createNew(
+                    ts.createIdentifier("capnp.Pipeline"),
+                    __, // typeArgs
+                    [
+                      ts.createIdentifier(resultTypeName),
+                      ts.createIdentifier("answer")
+                    ]
+                  )
                 )
-              )
-            ]
+              ],
+              ts.NodeFlags.Const
+            )
           ), // const pipeline = ...
 
           ts.createReturn(
@@ -492,15 +499,60 @@ export function generateClient(
     )
   );
 
+  const methodDefs: ts.Expression[] = [];
+  const methodDefTypes: ts.TypeNode[] = [];
+
+  members.push(
+    ts.createProperty(
+      __, // decorators
+      [STATIC, READONLY], // modifiers
+      "methods", // name
+      __, // questionOrExclamationToken
+      ts.createTupleTypeNode(methodDefTypes), // type
+      ts.createArrayLiteral(
+        methodDefs,
+        true // multiline
+      ) // initializer
+    )
+  );
+
   node
     .getInterface()
     .getMethods()
     .forEach((method, index) => {
-      generateClientMethod(ctx, node, clientName, members, method, index);
+      generateClientMethod(
+        ctx,
+        node,
+        clientName,
+        members,
+        methodDefs,
+        methodDefTypes,
+        method,
+        index
+      );
     });
 
   ctx.statements.push(
     ts.createClassDeclaration(__, [EXPORT], clientName, __, [], members)
+  );
+
+  ctx.statements.push(
+    ts.createExpressionStatement(
+      ts.createCall(
+        ts.createPropertyAccess(
+          ts.createIdentifier("capnp.Registry"),
+          "register"
+        ),
+        __, // typeArgs
+        [
+          ts.createPropertyAccess(
+            ts.createIdentifier(clientName),
+            "interfaceId"
+          ),
+          ts.createIdentifier(clientName)
+        ]
+      )
+    )
   );
 }
 
