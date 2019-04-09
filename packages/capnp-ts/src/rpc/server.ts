@@ -23,18 +23,22 @@ export interface ServerCall<P extends Struct, R extends Struct>
 // A server is a locally implemented interface
 export class Server implements Client {
   // tslint:disable-next-line:no-any
+  target: any;
+
+  // tslint:disable-next-line:no-any
   methods: Array<ServerMethod<any, any>>;
 
   // tslint:disable-next-line:no-any
-  constructor(methods: Array<ServerMethod<any, any>>) {
+  constructor(target: Object, methods: Array<ServerMethod<any, any>>) {
+    this.target = target;
     this.methods = methods;
   }
 
   startCall<P extends Struct, R extends Struct>(call: ServerCall<P, R>) {
     const msg = new Message();
     const results = msg.initRoot(call.method.ResultsClass);
-    call.serverMethod
-      .impl(call.params, results)
+    call.serverMethod.impl
+      .call(this.target, call.params, results)
       .then(() => call.answer.fulfill(results))
       .catch(err => call.answer.reject(err as any)); // tslint:disable-line:no-any
   }
