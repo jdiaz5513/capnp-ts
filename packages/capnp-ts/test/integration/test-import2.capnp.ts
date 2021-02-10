@@ -6,9 +6,9 @@
 
 import * as capnp from "capnp-ts";
 import { ObjectSize as __O, Struct as __S } from 'capnp-ts';
-import { Node, Field, Enumerant, Superclass, Method, Type, Brand, Value, Annotation } from "capnp-ts/lib/std/schema.capnp";
+import { Node, Node_Parameter, Node_NestedNode, Field, Enumerant, Superclass, Method, Type, Brand, Brand_Scope, Brand_Binding, Value, Annotation, ElementSize } from "capnp-ts/lib/std/schema.capnp";
 import { TestImport } from "./test-import.capnp";
-import { TestAllTypes } from "./test.capnp";
+import { TestEnum, TestAllTypes } from "./test.capnp";
 export const _capnpFileId = "c64a3bf0338a124a";
 export class TestImport2 extends __S {
     static readonly _capnp = { displayName: "TestImport2", id: "f6bd77f100ecb0ff", size: new __O(0, 3) };
