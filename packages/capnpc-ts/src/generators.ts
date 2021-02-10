@@ -100,6 +100,21 @@ export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
   );
 }
 
+export function getImportNodes(
+  ctx: CodeGeneratorFileContext,
+  node: s.Node
+): s.Node[] {
+  return lookupNode(ctx, node)
+    .getNestedNodes()
+    .filter(n => hasNode(ctx, n))
+    .map(n => lookupNode(ctx, n))
+    .reduce(
+      (a, n) => a.concat([n], getImportNodes(ctx, n)),
+      new Array<s.Node>()
+    )
+    .filter(n => lookupNode(ctx, n).isStruct() || lookupNode(ctx, n).isEnum());
+}
+
 export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
   ctx.imports.forEach(i => {
     const name = i.getName();
@@ -111,11 +126,8 @@ export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
       importPath = name[0] === "." ? name : `./${name}`;
     }
 
-    const imports = lookupNode(ctx, i)
-      .getNestedNodes()
-      .filter(n => hasNode(ctx, n))
-      .filter(n => lookupNode(ctx, n).isStruct())
-      .map(n => n.getName())
+    const imports = getImportNodes(ctx, lookupNode(ctx, i))
+      .map(getFullClassName)
       .join(", ");
 
     if (imports.length < 1) return;
