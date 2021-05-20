@@ -20,11 +20,7 @@ trace("load");
  */
 
 export class Int64 extends Uint64 {
-  static fromArrayBuffer(
-    source: ArrayBuffer,
-    offset = 0,
-    noCopy = false
-  ): Int64 {
+  static fromArrayBuffer(source: ArrayBuffer, offset = 0, noCopy = false): Int64 {
     if (noCopy) return new this(new Uint8Array(source, offset, 8));
 
     return new this(new Uint8Array(source.slice(offset, offset + 8)));
@@ -32,19 +28,10 @@ export class Int64 extends Uint64 {
 
   static fromDataView(source: DataView, offset = 0, noCopy = false): Int64 {
     if (noCopy) {
-      return new this(
-        new Uint8Array(source.buffer, source.byteOffset + offset, 8)
-      );
+      return new this(new Uint8Array(source.buffer, source.byteOffset + offset, 8));
     }
 
-    return new this(
-      new Uint8Array(
-        source.buffer.slice(
-          source.byteOffset + offset,
-          source.byteLength + offset + 8
-        )
-      )
-    );
+    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteLength + offset + 8)));
   }
 
   static fromNumber(source: number): Int64 {
@@ -78,9 +65,7 @@ export class Int64 extends Uint64 {
     source = pad(source, 16);
 
     if (source.length !== 16) {
-      throw new RangeError(
-        "Source string must contain at most 16 hexadecimal digits."
-      );
+      throw new RangeError("Source string must contain at most 16 hexadecimal digits.");
     }
 
     const bytes = source.toLowerCase().replace(/[^\da-f]/g, "");
@@ -100,25 +85,18 @@ export class Int64 extends Uint64 {
   static fromUint8Array(source: Uint8Array, offset = 0, noCopy = false): Int64 {
     if (noCopy) return new this(source.subarray(offset, offset + 8));
 
-    return new this(
-      new Uint8Array(
-        source.buffer.slice(
-          source.byteOffset + offset,
-          source.byteOffset + offset + 8
-        )
-      )
-    );
+    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteOffset + offset + 8)));
   }
 
   equals(other: Int64): boolean {
     return super.equals(other);
   }
 
-  inspect() {
+  inspect(): string {
     return `[Int64 ${this.toString(10)} 0x${this.toHexString()}]`;
   }
 
-  negate() {
+  negate(): void {
     for (let b = this.buffer, carry = 1, i = 0; i < 8; i++) {
       const v = (b[i] ^ 0xff) + carry;
 
@@ -127,7 +105,7 @@ export class Int64 extends Uint64 {
     }
   }
 
-  setValue(loWord: number, hiWord?: number) {
+  setValue(loWord: number, hiWord?: number): void {
     let negate = false;
     let lo = loWord;
     let hi = hiWord;
@@ -188,7 +166,7 @@ export class Int64 extends Uint64 {
    * @returns {number} A numeric representation of this integer.
    */
 
-  toNumber(allowImprecise?: boolean) {
+  toNumber(allowImprecise?: boolean): number {
     const b = this.buffer;
     const negate = b[7] & 0x80;
 

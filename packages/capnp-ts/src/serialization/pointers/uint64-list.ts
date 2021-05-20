@@ -4,7 +4,7 @@
 
 import initTrace from "debug";
 
-import { Uint64 } from "../../types";
+import { Uint64 } from "../../types/index";
 import { ListElementSize } from "../list-element-size";
 import { _ListCtor, List } from "./list";
 import { getContent } from "./pointer";
@@ -15,7 +15,7 @@ trace("load");
 export class Uint64List extends List<Uint64> {
   static readonly _capnp: _ListCtor = {
     displayName: "List<Uint64>" as string,
-    size: ListElementSize.BYTE_8
+    size: ListElementSize.BYTE_8,
   };
 
   get(index: number): Uint64 {

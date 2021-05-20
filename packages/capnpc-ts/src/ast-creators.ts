@@ -2,13 +2,13 @@
  * @author jdiaz5513
  */
 
-import * as s from "capnp-ts/lib/std/schema.capnp";
+import * as s from "capnp-ts/src/std/schema.capnp.js";
 import * as capnp from "capnp-ts";
-import { format, pad } from "capnp-ts/lib/util";
-import * as ts from "typescript";
-import * as initTrace from "debug";
+import { format, pad } from "capnp-ts/src/util";
+import ts from "typescript";
+import initTrace from "debug";
 import { CodeGeneratorFileContext } from "./code-generator-file-context";
-import { __, READONLY, STATIC, VOID_TYPE, STRUCT, CAPNP } from "./constants";
+import { __, READONLY, STATIC, VOID_TYPE, CAPNP } from "./constants";
 import * as E from "./errors";
 import { getDisplayNamePrefix, getFullClassName, getJsType } from "./file";
 import * as util from "./util";
@@ -16,24 +16,13 @@ import * as util from "./util";
 const trace = initTrace("capnpc:ast-creators");
 
 export function createClassExtends(identifierText: string): ts.HeritageClause {
-  const types = [
-    ts.createExpressionWithTypeArguments(
-      [],
-      ts.createIdentifier(identifierText)
-    )
-  ];
+  const types = [ts.createExpressionWithTypeArguments([], ts.createIdentifier(identifierText))];
   return ts.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, types);
 }
 
-export function createConcreteListProperty(
-  ctx: CodeGeneratorFileContext,
-  field: s.Field
-): ts.PropertyDeclaration {
+export function createConcreteListProperty(ctx: CodeGeneratorFileContext, field: s.Field): ts.PropertyDeclaration {
   const name = `_${util.c2t(field.getName())}`;
-  const type = ts.createTypeReferenceNode(
-    getJsType(ctx, field.getSlot().getType(), true),
-    __
-  );
+  const type = ts.createTypeReferenceNode(getJsType(ctx, field.getSlot().getType(), true), __);
   // LINT: This is a dirty way to force the initializer to be undefined...
   /* tslint:disable-next-line */
   let u: ts.Expression | undefined;
@@ -52,17 +41,11 @@ export function createExpressionBlock(
   returns: boolean,
   allowSingleLine: boolean
 ): ts.Block {
-  const statements = expressions.map(
-    (e, i) =>
-      i === expressions.length - 1 && returns
-        ? ts.createReturn(e)
-        : ts.createStatement(e)
+  const statements = expressions.map((e, i) =>
+    i === expressions.length - 1 && returns ? ts.createReturn(e) : ts.createStatement(e)
   );
 
-  return ts.createBlock(
-    statements,
-    !(allowSingleLine && expressions.length < 2)
-  );
+  return ts.createBlock(statements, !(allowSingleLine && expressions.length < 2));
 }
 
 export function createMethod(
@@ -92,15 +75,9 @@ export function createNestedNodeProperty(node: s.Node): ts.PropertyDeclaration {
   return ts.createProperty(__, [STATIC, READONLY], name, __, __, initializer);
 }
 
-export function createUnionConstProperty(
-  fullClassName: string,
-  field: s.Field
-): ts.PropertyDeclaration {
+export function createUnionConstProperty(fullClassName: string, field: s.Field): ts.PropertyDeclaration {
   const name = util.c2s(field.getName());
-  const initializer = ts.createPropertyAccess(
-    ts.createIdentifier(`${fullClassName}_Which`),
-    name
-  );
+  const initializer = ts.createPropertyAccess(ts.createIdentifier(`${fullClassName}_Which`), name);
 
   return ts.createProperty(__, [STATIC, READONLY], name, __, __, initializer);
 }
@@ -129,7 +106,7 @@ export function createValueExpression(value: s.Value): ts.Expression {
     case s.Value.INT32:
       return ts.createNumericLiteral(value.getInt32().toString());
 
-    case s.Value.INT64:
+    case s.Value.INT64: {
       const int64 = value.getInt64();
       const int64Bytes: string[] = [];
 
@@ -137,19 +114,10 @@ export function createValueExpression(value: s.Value): ts.Expression {
         int64Bytes.push(`0x${pad(int64.buffer[i].toString(16), 2)}`);
       }
 
-      const int64ByteArray = ts.createArrayLiteral(
-        int64Bytes.map(ts.createNumericLiteral),
-        false
-      );
-      const int64ArrayBuffer = ts.createNew(
-        ts.createIdentifier("Uint8Array"),
-        __,
-        [int64ByteArray]
-      );
-      return ts.createNew(ts.createIdentifier("capnp.Int64"), __, [
-        int64ArrayBuffer
-      ]);
-
+      const int64ByteArray = ts.createArrayLiteral(int64Bytes.map(ts.createNumericLiteral), false);
+      const int64ArrayBuffer = ts.createNew(ts.createIdentifier("Uint8Array"), __, [int64ByteArray]);
+      return ts.createNew(ts.createIdentifier("capnp.Int64"), __, [int64ArrayBuffer]);
+    }
     case s.Value.INT8:
       return ts.createNumericLiteral(value.getInt8().toString());
 
@@ -162,7 +130,7 @@ export function createValueExpression(value: s.Value): ts.Expression {
     case s.Value.UINT32:
       return ts.createNumericLiteral(value.getUint32().toString());
 
-    case s.Value.UINT64:
+    case s.Value.UINT64: {
       const uint64 = value.getUint64();
       const uint64Bytes: string[] = [];
 
@@ -170,19 +138,10 @@ export function createValueExpression(value: s.Value): ts.Expression {
         uint64Bytes.push(`0x${pad(uint64.buffer[i].toString(16), 2)}`);
       }
 
-      const uint64ByteArray = ts.createArrayLiteral(
-        uint64Bytes.map(ts.createNumericLiteral),
-        false
-      );
-      const uint64ArrayBuffer = ts.createNew(
-        ts.createIdentifier("Uint8Array"),
-        __,
-        [uint64ByteArray]
-      );
-      return ts.createNew(ts.createIdentifier("capnp.Int64"), __, [
-        uint64ArrayBuffer
-      ]);
-
+      const uint64ByteArray = ts.createArrayLiteral(uint64Bytes.map(ts.createNumericLiteral), false);
+      const uint64ArrayBuffer = ts.createNew(ts.createIdentifier("Uint8Array"), __, [uint64ByteArray]);
+      return ts.createNew(ts.createIdentifier("capnp.Int64"), __, [uint64ArrayBuffer]);
+    }
     case s.Value.UINT8:
       return ts.createNumericLiteral(value.getUint8().toString());
 
@@ -211,9 +170,7 @@ export function createValueExpression(value: s.Value): ts.Expression {
 
     case s.Value.INTERFACE:
     default:
-      throw new Error(
-        format(E.GEN_SERIALIZE_UNKNOWN_VALUE, s.Value_Which[value.which()])
-      );
+      throw new Error(format(E.GEN_SERIALIZE_UNKNOWN_VALUE, s.Value_Which[value.which()]));
   }
 
   const m = new capnp.Message();
@@ -228,10 +185,8 @@ export function createValueExpression(value: s.Value): ts.Expression {
 
   return ts.createCall(ts.createPropertyAccess(CAPNP, "readRawPointer"), __, [
     ts.createPropertyAccess(
-      ts.createNew(ts.createIdentifier("Uint8Array"), __, [
-        ts.createArrayLiteral(bytes, false)
-      ]),
+      ts.createNew(ts.createIdentifier("Uint8Array"), __, [ts.createArrayLiteral(bytes, false)]),
       "buffer"
-    )
+    ),
   ]);
 }

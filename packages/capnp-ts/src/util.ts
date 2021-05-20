@@ -7,11 +7,7 @@
 import initTrace from "debug";
 
 import { MAX_BUFFER_DUMP_BYTES, MAX_INT32, MAX_UINT32 } from "./constants";
-import {
-  RANGE_INT32_OVERFLOW,
-  RANGE_INVALID_UTF8,
-  RANGE_UINT32_OVERFLOW
-} from "./errors";
+import { RANGE_INT32_OVERFLOW, RANGE_INVALID_UTF8, RANGE_UINT32_OVERFLOW } from "./errors";
 
 const trace = initTrace("capnp:util");
 trace("load");
@@ -95,8 +91,7 @@ export function decodeUtf8(src: Uint8Array): string {
       b = src[i++];
       c = src[i++];
 
-      cp =
-        ((a & 0b00001111) << 12) | ((b & 0b00111111) << 6) | (c & 0b00111111);
+      cp = ((a & 0b00001111) << 12) | ((b & 0b00111111) << 6) | (c & 0b00111111);
     } else if ((a & 0b11111000) === 0b11110000) {
       if (i + 2 >= l) throw new RangeError(RANGE_INVALID_UTF8);
 
@@ -104,11 +99,7 @@ export function decodeUtf8(src: Uint8Array): string {
       c = src[i++];
       d = src[i++];
 
-      cp =
-        ((a & 0b00000111) << 18) |
-        ((b & 0b00111111) << 12) |
-        ((c & 0b00111111) << 6) |
-        (d & 0b00111111);
+      cp = ((a & 0b00000111) << 18) | ((b & 0b00111111) << 12) | ((c & 0b00111111) << 6) | (d & 0b00111111);
     } else {
       throw new RangeError(RANGE_INVALID_UTF8);
     }
@@ -229,9 +220,9 @@ export function encodeUtf8(src: string): Uint8Array {
  * @returns {string} The formatted string.
  */
 
-export function format(s: string, ...args: any[]) {
+export function format(s: string, ...args: unknown[]): string {
   const n = s.length;
-  let arg: any;
+  let arg: unknown;
   let argIndex = 0;
   let c: string;
   let escaped = false;
@@ -278,12 +269,12 @@ export function format(s: string, ...args: any[]) {
 
       switch (c) {
         case "a": // number in hex with padding
-          result += "0x" + pad(parseInt(nextArg(), 10).toString(16), 8);
+          result += "0x" + pad(parseInt(String(nextArg()), 10).toString(16), 8);
 
           break;
 
         case "b": // number in binary
-          result += parseInt(nextArg(), 10).toString(2);
+          result += parseInt(String(nextArg()), 10).toString(2);
 
           break;
 
@@ -293,30 +284,31 @@ export function format(s: string, ...args: any[]) {
           if (typeof arg === "string" || arg instanceof String) {
             result += arg;
           } else {
-            result += String.fromCharCode(parseInt(arg, 10));
+            result += String.fromCharCode(parseInt(String(arg), 10));
           }
 
           break;
 
         case "d": // number in decimal
-          result += parseInt(nextArg(), 10);
+          result += parseInt(String(nextArg()), 10);
 
           break;
 
-        case "f": // floating point number
-          const tmp = String(parseFloat(nextArg()).toFixed(precision || 6));
+        case "f": {
+          // floating point number
+          const tmp = parseFloat(String(nextArg())).toFixed(precision || 6);
 
           result += leadingZero ? tmp : tmp.replace(/^0/, "");
 
           break;
-
+        }
         case "j": // JSON
           result += JSON.stringify(nextArg());
 
           break;
 
         case "o": // number in octal
-          result += "0" + parseInt(nextArg(), 10).toString(8);
+          result += "0" + parseInt(String(nextArg()), 10).toString(8);
 
           break;
 
@@ -326,16 +318,12 @@ export function format(s: string, ...args: any[]) {
           break;
 
         case "x": // lowercase hexadecimal
-          result += "0x" + parseInt(nextArg(), 10).toString(16);
+          result += "0x" + parseInt(String(nextArg()), 10).toString(16);
 
           break;
 
         case "X": // uppercase hexadecimal
-          result +=
-            "0x" +
-            parseInt(nextArg(), 10)
-              .toString(16)
-              .toUpperCase();
+          result += "0x" + parseInt(String(nextArg()), 10).toString(16).toUpperCase();
 
           break;
 
@@ -363,7 +351,7 @@ export function format(s: string, ...args: any[]) {
  * @returns {T} The same thing.
  */
 
-export function identity<T>(x: T) {
+export function identity<T>(x: T): T {
   return x;
 }
 
@@ -391,7 +379,7 @@ export function padToWord(size: number): number {
  * @returns {string} The repeated string.
  */
 
-export function repeat(times: number, str: string) {
+export function repeat(times: number, str: string): string {
   let out = "";
   let n = times;
   let s = str;
@@ -411,15 +399,15 @@ export function repeat(times: number, str: string) {
   return out;
 }
 
+const hex = (v: unknown) => parseInt(String(v)).toString(16);
+
 // Set up custom debug formatters.
 
-/* tslint:disable:no-string-literal */
 /* istanbul ignore next */
-initTrace.formatters["h"] = (v: any) => v.toString("hex");
+initTrace.formatters["h"] = hex;
 /* istanbul ignore next */
-initTrace.formatters["x"] = (v: any) => `0x${v.toString(16)}`;
+initTrace.formatters["x"] = (v: unknown) => `0x${hex(v)}`;
 /* istanbul ignore next */
-initTrace.formatters["a"] = (v: any) => `0x${pad(v.toString(16), 8)}`;
+initTrace.formatters["a"] = (v: unknown) => `0x${pad(hex(v), 8)}`;
 /* istanbul ignore next */
-initTrace.formatters["X"] = (v: any) => `0x${v.toString(16).toUpperCase()}`;
-/* tslint:enable:no-string-literal */
+initTrace.formatters["X"] = (v: unknown) => `0x${hex(v).toUpperCase()}`;

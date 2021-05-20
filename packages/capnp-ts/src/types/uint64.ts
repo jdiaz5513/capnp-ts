@@ -41,11 +41,7 @@ export class Uint64 {
     this.buffer = buffer;
   }
 
-  static fromArrayBuffer(
-    source: ArrayBuffer,
-    offset = 0,
-    noCopy = false
-  ): Uint64 {
+  static fromArrayBuffer(source: ArrayBuffer, offset = 0, noCopy = false): Uint64 {
     if (noCopy) return new this(new Uint8Array(source, offset, 8));
 
     return new this(new Uint8Array(source.slice(offset, offset + 8)));
@@ -53,19 +49,10 @@ export class Uint64 {
 
   static fromDataView(source: DataView, offset = 0, noCopy = false): Uint64 {
     if (noCopy) {
-      return new this(
-        new Uint8Array(source.buffer, source.byteOffset + offset, 8)
-      );
+      return new this(new Uint8Array(source.buffer, source.byteOffset + offset, 8));
     }
 
-    return new this(
-      new Uint8Array(
-        source.buffer.slice(
-          source.byteOffset + offset,
-          source.byteLength + offset + 8
-        )
-      )
-    );
+    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteLength + offset + 8)));
   }
 
   /**
@@ -86,9 +73,7 @@ export class Uint64 {
     source = pad(source, 16);
 
     if (source.length !== 16) {
-      throw new RangeError(
-        "Source string must contain at most 16 hexadecimal digits."
-      );
+      throw new RangeError("Source string must contain at most 16 hexadecimal digits.");
     }
 
     const bytes = source.toLowerCase().replace(/[^\da-f]/g, "");
@@ -109,21 +94,10 @@ export class Uint64 {
     return ret;
   }
 
-  static fromUint8Array(
-    source: Uint8Array,
-    offset = 0,
-    noCopy = false
-  ): Uint64 {
+  static fromUint8Array(source: Uint8Array, offset = 0, noCopy = false): Uint64 {
     if (noCopy) return new this(source.subarray(offset, offset + 8));
 
-    return new this(
-      new Uint8Array(
-        source.buffer.slice(
-          source.byteOffset + offset,
-          source.byteOffset + offset + 8
-        )
-      )
-    );
+    return new this(new Uint8Array(source.buffer.slice(source.byteOffset + offset, source.byteOffset + offset + 8)));
   }
 
   equals(other: Uint64): boolean {
@@ -134,7 +108,7 @@ export class Uint64 {
     return true;
   }
 
-  inspect() {
+  inspect(): string {
     return `[Uint64 ${this.toString(10)} 0x${this.toHexString()}]`;
   }
 
@@ -153,7 +127,7 @@ export class Uint64 {
     return true;
   }
 
-  setValue(loWord: number, hiWord?: number) {
+  setValue(loWord: number, hiWord?: number): void {
     let lo = loWord;
     let hi = hiWord;
 
@@ -184,7 +158,7 @@ export class Uint64 {
    * @returns {number} A numeric representation of this integer.
    */
 
-  toNumber(allowImprecise?: boolean) {
+  toNumber(allowImprecise?: boolean): number {
     const b = this.buffer;
     let x = 0;
     let i = 0;
@@ -207,15 +181,15 @@ export class Uint64 {
     return x;
   }
 
-  valueOf() {
+  valueOf(): number {
     return this.toNumber(false);
   }
 
-  toArrayBuffer() {
+  toArrayBuffer(): ArrayBuffer {
     return this.buffer.buffer;
   }
 
-  toDataView() {
+  toDataView(): DataView {
     return new DataView(this.buffer.buffer);
   }
 
@@ -233,11 +207,11 @@ export class Uint64 {
     return hex;
   }
 
-  toString(radix?: number) {
+  toString(radix?: number): string {
     return this.toNumber(true).toString(radix);
   }
 
-  toUint8Array() {
+  toUint8Array(): Uint8Array {
     return this.buffer;
   }
 }

@@ -2,9 +2,9 @@
  * @author jdiaz5513
  */
 
-import * as s from "capnp-ts/lib/std/schema.capnp";
+import * as s from "capnp-ts/src/std/schema.capnp.js";
 import initTrace from "debug";
-import * as ts from "typescript";
+import ts from "typescript";
 
 const trace = initTrace("capnpc:constants");
 trace("load");
@@ -42,7 +42,7 @@ export const ConcreteListType = {
   [s.Type.UINT32]: "capnp.Uint32List",
   [s.Type.UINT64]: "capnp.Uint64List",
   [s.Type.UINT8]: "capnp.Uint8List",
-  [s.Type.VOID]: "capnp.VoidList"
+  [s.Type.VOID]: "capnp.VoidList",
 };
 
 /** export */
@@ -55,79 +55,85 @@ export const LENGTH = ts.createIdentifier("length");
 
 /** Some data used to help generate code for primitive struct fields. */
 
-export const Primitive = {
+export const Primitive: { [t: number]: { byteLength: number; getter: string; mask: string; setter: string } } = {
   [s.Type.BOOL]: {
     byteLength: 1,
     getter: "getBit",
     mask: "getBitMask",
-    setter: "setBit"
+    setter: "setBit",
   },
   [s.Type.ENUM]: {
     byteLength: 2,
     getter: "getUint16",
     mask: "getUint16Mask",
-    setter: "setUint16"
+    setter: "setUint16",
   },
   [s.Type.FLOAT32]: {
     byteLength: 4,
     getter: "getFloat32",
     mask: "getFloat32Mask",
-    setter: "setFloat32"
+    setter: "setFloat32",
   },
   [s.Type.FLOAT64]: {
     byteLength: 8,
     getter: "getFloat64",
     mask: "getFloat64Mask",
-    setter: "setFloat64"
+    setter: "setFloat64",
   },
   [s.Type.INT16]: {
     byteLength: 2,
     getter: "getInt16",
     mask: "getInt16Mask",
-    setter: "setInt16"
+    setter: "setInt16",
   },
   [s.Type.INT32]: {
     byteLength: 4,
     getter: "getInt32",
     mask: "getInt32Mask",
-    setter: "setInt32"
+    setter: "setInt32",
   },
   [s.Type.INT64]: {
     byteLength: 8,
     getter: "getInt64",
     mask: "getInt64Mask",
-    setter: "setInt64"
+    setter: "setInt64",
   },
   [s.Type.INT8]: {
     byteLength: 1,
     getter: "getInt8",
     mask: "getInt8Mask",
-    setter: "setInt8"
+    setter: "setInt8",
   },
   [s.Type.UINT16]: {
     byteLength: 2,
     getter: "getUint16",
     mask: "getUint16Mask",
-    setter: "setUint16"
+    setter: "setUint16",
   },
   [s.Type.UINT32]: {
     byteLength: 4,
     getter: "getUint32",
     mask: "getUint32Mask",
-    setter: "setUint32"
+    setter: "setUint32",
   },
   [s.Type.UINT64]: {
     byteLength: 8,
     getter: "getUint64",
     mask: "getUint64Mask",
-    setter: "setUint64"
+    setter: "setUint64",
   },
   [s.Type.UINT8]: {
     byteLength: 1,
     getter: "getUint8",
     mask: "getUint8Mask",
-    setter: "setUint8"
-  }
+    setter: "setUint8",
+  },
+  [s.Type.VOID]: {
+    byteLength: 0,
+    getter: "getVoid",
+    mask: "getVoidMask",
+    setter: "setVoid",
+  },
 };
 
 /** number */

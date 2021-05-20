@@ -1,0 +1,9 @@
+.eslintrc.js
+*.capnp.ts
+*.capnp.js
+*.d.ts
+packages/*/bin/**/*.js
+packages/*/src/**/*.js
+packages/*/test/**/*.js
+node_modules
+coverage

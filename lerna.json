@@ -1,12 +1,9 @@
 {
-  "lerna": "2.0.0-rc.4",
+  "lerna": "4.0.0",
   "packages": [
-    "packages/*",
-    "js-examples"
+    "packages/*"
   ],
-  "npmClient": "yarn",
   "version": "0.4.0",
-  "useWorkspaces": true,
   "command": {
     "publish": {
       "message": "chore(release): publish %s",

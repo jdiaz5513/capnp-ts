@@ -5,12 +5,20 @@
   "tasks": [
     {
       "label": "build",
-      "type": "gulp",
-      "task": "build",
+      "type": "npm",
+      "script": "build",
       "group": {
         "kind": "build",
         "isDefault": true
-      }
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "lint",
+      "type": "npm",
+      "script": "lint",
+      "group": "none",
+      "problemMatcher": ["$eslint-stylish"]
     }
   ]
 }

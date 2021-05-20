@@ -20,11 +20,7 @@ export abstract class Arena {
   static readonly getNumSegments = getNumSegments;
 }
 
-export function allocate(
-  minSize: number,
-  segments: Segment[],
-  a: AnyArena
-): ArenaAllocationResult {
+export function allocate(minSize: number, segments: Segment[], a: AnyArena): ArenaAllocationResult {
   switch (a.kind) {
     case ArenaKind.MULTI_SEGMENT:
       return MultiSegmentArena.allocate(minSize, a);
@@ -37,7 +33,7 @@ export function allocate(
   }
 }
 
-export function getBuffer(id: number, a: AnyArena) {
+export function getBuffer(id: number, a: AnyArena): ArrayBuffer {
   switch (a.kind) {
     case ArenaKind.MULTI_SEGMENT:
       return MultiSegmentArena.getBuffer(id, a);
@@ -50,7 +46,7 @@ export function getBuffer(id: number, a: AnyArena) {
   }
 }
 
-export function getNumSegments(a: AnyArena) {
+export function getNumSegments(a: AnyArena): number {
   switch (a.kind) {
     case ArenaKind.MULTI_SEGMENT:
       return MultiSegmentArena.getNumSegments(a);

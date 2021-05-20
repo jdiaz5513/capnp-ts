@@ -44,6 +44,12 @@ jspm_packages
 *.tgz
 
 # Build output
-lib
-lib-test
 .tmp
+*.d.ts
+*.map
+*.tsbuildinfo
+packages/*/bin/**/*.d.ts
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.js
+packages/*/test/**/*.d.ts
+packages/*/test/**/*.js

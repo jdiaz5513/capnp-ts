@@ -1,10 +1,10 @@
-import { tap } from "../util";
+import tap from "tap";
 import * as capnp from "capnp-ts";
-import * as T from "./test.capnp";
+import * as T from "./test.capnp.js";
 
 const FLOAT_TOLERANCE = 0.000001;
 
-tap.test("TestEnum", t => {
+void tap.test("TestEnum", (t) => {
   t.equal(T.TestEnum.FOO, 0);
   t.equal(T.TestEnum.BAR, 1);
   t.equal(T.TestEnum.BAZ, 2);
@@ -17,7 +17,7 @@ tap.test("TestEnum", t => {
   t.end();
 });
 
-tap.test("TestAllTypes", t => {
+void tap.test("TestAllTypes", (t) => {
   const allTypes = new capnp.Message().initRoot(T.TestAllTypes);
 
   allTypes.setBoolField(true);
@@ -51,9 +51,7 @@ tap.test("TestAllTypes", t => {
   t.ok(Math.abs(allTypes.getFloat32Field() - -9.999) < FLOAT_TOLERANCE);
 
   allTypes.setFloat64Field(-999999999999.9);
-  t.ok(
-    Math.abs(allTypes.getFloat64Field() - -999999999999.9) < FLOAT_TOLERANCE
-  );
+  t.ok(Math.abs(allTypes.getFloat64Field() - -999999999999.9) < FLOAT_TOLERANCE);
 
   allTypes.setTextField("text");
   t.equal(allTypes.getTextField(), "text");
@@ -80,13 +78,7 @@ tap.test("TestAllTypes", t => {
   t.equal(allTypes.getInt32List().get(2), -888);
 
   allTypes.initInt64List(3).set(2, capnp.Int64.fromNumber(-8888));
-  t.equal(
-    allTypes
-      .getInt64List()
-      .get(2)
-      .toNumber(),
-    -8888
-  );
+  t.equal(allTypes.getInt64List().get(2).toNumber(), -8888);
 
   allTypes.initUInt8List(3).set(2, 8);
   t.equal(allTypes.getUInt8List().get(2), 8);
@@ -98,28 +90,13 @@ tap.test("TestAllTypes", t => {
   t.equal(allTypes.getUInt32List().get(2), 888);
 
   allTypes.initUInt64List(3).set(2, capnp.Uint64.fromNumber(8888));
-  t.equal(
-    allTypes
-      .getUInt64List()
-      .get(2)
-      .toNumber(),
-    8888
-  );
+  t.equal(allTypes.getUInt64List().get(2).toNumber(), 8888);
 
   allTypes.initTextList(4).set(2, "hi");
   t.equal(allTypes.getTextList().get(2), "hi");
 
-  allTypes
-    .initStructList(3)
-    .get(1)
-    .setUInt32Field(9999);
-  t.equal(
-    allTypes
-      .getStructList()
-      .get(1)
-      .getUInt32Field(),
-    9999
-  );
+  allTypes.initStructList(3).get(1).setUInt32Field(9999);
+  t.equal(allTypes.getStructList().get(1).getUInt32Field(), 9999);
 
   allTypes.initEnumList(2).set(1, T.TestEnum.FOO);
   t.equal(allTypes.getEnumList().get(1), T.TestEnum.FOO);
