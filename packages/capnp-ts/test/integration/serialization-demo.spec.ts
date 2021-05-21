@@ -2,13 +2,15 @@
  * @author jdiaz5513
  */
 
+import * as tap from "tap";
+
 import * as capnp from "../../lib";
-import { compareBuffers, readFileBuffer, tap } from "../util";
+import { compareBuffers, readFileBuffer } from "../util";
 import { AddressBook, Person } from "./serialization-demo";
 
 const SERIALIZATION_DEMO = readFileBuffer("test/data/serialization-demo.bin");
 
-tap.test("write address book", t => {
+tap.test("write address book", (t) => {
   const message = new capnp.Message();
   const addressBook = message.initRoot(AddressBook);
 
@@ -49,9 +51,7 @@ tap.test("write address book", t => {
   bob.setName("Bob");
   bob.setEmail("bob@example.com");
 
-  t.comment(
-    "should not crash while calling setters on composite struct with nonzero index"
-  );
+  t.comment("should not crash while calling setters on composite struct with nonzero index");
 
   const bobPhones = bob.initPhones(2);
 
@@ -75,7 +75,7 @@ tap.test("write address book", t => {
   t.end();
 });
 
-tap.test("read address book", t => {
+tap.test("read address book", (t) => {
   const message = new capnp.Message(SERIALIZATION_DEMO, false);
 
   const addressBook = message.getRoot(AddressBook);
@@ -126,7 +126,7 @@ tap.test("read address book", t => {
   t.end();
 });
 
-tap.test("copy pointers from other message", t => {
+tap.test("copy pointers from other message", (t) => {
   const message1 = new capnp.Message();
   const addressBook1 = message1.initRoot(AddressBook);
   const people1 = addressBook1.initPeople(2);
@@ -152,7 +152,7 @@ tap.test("copy pointers from other message", t => {
   t.end();
 });
 
-tap.test("adoption", t => {
+tap.test("adoption", (t) => {
   const m = new capnp.Message();
   const s = m.getSegment(0);
   const addressBook = m.initRoot(AddressBook);
@@ -166,10 +166,7 @@ tap.test("adoption", t => {
   const o = addressBook.disownPeople();
 
   t.ok(s.isWordZero(0x08), "should null the pointer");
-  t.notOk(
-    s.isWordZero(0x10),
-    "should not wipe out the composite list tag word"
-  );
+  t.notOk(s.isWordZero(0x10), "should not wipe out the composite list tag word");
   t.notOk(s.isWordZero(0x40), "should not touch the content");
   t.ok(capnp.Pointer.isNull(people1), "should null the original pointer");
 
@@ -183,16 +180,12 @@ tap.test("adoption", t => {
   t.equal(alice2.getId(), 456);
   t.equal(alice1.getId(), 456);
 
-  t.throws(
-    () => addressBook.adoptPeople(o),
-    undefined,
-    "should not allow multiple adoption"
-  );
+  t.throws(() => addressBook.adoptPeople(o), undefined, "should not allow multiple adoption");
 
   t.end();
 });
 
-tap.test("overwrite", t => {
+tap.test("overwrite", (t) => {
   const m = new capnp.Message();
   const s = m.getSegment(0);
   const addressBook = m.initRoot(AddressBook);

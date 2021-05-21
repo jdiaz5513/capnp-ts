@@ -24,20 +24,13 @@
 
 "use strict";
 
-const capnp = require('capnp-ts');
-const addressbookSchemas = require('./addressbook.capnp.js');
-
-// No destructuring assignment in node 4.0
-const AddressBook = addressbookSchemas.AddressBook;
-const Person = addressbookSchemas.Person;
-const Person_Employment = addressbookSchemas.Person_Employment;
-const Person_PhoneNumber = addressbookSchemas.Person_PhoneNumber;
-const Person_PhoneNumber_Type = addressbookSchemas.Person_PhoneNumber_Type;
+import capnp from 'capnp-ts';
+import { AddressBook, Person_Employment, Person_PhoneNumber_Type } from './addressbook.capnp.js';
 
 function writePackedMessageToStream(writeStream, message) {
   const arrayBuffer = message.toPackedArrayBuffer();
   // Beacause streams can't handle ArrayBuffers
-  const buffer = new Buffer(arrayBuffer);
+  const buffer = Buffer.alloc(arrayBuffer);
   writeStream.write(buffer);
 }
 

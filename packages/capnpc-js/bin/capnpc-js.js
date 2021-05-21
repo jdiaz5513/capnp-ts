@@ -1,3 +1,5 @@
 #!/usr/bin/env node
 
-require('../lib').main();
+import { main } from "../lib";
+
+main();

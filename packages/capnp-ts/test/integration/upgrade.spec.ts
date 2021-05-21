@@ -4,12 +4,13 @@
  * @author jdiaz5513
  */
 
+import * as tap from "tap";
+
 import * as capnp from "../../lib";
-import { tap } from "../util";
 import { Upgrade as UpgradeV1 } from "./upgrade-v1.capnp";
 import { Upgrade as UpgradeV2 } from "./upgrade-v2.capnp";
 
-tap.test("schema upgrade with legacy data", t => {
+tap.test("schema upgrade with legacy data", (t) => {
   // This test creates a message with a legacy version of a struct, then attempts to read that same struct data using a
   // newer version of the schema (it has more data fields). This should force the library to shallow copy and reallocate
   // space for the struct so that there's enough space to write to the new fields. Additionally they should default to
@@ -33,14 +34,8 @@ tap.test("schema upgrade with legacy data", t => {
   const u2 = m.getRoot(UpgradeV2);
 
   t.comment("should null out the self-reference pointers");
-  t.ok(
-    capnp.Pointer.isNull(v1Child),
-    "should null out the self-reference pointer"
-  );
-  t.ok(
-    m.getSegment(0).isWordZero(0x18),
-    "should null out the self-reference pointer"
-  );
+  t.ok(capnp.Pointer.isNull(v1Child), "should null out the self-reference pointer");
+  t.ok(m.getSegment(0).isWordZero(0x18), "should null out the self-reference pointer");
 
   t.comment("should still be able to access the legacy data from both classes");
   t.equal(u1.getLegacyId(), 0x5555);
@@ -64,20 +59,9 @@ tap.test("schema upgrade with legacy data", t => {
     v2Child.setNewHotnessName("HIHI");
   }, "should be able to set new child fields");
 
-  t.ok(
-    capnp.Pointer.isNull(v1Child),
-    "should not be able to access the old child"
-  );
-  t.equal(
-    v2Child.getLegacyId(),
-    0x6666,
-    "should preserve the child's legacy id"
-  );
-  t.equal(
-    v2Child.getLegacyName(),
-    "hihi",
-    "should preserve the child's legacy name"
-  );
+  t.ok(capnp.Pointer.isNull(v1Child), "should not be able to access the old child");
+  t.equal(v2Child.getLegacyId(), 0x6666, "should preserve the child's legacy id");
+  t.equal(v2Child.getLegacyName(), "hihi", "should preserve the child's legacy name");
 
   // Make sure that composite lists get resized too.
   const v2ListChild = u2.getSelfReferences().get(0);
@@ -88,16 +72,8 @@ tap.test("schema upgrade with legacy data", t => {
   }, "should be able to set new composite list fields");
 
   t.comment("should preserve composite list data");
-  t.equal(
-    v2ListChild.getLegacyId(),
-    0x9999,
-    "should preserve composite list data"
-  );
-  t.equal(
-    v2ListChild.getLegacyName(),
-    "hihihi",
-    "should preserve composite list data"
-  );
+  t.equal(v2ListChild.getLegacyId(), 0x9999, "should preserve composite list data");
+  t.equal(v2ListChild.getLegacyName(), "hihihi", "should preserve composite list data");
 
   t.end();
 });

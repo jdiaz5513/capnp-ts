@@ -1,8 +1,9 @@
+import * as tap from "tap";
+
 import { Message, Pointer } from "../../../../lib";
 import * as C from "../../../../lib/constants";
-import { tap } from "../../../util";
 
-tap.test("new Pointer()", t => {
+tap.test("new Pointer()", (t) => {
   const m = new Message();
   const s = m.getSegment(0);
 
@@ -19,11 +20,7 @@ tap.test("new Pointer()", t => {
 
   const p = new Pointer(s, 4);
 
-  t.equal(
-    m._capnp.traversalLimit,
-    initialTraversalLimit - 8,
-    "should track pointer allocation in the message"
-  );
+  t.equal(m._capnp.traversalLimit, initialTraversalLimit - 8, "should track pointer allocation in the message");
 
   t.throws(
     () => {
@@ -44,10 +41,7 @@ tap.test("new Pointer()", t => {
   );
 
   t.equal(s.byteLength, 8);
-  t.ok(
-    new Pointer(s, 8),
-    "should allow creating pointers at the end of the segment"
-  );
+  t.ok(new Pointer(s, 8), "should allow creating pointers at the end of the segment");
 
   t.equal(p.segment, s);
   t.equal(p.byteOffset, 4);
@@ -56,7 +50,7 @@ tap.test("new Pointer()", t => {
   t.end();
 });
 
-tap.test("Pointer.adopt(), Pointer.disown()", t => {
+tap.test("Pointer.adopt(), Pointer.disown()", (t) => {
   const m = new Message();
   const s = m.getSegment(0);
   const p = new Pointer(s, 0);
@@ -78,7 +72,7 @@ tap.test("Pointer.adopt(), Pointer.disown()", t => {
   t.end();
 });
 
-tap.test("Pointer.dump()", t => {
+tap.test("Pointer.dump()", (t) => {
   const m = new Message();
   const s = m.getSegment(0);
   const p = new Pointer(s, 0);
@@ -91,7 +85,7 @@ tap.test("Pointer.dump()", t => {
   t.end();
 });
 
-tap.test("Pointer.toString()", t => {
+tap.test("Pointer.toString()", (t) => {
   const m = new Message();
   const s = m.getSegment(0);
   const p = new Pointer(s, 0);
@@ -99,10 +93,7 @@ tap.test("Pointer.toString()", t => {
   s.setUint32(0, 0x00000001);
   s.setUint32(4, 0x00000002);
 
-  t.equal(
-    p.toString(),
-    "Pointer_0@0x00000000,[01 00 00 00 02 00 00 00],limit:0x7fffffff"
-  );
+  t.equal(p.toString(), "Pointer_0@0x00000000,[01 00 00 00 02 00 00 00],limit:0x7fffffff");
 
   t.end();
 });

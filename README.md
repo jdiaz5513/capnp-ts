@@ -19,8 +19,6 @@
 
 ```
 
-[![Build Status](https://travis-ci.org/jdiaz5513/capnp-ts.svg?branch=master)](https://travis-ci.org/jdiaz5513/capnp-ts) [![codecov](https://codecov.io/gh/jdiaz5513/capnp-ts/branch/master/graph/badge.svg)](https://codecov.io/gh/jdiaz5513/capnp-ts)
-
 This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) serialization protocol. Start with the [Cap'n Proto Introduction](https://capnproto.org/index.html) for more detailed information on what this is about.
 
 > WARNING: THIS IS ALPHA QUALITY SOFTWARE. USE AT YOUR OWN RISK. AUTHORS ARE NOT RESPONSIBLE FOR LOSS OF LIMB, LIFE, SANITY, OR RETIREMENT FUNDS DUE TO USE OF THIS SOFTWARE.

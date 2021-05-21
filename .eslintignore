@@ -1,0 +1,6 @@
+*.capnp.ts
+*.capnp.js
+lib
+lib-test
+node_modules
+coverage

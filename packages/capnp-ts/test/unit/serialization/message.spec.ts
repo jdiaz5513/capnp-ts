@@ -1,69 +1,48 @@
+import * as tap from "tap";
+
 import * as C from "../../../lib/constants";
 import { Message } from "../../../lib/serialization";
 import { MultiSegmentArena } from "../../../lib/serialization/arena";
-import {
-  getFramedSegments,
-  preallocateSegments
-} from "../../../lib/serialization/message";
+import { getFramedSegments, preallocateSegments } from "../../../lib/serialization/message";
 import { Person } from "../../integration/serialization-demo";
-import { compareBuffers, readFileBuffer, tap } from "../../util";
+import { compareBuffers, readFileBuffer } from "../../util";
 
 const SEGMENTED_PACKED = readFileBuffer("test/data/segmented-packed.bin");
 const SEGMENTED_UNPACKED = readFileBuffer("test/data/segmented.bin");
 
-tap.test("new Message(ArrayBuffer, false)", t => {
+tap.test("new Message(ArrayBuffer, false)", (t) => {
   const message = new Message(SEGMENTED_UNPACKED, false);
 
-  compareBuffers(
-    t,
-    message.toArrayBuffer(),
-    SEGMENTED_UNPACKED,
-    "should read segmented messages"
-  );
+  compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, "should read segmented messages");
 
   t.end();
 });
 
-tap.test("new Message(Buffer, false)", t => {
-  const message = new Message(new Buffer(SEGMENTED_UNPACKED), false);
+tap.test("new Message(Buffer, false)", (t) => {
+  const message = new Message(Buffer.from(SEGMENTED_UNPACKED), false);
 
-  compareBuffers(
-    t,
-    message.toArrayBuffer(),
-    SEGMENTED_UNPACKED,
-    "should read messages from a Buffer"
-  );
+  compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, "should read messages from a Buffer");
 
   t.end();
 });
 
-tap.test("new Message(ArrayBuffer)", t => {
+tap.test("new Message(ArrayBuffer)", (t) => {
   const message = new Message(SEGMENTED_PACKED);
 
-  compareBuffers(
-    t,
-    message.toArrayBuffer(),
-    SEGMENTED_UNPACKED,
-    "should read packed messages"
-  );
+  compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, "should read packed messages");
 
   t.end();
 });
 
-tap.test("new Message(Buffer)", t => {
-  const message = new Message(new Buffer(SEGMENTED_PACKED));
+tap.test("new Message(Buffer)", (t) => {
+  const message = new Message(Buffer.from(SEGMENTED_PACKED));
 
-  compareBuffers(
-    t,
-    message.toArrayBuffer(),
-    SEGMENTED_UNPACKED,
-    "should read packed messages from a Buffer"
-  );
+  compareBuffers(t, message.toArrayBuffer(), SEGMENTED_UNPACKED, "should read packed messages from a Buffer");
 
   t.end();
 });
 
-tap.test("getFramedSegments()", t => {
+tap.test("getFramedSegments()", (t) => {
   t.throws(
     () =>
       getFramedSegments(
@@ -71,7 +50,7 @@ tap.test("getFramedSegments()", t => {
           0x00,
           0x00,
           0x00,
-          0x00 // need at least 4 more bytes for an empty message
+          0x00, // need at least 4 more bytes for an empty message
         ]).buffer
       ),
     undefined,
@@ -89,7 +68,7 @@ tap.test("getFramedSegments()", t => {
           0x00,
           0x00,
           0x00,
-          0x00 // need at least 4 more bytes for the second segment length
+          0x00, // need at least 4 more bytes for the second segment length
         ]).buffer
       ),
     undefined,
@@ -123,7 +102,7 @@ tap.test("getFramedSegments()", t => {
           0x00,
           0x00,
           0x00,
-          0x00 // but only get 2
+          0x00, // but only get 2
         ]).buffer
       ),
     undefined,
@@ -133,7 +112,7 @@ tap.test("getFramedSegments()", t => {
   t.end();
 });
 
-tap.test("Message.allocateSegment()", t => {
+tap.test("Message.allocateSegment()", (t) => {
   const length = C.DEFAULT_BUFFER_SIZE;
 
   const m1 = new Message();
@@ -156,16 +135,12 @@ tap.test("Message.allocateSegment()", t => {
   m2.allocateSegment(length);
   m2.allocateSegment(length);
 
-  t.equal(
-    m2.getSegment(1).buffer.byteLength,
-    length,
-    "should allocate new segments"
-  );
+  t.equal(m2.getSegment(1).buffer.byteLength, length, "should allocate new segments");
 
   t.end();
 });
 
-tap.test("Message.dump()", t => {
+tap.test("Message.dump()", (t) => {
   const m1 = new Message(new MultiSegmentArena());
 
   t.equal(
@@ -196,29 +171,21 @@ Segment #0
   t.end();
 });
 
-tap.test("Message.getSegment()", t => {
+tap.test("Message.getSegment()", (t) => {
   const s = new Message(new MultiSegmentArena()).getSegment(0);
 
   t.equal(s.byteLength, 8, "should preallocate segment 0");
 
-  t.throws(
-    () => new Message().getSegment(1),
-    undefined,
-    "should throw when getting out of range segments"
-  );
+  t.throws(() => new Message().getSegment(1), undefined, "should throw when getting out of range segments");
 
   const m = new Message(new MultiSegmentArena([new ArrayBuffer(2)])); // this is too small to hold the root pointer
 
-  t.throws(
-    () => m.getSegment(0),
-    undefined,
-    "should throw when segment 0 is too small"
-  );
+  t.throws(() => m.getSegment(0), undefined, "should throw when segment 0 is too small");
 
   t.end();
 });
 
-tap.test("Message.onCreatePointer()", t => {
+tap.test("Message.onCreatePointer()", (t) => {
   // This is why you should cache the result of `getList()` calls and use `List.toArray()` liberally...
 
   const m = new Message();
@@ -235,30 +202,21 @@ tap.test("Message.onCreatePointer()", t => {
   t.end();
 });
 
-tap.test("Message.toArrayBuffer()", t => {
-  t.equals(
-    new Message().toArrayBuffer().byteLength,
-    16,
-    "should allocate segment 0 before converting"
-  );
+tap.test("Message.toArrayBuffer()", (t) => {
+  t.equals(new Message().toArrayBuffer().byteLength, 16, "should allocate segment 0 before converting");
 
   t.end();
 });
 
-tap.test("Message.toPackedArrayBuffer()", t => {
+tap.test("Message.toPackedArrayBuffer()", (t) => {
   const message = new Message(SEGMENTED_UNPACKED, false);
 
-  compareBuffers(
-    t,
-    message.toPackedArrayBuffer(),
-    SEGMENTED_PACKED,
-    "should pack messages properly"
-  );
+  compareBuffers(t, message.toPackedArrayBuffer(), SEGMENTED_PACKED, "should pack messages properly");
 
   t.end();
 });
 
-tap.test("preallocateSegments()", t => {
+tap.test("preallocateSegments()", (t) => {
   t.throws(
     () => {
       const message = new Message(new MultiSegmentArena());

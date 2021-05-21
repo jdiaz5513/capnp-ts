@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-require('../lib').main();
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("../lib").main();

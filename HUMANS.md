@@ -22,11 +22,11 @@
 
 ## PLEDGE
 
-  This software repository shall be free to use across all races, religions,
+This software repository shall be free to use across all races, religions,
 species, or territory. Both free in that it may be used anywhere, and free in
 that it may be worked on by anyone.
 
-  No contributions to this repository shall be rejected by way of face,
+No contributions to this repository shall be rejected by way of face,
 allegiance, or stubbornness. This pledge shall remain valid as long as it is
 still legible.
 

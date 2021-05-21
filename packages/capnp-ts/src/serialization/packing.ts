@@ -35,7 +35,7 @@ const enum PackedTag {
    * input (256 words = 2KiB).
    */
 
-  SPAN = 0xff
+  SPAN = 0xff,
 }
 
 /**
@@ -48,7 +48,7 @@ const enum PackedTag {
  * @returns {number} The hamming weight (integer).
  */
 
-export function getHammingWeight(x: number) {
+export function getHammingWeight(x: number): number {
   // Thanks, HACKMEM!
 
   let w = x - ((x >> 1) & 0x55555555);
@@ -72,16 +72,7 @@ export type byte = number;
  * @returns {number} The tag byte.
  */
 
-export function getTagByte(
-  a: byte,
-  b: byte,
-  c: byte,
-  d: byte,
-  e: byte,
-  f: byte,
-  g: byte,
-  h: byte
-): number {
+export function getTagByte(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte, g: byte, h: byte): number {
   // Yes, it's pretty. Don't touch it.
 
   return (
@@ -150,16 +141,7 @@ export function getUnpackedByteLength(packed: ArrayBuffer): number {
  * @returns {number} The number of these bytes that are zero.
  */
 
-export function getZeroByteCount(
-  a: byte,
-  b: byte,
-  c: byte,
-  d: byte,
-  e: byte,
-  f: byte,
-  g: byte,
-  h: byte
-): number {
+export function getZeroByteCount(a: byte, b: byte, c: byte, d: byte, e: byte, f: byte, g: byte, h: byte): number {
   return (
     (a === 0 ? 1 : 0) +
     (b === 0 ? 1 : 0) +
@@ -189,11 +171,7 @@ export function getZeroByteCount(
  * @returns {ArrayBuffer} A packed version of the message.
  */
 
-export function pack(
-  unpacked: ArrayBuffer,
-  byteOffset = 0,
-  byteLength?: number
-): ArrayBuffer {
+export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number): ArrayBuffer {
   if (unpacked.byteLength % 8 !== 0) throw new Error(MSG_PACK_NOT_WORD_ALIGNED);
 
   const src = new Uint8Array(unpacked, byteOffset, byteLength);
@@ -220,11 +198,7 @@ export function pack(
 
   let spanThreshold = PACK_SPAN_THRESHOLD;
 
-  for (
-    let srcByteOffset = 0;
-    srcByteOffset < src.byteLength;
-    srcByteOffset += 8
-  ) {
+  for (let srcByteOffset = 0; srcByteOffset < src.byteLength; srcByteOffset += 8) {
     /** Read in the entire word. Yes, this feels silly but it's fast! */
 
     const a = src[srcByteOffset];
@@ -261,7 +235,7 @@ export function pack(
 
         break;
 
-      case PackedTag.SPAN:
+      case PackedTag.SPAN: {
         // We're writing a span of nonzero words.
 
         const zeroCount = getZeroByteCount(a, b, c, d, e, f, g, h);
@@ -290,7 +264,7 @@ export function pack(
         }
 
         break;
-
+      }
       default:
         // Didn't get a special tag last time, let's write this as normal.
 
@@ -355,11 +329,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
   let lastTag = 0x77;
 
-  for (
-    let srcByteOffset = 0, dstByteOffset = 0;
-    srcByteOffset < src.byteLength;
-
-  ) {
+  for (let srcByteOffset = 0, dstByteOffset = 0; srcByteOffset < src.byteLength; ) {
     const tag = src[srcByteOffset];
 
     if (lastTag === PackedTag.ZERO) {
@@ -375,10 +345,7 @@ export function unpack(packed: ArrayBuffer): ArrayBuffer {
 
       const spanByteLength = tag * 8;
 
-      dst.set(
-        src.subarray(srcByteOffset + 1, srcByteOffset + 1 + spanByteLength),
-        dstByteOffset
-      );
+      dst.set(src.subarray(srcByteOffset + 1, srcByteOffset + 1 + spanByteLength), dstByteOffset);
 
       dstByteOffset += spanByteLength;
       srcByteOffset += 1 + spanByteLength;

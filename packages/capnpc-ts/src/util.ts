@@ -1,7 +1,6 @@
 import { Int64, Uint64 } from "capnp-ts/lib/types";
 import { pad } from "capnp-ts/lib/util";
 import initTrace from "debug";
-import * as R from "ramda";
 
 // Yep, this is silly. :)
 
@@ -9,7 +8,7 @@ interface Hex2Dec {
   decToHex(d: string): string;
   hexToDec(h: string): string;
 }
-/* tslint:disable-next-line:no-var-requires */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { decToHex } = require("hex2dec") as Hex2Dec;
 
 const trace = initTrace("capnpc:util");
@@ -17,11 +16,11 @@ trace("load");
 
 export function c2s(s: string): string {
   return splitCamel(s)
-    .map(x => x.toUpperCase())
+    .map((x) => x.toUpperCase())
     .join("_");
 }
 
-export function c2t(s: string) {
+export function c2t(s: string): string {
   return s.substr(0, 1).toUpperCase() + s.substr(1);
 }
 
@@ -58,7 +57,7 @@ export function decToInt64(d: string): Int64 {
 
   if (neg) h.shift();
 
-  const v = new Int64(new Uint8Array(R.map(b => parseInt(b, 16), h)));
+  const v = new Int64(new Uint8Array(h.map((b) => parseInt(b, 16))));
 
   if (neg) v.negate();
 
@@ -68,29 +67,25 @@ export function decToInt64(d: string): Int64 {
 export function decToUint64(d: string): Uint64 {
   const h = decToHexBytes(d);
 
-  return new Uint64(new Uint8Array(R.map(b => parseInt(b, 16), h)));
+  return new Uint64(new Uint8Array(h.map((b) => parseInt(b, 16))));
 }
 
 export function splitCamel(s: string): string[] {
   let wasLo = false;
 
-  return R.reduce(
-    (a: string[], c: string) => {
-      const lo = c.toUpperCase() !== c;
-      const up = c.toLowerCase() !== c;
+  return s.split("").reduce((a: string[], c: string) => {
+    const lo = c.toUpperCase() !== c;
+    const up = c.toLowerCase() !== c;
 
-      if (a.length === 0 || (wasLo && up)) {
-        a.push(c);
-      } else {
-        const i = a.length - 1;
-        a[i] = a[i] + c;
-      }
+    if (a.length === 0 || (wasLo && up)) {
+      a.push(c);
+    } else {
+      const i = a.length - 1;
+      a[i] = a[i] + c;
+    }
 
-      wasLo = lo;
+    wasLo = lo;
 
-      return a;
-    },
-    [],
-    s.split("")
-  );
+    return a;
+  }, []);
 }

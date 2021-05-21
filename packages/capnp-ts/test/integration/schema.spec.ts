@@ -2,15 +2,17 @@
  * @author jdiaz5513
  */
 
+import * as tap from "tap";
+
 import * as capnp from "../../lib";
 import { CodeGeneratorRequest } from "../../lib/std/schema.capnp";
-import { compareBuffers, readFileBuffer, tap } from "../util";
+import { compareBuffers, readFileBuffer } from "../util";
 
 const SCHEMA_MESSAGE = readFileBuffer("test/data/schema.bin");
 
 const SCHEMA_FILE_ID = capnp.Int64.fromHexString("a93fc509624c72d9");
 
-tap.test("schema roundtrip", t => {
+tap.test("schema roundtrip", (t) => {
   const message = new capnp.Message(SCHEMA_MESSAGE, false);
   const req = message.getRoot(CodeGeneratorRequest);
 
@@ -33,11 +35,7 @@ tap.test("schema roundtrip", t => {
 
   const requestedFileId = requestedFile.getId();
 
-  compareBuffers(
-    t,
-    requestedFileId.buffer.buffer,
-    SCHEMA_FILE_ID.buffer.buffer
-  );
+  compareBuffers(t, requestedFileId.buffer.buffer, SCHEMA_FILE_ID.buffer.buffer);
 
   const out = message.toArrayBuffer();
 

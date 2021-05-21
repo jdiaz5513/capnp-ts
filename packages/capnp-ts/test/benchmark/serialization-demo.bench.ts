@@ -9,13 +9,8 @@ import { decodeUtf8 } from "../../lib/util";
 import { AddressBook } from "../integration/serialization-demo";
 import { logBench, readFileBuffer } from "../util";
 
-const jsonBuffer = new Uint8Array(
-  readFileBuffer("test/data/serialization-demo.json")
-);
-const jsonString = readFileSync(
-  path.join(__dirname, "../../", "test/data/serialization-demo.json"),
-  "utf-8"
-);
+const jsonBuffer = new Uint8Array(readFileBuffer("test/data/serialization-demo.json"));
+const jsonString = readFileSync(path.join(__dirname, "../../", "test/data/serialization-demo.json"), "utf-8");
 const messageData = readFileBuffer("test/data/serialization-demo.bin");
 // Let's preprocess it so we have just the raw segment data.
 const messageSegment = new capnp.Message(messageData).getSegment(0).buffer;
@@ -25,8 +20,8 @@ const deeplyNested = new Suite("iteration over deeply nested lists")
   .add("JSON.parse(decodeUtf8(m))", () => {
     const addressBook = JSON.parse(decodeUtf8(jsonBuffer));
 
-    addressBook.people.forEach((person: any) => {
-      person.phones.forEach((phone: any) => {
+    addressBook.people.forEach((person: { phones: [] }) => {
+      person.phones.forEach((phone: { number: string }) => {
         phone.number.toUpperCase();
       });
     });
@@ -35,8 +30,8 @@ const deeplyNested = new Suite("iteration over deeply nested lists")
   .add("JSON.parse(m)", () => {
     const addressBook = JSON.parse(jsonString);
 
-    addressBook.people.forEach((person: any) => {
-      person.phones.forEach((phone: any) => {
+    addressBook.people.forEach((person: { phones: [] }) => {
+      person.phones.forEach((phone: { number: string }) => {
         phone.number.toUpperCase();
       });
     });
@@ -47,8 +42,8 @@ const deeplyNested = new Suite("iteration over deeply nested lists")
 
     const addressBook = message.getRoot(AddressBook);
 
-    addressBook.getPeople().forEach(person => {
-      person.getPhones().forEach(phone => {
+    addressBook.getPeople().forEach((person) => {
+      person.getPhones().forEach((phone) => {
         phone.getNumber().toUpperCase();
       });
     });
@@ -73,10 +68,7 @@ const listLength = new Suite("top level list length access")
 
     const addressBook = message.getRoot(AddressBook);
 
-    addressBook
-      .getPeople()
-      .getLength()
-      .toFixed(0);
+    addressBook.getPeople().getLength().toFixed(0);
   });
 
 const parse = new Suite('"parse"')

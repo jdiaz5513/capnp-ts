@@ -1,9 +1,10 @@
+import * as tap from "tap";
 import { gen, property } from "testcheck";
 
 import * as C from "../../lib/constants";
 import { RANGE_INVALID_UTF8 } from "../../lib/errors";
 import * as util from "../../lib/util";
-import { compareBuffers, runTestCheck, tap } from "../util";
+import { compareBuffers, runTestCheck } from "../util";
 
 const BAD_UTF8 = [
   new Uint8Array([0xff, 0xff]),
@@ -13,25 +14,22 @@ const BAD_UTF8 = [
   new Uint8Array([0xe0, 0xbc]),
   new Uint8Array([0xf0]),
   new Uint8Array([0xf0, 0x9f]),
-  new Uint8Array([0xf0, 0x9f, 0x92])
+  new Uint8Array([0xf0, 0x9f, 0x92]),
 ];
 const UTF8_BUFFERS = [
   { buf: new Uint8Array([0x21]), str: "!" },
   { buf: new Uint8Array([0xc3, 0xad]), str: "í" },
   { buf: new Uint8Array([0xe0, 0xbc, 0x80]), str: "ༀ" },
-  { buf: new Uint8Array([0xf0, 0x9f, 0x92, 0xa9]), str: "💩" }
+  { buf: new Uint8Array([0xf0, 0x9f, 0x92, 0xa9]), str: "💩" },
 ];
 
-tap.test("bufferToHex()", t => {
-  t.equal(
-    util.bufferToHex(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]).buffer),
-    "[aa bb cc dd]"
-  );
+tap.test("bufferToHex()", (t) => {
+  t.equal(util.bufferToHex(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]).buffer), "[aa bb cc dd]");
 
   t.end();
 });
 
-tap.test("checkInt32()", t => {
+tap.test("checkInt32()", (t) => {
   t.throws(() => util.checkInt32(0xffffffff));
 
   t.throws(() => util.checkInt32(-0xffffffff));
@@ -43,7 +41,7 @@ tap.test("checkInt32()", t => {
   t.end();
 });
 
-tap.test("checkUint32()", t => {
+tap.test("checkUint32()", (t) => {
   t.throws(() => util.checkUint32(0xffffffff + 1));
 
   t.throws(() => util.checkUint32(-1));
@@ -55,29 +53,29 @@ tap.test("checkUint32()", t => {
   t.end();
 });
 
-tap.test("decodeUtf8()", t => {
+tap.test("decodeUtf8()", (t) => {
   UTF8_BUFFERS.forEach(({ buf, str }) => {
     t.equal(util.decodeUtf8(buf), str);
   });
 
-  BAD_UTF8.forEach(b => {
+  BAD_UTF8.forEach((b) => {
     t.throws(() => util.decodeUtf8(b), new RangeError(RANGE_INVALID_UTF8));
   });
 
   t.end();
 });
 
-tap.test("decodeUtf8(encodeUtf8())", t => {
+tap.test("decodeUtf8(encodeUtf8())", (t) => {
   runTestCheck(
     t,
-    property(gen.string, s => util.decodeUtf8(util.encodeUtf8(s)) === s),
+    property(gen.string, (s) => util.decodeUtf8(util.encodeUtf8(s)) === s),
     { numTests: 1000 }
   );
 
   t.end();
 });
 
-tap.test("dumpBuffer()", t => {
+tap.test("dumpBuffer()", (t) => {
   const buf1 = new Uint8Array(64);
 
   // Gratuitous? Yes. Awesome? Yes.
@@ -117,7 +115,7 @@ tap.test("dumpBuffer()", t => {
   t.end();
 });
 
-tap.test("encodeUtf8()", t => {
+tap.test("encodeUtf8()", (t) => {
   UTF8_BUFFERS.forEach(({ buf, str }) => {
     // The output buffer might be longer than its contents so we need to slice it.
 
@@ -128,7 +126,7 @@ tap.test("encodeUtf8()", t => {
   t.end();
 });
 
-tap.test("format()", t => {
+tap.test("format()", (t) => {
   t.equal(util.format("%a", 0x0da0beef), "0x0da0beef");
   t.equal(util.format("%b", 0b10101010), "10101010");
   t.equal(util.format("%c", 33), "!");
@@ -148,13 +146,13 @@ tap.test("format()", t => {
   t.end();
 });
 
-tap.test("identity()", t => {
+tap.test("identity()", (t) => {
   t.equal(util.identity("x"), "x");
 
   t.end();
 });
 
-tap.test("pad()", t => {
+tap.test("pad()", (t) => {
   t.equal(util.pad("0", 8), "00000000");
   t.equal(util.pad("0", 8, "="), "=======0");
   t.equal(util.pad("000000000", 8), "000000000");
@@ -162,7 +160,7 @@ tap.test("pad()", t => {
   t.end();
 });
 
-tap.test("padToWord()", t => {
+tap.test("padToWord()", (t) => {
   t.equal(util.padToWord(7), 8);
   t.equal(util.padToWord(0), 0);
   t.equal(util.padToWord(9), 16);
@@ -170,7 +168,7 @@ tap.test("padToWord()", t => {
   t.end();
 });
 
-tap.test("repeat()", t => {
+tap.test("repeat()", (t) => {
   t.equal(util.repeat(10, "0"), "0000000000");
   t.equal(util.repeat(0, "x"), "");
   t.equal(util.repeat(-1, "z"), "");

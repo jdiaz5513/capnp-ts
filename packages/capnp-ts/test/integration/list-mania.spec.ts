@@ -6,11 +6,12 @@
  * @author jdiaz5513
  */
 
+import * as tap from "tap";
+
 import * as capnp from "../../lib";
-import { tap } from "../util";
 import { ListMania } from "./list-mania.capnp";
 
-tap.test("loop de loop", t => {
+tap.test("loop de loop", (t) => {
   t.doesNotThrow(() => {
     const m = new capnp.Message();
     const listMania = m.initRoot(ListMania);
@@ -35,7 +36,7 @@ tap.test("loop de loop", t => {
   t.end();
 });
 
-tap.test("1 of each list", t => {
+tap.test("1 of each list", (t) => {
   t.doesNotThrow(() => {
     const m = new capnp.Message();
     const listMania = m.initRoot(ListMania);

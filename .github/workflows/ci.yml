@@ -1,0 +1,28 @@
+name: CI
+on:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - "14"
+          - "16"
+    name: Test on node v${{ matrix.node-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          check-latest: true
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: |
+          npm i -g npm@latest
+          npm ci --verbose
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test

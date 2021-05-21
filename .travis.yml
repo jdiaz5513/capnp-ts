@@ -1,9 +1,12 @@
-dist: trusty
+dist: xenial
 sudo: false
 language: node_js
 node_js:
+  - "16"
+  - "15"
+  - "14"
+  - "12"
   - "10"
-  - "8"
 addons:
   apt:
     sources:
@@ -13,13 +16,15 @@ addons:
 before_install:
   - export CXX="g++-5"
   - bash ci/install-capnproto.sh
-  - curl -o- -L https://yarnpkg.com/install.sh | bash -s
-  - export PATH="$HOME/opt/bin:$HOME/.yarn/bin:$PATH"
+  - export PATH="$HOME/opt/bin"
 install:
-  - yarn --frozen-lockfile
-script: yarn run ci
+  - npm ci
+  - npm audit
+script:
+  - make lint
+  - make coverage
+  - ./packages/js-examples/test.sh
 cache:
-  yarn: true
   directories:
     - node_modules
     - js-examples/node_modules

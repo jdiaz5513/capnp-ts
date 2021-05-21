@@ -3,10 +3,7 @@
  */
 
 import initTrace from "debug";
-import {
-  DEFAULT_BUFFER_SIZE,
-  MIN_SINGLE_SEGMENT_GROWTH
-} from "../../constants";
+import { DEFAULT_BUFFER_SIZE, MIN_SINGLE_SEGMENT_GROWTH } from "../../constants";
 import { SEG_GET_NON_ZERO_SINGLE, SEG_NOT_WORD_ALIGNED } from "../../errors";
 import { format, padToWord } from "../../util";
 import { Segment } from "../segment";
@@ -34,16 +31,12 @@ export class SingleSegmentArena {
     trace("new %s", this);
   }
 
-  toString() {
+  toString(): string {
     return format("SingleSegmentArena_len:%x", this.buffer.byteLength);
   }
 }
 
-export function allocate(
-  minSize: number,
-  segments: Segment[],
-  s: SingleSegmentArena
-): ArenaAllocationResult {
+export function allocate(minSize: number, segments: Segment[], s: SingleSegmentArena): ArenaAllocationResult {
   trace("Allocating %x bytes for segment 0 in %s.", minSize, s);
 
   const srcBuffer = segments.length > 0 ? segments[0].buffer : s.buffer;
