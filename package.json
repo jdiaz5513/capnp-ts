@@ -25,6 +25,7 @@
     "lint-staged": "^11.0.0",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.0",
+    "standard-version": "^9.3.1",
     "tap": "^15.0.9",
     "testcheck": "^1.0.0-rc.2",
     "ts-node": "^9.1.1",
@@ -72,9 +73,22 @@
     "nodemon": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -w ./packages/capnp-ts/test -w ./packages/capnpc-ts/test -w ./**/tsconfig.json -i './packages/capnp-ts/src/std' -i './packages/**/*.d.ts' -i './packages/**/*.capnp.ts' -e .ts -x ",
     "prepare": "husky install",
     "prepublishOnly": "make build",
+    "release": "standard-version",
     "test": "make test",
     "test:watch": "npm run nodemon make test",
     "watch": "npm run test:watch"
+  },
+  "standard-version": {
+    "bumpFiles": [
+      "packages/capnp-ts/package.json",
+      "packages/capnpc-js/package.json",
+      "packages/capnpc-ts/package.json"
+    ],
+    "packageFiles": [
+      "packages/capnp-ts/package.json",
+      "packages/capnpc-js/package.json",
+      "packages/capnpc-ts/package.json"
+    ]
   },
   "workspaces": [
     "packages/capnp-ts",

@@ -1,7 +1,13 @@
-# Change Log
+# Changelog
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [0.5.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.4.0...v0.5.0) (2021-08-18)
+
+
+### Bug Fixes
+
+* upgrade outdated packages, revert to makefile ([#159](https://github.com/jdiaz5513/capnp-ts/issues/159)) ([c629dad](https://github.com/jdiaz5513/capnp-ts/commit/c629dadbda0e280c63cc4582c772b86445ba1d69))
 
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.3.1...v0.4.0) (2018-09-26)

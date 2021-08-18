@@ -21,6 +21,6 @@
     "stripInternal": true,
     "target": "es2015"
   },
-  "include": ["packages/*/bin/**/*.ts", "packages/*/src/**/*.ts", "packages/*/test/**/*.ts"],
+  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts"],
   "exclude": ["packages/**/*.d.ts"]
 }

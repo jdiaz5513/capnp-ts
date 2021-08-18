@@ -15,6 +15,7 @@ CAPNP_BIN := capnp
 TAP_FLAGS ?= -j8 --no-coverage --ts -Rterse -c
 TAP_TS := 1
 TSC_FLAGS ?= --incremental
+STANDARD_FLAGS ?= --dry-run
 
 ##############
 # binary paths
@@ -25,6 +26,7 @@ node_bin := node_modules/.bin
 tsc := $(node_bin)/tsc $(TSC_FLAGS)
 tap := $(node_bin)/tap $(TAP_FLAGS)
 eslint := $(node_bin)/eslint
+standard := $(node_bin)/standard-version $(STANDARD_FLAGS)
 
 ######
 # vars
@@ -88,3 +90,7 @@ coverage: build
 lint: build
 	@echo [eslint] running lint checkers...
 	$(eslint) . --ext .ts
+
+.PHONY: release
+release: build
+	$(standard)
