@@ -1,7 +1,6 @@
 name: cd
 on:
   push:
-    branches: master
     tags: v.+
 jobs:
   publish:
@@ -15,15 +14,6 @@ jobs:
         with:
           check-latest: true
           node-version: "14"
-      - name: Configure git credentials
-        run: |
-          git config --global user.name '@jdiaz5513'
-          git config --global user.email 'jdiaz5513@users.noreply.github.com'
-          git remote set-url origin https://${GITHUB_ACTOR}:${GITHUB_PAT}@github.com/jdiaz5513/capnp-ts
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
-      - name: Pull
-        run: git checkout "${GITHUB_REF:11}" && git pull
       - name: Install dependencies
         run: |
           npm i -g npm@latest
@@ -42,7 +32,3 @@ jobs:
       - name: Publish to NPM registry
         run: |
           npm run publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_PAT }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
