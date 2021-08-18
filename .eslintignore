@@ -3,6 +3,7 @@
 *.capnp.js
 *.d.ts
 packages/*/bin/**/*.js
+packages/*/bin/**/*.ts
 packages/*/src/**/*.js
 packages/*/test/**/*.js
 node_modules

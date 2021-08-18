@@ -27,6 +27,7 @@ tsc := $(node_bin)/tsc $(TSC_FLAGS)
 tap := $(node_bin)/tap $(TAP_FLAGS)
 eslint := $(node_bin)/eslint
 standard := $(node_bin)/standard-version $(STANDARD_FLAGS)
+npm := $(shell which npm)
 
 ######
 # vars
@@ -94,3 +95,9 @@ lint: build
 .PHONY: release
 release: build
 	$(standard)
+
+.PHONY: publish
+publish:
+	$(npm) publish -w capnp-ts
+	$(npm) publish -w capnpc-js
+	$(npm) publish -w capnpc-ts

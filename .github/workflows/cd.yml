@@ -1,8 +1,8 @@
 name: cd
 on:
   push:
-    branches:
-      - master
+    branches: master
+    tags: v.+
 jobs:
   publish:
     name: Publish
@@ -40,7 +40,8 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish to NPM registry
-        run: npm run publish
+        run: |
+          npm run publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_PAT }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}

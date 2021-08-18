@@ -73,6 +73,7 @@
     "nodemon": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -w ./packages/capnp-ts/test -w ./packages/capnpc-ts/test -w ./**/tsconfig.json -i './packages/capnp-ts/src/std' -i './packages/**/*.d.ts' -i './packages/**/*.capnp.ts' -e .ts -x ",
     "prepare": "husky install",
     "prepublishOnly": "make build",
+    "publish": "make publish",
     "release": "standard-version",
     "test": "make test",
     "test:watch": "npm run nodemon make test",
@@ -94,7 +95,8 @@
     "packages/capnp-ts",
     "packages/capnp-ts-test",
     "packages/capnpc-js",
-    "packages/capnpc-ts"
+    "packages/capnpc-ts",
+    "packages/js-examples"
   ],
   "version": "0.0.1"
 }
