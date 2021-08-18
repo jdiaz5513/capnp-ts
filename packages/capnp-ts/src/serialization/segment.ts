@@ -5,7 +5,7 @@
 import initTrace from "debug";
 
 import { MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN } from "../constants";
-import { SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from "../errors";
+import { NOT_IMPLEMENTED, SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from "../errors";
 import { Int64, Uint64 } from "../types";
 import { format, padToWord } from "../util";
 import { Message } from "./message";
@@ -38,12 +38,7 @@ export class Segment implements DataView {
 
   private _dv: DataView;
 
-  constructor(
-    id: number,
-    message: Message,
-    buffer: ArrayBuffer,
-    byteLength = 0
-  ) {
+  constructor(id: number, message: Message, buffer: ArrayBuffer, byteLength = 0) {
     this.id = id;
     this.message = message;
     this.buffer = buffer;
@@ -64,6 +59,7 @@ export class Segment implements DataView {
   allocate(byteLength: number): Pointer {
     trace("allocate(%d)", byteLength);
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let segment: Segment = this;
 
     byteLength = padToWord(byteLength);
@@ -80,12 +76,7 @@ export class Segment implements DataView {
 
     segment.byteLength = segment.byteLength + byteLength;
 
-    trace(
-      "Allocated %x bytes in %s (requested segment: %s).",
-      byteLength,
-      this,
-      segment
-    );
+    trace("Allocated %x bytes in %s (requested segment: %s).", byteLength, this, segment);
 
     return new Pointer(segment, byteOffset);
   }
@@ -99,15 +90,8 @@ export class Segment implements DataView {
    * @returns {void}
    */
 
-  copyWord(
-    byteOffset: number,
-    srcSegment: Segment,
-    srcByteOffset: number
-  ): void {
-    const value = srcSegment._dv.getFloat64(
-      srcByteOffset,
-      NATIVE_LITTLE_ENDIAN
-    );
+  copyWord(byteOffset: number, srcSegment: Segment, srcByteOffset: number): void {
+    const value = srcSegment._dv.getFloat64(srcByteOffset, NATIVE_LITTLE_ENDIAN);
 
     this._dv.setFloat64(byteOffset, value, NATIVE_LITTLE_ENDIAN);
   }
@@ -122,12 +106,7 @@ export class Segment implements DataView {
    * @returns {void}
    */
 
-  copyWords(
-    byteOffset: number,
-    srcSegment: Segment,
-    srcByteOffset: number,
-    wordLength: number
-  ): void {
+  copyWords(byteOffset: number, srcSegment: Segment, srcByteOffset: number, wordLength: number): void {
     const dst = new Float64Array(this.buffer, byteOffset, wordLength);
     const src = new Float64Array(srcSegment.buffer, srcByteOffset, wordLength);
 
@@ -144,6 +123,18 @@ export class Segment implements DataView {
 
   fillZeroWords(byteOffset: number, wordLength: number): void {
     new Float64Array(this.buffer, byteOffset, wordLength).fill(0);
+  }
+
+  /** WARNING: This function is not yet implemented. */
+
+  getBigInt64(byteOffset: number, littleEndian?: boolean): bigint {
+    throw new Error(format(NOT_IMPLEMENTED, byteOffset, littleEndian));
+  }
+
+  /** WARNING: This function is not yet implemented. */
+
+  getBigUint64(byteOffset: number, littleEndian?: boolean): bigint {
+    throw new Error(format(NOT_IMPLEMENTED, byteOffset, littleEndian));
   }
 
   /**
@@ -208,9 +199,7 @@ export class Segment implements DataView {
    */
 
   getInt64(byteOffset: number): Int64 {
-    return new Int64(
-      new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8))
-    );
+    return new Int64(new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8)));
   }
 
   /**
@@ -255,9 +244,7 @@ export class Segment implements DataView {
    */
 
   getUint64(byteOffset: number): Uint64 {
-    return new Uint64(
-      new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8))
-    );
+    return new Uint64(new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8)));
   }
 
   /**
@@ -314,6 +301,18 @@ export class Segment implements DataView {
 
     this._dv = new DataView(buffer);
     this.buffer = buffer;
+  }
+
+  /** WARNING: This function is not yet implemented.  */
+
+  setBigInt64(byteOffset: number, value: bigint, littleEndian?: boolean): void {
+    throw new Error(format(NOT_IMPLEMENTED, byteOffset, value, littleEndian));
+  }
+
+  /** WARNING: This function is not yet implemented.  */
+
+  setBigUint64(byteOffset: number, value: bigint, littleEndian?: boolean): void {
+    throw new Error(format(NOT_IMPLEMENTED, byteOffset, value, littleEndian));
   }
 
   /**
@@ -465,7 +464,7 @@ export class Segment implements DataView {
     this._dv.setFloat64(byteOffset, 0, NATIVE_LITTLE_ENDIAN);
   }
 
-  toString() {
+  toString(): string {
     return format(
       "Segment_id:%d,off:%a,len:%a,cap:%a",
       this.id,

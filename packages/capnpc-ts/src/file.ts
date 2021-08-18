@@ -1,8 +1,7 @@
 import * as capnp from "capnp-ts";
-import * as s from "capnp-ts/lib/std/schema.capnp";
-import { format } from "capnp-ts/lib/util";
+import * as s from "capnp-ts/src/std/schema.capnp.js";
+import { format } from "capnp-ts/src/util";
 import initTrace from "debug";
-import * as ts from "typescript";
 
 import { CodeGeneratorFileContext } from "./code-generator-file-context";
 import { ConcreteListType } from "./constants";
@@ -12,17 +11,11 @@ import * as util from "./util";
 const trace = initTrace("capnpc:file");
 trace("load");
 
-export function compareCodeOrder(
-  a: { getCodeOrder(): number },
-  b: { getCodeOrder(): number }
-): number {
+export function compareCodeOrder(a: { getCodeOrder(): number }, b: { getCodeOrder(): number }): number {
   return a.getCodeOrder() - b.getCodeOrder();
 }
 
-export function getConcreteListType(
-  ctx: CodeGeneratorFileContext,
-  type: s.Type
-): string {
+export function getConcreteListType(ctx: CodeGeneratorFileContext, type: s.Type): string {
   if (!type.isList()) return getJsType(ctx, type, false);
 
   const elementType = type.getList().getElementType();
@@ -33,10 +26,7 @@ export function getConcreteListType(
   } else if (elementTypeWhich === s.Type.STRUCT) {
     const structNode = lookupNode(ctx, elementType.getStruct().getTypeId());
 
-    if (
-      structNode.getStruct().getPreferredListEncoding() !==
-      s.ElementSize.INLINE_COMPOSITE
-    ) {
+    if (structNode.getStruct().getPreferredListEncoding() !== s.ElementSize.INLINE_COMPOSITE) {
       throw new Error(E.GEN_FIELD_NON_INLINE_STRUCT_LIST);
     }
 
@@ -51,19 +41,10 @@ export function getDisplayNamePrefix(node: s.Node): string {
 }
 
 export function getFullClassName(node: s.Node): string {
-  return node
-    .getDisplayName()
-    .split(":")[1]
-    .split(".")
-    .map(util.c2t)
-    .join("_");
+  return node.getDisplayName().split(":")[1].split(".").map(util.c2t).join("_");
 }
 
-export function getJsType(
-  ctx: CodeGeneratorFileContext,
-  type: s.Type,
-  constructor: boolean
-): string {
+export function getJsType(ctx: CodeGeneratorFileContext, type: s.Type, constructor: boolean): string {
   const whichType = type.which();
 
   switch (whichType) {
@@ -96,17 +77,13 @@ export function getJsType(
       return "capnp.Interface";
 
     case s.Type.LIST:
-      return `capnp.List${constructor ? "Ctor" : ""}<${getJsType(
-        ctx,
-        type.getList().getElementType(),
-        false
-      )}>`;
+      return `capnp.List${constructor ? "Ctor" : ""}<${getJsType(ctx, type.getList().getElementType(), false)}>`;
 
-    case s.Type.STRUCT:
+    case s.Type.STRUCT: {
       const c = getFullClassName(lookupNode(ctx, type.getStruct().getTypeId()));
 
       return constructor ? `capnp.StructCtor<${c}>` : c;
-
+    }
     case s.Type.UINT64:
       return "capnp.Uint64";
 
@@ -127,16 +104,13 @@ export function getUnnamedUnionFields(node: s.Node): s.Field[] {
   return node
     .getStruct()
     .getFields()
-    .filter(f => f.getDiscriminantValue() !== s.Field.NO_DISCRIMINANT);
+    .filter((f) => f.getDiscriminantValue() !== s.Field.NO_DISCRIMINANT);
 }
 
-export function hasNode(
-  ctx: CodeGeneratorFileContext,
-  lookup: { getId(): capnp.Uint64 } | capnp.Uint64
-): boolean {
+export function hasNode(ctx: CodeGeneratorFileContext, lookup: { getId(): capnp.Uint64 } | capnp.Uint64): boolean {
   const id = lookup instanceof capnp.Uint64 ? lookup : lookup.getId();
 
-  return ctx.nodes.some(n => n.getId().equals(id));
+  return ctx.nodes.some((n) => n.getId().equals(id));
 }
 
 export function loadRequestedFile(
@@ -154,12 +128,9 @@ export function loadRequestedFile(
   return ctx;
 }
 
-export function lookupNode(
-  ctx: CodeGeneratorFileContext,
-  lookup: { getId(): capnp.Uint64 } | capnp.Uint64
-): s.Node {
+export function lookupNode(ctx: CodeGeneratorFileContext, lookup: { getId(): capnp.Uint64 } | capnp.Uint64): s.Node {
   const id = lookup instanceof capnp.Uint64 ? lookup : lookup.getId();
-  const node = ctx.nodes.find(n => n.getId().equals(id));
+  const node = ctx.nodes.find((n) => n.getId().equals(id));
 
   if (node === undefined) throw new Error(format(E.GEN_NODE_LOOKUP_FAIL, id));
 

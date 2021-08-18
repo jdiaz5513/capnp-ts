@@ -4,20 +4,12 @@
     "url": "https://github.com/jdiaz5513/capnp-ts/issues"
   },
   "dependencies": {
-    "debug": "^2.6.3",
+    "debug": "^4.3.1",
     "format": "^0.2.2",
-    "tslib": "^1.7.1",
+    "tslib": "^2.2.0",
     "utf8-encoding": "^0.1.2"
   },
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
-  "devDependencies": {
-    "@types/benchmark": "^1.0.30",
-    "@types/debug": "0.0.29",
-    "@types/node": "^7.0.18",
-    "benchmark": "^2.1.4",
-    "tap": "^10.7.0",
-    "testcheck": "^1.0.0-rc.2"
-  },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [
     "capnp",
@@ -25,12 +17,12 @@
     "typescript"
   ],
   "license": "MIT",
-  "main": "lib/index",
+  "main": "./src/index.js",
   "name": "capnp-ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
-  "typings": "lib/index",
+  "types": "./src/index.d.ts",
   "version": "0.4.0"
 }

@@ -5,24 +5,30 @@
   },
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
   "devDependencies": {
-    "codecov": "^3.0.4",
-    "glob": "^7.1.3",
-    "gulp": "^3.9.1",
-    "gulp-sourcemaps": "^2.6.1",
-    "gulp-tslint": "^8.1.3",
-    "gulp-typescript": "^5.0.0-alpha.3",
-    "gulp-util": "^3.0.8",
-    "husky": "^1.0.0-rc.13",
-    "lerna": "^3.1.4",
-    "lint-staged": "^7.2.2",
-    "merge-stream": "^1.0.1",
-    "nodemon": "^1.18.3",
-    "prettier": "1.14.2",
-    "tap": "^12.0.1",
-    "ts-node": "^7.0.1",
-    "tslint": "^5.11.0",
-    "tslint-eslint-rules": "^5.4.0",
-    "typescript": "^3.0.1"
+    "@types/benchmark": "^2.1.0",
+    "@types/bluebird": "^3.5.35",
+    "@types/debug": "^4.1.5",
+    "@types/mkdirp": "^1.0.1",
+    "@types/node": "^15.3.1",
+    "@types/tap": "^15.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.24.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^4.24.0",
+    "@typescript-eslint/parser": "^4.24.0",
+    "benchmark": "^2.1.4",
+    "eslint": "^7.26.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.2",
+    "eslint-plugin-jsdoc": "^34.8.2",
+    "eslint-plugin-no-null": "^1.0.2",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
+    "nodemon": "^2.0.7",
+    "prettier": "^2.3.0",
+    "tap": "^15.0.9",
+    "testcheck": "^1.0.0-rc.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "husky": {
@@ -40,7 +46,7 @@
     "linters": {
       "*.ts": [
         "prettier --write",
-        "tslint -p .",
+        "eslint -p .",
         "git add"
       ]
     },
@@ -48,31 +54,33 @@
       "packages/capnpc-ts/bin/**/*.ts"
     ]
   },
-  "main": "lib/index",
+  "prettier": {
+    "printWidth": 120
+  },
   "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "benchmark": "gulp benchmark",
-    "build": "gulp build",
-    "build:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn build",
-    "ci": "gulp lint && gulp coverage && codecov --disable=gcov && packages/js-examples/test.sh",
-    "coverage": "gulp coverage",
-    "coverage:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn coverage",
-    "lerna": "lerna",
-    "lint": "gulp lint",
-    "publish": "yarn install && lerna publish",
-    "prepublish": "gulp build",
-    "test": "gulp test",
-    "test:watch": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -i ./packages/capnp-ts/src/std -e .ts -x yarn test",
-    "watch": "gulp watch"
+    "benchmark": "make benchmark",
+    "build": "make build",
+    "build:watch": "npm run nodemon make build",
+    "coverage": "make coverage",
+    "coverage:watch": "npm run nodemon make coverage",
+    "lint": "make lint",
+    "nodemon": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -w ./packages/capnp-ts/test -w ./packages/capnpc-ts/test -w ./**/tsconfig.json -i './packages/capnp-ts/src/std' -i './packages/**/*.d.ts' -i './packages/**/*.capnp.ts' -e .ts -x ",
+    "prepare": "husky install",
+    "prepublishOnly": "make build",
+    "test": "make test",
+    "test:watch": "npm run nodemon make test",
+    "watch": "npm run test:watch"
   },
-  "typings": "lib/index",
-  "version": "0.0.1",
   "workspaces": [
-    "packages/*"
-  ]
+    "packages/capnp-ts",
+    "packages/capnp-ts-test",
+    "packages/capnpc-js",
+    "packages/capnpc-ts"
+  ],
+  "version": "0.0.1"
 }
