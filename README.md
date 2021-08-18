@@ -19,6 +19,11 @@
 
 ```
 
+![test status](https://img.shields.io/github/workflow/status/jdiaz5513/capnp-ts/cd/master?style=flat-square)
+![npm](https://img.shields.io/npm/v/capnp-ts?color=green&style=flat-square)
+![vulnerabilities](https://img.shields.io/snyk/vulnerabilities/npm/capnp-ts?style=flat-square)
+![issues](https://img.shields.io/github/issues/jdiaz5513/capnp-ts?style=flat-square)
+
 This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) serialization protocol. Start with the [Cap'n Proto Introduction](https://capnproto.org/index.html) for more detailed information on what this is about.
 
 > WARNING: THIS IS ALPHA QUALITY SOFTWARE. USE AT YOUR OWN RISK. AUTHORS ARE NOT RESPONSIBLE FOR LOSS OF LIMB, LIFE, SANITY, OR RETIREMENT FUNDS DUE TO USE OF THIS SOFTWARE.
@@ -42,11 +47,11 @@ This is a TypeScript implementation of the [Cap'n Proto](https://capnproto.org) 
 
 This repository is managed as a monorepo composed of separate packages.
 
-| Package | Version | Dependencies |
-|:--------|:--------|:-------------|
-| [`capnp-ts`](/packages/capnp-ts) | [![npm](https://img.shields.io/npm/v/capnp-ts.svg?maxAge=2592000)](https://www.npmjs.com/package/capnp-ts) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnp-ts.svg?path=packages/capnp-ts)](https://david-dm.org/jdiaz5513/capnp-ts?path=packages/capnp-ts) |
-| [`capnpc-ts`](/packages/capnpc-ts) | [![npm](https://img.shields.io/npm/v/capnpc-ts.svg?maxAge=2592000)](https://www.npmjs.com/package/capnpc-ts) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnpc-ts.svg?path=packages/capnpc-ts)](https://david-dm.org/jdiaz5513/capnpc-ts?path=packages/capnpc-ts) |
-| [`capnpc-js`](/packages/capnpc-js) | [![npm](https://img.shields.io/npm/v/capnpc-js.svg?maxAge=2592000)](https://www.npmjs.com/package/capnpc-js) | [![Dependency Status](https://david-dm.org/jdiaz5513/capnpc-js.svg?path=packages/capnpc-js)](https://david-dm.org/jdiaz5513/capnpc-js?path=packages/capnpc-js) |
+| Package                            | Version                                                                      | Dependencies                                                                                                      |
+| :--------------------------------- | :--------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| [`capnp-ts`](/packages/capnp-ts)   | ![npm](https://img.shields.io/npm/v/capnp-ts?color=green&style=flat-square)  | ![dependency status](https://img.shields.io/david/jdiaz5513/capnp-ts?path=packages%2Fcapnp-ts&style=flat-square)  |
+| [`capnpc-ts`](/packages/capnpc-ts) | ![npm](https://img.shields.io/npm/v/capnpc-ts?color=green&style=flat-square) | ![dependency status](https://img.shields.io/david/jdiaz5513/capnp-ts?path=packages%2Fcapnpc-ts&style=flat-square) |
+| [`capnpc-js`](/packages/capnpc-js) | ![npm](https://img.shields.io/npm/v/capnpc-js?color=green&style=flat-square) | ![dependency status](https://img.shields.io/david/jdiaz5513/capnp-ts?path=packages%2Fcapnpc-js&style=flat-square) |
 
 - `capnp-ts` is the core Cap'n Proto library for Typescript. It is a required import for all compiled schema files, and the starting point for reading/writing a Cap'n Proto message.
 - `capnpc-ts` is the schema compiler plugin for TypeScript. It is intended to be invoked by the [`capnp`](https://capnproto.org/capnp-tool.html) tool.
@@ -102,6 +107,7 @@ capnpc -o ts path/to/myschema.capnp
 ```
 
 Or for JavaScript:
+
 ```shell
 capnpc -o js path/to/myschema.capnp
 ```
@@ -111,6 +117,7 @@ Running that command will create a file named `path/to/myschema.capnp.ts` (or `.
 > These instructions assume `capnpc-ts` was installed globally and is available from `$PATH`. If not, change the `-o` option to something like `-o node_modules/.bin/capnpc-ts` or `-o capnp-ts/packages/capnpc-ts/bin/capnpc-ts.js` so it points to your local `capnpc-ts` install.
 
 To write the compiled source to a different directory:
+
 ```shell
 capnpc -o ts:/tmp/some-dir/ path/to/myschema.capnp
 ```
@@ -122,16 +129,14 @@ That will generate a file at `/tmp/some-dir/path/to/myschema.capnp.ts`.
 To read a message, do something like the following:
 
 ```typescript
-import * as capnp from 'capnp-ts';
+import * as capnp from "capnp-ts";
 
-import {MyStruct} from './myschema.capnp';
+import { MyStruct } from "./myschema.capnp";
 
 export function loadMessage(buffer: ArrayBuffer): MyStruct {
-
   const message = new capnp.Message(buffer);
 
   return message.getRoot(MyStruct);
-
 }
 ```
 
@@ -142,16 +147,14 @@ JavaScript usage is nearly identical to the TypeScript version, except you won't
 Also, the name `capnp-js` is already reserved on npm from a [previous attempt by another author](https://www.npmjs.com/package/capnp-js) so you'll be importing `capnp-ts` instead.
 
 ```javascript
-const capnp = require('capnp-ts');
+const capnp = require("capnp-ts");
 
-const MyStruct = require('./myschema.capnp').MyStruct;
+const MyStruct = require("./myschema.capnp").MyStruct;
 
 function loadMessage(buffer) {
-
   const message = new capnp.Message(buffer);
 
   return message.getRoot(MyStruct);
-
 }
 ```
 
@@ -190,38 +193,31 @@ Using npm:
 npm run build
 ```
 
-Or (preferred) using [gulp-cli](https://github.com/gulpjs/gulp-cli):
-
-```shell
-npm install --global gulp-cli # If you don't already have gulp-cli
-gulp build
-```
-
 ---
-
-#### `build`
-
-Compiles the typescript sources and test files.
 
 #### `benchmark`
 
 Runs all available benchmarks in `packages/capnp-ts/test/benchmark`.
 
-#### `capnp-compile`
+#### `build`
 
-Compiles all `.capnp` files into TypeScript source.
-
-#### `ci`
-
-Used by Travis for continuous integration testing; do not run locally.
+Compiles the typescript sources and test files.
 
 #### `coverage`
 
-Generates a coverage report and opens it in a new web browser tab.
+Generates a coverage report.
 
 #### `lint`
 
-Runs `tslint` and prints out any linter violations.
+Runs `eslint` and prints out any linter violations.
+
+#### `publish`
+
+Publish the latest release to NPM. Intended to only be run from CI.
+
+#### `release`
+
+Create a new release using [standard-version](https://github.com/conventional-changelog/standard-version); use this to trigger a continuous deployment run after pushing the new tag.
 
 #### `test`
 
@@ -236,9 +232,9 @@ Runs the test suite in a loop, recompiling any changes to the source as it is sa
 Tests are written using [node-tap](http://www.node-tap.org/) and are located in the `test/` subdirectory for each package. The goal for this repository is to reach 100% coverage on critical code. Exceptions may be made (e.g. for benchmark code) using special istanbul comments:
 
 ```javascript
-/* istanbul ignore next */    // ignore the next statement/block
-/* istanbul ignore if */      // ignore an if branch
-/* istanbul ignore else */    // ignore an else branch
+/* istanbul ignore next */ // ignore the next statement/block
+/* istanbul ignore if */ // ignore an if branch
+/* istanbul ignore else */ // ignore an else branch
 ```
 
 ## Debugging
@@ -254,7 +250,7 @@ export DEBUG='capnp*'
 When running in a web browser, use `localStorage` to enable debug output:
 
 ```javascript
-localStorage.debug = 'capnp*';
+localStorage.debug = "capnp*";
 ```
 
 Trace messages can get rather noisy, so tweak the `DEBUG` variable as you see fit.
