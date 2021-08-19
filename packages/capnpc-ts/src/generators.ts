@@ -65,7 +65,6 @@ export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
     tsImportPathAnnotation && fileNode.getAnnotations().find((a) => a.getId().equals(tsImportPathAnnotation.getId()));
   const importPath = importAnnotation === undefined ? "capnp-ts" : importAnnotation.getValue().getText();
 
-  /* tslint:disable-next-line */
   let u: ts.Identifier | undefined;
 
   // import * as capnp from '${importPath}';
@@ -90,17 +89,12 @@ export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
     let importPath: string;
 
     if (name.substr(0, 7) === "/capnp/") {
-      importPath = "capnp-ts/lib/std/" + name.substr(7);
+      importPath = `capnp-ts/src/std/${name.substr(7)}.js`;
     } else {
-      importPath = name[0] === "." ? name : `./${name}`;
+      importPath = name[0] === "." ? `${name}.js` : `./${name}.js`;
     }
 
-    const imports = lookupNode(ctx, i)
-      .getNestedNodes()
-      .filter((n) => hasNode(ctx, n))
-      .filter((n) => lookupNode(ctx, n).isStruct())
-      .map((n) => n.getName())
-      .join(", ");
+    const imports = getImportNodes(ctx, lookupNode(ctx, i)).map(getFullClassName).join(", ");
 
     if (imports.length < 1) return;
 
@@ -714,4 +708,13 @@ export function generateUnnamedUnionEnum(
   const d = ts.createEnumDeclaration(__, [EXPORT], `${fullClassName}_Which`, members);
 
   ctx.statements.push(d);
+}
+
+export function getImportNodes(ctx: CodeGeneratorFileContext, node: s.Node): s.Node[] {
+  return lookupNode(ctx, node)
+    .getNestedNodes()
+    .filter((n) => hasNode(ctx, n))
+    .map((n) => lookupNode(ctx, n))
+    .reduce((a, n) => a.concat([n], getImportNodes(ctx, n)), new Array<s.Node>())
+    .filter((n) => lookupNode(ctx, n).isStruct() || lookupNode(ctx, n).isEnum());
 }

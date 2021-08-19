@@ -82,19 +82,16 @@
   "standard-version": {
     "bumpFiles": [
       "packages/capnp-ts/package.json",
-      "packages/capnpc-js/package.json",
       "packages/capnpc-ts/package.json"
     ],
     "packageFiles": [
       "packages/capnp-ts/package.json",
-      "packages/capnpc-js/package.json",
       "packages/capnpc-ts/package.json"
     ]
   },
   "workspaces": [
     "packages/capnp-ts",
     "packages/capnp-ts-test",
-    "packages/capnpc-js",
     "packages/capnpc-ts",
     "packages/js-examples"
   ],

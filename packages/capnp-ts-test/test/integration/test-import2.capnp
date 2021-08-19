@@ -29,4 +29,9 @@ struct TestImport2 {
   foo @0 :Import3.TestAllTypes;
   bar @1 :Import1.Node;
   baz @2 :Import2.TestImport;
+  box @3 :Import1.Node.Parameter;
+  bee @4 :Import1.Node.NestedNode;
+  bok @5 :Import1.Brand.Scope;
+  bip @6 :Import1.Brand.Binding;
+  bep @7 :Import1.ElementSize;
 }

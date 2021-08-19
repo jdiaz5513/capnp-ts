@@ -23,8 +23,6 @@ export function createClassExtends(identifierText: string): ts.HeritageClause {
 export function createConcreteListProperty(ctx: CodeGeneratorFileContext, field: s.Field): ts.PropertyDeclaration {
   const name = `_${util.c2t(field.getName())}`;
   const type = ts.createTypeReferenceNode(getJsType(ctx, field.getSlot().getType(), true), __);
-  // LINT: This is a dirty way to force the initializer to be undefined...
-  /* tslint:disable-next-line */
   let u: ts.Expression | undefined;
   return ts.createProperty(__, [STATIC], name, __, type, u as ts.Expression);
 }

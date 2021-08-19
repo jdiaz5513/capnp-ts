@@ -1,5 +1,4 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
@@ -9,8 +8,7 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "newLine": "LF",
-    "noEmit": true,
-    "noEmitOnError": false,
+    "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
@@ -21,6 +19,5 @@
     "stripInternal": true,
     "target": "es2015"
   },
-  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts"],
-  "exclude": ["packages/**/*.d.ts"]
+  "include": ["packages/*/src/**/*", "packages/*/test/**/*"]
 }

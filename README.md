@@ -131,7 +131,7 @@ To read a message, do something like the following:
 ```typescript
 import * as capnp from "capnp-ts";
 
-import { MyStruct } from "./myschema.capnp";
+import { MyStruct } from "./myschema.capnp.js";
 
 export function loadMessage(buffer: ArrayBuffer): MyStruct {
   const message = new capnp.Message(buffer);

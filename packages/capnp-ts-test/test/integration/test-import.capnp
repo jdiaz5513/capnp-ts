@@ -25,4 +25,5 @@ using Test = import "test.capnp";
 
 struct TestImport {
   field @0 :Test.TestAllTypes;
+  enumField @1 :Test.TestEnum;
 }

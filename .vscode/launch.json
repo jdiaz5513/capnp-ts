@@ -16,9 +16,6 @@
         "DEBUG": "capnp:*",
         "NODE_ENV": "development"
       },
-      "outFiles": [
-        "${workspaceRoot}/packages/*/lib-test/**/*"
-      ],
       "name": "Debug (Test)",
       "preLaunchTask": "build",
       "program": "${file}",
