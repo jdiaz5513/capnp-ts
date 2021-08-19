@@ -273,7 +273,7 @@ export function generateServer(
   trace("generateServer(%s) [%s]", node, node.getDisplayName());
 
   const fullClassName = getFullClassName(node);
-  const serverName = `${fullClassName}_Server`;
+  const serverName = `${fullClassName}$Server`;
 
   // TODO: handle superclasses
 
@@ -325,20 +325,43 @@ export function generateClient(
   trace("generateClient(%s) [%s]", node, node.getDisplayName());
 
   const fullClassName = getFullClassName(node);
-  const clientName = `${fullClassName}_Client`;
+  const clientName = `${fullClassName}$Client`;
 
   // TODO: handle superclasses
+  let members: ts.ClassElement[] = [];
 
-  // Note: we don't sort by code order here, because we need methods
-  // to be identified by their index.
-  const methods = node.getInterface().getMethods();
+  const ClientType = ts.createTypeReferenceNode("capnp.Client", __);
+  members.push(ts.createProperty(__, __, "client", __, ClientType, __));
 
-  const clientMethods = methods.map((method, index) => {
-    return generateClientMethod(ctx, node, method, index);
-  });
+  members.push(
+    ts.createConstructor(
+      __, // decorators
+      __, // modifiers
+      [ts.createParameter(__, __, __, "client", __, ClientType)], // parameters
+      ts.createBlock(
+        [
+          ts.createStatement(
+            ts.createAssignment(
+              ts.createPropertyAccess(THIS, "client"),
+              ts.createIdentifier("client")
+            )
+          )
+        ],
+        true // multiline
+      ) // body
+    )
+  );
+
+  const methods = node
+    .getInterface()
+    .getMethods()
+    .map<ts.ClassElement>((method, index) => {
+      return generateClientMethod(ctx, node, method, index);
+    });
+  members = [...members, ...methods];
 
   ctx.statements.push(
-    ts.createClassDeclaration(__, [EXPORT], clientName, __, [], clientMethods)
+    ts.createClassDeclaration(__, [EXPORT], clientName, __, [], members)
   );
 }
 
@@ -751,8 +774,8 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
   // static readonly NestedStruct = MyStruct_NestedStruct;
   members.push(...nestedNodes.map(createNestedNodeProperty));
 
-  // static readonly Client = MyInterface_Client;
-  // static readonly Server = MyInterface_Server;
+  // static readonly Client = MyInterface$Client;
+  // static readonly Server = MyInterface$Server;
   if (interfaceNode) {
     members.push(
       ts.createProperty(
@@ -761,7 +784,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
         "Client",
         __,
         __,
-        ts.createIdentifier(`${fullClassName}_Client`)
+        ts.createIdentifier(`${fullClassName}$Client`)
       )
     );
     members.push(
@@ -771,7 +794,7 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
         "Server",
         __,
         __,
-        ts.createIdentifier(`${fullClassName}_Server`)
+        ts.createIdentifier(`${fullClassName}$Server`)
       )
     );
   }

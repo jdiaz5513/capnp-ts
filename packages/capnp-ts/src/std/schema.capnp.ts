@@ -4,7 +4,7 @@
  */
 
 import * as capnp from "../index";
-import { ObjectSize as __O, Struct as __S } from "../index";
+import { ObjectSize as __O, Struct as __S, Interface as __I } from '../index';
 export const _capnpFileId = "a93fc509624c72d9";
 export class Node_Parameter extends __S {
     static readonly _capnp = { displayName: "Parameter", id: "b9521bccf10fa3b1", size: new __O(0, 1) };

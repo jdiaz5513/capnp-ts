@@ -4,7 +4,7 @@
  */
 
 import * as capnp from "../index";
-import { ObjectSize as __O, Struct as __S } from "../index";
+import { ObjectSize as __O, Struct as __S, Interface as __I } from '../index';
 export const _capnpFileId = "a184c7885cdaf2a1";
 export enum Side {
     SERVER,

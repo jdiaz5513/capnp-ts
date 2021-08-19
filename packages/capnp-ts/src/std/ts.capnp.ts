@@ -4,5 +4,5 @@
  */
 
 import * as capnp from "../index";
-import { ObjectSize as __O, Struct as __S } from "../index";
+import { ObjectSize as __O, Struct as __S, Interface as __I } from '../index';
 export const _capnpFileId = "e37ded525a68a7c9";
