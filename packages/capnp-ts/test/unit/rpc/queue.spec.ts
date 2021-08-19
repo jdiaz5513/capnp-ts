@@ -1,5 +1,5 @@
 import { Queue } from "../../../lib/rpc/queue";
-import { tap } from "../../util";
+import tap from "tap";
 
 class Ints {
   data: number[];
