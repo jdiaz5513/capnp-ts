@@ -211,11 +211,6 @@ export function generateInterfaceClasses(
 ): void {
   trace("generateInterfaceClasses(%s) [%s]", node, node.getDisplayName());
 
-  /* tslint:disable-next-line */
-  console.error(
-    `CAPNP-TS: Warning! Interface generation (${node.getDisplayName()}) is not yet implemented.`
-  );
-
   // Generate the parameter and result structs first
   generateMethodStructs(ctx, node);
 
