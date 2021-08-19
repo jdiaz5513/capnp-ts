@@ -1,4 +1,4 @@
-import { Queue } from "../../../lib/rpc/queue";
+import { Queue } from "capnp-ts/src/rpc/queue";
 import tap from "tap";
 
 class Ints {
