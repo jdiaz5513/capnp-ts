@@ -24,10 +24,9 @@ jobs:
         with:
           check-latest: true
           node-version: ${{ matrix.node-version }}
-      - name: Install capnproto
-        run: sudo apt-get install capnproto libcapnp-dev
       - name: Install dependencies
         run: |
+          sudo apt-get install capnproto libcapnp-dev
           npm i -g npm@latest
           npm ci
       - name: Lint
