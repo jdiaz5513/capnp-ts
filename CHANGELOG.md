@@ -1,7 +1,54 @@
-# Change Log
+# Changelog
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [0.7.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.5.1...v0.7.0) (2021-08-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* `capnpc-js` is being retired in favor of compiling
+directly to js from `capnpc-ts` instead. This makes the one compiler
+serve both purposes; js-only users who are annoyed by the extra d.ts
+files may simply delete them. This was done to work around bugs in
+source-map-support that prevent importing capnp.js files when a
+capnp.ts file is also present.
+
+### Bug Fixes
+
+* support imports with nested enums ([64778e0](https://github.com/jdiaz5513/capnp-ts/commit/64778e0ea65f0221498c9c8b47708ed5e18e14d2))
+
+## [0.6.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.5.1...v0.6.0) (2021-08-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* `capnpc-js` is being retired in favor of compiling
+directly to js from `capnpc-ts` instead. This makes the one compiler
+serve both purposes; js-only users who are annoyed by the extra d.ts
+files may simply delete them. This was done to work around bugs in
+source-map-support that prevent importing capnp.js files when a
+capnp.ts file is also present.
+
+### Bug Fixes
+
+* support imports with nested enums ([64778e0](https://github.com/jdiaz5513/capnp-ts/commit/64778e0ea65f0221498c9c8b47708ed5e18e14d2))
+
+### [0.5.1](https://github.com/jdiaz5513/capnp-ts/compare/v0.5.0...v0.5.1) (2021-08-18)
+
+
+### Bug Fixes
+
+* resolve build failures and readme inaccuracies ([#165](https://github.com/jdiaz5513/capnp-ts/issues/165)) ([0114b10](https://github.com/jdiaz5513/capnp-ts/commit/0114b10aab255ab1ad7aaa8a4f2f784a754596ae))
+* run ci workflow on master ([68a9c8d](https://github.com/jdiaz5513/capnp-ts/commit/68a9c8d4041fb8023eeb1cf9649f9f25b44885eb))
+* use correct branch in cd workflow ([1664197](https://github.com/jdiaz5513/capnp-ts/commit/1664197ddae62ec9d3aeba2f9e78c9dccee1d47d))
+
+## [0.5.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.4.0...v0.5.0) (2021-08-18)
+
+
+### Bug Fixes
+
+* upgrade outdated packages, revert to makefile ([#159](https://github.com/jdiaz5513/capnp-ts/issues/159)) ([c629dad](https://github.com/jdiaz5513/capnp-ts/commit/c629dadbda0e280c63cc4582c772b86445ba1d69))
 
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.3.1...v0.4.0) (2018-09-26)

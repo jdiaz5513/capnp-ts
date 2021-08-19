@@ -46,7 +46,7 @@ export {
   getUint16Mask,
   getUint32Mask,
   getUint64Mask,
-  getUint8Mask
+  getUint8Mask,
 } from "./serialization";
 
 export { Int64, Uint64 } from "./types";

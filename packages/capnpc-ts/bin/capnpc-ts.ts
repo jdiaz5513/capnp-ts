@@ -2,4 +2,4 @@
 
 import { main } from "../src";
 
-main();
+void main();

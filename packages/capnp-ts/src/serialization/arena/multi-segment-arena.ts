@@ -26,15 +26,12 @@ export class MultiSegmentArena {
     trace("new %s", this);
   }
 
-  toString() {
+  toString(): string {
     return format("MultiSegmentArena_segments:%d", getNumSegments(this));
   }
 }
 
-export function allocate(
-  minSize: number,
-  m: MultiSegmentArena
-): ArenaAllocationResult {
+export function allocate(minSize: number, m: MultiSegmentArena): ArenaAllocationResult {
   const b = new ArrayBuffer(padToWord(Math.max(minSize, DEFAULT_BUFFER_SIZE)));
   m.buffers.push(b);
 

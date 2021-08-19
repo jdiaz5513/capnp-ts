@@ -11,22 +11,16 @@ import { Pointer, PointerCtor, getContent, copyFrom } from "./pointer";
 const trace = initTrace("capnp:list:composite");
 trace("load");
 
-export function PointerList<T extends Pointer>(
-  PointerClass: PointerCtor<T>
-): ListCtor<T> {
+export function PointerList<T extends Pointer>(PointerClass: PointerCtor<T>): ListCtor<T> {
   return class extends List<T> {
     static readonly _capnp: _ListCtor = {
-      displayName: `List<${PointerClass._capnp.displayName}>` as string,
-      size: ListElementSize.POINTER
+      displayName: `List<${PointerClass._capnp.displayName}>`,
+      size: ListElementSize.POINTER,
     };
 
     get(index: number): T {
       const c = getContent(this);
-      return new PointerClass(
-        c.segment,
-        c.byteOffset + index * 8,
-        this._capnp.depthLimit - 1
-      );
+      return new PointerClass(c.segment, c.byteOffset + index * 8, this._capnp.depthLimit - 1);
     }
 
     set(index: number, value: T): void {

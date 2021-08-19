@@ -1,10 +1,6 @@
 import initTrace from "debug";
 
-import {
-  PTR_ADOPT_WRONG_MESSAGE,
-  PTR_ALREADY_ADOPTED,
-  PTR_INVALID_POINTER_TYPE
-} from "../../errors";
+import { PTR_ADOPT_WRONG_MESSAGE, PTR_ALREADY_ADOPTED, PTR_INVALID_POINTER_TYPE } from "../../errors";
 import { format } from "../../util";
 import { ListElementSize } from "../list-element-size";
 import { ObjectSize, getWordLength } from "../object-size";
@@ -24,7 +20,7 @@ import {
   setStructPointer,
   setListPointer,
   setInterfacePointer,
-  getListByteLength
+  getListByteLength,
 } from "./pointer";
 import { PointerType } from "./pointer-type";
 
@@ -133,23 +129,17 @@ export class Orphan<T extends Pointer> {
 
         break;
 
-      case PointerType.LIST:
+      case PointerType.LIST: {
         let offsetWords = res.offsetWords;
 
         if (this._capnp.elementSize === ListElementSize.COMPOSITE) {
           offsetWords--; // The tag word gets skipped.
         }
 
-        setListPointer(
-          offsetWords,
-          this._capnp.elementSize,
-          this._capnp.length,
-          res.pointer,
-          this._capnp.size
-        );
+        setListPointer(offsetWords, this._capnp.elementSize, this._capnp.length, res.pointer, this._capnp.size);
 
         break;
-
+      }
       case PointerType.OTHER:
         setInterfacePointer(this._capnp.capId, res.pointer);
 
@@ -173,23 +163,16 @@ export class Orphan<T extends Pointer> {
 
     switch (this._capnp.type) {
       case PointerType.STRUCT:
-        this.segment.fillZeroWords(
-          this.byteOffset,
-          getWordLength(this._capnp.size)
-        );
+        this.segment.fillZeroWords(this.byteOffset, getWordLength(this._capnp.size));
 
         break;
 
-      case PointerType.LIST:
-        const byteLength = getListByteLength(
-          this._capnp.elementSize,
-          this._capnp.length,
-          this._capnp.size
-        );
+      case PointerType.LIST: {
+        const byteLength = getListByteLength(this._capnp.elementSize, this._capnp.length, this._capnp.size);
         this.segment.fillZeroWords(this.byteOffset, byteLength);
 
         break;
-
+      }
       default:
         // Other pointer types don't actually have any content.
 
@@ -200,11 +183,6 @@ export class Orphan<T extends Pointer> {
   }
 
   toString(): string {
-    return format(
-      "Orphan_%d@%a,type:%s",
-      this.segment.id,
-      this.byteOffset,
-      this._capnp && this._capnp.type
-    );
+    return format("Orphan_%d@%a,type:%s", this.segment.id, this.byteOffset, this._capnp && this._capnp.type);
   }
 }

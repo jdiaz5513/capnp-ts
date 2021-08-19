@@ -1,0 +1,33 @@
+name: cd
+on:
+  push:
+    tags: v.+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          check-latest: true
+          node-version: "14"
+      - name: Install dependencies
+        run: |
+          sudo apt-get install capnproto libcapnp-dev
+          npm i -g npm@latest
+          npm ci
+      - name: Test
+        run: |
+          npm run test
+      - name: Authenticate to NPM registry
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+          npm whoami
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to NPM registry
+        run: |
+          npm run publish

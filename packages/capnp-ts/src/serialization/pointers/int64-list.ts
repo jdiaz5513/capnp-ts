@@ -15,7 +15,7 @@ trace("load");
 export class Int64List extends List<Int64> {
   static readonly _capnp: _ListCtor = {
     displayName: "List<Int64>" as string,
-    size: ListElementSize.BYTE_8
+    size: ListElementSize.BYTE_8,
   };
 
   get(index: number): Int64 {

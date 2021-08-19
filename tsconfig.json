@@ -1,15 +1,23 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "outDir": ".tmp"
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "lib": ["es2015"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "newLine": "LF",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "pretty": true,
+    "sourceMap": true,
+    "strict": true,
+    "stripInternal": true,
+    "target": "es2015"
   },
-  "extends": "./configs/tsconfig-base",
-  "include": [
-    "packages/capnp-ts/src/**/*.ts",
-    "packages/capnp-ts/test/**/*.ts",
-    "packages/capnpc-js/src/**/*.ts",
-    "packages/capnpc-js/test/**/*.ts",
-    "packages/capnpc-ts/src/**/*.ts",
-    "packages/capnpc-ts/test/**/*.ts"
-  ]
+  "include": ["packages/*/src/**/*", "packages/*/test/**/*"]
 }

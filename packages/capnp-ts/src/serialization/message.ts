@@ -8,16 +8,10 @@ import {
   MSG_INVALID_FRAME_HEADER,
   MSG_SEGMENT_OUT_OF_BOUNDS,
   MSG_SEGMENT_TOO_SMALL,
-  MSG_NO_SEGMENTS_IN_ARENA
+  MSG_NO_SEGMENTS_IN_ARENA,
 } from "../errors";
 import { dumpBuffer, format, padToWord } from "../util";
-import {
-  AnyArena,
-  Arena,
-  MultiSegmentArena,
-  SingleSegmentArena,
-  ArenaKind
-} from "./arena";
+import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena, ArenaKind } from "./arena";
 import { pack, unpack } from "./packing";
 import { Pointer, StructCtor, PointerType, Struct } from "./pointers";
 import { Segment } from "./segment";
@@ -74,11 +68,7 @@ export class Message {
    * a framing header.
    *
    */
-  constructor(
-    src?: AnyArena | ArrayBufferView | ArrayBuffer,
-    packed = true,
-    singleSegment = false
-  ) {
+  constructor(src?: AnyArena | ArrayBufferView | ArrayBuffer, packed = true, singleSegment = false) {
     this._capnp = initMessage(src, packed, singleSegment);
 
     if (src && !isAnyArena(src)) preallocateSegments(this);
@@ -86,7 +76,7 @@ export class Message {
     trace("new %s", this);
   }
 
-  allocateSegment(byteLength: number) {
+  allocateSegment(byteLength: number): Segment {
     return allocateSegment(byteLength, this);
   }
 
@@ -111,7 +101,7 @@ export class Message {
    * @returns {T} A struct representing the root of the message.
    */
 
-  getRoot<T extends Struct>(RootStruct: StructCtor<T>) {
+  getRoot<T extends Struct>(RootStruct: StructCtor<T>): T {
     return getRoot(RootStruct, this);
   }
 
@@ -136,7 +126,7 @@ export class Message {
    * @returns {T} An initialized struct pointing to the root of the message.
    */
 
-  initRoot<T extends Struct>(RootStruct: StructCtor<T>) {
+  initRoot<T extends Struct>(RootStruct: StructCtor<T>): T {
     return initRoot(RootStruct, this);
   }
 
@@ -148,7 +138,7 @@ export class Message {
    * @returns {void}
    */
 
-  setRoot(src: Pointer) {
+  setRoot(src: Pointer): void {
     setRoot(src, this);
   }
 
@@ -159,7 +149,7 @@ export class Message {
    * @returns {ArrayBuffer} An ArrayBuffer with the contents of this message.
    */
 
-  toArrayBuffer() {
+  toArrayBuffer(): ArrayBuffer {
     return toArrayBuffer(this);
   }
 
@@ -170,11 +160,12 @@ export class Message {
    * @returns {ArrayBuffer} A packed message.
    */
 
-  toPackedArrayBuffer() {
+  toPackedArrayBuffer(): ArrayBuffer {
     return toPackedArrayBuffer(this);
   }
 
-  toString() {
+  toString(): string {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     return `Message_arena:${this._capnp.arena}`;
   }
 }
@@ -193,7 +184,7 @@ export function initMessage(
     return {
       arena: new SingleSegmentArena(),
       segments: [],
-      traversalLimit: DEFAULT_TRAVERSE_LIMIT
+      traversalLimit: DEFAULT_TRAVERSE_LIMIT,
     };
   }
 
@@ -213,14 +204,14 @@ export function initMessage(
     return {
       arena: new SingleSegmentArena(buf),
       segments: [],
-      traversalLimit: DEFAULT_TRAVERSE_LIMIT
+      traversalLimit: DEFAULT_TRAVERSE_LIMIT,
     };
   }
 
   return {
     arena: new MultiSegmentArena(getFramedSegments(buf)),
     segments: [],
-    traversalLimit: DEFAULT_TRAVERSE_LIMIT
+    traversalLimit: DEFAULT_TRAVERSE_LIMIT,
   };
 }
 
@@ -240,7 +231,7 @@ export function getFramedSegments(message: ArrayBuffer): ArrayBuffer[] {
 
   const segmentCount = dv.getUint32(0, true) + 1;
 
-  const segments: ArrayBuffer[] = new Array(segmentCount);
+  const segments = new Array(segmentCount) as ArrayBuffer[];
 
   trace("reading %d framed segments from stream", segmentCount);
 
@@ -282,7 +273,7 @@ export function preallocateSegments(m: Message): void {
 
   if (numSegments < 1) throw new Error(MSG_NO_SEGMENTS_IN_ARENA);
 
-  m._capnp.segments = new Array(numSegments);
+  m._capnp.segments = new Array(numSegments) as Segment[];
 
   for (let i = 0; i < numSegments; i++) {
     // Set up each segment so that they're fully allocated to the extents of the existing buffers.
@@ -294,13 +285,11 @@ export function preallocateSegments(m: Message): void {
   }
 }
 
-function isArrayBufferView(
-  src: ArrayBuffer | ArrayBufferView
-): src is ArrayBufferView {
+function isArrayBufferView(src: ArrayBuffer | ArrayBufferView): src is ArrayBufferView {
   return (src as { byteOffset?: number }).byteOffset !== undefined;
 }
 
-function isAnyArena(o: object): o is AnyArena {
+function isAnyArena(o: unknown): o is AnyArena {
   return (o as { kind?: ArenaKind }).kind !== undefined;
 }
 
@@ -324,11 +313,7 @@ export function allocateSegment(byteLength: number, m: Message): Segment {
   } else {
     s = m._capnp.segments[res.id];
 
-    trace(
-      "replacing segment %s with buffer (len:%d)",
-      s,
-      res.buffer.byteLength
-    );
+    trace("replacing segment %s with buffer (len:%d)", s, res.buffer.byteLength);
 
     s.replaceBuffer(res.buffer);
   }
@@ -355,10 +340,7 @@ export function dump(m: Message): string {
   return r;
 }
 
-export function getRoot<T extends Struct>(
-  RootStruct: StructCtor<T>,
-  m: Message
-) {
+export function getRoot<T extends Struct>(RootStruct: StructCtor<T>, m: Message): T {
   const root = new RootStruct(m.getSegment(0), 0);
 
   validate(PointerType.STRUCT, root);
@@ -394,11 +376,7 @@ export function getSegment(id: number, m: Message): Segment {
     } else {
       // Okay, the arena already has a buffer we can use. This is totally fine.
 
-      m._capnp.segments[0] = new Segment(
-        0,
-        m,
-        Arena.getBuffer(0, m._capnp.arena)
-      );
+      m._capnp.segments[0] = new Segment(0, m, Arena.getBuffer(0, m._capnp.arena));
     }
 
     if (!m._capnp.segments[0].hasCapacity(8)) {
@@ -419,10 +397,7 @@ export function getSegment(id: number, m: Message): Segment {
   return m._capnp.segments[id];
 }
 
-export function initRoot<T extends Struct>(
-  RootStruct: StructCtor<T>,
-  m: Message
-): T {
+export function initRoot<T extends Struct>(RootStruct: StructCtor<T>, m: Message): T {
   const root = new RootStruct(m.getSegment(0), 0);
 
   initStruct(RootStruct._capnp.size, root);
@@ -463,15 +438,13 @@ export function toArrayBuffer(m: Message): ArrayBuffer {
 
   // Add space for the stream framing.
 
-  const totalLength =
-    streamFrame.byteLength +
-    segments.reduce((l, s) => l + padToWord(s.byteLength), 0);
+  const totalLength = streamFrame.byteLength + segments.reduce((l, s) => l + padToWord(s.byteLength), 0);
   const out = new Uint8Array(new ArrayBuffer(totalLength));
   let o = streamFrame.byteLength;
 
   out.set(new Uint8Array(streamFrame));
 
-  segments.forEach(s => {
+  segments.forEach((s) => {
     const segmentLength = padToWord(s.byteLength);
     out.set(new Uint8Array(s.buffer, 0, segmentLength), o);
 
@@ -491,18 +464,15 @@ export function toPackedArrayBuffer(m: Message): ArrayBuffer {
   // NOTE: A copy operation can be avoided here if we capture the intermediate array and use that directly in the copy
   // loop below, rather than have `pack()` copy it to an ArrayBuffer just to have to copy it again later. If the
   // intermediate array can be avoided altogether that's even better!
-  const segments = m._capnp.segments.map(s =>
-    pack(s.buffer, 0, padToWord(s.byteLength))
-  );
+  const segments = m._capnp.segments.map((s) => pack(s.buffer, 0, padToWord(s.byteLength)));
 
-  const totalLength =
-    streamFrame.byteLength + segments.reduce((l, s) => l + s.byteLength, 0);
+  const totalLength = streamFrame.byteLength + segments.reduce((l, s) => l + s.byteLength, 0);
   const out = new Uint8Array(new ArrayBuffer(totalLength));
   let o = streamFrame.byteLength;
 
   out.set(new Uint8Array(streamFrame));
 
-  segments.forEach(s => {
+  segments.forEach((s) => {
     out.set(new Uint8Array(s), o);
 
     o += s.byteLength;

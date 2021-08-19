@@ -1,4 +1,3 @@
-export { default as tap } from "./tap";
 import { readFileSync } from "fs";
 import * as path from "path";
 
