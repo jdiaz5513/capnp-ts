@@ -324,6 +324,7 @@ export function generateStructFieldMethods(
   let get;
   let set;
   let getArgs: ts.Expression[];
+  let setArgs: ts.Expression[];
 
   switch (whichType) {
     case s.Type.ANY_POINTER:
@@ -357,13 +358,17 @@ export function generateStructFieldMethods(
       // NOTE: For a BOOL type this is actually a bit offset; `byteLength` will be `1` in that case.
       const byteOffset = f.createNumericLiteral((offset * byteLength).toString());
       getArgs = [byteOffset, THIS];
+      setArgs = [byteOffset, VALUE, THIS];
 
-      if (defaultValue) getArgs.push(defaultValue);
+      if (defaultValue) {
+        getArgs.push(defaultValue);
+        setArgs.push(defaultValue);
+      }
 
       /** __S.getXYZ(0, this) */
       get = f.createCallExpression(f.createPropertyAccessExpression(STRUCT, getter), __, getArgs);
       /** __S.setXYZ(0, value, this) */
-      set = f.createCallExpression(f.createPropertyAccessExpression(STRUCT, setter), __, [byteOffset, VALUE, THIS]);
+      set = f.createCallExpression(f.createPropertyAccessExpression(STRUCT, setter), __, setArgs);
 
       break;
     }
