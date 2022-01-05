@@ -10,7 +10,7 @@ import { compareBuffers, readFileBuffer } from "../util";
 
 const SCHEMA_MESSAGE = readFileBuffer("test/data/schema.bin");
 
-const SCHEMA_FILE_ID = capnp.Int64.fromHexString("a93fc509624c72d9");
+const SCHEMA_FILE_ID = BigInt("0xa93fc509624c72d9");
 
 void tap.test("schema roundtrip", (t) => {
   const message = new capnp.Message(SCHEMA_MESSAGE, false);
@@ -35,7 +35,7 @@ void tap.test("schema roundtrip", (t) => {
 
   const requestedFileId = requestedFile.getId();
 
-  compareBuffers(t, requestedFileId.buffer.buffer, SCHEMA_FILE_ID.buffer.buffer);
+  t.equal(requestedFileId, SCHEMA_FILE_ID);
 
   const out = message.toArrayBuffer();
 

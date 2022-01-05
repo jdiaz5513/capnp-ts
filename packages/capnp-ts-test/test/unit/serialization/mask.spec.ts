@@ -14,10 +14,9 @@ import {
   getUint64Mask,
   getUint8Mask,
 } from "capnp-ts/src/serialization/mask";
-import { Int64, Uint64 } from "capnp-ts/src/types";
 import { compareBuffers } from "../../util";
 
-type MaskArray = Array<{ mask: number[]; val: number }>;
+type MaskArray<T> = Array<{ mask: number[]; val: T }>;
 
 const BIT_MASKS = [
   { mask: [0b00000000], bitOffset: 5, val: false },
@@ -69,23 +68,23 @@ const INT_32_MASKS = [
 const INT_64_MASKS = [
   {
     mask: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-    val: 0x0000000000000000,
+    val: BigInt("0x0000000000000000"),
   },
   {
     mask: [0xde, 0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12, 0x00],
-    val: 0x00123456789abcde,
+    val: BigInt("0x00123456789abcde"),
   },
   {
     mask: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff],
-    val: MIN_SAFE_INTEGER,
+    val: BigInt(MIN_SAFE_INTEGER),
   },
   {
     mask: [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00],
-    val: MAX_SAFE_INTEGER,
+    val: BigInt(MAX_SAFE_INTEGER),
   },
   {
     mask: [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff],
-    val: -0x0000000000000001,
+    val: BigInt(-0x0000000000000001),
   },
 ];
 
@@ -128,24 +127,19 @@ const UINT_32_MASKS = [
 const UINT_64_MASKS = [
   {
     mask: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-    val: 0x0000000000000000,
+    val: BigInt("0x0000000000000000"),
   },
   {
     mask: [0xde, 0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12, 0x00],
-    val: 0x00123456789abcde,
+    val: BigInt("0x00123456789abcde"),
   },
   {
     mask: [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00],
-    val: MAX_SAFE_INTEGER,
-  },
-  // Negative numbers are negated.
-  {
-    mask: [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00],
-    val: MIN_SAFE_INTEGER,
+    val: BigInt(MAX_SAFE_INTEGER),
   },
   {
-    mask: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-    val: -0x0000000000000001,
+    mask: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff],
+    val: BigInt(MIN_SAFE_INTEGER),
   },
 ];
 
@@ -161,7 +155,7 @@ const UINT_8_MASKS = [
   { mask: [0x21], val: 0xfffffffff + 0x2222 },
 ];
 
-function makeMaskTest(name: string, fn: (x: number) => DataView, testData: MaskArray) {
+function makeMaskTest<T>(name: string, fn: (x: T) => DataView, testData: MaskArray<T>) {
   void tap.test(name, (t) => {
     testData.forEach(({ mask, val }) => {
       compareBuffers(t, fn(val).buffer, new Uint8Array(mask).buffer);
@@ -179,27 +173,13 @@ void tap.test("getBitMask()", (t) => {
   t.end();
 });
 
-void tap.test("getInt64Mask()", (t) => {
-  INT_64_MASKS.forEach(({ mask, val }) => {
-    compareBuffers(t, getInt64Mask(Int64.fromNumber(val)).buffer, new Uint8Array(mask).buffer);
-  });
-
-  t.end();
-});
-
-void tap.test("getUint64Mask()", (t) => {
-  UINT_64_MASKS.forEach(({ mask, val }) => {
-    compareBuffers(t, getUint64Mask(Uint64.fromNumber(val)).buffer, new Uint8Array(mask).buffer);
-  });
-
-  t.end();
-});
-
 makeMaskTest("getFloat32Mask()", getFloat32Mask, FLOAT_32_MASKS);
 makeMaskTest("getFloat64Mask()", getFloat64Mask, FLOAT_64_MASKS);
 makeMaskTest("getInt16Mask()", getInt16Mask, INT_16_MASKS);
 makeMaskTest("getInt32Mask()", getInt32Mask, INT_32_MASKS);
+makeMaskTest("getInt64Mask()", getInt64Mask, INT_64_MASKS);
 makeMaskTest("getInt8Mask()", getInt8Mask, INT_8_MASKS);
 makeMaskTest("getUint16Mask()", getUint16Mask, UINT_16_MASKS);
 makeMaskTest("getUint32Mask()", getUint32Mask, UINT_32_MASKS);
+makeMaskTest("getUint64Mask()", getUint64Mask, UINT_64_MASKS);
 makeMaskTest("getUint8Mask()", getUint8Mask, UINT_8_MASKS);

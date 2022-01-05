@@ -7,7 +7,7 @@ exports.AddressBook = exports.Person = exports.Person_Employment = exports.Perso
  */
 const capnp = require("capnp-ts");
 const capnp_ts_1 = require("capnp-ts");
-exports._capnpFileId = "ef1b5abe02e1f8d4";
+exports._capnpFileId = BigInt("0xef1b5abe02e1f8d4");
 var Person_PhoneNumber_Type;
 (function (Person_PhoneNumber_Type) {
     Person_PhoneNumber_Type[Person_PhoneNumber_Type["MOBILE"] = 0] = "MOBILE";

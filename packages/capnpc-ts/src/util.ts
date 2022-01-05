@@ -1,4 +1,3 @@
-import { Int64, Uint64 } from "capnp-ts/src/types";
 import { pad } from "capnp-ts/src/util";
 import initTrace from "debug";
 
@@ -11,7 +10,7 @@ interface Hex2Dec {
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/unbound-method */
-const { decToHex } = require("hex2dec") as Hex2Dec;
+const { decToHex, hexToDec } = require("hex2dec") as Hex2Dec;
 /* eslint-enable */
 
 const trace = initTrace("capnpc:util");
@@ -54,25 +53,6 @@ export function decToHexBytes(d: string): string[] {
   return out;
 }
 
-export function decToInt64(d: string): Int64 {
-  const h = decToHexBytes(d);
-  const neg = h[0] === "-";
-
-  if (neg) h.shift();
-
-  const v = new Int64(new Uint8Array(h.map((b) => parseInt(b, 16))));
-
-  if (neg) v.negate();
-
-  return v;
-}
-
-export function decToUint64(d: string): Uint64 {
-  const h = decToHexBytes(d);
-
-  return new Uint64(new Uint8Array(h.map((b) => parseInt(b, 16))));
-}
-
 export function splitCamel(s: string): string[] {
   let wasLo = false;
 
@@ -91,4 +71,8 @@ export function splitCamel(s: string): string[] {
 
     return a;
   }, []);
+}
+
+export function hexToBigInt(h: string): bigint {
+  return BigInt(hexToDec(h));
 }

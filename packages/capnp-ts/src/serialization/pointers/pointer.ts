@@ -94,7 +94,7 @@ export class Pointer {
     this.segment = segment;
     this.byteOffset = byteOffset;
 
-    if (depthLimit === 0) {
+    if (depthLimit < 1) {
       throw new Error(format(PTR_DEPTH_LIMIT_EXCEEDED, this));
     }
 
@@ -115,7 +115,7 @@ export class Pointer {
   }
 
   toString(): string {
-    return format("Pointer_%d@%a,%s,limit:%x", this.segment.id, this.byteOffset, dump(this), this._capnp.depthLimit);
+    return format("->%d@%a%s", this.segment.id, this.byteOffset, dump(this));
   }
 }
 
@@ -147,7 +147,12 @@ export function disown<T extends Pointer>(p: T): Orphan<T> {
 }
 
 export function dump(p: Pointer): string {
-  return bufferToHex(p.segment.buffer.slice(p.byteOffset, p.byteOffset + 8));
+  const f = followFars(p);
+  const pHex = bufferToHex(p.segment.buffer.slice(p.byteOffset, p.byteOffset + 8));
+  if (f.byteOffset === p.byteOffset && f.segment === p.segment) {
+    return pHex;
+  }
+  return `${pHex} > ${bufferToHex(f.segment.buffer.slice(f.byteOffset, f.byteOffset + 8))}`;
 }
 
 /**

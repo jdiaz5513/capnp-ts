@@ -5,7 +5,7 @@
 import * as s from "capnp-ts/src/std/schema.capnp.js";
 import * as capnp from "capnp-ts";
 import { format, pad } from "capnp-ts/src/util";
-import ts from "typescript";
+import ts, { factory as f } from "typescript";
 import initTrace from "debug";
 import { CodeGeneratorFileContext } from "./code-generator-file-context";
 import { __, READONLY, STATIC, VOID_TYPE, CAPNP } from "./constants";
@@ -16,22 +16,22 @@ import * as util from "./util";
 const trace = initTrace("capnpc:ast-creators");
 
 export function createClassExtends(identifierText: string): ts.HeritageClause {
-  const types = [ts.createExpressionWithTypeArguments([], ts.createIdentifier(identifierText))];
-  return ts.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, types);
+  const types = [f.createExpressionWithTypeArguments(f.createIdentifier(identifierText), [])];
+  return f.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, types);
 }
 
 export function createConcreteListProperty(ctx: CodeGeneratorFileContext, field: s.Field): ts.PropertyDeclaration {
   const name = `_${util.c2t(field.getName())}`;
-  const type = ts.createTypeReferenceNode(getJsType(ctx, field.getSlot().getType(), true), __);
+  const type = f.createTypeReferenceNode(getJsType(ctx, field.getSlot().getType(), true), __);
   let u: ts.Expression | undefined;
-  return ts.createProperty(__, [STATIC], name, __, type, u as ts.Expression);
+  return f.createPropertyDeclaration(__, [STATIC], name, __, type, u as ts.Expression);
 }
 
 export function createConstProperty(node: s.Node): ts.PropertyDeclaration {
   const name = util.c2s(getDisplayNamePrefix(node));
   const initializer = createValueExpression(node.getConst().getValue());
 
-  return ts.createProperty(__, [STATIC, READONLY], name, __, __, initializer);
+  return f.createPropertyDeclaration(__, [STATIC, READONLY], name, __, __, initializer);
 }
 
 export function createExpressionBlock(
@@ -40,10 +40,10 @@ export function createExpressionBlock(
   allowSingleLine: boolean
 ): ts.Block {
   const statements = expressions.map((e, i) =>
-    i === expressions.length - 1 && returns ? ts.createReturn(e) : ts.createStatement(e)
+    i === expressions.length - 1 && returns ? f.createReturnStatement(e) : f.createExpressionStatement(e)
   );
 
-  return ts.createBlock(statements, !(allowSingleLine && expressions.length < 2));
+  return f.createBlock(statements, !(allowSingleLine && expressions.length < 2));
 }
 
 export function createMethod(
@@ -53,7 +53,7 @@ export function createMethod(
   expressions: ts.Expression[],
   allowSingleLine = true
 ): ts.MethodDeclaration {
-  return ts.createMethod(
+  return f.createMethodDeclaration(
     __,
     __,
     __,
@@ -68,16 +68,16 @@ export function createMethod(
 
 export function createNestedNodeProperty(node: s.Node): ts.PropertyDeclaration {
   const name = getDisplayNamePrefix(node);
-  const initializer = ts.createIdentifier(getFullClassName(node));
+  const initializer = f.createIdentifier(getFullClassName(node));
 
-  return ts.createProperty(__, [STATIC, READONLY], name, __, __, initializer);
+  return f.createPropertyDeclaration(__, [STATIC, READONLY], name, __, __, initializer);
 }
 
 export function createUnionConstProperty(fullClassName: string, field: s.Field): ts.PropertyDeclaration {
   const name = util.c2s(field.getName());
-  const initializer = ts.createPropertyAccess(ts.createIdentifier(`${fullClassName}_Which`), name);
+  const initializer = f.createPropertyAccessExpression(f.createIdentifier(`${fullClassName}_Which`), name);
 
-  return ts.createProperty(__, [STATIC, READONLY], name, __, __, initializer);
+  return f.createPropertyDeclaration(__, [STATIC, READONLY], name, __, __, initializer);
 }
 
 export function createValueExpression(value: s.Value): ts.Expression {
@@ -87,64 +87,54 @@ export function createValueExpression(value: s.Value): ts.Expression {
 
   switch (value.which()) {
     case s.Value.BOOL:
-      return value.getBool() ? ts.createTrue() : ts.createFalse();
+      return value.getBool() ? f.createTrue() : f.createFalse();
 
     case s.Value.ENUM:
-      return ts.createNumericLiteral(value.getEnum().toString());
+      return f.createNumericLiteral(value.getEnum().toString());
 
     case s.Value.FLOAT32:
-      return ts.createNumericLiteral(value.getFloat32().toString());
+      return f.createNumericLiteral(value.getFloat32().toString());
 
     case s.Value.FLOAT64:
-      return ts.createNumericLiteral(value.getFloat64().toString());
+      return f.createNumericLiteral(value.getFloat64().toString());
 
     case s.Value.INT16:
-      return ts.createNumericLiteral(value.getInt16().toString());
+      return f.createNumericLiteral(value.getInt16().toString());
 
     case s.Value.INT32:
-      return ts.createNumericLiteral(value.getInt32().toString());
+      return f.createNumericLiteral(value.getInt32().toString());
 
     case s.Value.INT64: {
-      const int64 = value.getInt64();
-      const int64Bytes: string[] = [];
-
-      for (let i = 0; i < 8; i++) {
-        int64Bytes.push(`0x${pad(int64.buffer[i].toString(16), 2)}`);
+      let v = value.getInt64().toString(16);
+      let neg = "";
+      if (v[0] === "-") {
+        v = v.slice(1);
+        neg = "-";
       }
-
-      const int64ByteArray = ts.createArrayLiteral(int64Bytes.map(ts.createNumericLiteral), false);
-      const int64ArrayBuffer = ts.createNew(ts.createIdentifier("Uint8Array"), __, [int64ByteArray]);
-      return ts.createNew(ts.createIdentifier("capnp.Int64"), __, [int64ArrayBuffer]);
+      return f.createCallExpression(f.createIdentifier(`${neg}BigInt`), __, [f.createStringLiteral(`0x${v}`)]);
     }
     case s.Value.INT8:
-      return ts.createNumericLiteral(value.getInt8().toString());
+      return f.createNumericLiteral(value.getInt8().toString());
 
     case s.Value.TEXT:
-      return ts.createLiteral(value.getText());
+      return f.createStringLiteral(value.getText());
 
     case s.Value.UINT16:
-      return ts.createNumericLiteral(value.getUint16().toString());
+      return f.createNumericLiteral(value.getUint16().toString());
 
     case s.Value.UINT32:
-      return ts.createNumericLiteral(value.getUint32().toString());
+      return f.createNumericLiteral(value.getUint32().toString());
 
     case s.Value.UINT64: {
-      const uint64 = value.getUint64();
-      const uint64Bytes: string[] = [];
-
-      for (let i = 0; i < 8; i++) {
-        uint64Bytes.push(`0x${pad(uint64.buffer[i].toString(16), 2)}`);
-      }
-
-      const uint64ByteArray = ts.createArrayLiteral(uint64Bytes.map(ts.createNumericLiteral), false);
-      const uint64ArrayBuffer = ts.createNew(ts.createIdentifier("Uint8Array"), __, [uint64ByteArray]);
-      return ts.createNew(ts.createIdentifier("capnp.Int64"), __, [uint64ArrayBuffer]);
+      return f.createCallExpression(f.createIdentifier("BigInt"), __, [
+        f.createStringLiteral(`0x${value.getUint64().toString(16)}`),
+      ]);
     }
     case s.Value.UINT8:
-      return ts.createNumericLiteral(value.getUint8().toString());
+      return f.createNumericLiteral(value.getUint8().toString());
 
     case s.Value.VOID:
-      return ts.createIdentifier("undefined");
+      return f.createIdentifier("undefined");
 
     case s.Value.ANY_POINTER:
       p = value.getAnyPointer();
@@ -178,12 +168,12 @@ export function createValueExpression(value: s.Value): ts.Expression {
   const bytes = new Array<ts.NumericLiteral>(buf.byteLength);
 
   for (let i = 0; i < buf.byteLength; i++) {
-    bytes[i] = ts.createNumericLiteral(`0x${pad(buf[i].toString(16), 2)}`);
+    bytes[i] = f.createNumericLiteral(`0x${pad(buf[i].toString(16), 2)}`);
   }
 
-  return ts.createCall(ts.createPropertyAccess(CAPNP, "readRawPointer"), __, [
-    ts.createPropertyAccess(
-      ts.createNew(ts.createIdentifier("Uint8Array"), __, [ts.createArrayLiteral(bytes, false)]),
+  return f.createCallExpression(f.createPropertyAccessExpression(CAPNP, "readRawPointer"), __, [
+    f.createPropertyAccessExpression(
+      f.createNewExpression(f.createIdentifier("Uint8Array"), __, [f.createArrayLiteralExpression(bytes, false)]),
       "buffer"
     ),
   ]);

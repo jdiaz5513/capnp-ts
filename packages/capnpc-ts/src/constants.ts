@@ -4,7 +4,7 @@
 
 import * as s from "capnp-ts/src/std/schema.capnp.js";
 import initTrace from "debug";
-import ts from "typescript";
+import ts, { factory as f } from "typescript";
 
 const trace = initTrace("capnpc:constants");
 trace("load");
@@ -13,13 +13,17 @@ trace("load");
 
 export const __ = undefined;
 
+/** BigInt */
+
+export const BIGINT = f.createIdentifier("BigInt");
+
 /** boolean */
 
-export const BOOLEAN_TYPE = ts.createTypeReferenceNode("boolean", __);
+export const BOOLEAN_TYPE = f.createTypeReferenceNode("boolean", __);
 
 /** capnp */
 
-export const CAPNP = ts.createIdentifier("capnp");
+export const CAPNP = f.createIdentifier("capnp");
 
 /** A Mapping of various types to their list type constructor. */
 
@@ -47,11 +51,11 @@ export const ConcreteListType = {
 
 /** export */
 
-export const EXPORT = ts.createToken(ts.SyntaxKind.ExportKeyword);
+export const EXPORT = f.createToken(ts.SyntaxKind.ExportKeyword);
 
 /** length */
 
-export const LENGTH = ts.createIdentifier("length");
+export const LENGTH = f.createIdentifier("length");
 
 /** Some data used to help generate code for primitive struct fields. */
 
@@ -138,15 +142,15 @@ export const Primitive: { [t: number]: { byteLength: number; getter: string; mas
 
 /** number */
 
-export const NUMBER_TYPE = ts.createTypeReferenceNode("number", __);
+export const NUMBER_TYPE = f.createTypeReferenceNode("number", __);
 
 /** __O */
 // This is referenced so frequently it gets a shorthand!
-export const OBJECT_SIZE = ts.createIdentifier("__O");
+export const OBJECT_SIZE = f.createIdentifier("__O");
 
 /** readonly */
 
-export const READONLY = ts.createToken(ts.SyntaxKind.ReadonlyKeyword);
+export const READONLY = f.createToken(ts.SyntaxKind.ReadonlyKeyword);
 
 /** No... comment? */
 
@@ -160,11 +164,11 @@ export const SOURCE_COMMENT = `/* tslint:disable */
 
 /** static */
 
-export const STATIC = ts.createToken(ts.SyntaxKind.StaticKeyword);
+export const STATIC = f.createToken(ts.SyntaxKind.StaticKeyword);
 
 /** string */
 
-export const STRING_TYPE = ts.createTypeReferenceNode("string", __);
+export const STRING_TYPE = f.createTypeReferenceNode("string", __);
 
 /** __S */
 // This is referenced so frequently it gets a shorthand!
@@ -172,7 +176,7 @@ export const STRUCT = ts.createIdentifier("__S");
 
 /** this */
 
-export const THIS = ts.createThis();
+export const THIS = f.createThis();
 
 /**
  * Used to look up the ts.capnp file by its ID.
@@ -184,8 +188,8 @@ export const TS_FILE_ID = "e37ded525a68a7c9";
 
 /** value */
 
-export const VALUE = ts.createIdentifier("value");
+export const VALUE = f.createIdentifier("value");
 
 /** void */
 
-export const VOID_TYPE = ts.createTypeReferenceNode("void", __);
+export const VOID_TYPE = f.createTypeReferenceNode("void", __);

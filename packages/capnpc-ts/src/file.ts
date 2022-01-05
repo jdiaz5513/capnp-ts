@@ -1,4 +1,3 @@
-import * as capnp from "capnp-ts";
 import * as s from "capnp-ts/src/std/schema.capnp.js";
 import { format } from "capnp-ts/src/util";
 import initTrace from "debug";
@@ -70,8 +69,9 @@ export function getJsType(ctx: CodeGeneratorFileContext, type: s.Type, construct
     case s.Type.UINT8:
       return "number";
 
+    case s.Type.UINT64:
     case s.Type.INT64:
-      return "capnp.Int64";
+      return "bigint";
 
     case s.Type.INTERFACE:
       return "capnp.Interface";
@@ -84,8 +84,6 @@ export function getJsType(ctx: CodeGeneratorFileContext, type: s.Type, construct
 
       return constructor ? `capnp.StructCtor<${c}>` : c;
     }
-    case s.Type.UINT64:
-      return "capnp.Uint64";
 
     case s.Type.TEXT:
       return "string";
@@ -107,10 +105,10 @@ export function getUnnamedUnionFields(node: s.Node): s.Field[] {
     .filter((f) => f.getDiscriminantValue() !== s.Field.NO_DISCRIMINANT);
 }
 
-export function hasNode(ctx: CodeGeneratorFileContext, lookup: { getId(): capnp.Uint64 } | capnp.Uint64): boolean {
-  const id = lookup instanceof capnp.Uint64 ? lookup : lookup.getId();
+export function hasNode(ctx: CodeGeneratorFileContext, lookup: { getId(): bigint } | bigint): boolean {
+  const id = typeof lookup === "bigint" ? lookup : lookup.getId();
 
-  return ctx.nodes.some((n) => n.getId().equals(id));
+  return ctx.nodes.some((n) => n.getId() === id);
 }
 
 export function loadRequestedFile(
@@ -128,9 +126,9 @@ export function loadRequestedFile(
   return ctx;
 }
 
-export function lookupNode(ctx: CodeGeneratorFileContext, lookup: { getId(): capnp.Uint64 } | capnp.Uint64): s.Node {
-  const id = lookup instanceof capnp.Uint64 ? lookup : lookup.getId();
-  const node = ctx.nodes.find((n) => n.getId().equals(id));
+export function lookupNode(ctx: CodeGeneratorFileContext, lookup: { getId(): bigint } | bigint): s.Node {
+  const id = typeof lookup === "bigint" ? lookup : lookup.getId();
+  const node = ctx.nodes.find((n) => n.getId() === id);
 
   if (node === undefined) throw new Error(format(E.GEN_NODE_LOOKUP_FAIL, id));
 
