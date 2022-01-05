@@ -4,6 +4,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
+    "incremental": true,
     "lib": ["es2015"],
     "module": "CommonJS",
     "moduleResolution": "Node",
