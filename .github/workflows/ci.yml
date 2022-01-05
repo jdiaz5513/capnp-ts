@@ -10,11 +10,10 @@ jobs:
       fail-fast: false
       matrix:
         node-version:
-          - "10"
           - "12"
           - "14"
-          - "15"
           - "16"
+          - "17"
     name: Test on node v${{ matrix.node-version }}
     steps:
       - name: Checkout
