@@ -13,7 +13,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           check-latest: true
-          node-version: "14"
+          node-version: "16"
       - name: Install dependencies
         run: |
           sudo apt-get install capnproto libcapnp-dev

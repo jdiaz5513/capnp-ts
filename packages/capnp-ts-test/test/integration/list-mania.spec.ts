@@ -83,12 +83,12 @@ void tap.test("1 of each list", (t) => {
     int8List.set(0, 1);
     int16List.set(0, 1);
     int32List.set(0, 1);
-    int64List.set(0, capnp.Int64.fromNumber(1));
+    int64List.set(0, BigInt(1));
     textList.set(0, "hi");
     uint8List.set(0, 1);
     uint16List.set(0, 1);
     uint32List.set(0, 1);
-    uint64List.set(0, capnp.Uint64.fromNumber(1));
+    uint64List.set(0, BigInt(1));
 
     capnp.Pointer.disown(boolList).dispose();
     capnp.Pointer.disown(compositeList).dispose();

@@ -5,7 +5,6 @@
 import initTrace from "debug";
 
 import { MAX_DEPTH, NATIVE_LITTLE_ENDIAN } from "../../constants";
-import { Int64, Uint64 } from "../../types/index";
 import { format, padToWord } from "../../util";
 import { ListElementSize } from "../list-element-size";
 import { ObjectSize, getByteLength, getDataWordLength, getWordLength } from "../object-size";
@@ -136,7 +135,8 @@ export class Struct extends Pointer {
   toString(): string {
     return (
       `Struct_${super.toString()}` +
-      `${this._capnp.compositeIndex === undefined ? "" : `,ci:${this._capnp.compositeIndex}`}`
+      `${this._capnp.compositeIndex === undefined ? "" : `,ci:${this._capnp.compositeIndex}`}` +
+      ` > ${getContent(this).toString()}`
     );
   }
 }
@@ -422,23 +422,23 @@ export function getInt32(byteOffset: number, s: Struct, defaultMask?: DataView):
  * @param {number} byteOffset The offset in bytes from the start of the data section.
  * @param {Struct} s The struct to read from.
  * @param {DataView} [defaultMask] The default value as a DataView.
- * @returns {number} The value.
+ * @returns {bigint} The value.
  */
 
-export function getInt64(byteOffset: number, s: Struct, defaultMask?: DataView): Int64 {
+export function getInt64(byteOffset: number, s: Struct, defaultMask?: DataView): bigint {
   checkDataBounds(byteOffset, 8, s);
 
   const ds = getDataSection(s);
 
-  if (defaultMask === undefined) {
-    return ds.segment.getInt64(ds.byteOffset + byteOffset);
+  if (defaultMask !== undefined) {
+    const lo = ds.segment.getUint32(ds.byteOffset + byteOffset) ^ defaultMask.getUint32(0, true);
+    const hi = ds.segment.getUint32(ds.byteOffset + byteOffset + 4) ^ defaultMask.getUint32(4, true);
+    TMP_WORD.setUint32(NATIVE_LITTLE_ENDIAN ? 0 : 4, lo, NATIVE_LITTLE_ENDIAN);
+    TMP_WORD.setUint32(NATIVE_LITTLE_ENDIAN ? 4 : 0, hi, NATIVE_LITTLE_ENDIAN);
+    return TMP_WORD.getBigInt64(0, NATIVE_LITTLE_ENDIAN);
   }
 
-  const lo = ds.segment.getUint32(ds.byteOffset + byteOffset) ^ defaultMask.getUint32(0, true);
-  const hi = ds.segment.getUint32(ds.byteOffset + byteOffset + 4) ^ defaultMask.getUint32(4, true);
-  TMP_WORD.setUint32(0, lo, NATIVE_LITTLE_ENDIAN);
-  TMP_WORD.setUint32(4, hi, NATIVE_LITTLE_ENDIAN);
-  return new Int64(new Uint8Array(TMP_WORD.buffer.slice(0)));
+  return ds.segment.getInt64(ds.byteOffset + byteOffset);
 }
 
 /**
@@ -687,23 +687,23 @@ export function getUint32(byteOffset: number, s: Struct, defaultMask?: DataView)
  * @param {number} byteOffset The offset in bytes from the start of the data section.
  * @param {Struct} s The struct to read from.
  * @param {DataView} [defaultMask] The default value as a DataView.
- * @returns {number} The value.
+ * @returns {bigint} The value.
  */
 
-export function getUint64(byteOffset: number, s: Struct, defaultMask?: DataView): Uint64 {
+export function getUint64(byteOffset: number, s: Struct, defaultMask?: DataView): bigint {
   checkDataBounds(byteOffset, 8, s);
 
   const ds = getDataSection(s);
 
-  if (defaultMask === undefined) {
-    return ds.segment.getUint64(ds.byteOffset + byteOffset);
+  if (defaultMask !== undefined) {
+    const lo = ds.segment.getUint32(ds.byteOffset + byteOffset) ^ defaultMask.getUint32(0, true);
+    const hi = ds.segment.getUint32(ds.byteOffset + byteOffset + 4) ^ defaultMask.getUint32(4, true);
+    TMP_WORD.setUint32(NATIVE_LITTLE_ENDIAN ? 0 : 4, lo, NATIVE_LITTLE_ENDIAN);
+    TMP_WORD.setUint32(NATIVE_LITTLE_ENDIAN ? 4 : 0, hi, NATIVE_LITTLE_ENDIAN);
+    return TMP_WORD.getBigUint64(0, NATIVE_LITTLE_ENDIAN);
   }
 
-  const lo = ds.segment.getUint32(ds.byteOffset + byteOffset) ^ defaultMask.getUint32(0, true);
-  const hi = ds.segment.getUint32(ds.byteOffset + byteOffset + 4) ^ defaultMask.getUint32(4, true);
-  TMP_WORD.setUint32(0, lo, NATIVE_LITTLE_ENDIAN);
-  TMP_WORD.setUint32(4, hi, NATIVE_LITTLE_ENDIAN);
-  return new Uint64(new Uint8Array(TMP_WORD.buffer.slice(0)));
+  return ds.segment.getUint64(ds.byteOffset + byteOffset);
 }
 
 /**
@@ -908,25 +908,23 @@ export function setInt32(byteOffset: number, value: number, s: Struct, defaultMa
  *
  * @protected
  * @param {number} byteOffset The offset in bytes from the start of the data section.
- * @param {number} value The value to write.
+ * @param {bigint} value The value to write.
  * @param {Struct} s The struct to write to.
  * @param {DataView} [defaultMask] The default value as a DataView.
  * @returns {void}
  */
 
-export function setInt64(byteOffset: number, value: Int64, s: Struct, defaultMask?: DataView): void {
+export function setInt64(byteOffset: number, value: bigint, s: Struct, defaultMask?: DataView): void {
   checkDataBounds(byteOffset, 8, s);
 
   const ds = getDataSection(s);
 
   if (defaultMask !== undefined) {
-    // PERF: We could cast the Int64 to a DataView to apply the mask using four 32-bit reads, but we already have a
-    // typed array so avoiding the object allocation turns out to be slightly faster. Int64 is guaranteed to be in
-    // little-endian format by design.
-
-    for (let i = 0; i < 8; i++) {
-      ds.segment.setUint8(ds.byteOffset + byteOffset + i, value.buffer[i] ^ defaultMask.getUint8(i));
-    }
+    TMP_WORD.setBigInt64(0, value, NATIVE_LITTLE_ENDIAN);
+    const lo = TMP_WORD.getUint32(NATIVE_LITTLE_ENDIAN ? 0 : 4, NATIVE_LITTLE_ENDIAN) ^ defaultMask.getUint32(0, true);
+    const hi = TMP_WORD.getUint32(NATIVE_LITTLE_ENDIAN ? 4 : 0, NATIVE_LITTLE_ENDIAN) ^ defaultMask.getUint32(4, true);
+    ds.segment.setUint32(ds.byteOffset + byteOffset, lo);
+    ds.segment.setUint32(ds.byteOffset + byteOffset + 4, hi);
 
     return;
   }
@@ -1016,25 +1014,23 @@ export function setUint32(byteOffset: number, value: number, s: Struct, defaultM
  *
  * @protected
  * @param {number} byteOffset The offset in bytes from the start of the data section.
- * @param {number} value The value to write.
+ * @param {bigint} value The value to write.
  * @param {Struct} s The struct to write to.
  * @param {DataView} [defaultMask] The default value as a DataView.
  * @returns {void}
  */
 
-export function setUint64(byteOffset: number, value: Uint64, s: Struct, defaultMask?: DataView): void {
+export function setUint64(byteOffset: number, value: bigint, s: Struct, defaultMask?: DataView): void {
   checkDataBounds(byteOffset, 8, s);
 
   const ds = getDataSection(s);
 
   if (defaultMask !== undefined) {
-    // PERF: We could cast the Uint64 to a DataView to apply the mask using four 32-bit reads, but we already have a
-    // typed array so avoiding the object allocation turns out to be slightly faster. Uint64 is guaranteed to be in
-    // little-endian format by design.
-
-    for (let i = 0; i < 8; i++) {
-      ds.segment.setUint8(ds.byteOffset + byteOffset + i, value.buffer[i] ^ defaultMask.getUint8(i));
-    }
+    TMP_WORD.setBigUint64(0, value, NATIVE_LITTLE_ENDIAN);
+    const lo = TMP_WORD.getUint32(NATIVE_LITTLE_ENDIAN ? 0 : 4, NATIVE_LITTLE_ENDIAN) ^ defaultMask.getUint32(0, true);
+    const hi = TMP_WORD.getUint32(NATIVE_LITTLE_ENDIAN ? 4 : 0, NATIVE_LITTLE_ENDIAN) ^ defaultMask.getUint32(4, true);
+    ds.segment.setUint32(ds.byteOffset + byteOffset, lo);
+    ds.segment.setUint32(ds.byteOffset + byteOffset + 4, hi);
 
     return;
   }

@@ -5,8 +5,7 @@
 import initTrace from "debug";
 
 import { MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN } from "../constants";
-import { NOT_IMPLEMENTED, SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from "../errors";
-import { Int64, Uint64 } from "../types";
+import { SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from "../errors";
 import { format, padToWord } from "../util";
 import { Message } from "./message";
 import { Pointer } from "./pointers";
@@ -125,16 +124,12 @@ export class Segment implements DataView {
     new Float64Array(this.buffer, byteOffset, wordLength).fill(0);
   }
 
-  /** WARNING: This function is not yet implemented. */
-
   getBigInt64(byteOffset: number, littleEndian?: boolean): bigint {
-    throw new Error(format(NOT_IMPLEMENTED, byteOffset, littleEndian));
+    return this._dv.getBigInt64(byteOffset, littleEndian);
   }
 
-  /** WARNING: This function is not yet implemented. */
-
   getBigUint64(byteOffset: number, littleEndian?: boolean): bigint {
-    throw new Error(format(NOT_IMPLEMENTED, byteOffset, littleEndian));
+    return this._dv.getBigUint64(byteOffset, littleEndian);
   }
 
   /**
@@ -198,8 +193,8 @@ export class Segment implements DataView {
    * @returns {number} The value.
    */
 
-  getInt64(byteOffset: number): Int64 {
-    return new Int64(new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8)));
+  getInt64(byteOffset: number): bigint {
+    return this._dv.getBigInt64(byteOffset, true);
   }
 
   /**
@@ -236,15 +231,15 @@ export class Segment implements DataView {
   }
 
   /**
-   * Read a uint8 value out of this segment.
-   * NOTE: this does not copy the memory region, so updates to the underlying buffer will affect the Uint64 value!
+   * Read a uint64 value (as a bigint) out of this segment.
+   * NOTE: this does not copy the memory region, so updates to the underlying buffer will affect the returned value!
    *
    * @param {number} byteOffset The offset in bytes to the value.
    * @returns {number} The value.
    */
 
-  getUint64(byteOffset: number): Uint64 {
-    return new Uint64(new Uint8Array(this.buffer.slice(byteOffset, byteOffset + 8)));
+  getUint64(byteOffset: number): bigint {
+    return this._dv.getBigUint64(byteOffset, true);
   }
 
   /**
@@ -303,16 +298,14 @@ export class Segment implements DataView {
     this.buffer = buffer;
   }
 
-  /** WARNING: This function is not yet implemented.  */
-
   setBigInt64(byteOffset: number, value: bigint, littleEndian?: boolean): void {
-    throw new Error(format(NOT_IMPLEMENTED, byteOffset, value, littleEndian));
+    this._dv.setBigInt64(byteOffset, value, littleEndian);
   }
 
   /** WARNING: This function is not yet implemented.  */
 
   setBigUint64(byteOffset: number, value: bigint, littleEndian?: boolean): void {
-    throw new Error(format(NOT_IMPLEMENTED, byteOffset, value, littleEndian));
+    this._dv.setBigUint64(byteOffset, value, littleEndian);
   }
 
   /**
@@ -379,19 +372,12 @@ export class Segment implements DataView {
    * Write an int64 value to the specified offset.
    *
    * @param {number} byteOffset The offset from the beginning of the buffer.
-   * @param {Int64} val The value to store.
+   * @param {bigint} val The value to store.
    * @returns {void}
    */
 
-  setInt64(byteOffset: number, val: Int64): void {
-    this._dv.setUint8(byteOffset, val.buffer[0]);
-    this._dv.setUint8(byteOffset + 1, val.buffer[1]);
-    this._dv.setUint8(byteOffset + 2, val.buffer[2]);
-    this._dv.setUint8(byteOffset + 3, val.buffer[3]);
-    this._dv.setUint8(byteOffset + 4, val.buffer[4]);
-    this._dv.setUint8(byteOffset + 5, val.buffer[5]);
-    this._dv.setUint8(byteOffset + 6, val.buffer[6]);
-    this._dv.setUint8(byteOffset + 7, val.buffer[7]);
+  setInt64(byteOffset: number, val: bigint): void {
+    this._dv.setBigInt64(byteOffset, val, true);
   }
 
   /**
@@ -420,22 +406,14 @@ export class Segment implements DataView {
 
   /**
    * Write a uint64 value to the specified offset.
-   * TODO: benchmark other ways to perform this write operation.
    *
    * @param {number} byteOffset The offset from the beginning of the buffer.
-   * @param {Uint64} val The value to store.
+   * @param {bigint} val The value to store.
    * @returns {void}
    */
 
-  setUint64(byteOffset: number, val: Uint64): void {
-    this._dv.setUint8(byteOffset + 0, val.buffer[0]);
-    this._dv.setUint8(byteOffset + 1, val.buffer[1]);
-    this._dv.setUint8(byteOffset + 2, val.buffer[2]);
-    this._dv.setUint8(byteOffset + 3, val.buffer[3]);
-    this._dv.setUint8(byteOffset + 4, val.buffer[4]);
-    this._dv.setUint8(byteOffset + 5, val.buffer[5]);
-    this._dv.setUint8(byteOffset + 6, val.buffer[6]);
-    this._dv.setUint8(byteOffset + 7, val.buffer[7]);
+  setUint64(byteOffset: number, val: bigint): void {
+    this._dv.setBigUint64(byteOffset, val, true);
   }
 
   /**

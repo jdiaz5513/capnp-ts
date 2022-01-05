@@ -90,7 +90,7 @@ void tap.test("Pointer.toString()", (t) => {
   s.setUint32(0, 0x00000001);
   s.setUint32(4, 0x00000002);
 
-  t.equal(p.toString(), "Pointer_0@0x00000000,[01 00 00 00 02 00 00 00],limit:0x7fffffff");
+  t.equal(p.toString(), "->0@0x00000000[01 00 00 00 02 00 00 00]");
 
   t.end();
 });

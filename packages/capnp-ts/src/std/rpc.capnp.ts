@@ -352,8 +352,8 @@ export class Call extends __S {
     hasTarget(): boolean { return !__S.isNull(__S.getPointer(0, this)); }
     initTarget(): MessageTarget { return __S.initStructAt(0, MessageTarget, this); }
     setTarget(value: MessageTarget): void { __S.copyFrom(value, __S.getPointer(0, this)); }
-    getInterfaceId(): capnp.Uint64 { return __S.getUint64(8, this); }
-    setInterfaceId(value: capnp.Uint64): void { __S.setUint64(8, value, this); }
+    getInterfaceId(): bigint { return __S.getUint64(8, this); }
+    setInterfaceId(value: bigint): void { __S.setUint64(8, value, this); }
     getMethodId(): number { return __S.getUint16(4, this); }
     setMethodId(value: number): void { __S.setUint16(4, value, this); }
     getAllowThirdPartyTailCall(): boolean { return __S.getBit(128, this, Call._capnp.defaultAllowThirdPartyTailCall); }

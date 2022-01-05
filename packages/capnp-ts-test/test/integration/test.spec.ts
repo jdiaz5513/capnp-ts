@@ -32,8 +32,8 @@ void tap.test("TestAllTypes", (t) => {
   allTypes.setInt32Field(-1000000);
   t.equal(allTypes.getInt32Field(), -1000000);
 
-  allTypes.setInt64Field(capnp.Int64.fromHexString("-0000c509624c72d9"));
-  t.equal(allTypes.getInt64Field().toNumber(), -216644094554841);
+  allTypes.setInt64Field(BigInt(-0xc54c72d9));
+  t.equal(allTypes.getInt64Field(), BigInt(-0xc54c72d9));
 
   allTypes.setUInt8Field(8);
   t.equal(allTypes.getUInt8Field(), 8);
@@ -44,8 +44,8 @@ void tap.test("TestAllTypes", (t) => {
   allTypes.setUInt32Field(99999999);
   t.equal(allTypes.getUInt32Field(), 99999999);
 
-  allTypes.setUInt64Field(capnp.Uint64.fromHexString("000000ffffffffff"));
-  t.equal(allTypes.getUInt64Field().toNumber(), 1099511627775);
+  allTypes.setUInt64Field(BigInt(1099511627775));
+  t.equal(allTypes.getUInt64Field(), BigInt(1099511627775));
 
   allTypes.setFloat32Field(-9.999);
   t.ok(Math.abs(allTypes.getFloat32Field() - -9.999) < FLOAT_TOLERANCE);
@@ -77,8 +77,8 @@ void tap.test("TestAllTypes", (t) => {
   allTypes.initInt32List(3).set(2, -888);
   t.equal(allTypes.getInt32List().get(2), -888);
 
-  allTypes.initInt64List(3).set(2, capnp.Int64.fromNumber(-8888));
-  t.equal(allTypes.getInt64List().get(2).toNumber(), -8888);
+  allTypes.initInt64List(3).set(2, BigInt(-8888));
+  t.equal(allTypes.getInt64List().get(2), BigInt(-8888));
 
   allTypes.initUInt8List(3).set(2, 8);
   t.equal(allTypes.getUInt8List().get(2), 8);
@@ -89,8 +89,8 @@ void tap.test("TestAllTypes", (t) => {
   allTypes.initUInt32List(3).set(2, 888);
   t.equal(allTypes.getUInt32List().get(2), 888);
 
-  allTypes.initUInt64List(3).set(2, capnp.Uint64.fromNumber(8888));
-  t.equal(allTypes.getUInt64List().get(2).toNumber(), 8888);
+  allTypes.initUInt64List(3).set(2, BigInt(8888));
+  t.equal(allTypes.getUInt64List().get(2), BigInt(8888));
 
   allTypes.initTextList(4).set(2, "hi");
   t.equal(allTypes.getTextList().get(2), "hi");

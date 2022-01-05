@@ -3,7 +3,7 @@
  */
 
 import * as s from "capnp-ts/src/std/schema.capnp.js";
-import * as ts from "typescript";
+import ts from "typescript";
 
 export class CodeGeneratorFileContext {
   concreteLists: Array<[string, s.Field]>;

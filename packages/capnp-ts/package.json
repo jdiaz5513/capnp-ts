@@ -8,6 +8,9 @@
     "tslib": "^2.2.0"
   },
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
+  "engines": {
+    "node": ">=10.4.0"
+  },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [
     "capnp",

@@ -3,9 +3,11 @@ import { readFileSync } from "fs";
 import * as path from "path";
 import { check, CheckOptions, Property } from "testcheck";
 
-import { format, pad } from "capnp-ts/src/util";
+import { dumpBuffer, format, pad } from "capnp-ts/src/util";
 import { Test } from "tap";
+import initTrace from "debug";
 
+const trace = initTrace("capnp-ts-test:util");
 const x = new Test();
 type Test = typeof x;
 
@@ -15,6 +17,8 @@ function diffHex(found: ArrayBuffer, wanted: ArrayBuffer): string {
 
   for (let i = 0; i < a.byteLength && i < b.byteLength; i++) {
     if (a[i] !== b[i]) {
+      trace(dumpBuffer(found));
+      trace(dumpBuffer(wanted));
       return format("addr:%a,found:%s,wanted:%s", i, pad(a[i].toString(16), 2), pad(b[i].toString(16), 2));
     }
   }
