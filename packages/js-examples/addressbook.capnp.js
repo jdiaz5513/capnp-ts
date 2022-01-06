@@ -1,5 +1,4 @@
 "use strict";
-/* tslint:disable */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddressBook = exports.Person = exports.Person_Employment = exports.Person_Employment_Which = exports.Person_PhoneNumber = exports.Person_PhoneNumber_Type = exports._capnpFileId = void 0;
 /**

@@ -11,18 +11,17 @@
       "type": "node"
     },
     {
-      "cwd": "${workspaceRoot}",
       "env": {
         "DEBUG": "capnp:*",
         "NODE_ENV": "development"
       },
       "name": "Debug (Test)",
-      "preLaunchTask": "build",
-      "program": "${file}",
+      "type": "node",
       "request": "launch",
-      "sourceMaps": true,
-      "stopOnEntry": false,
-      "type": "node"
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "test:watch"],
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
     }
   ]
 }

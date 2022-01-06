@@ -15,6 +15,16 @@ import * as util from "./util";
 
 const trace = initTrace("capnpc:ast-creators");
 
+export function createBigIntExpression(value: bigint): ts.Expression {
+  let v = value.toString(16);
+  let neg = "";
+  if (v[0] === "-") {
+    v = v.slice(1);
+    neg = "-";
+  }
+  return f.createCallExpression(f.createIdentifier(`${neg}BigInt`), __, [f.createStringLiteral(`0x${v}`)]);
+}
+
 export function createClassExtends(identifierText: string): ts.HeritageClause {
   const types = [f.createExpressionWithTypeArguments(f.createIdentifier(identifierText), [])];
   return f.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, types);
@@ -105,13 +115,7 @@ export function createValueExpression(value: s.Value): ts.Expression {
       return f.createNumericLiteral(value.getInt32().toString());
 
     case s.Value.INT64: {
-      let v = value.getInt64().toString(16);
-      let neg = "";
-      if (v[0] === "-") {
-        v = v.slice(1);
-        neg = "-";
-      }
-      return f.createCallExpression(f.createIdentifier(`${neg}BigInt`), __, [f.createStringLiteral(`0x${v}`)]);
+      return createBigIntExpression(value.getInt64());
     }
     case s.Value.INT8:
       return f.createNumericLiteral(value.getInt8().toString());
@@ -126,9 +130,7 @@ export function createValueExpression(value: s.Value): ts.Expression {
       return f.createNumericLiteral(value.getUint32().toString());
 
     case s.Value.UINT64: {
-      return f.createCallExpression(f.createIdentifier("BigInt"), __, [
-        f.createStringLiteral(`0x${value.getUint64().toString(16)}`),
-      ]);
+      return createBigIntExpression(value.getUint64());
     }
     case s.Value.UINT8:
       return f.createNumericLiteral(value.getUint8().toString());
@@ -157,6 +159,14 @@ export function createValueExpression(value: s.Value): ts.Expression {
       break;
 
     case s.Value.INTERFACE:
+      {
+        const __S = capnp.Struct;
+        __S.testWhich("interface", __S.getUint16(0, value), 17, value);
+        p = __S.getPointer(0, value);
+      }
+
+      break;
+
     default:
       throw new Error(format(E.GEN_SERIALIZE_UNKNOWN_VALUE, s.Value_Which[value.which()]));
   }

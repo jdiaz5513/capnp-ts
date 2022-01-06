@@ -113,3 +113,25 @@ export const TYPE_SET_GENERIC_LIST = "CAPNP-TS042 Attempted to call set() on a g
 
 export const PTR_WRITE_CONST_LIST = "CAPNP-TS043 Attempted to write to a const list.";
 export const PTR_WRITE_CONST_STRUCT = "CAPNP-TS044 Attempted to write to a const struct.";
+
+// RPC errors
+//
+// RPC is hard too.
+
+export const RPC_NULL_CLIENT = "CAPNP-TS100 Call on null client.";
+export const RPC_CALL_QUEUE_FULL = "CAPNP-TS101 Promised answer call queue full.";
+export const RPC_QUEUE_CALL_CANCEL = "CAPNP-TS102 Queue call canceled.";
+export const RPC_CLOSED_CLIENT = "CAPNP-TS104 Close() called on closed client.";
+export const RPC_ZERO_REF = "CAPNP-TS105 Ref() called on zeroed refcount.";
+export const RPC_IMPORT_CLOSED = "CAPNP-TS106 Call on closed import.";
+export const RPC_METHOD_NOT_IMPLEMENTED = "CAPNP-TS107 Method not implemented.";
+export const RPC_UNIMPLEMENTED = "CAPNP-TS108 Remote used unimplemented feature.";
+export const RPC_BAD_TARGET = "CAPNP-TS109 Target not found.";
+export const RPC_ONERROR_CALLBACK_MISSING = "CAPNP-TS110 Connection error callback unavailable; original error: %s";
+export const RPC_RETURN_FOR_UNKNOWN_QUESTION = "CAPNP-TS111 Received return for unknown question (id=%s).";
+export const RPC_QUESTION_ID_REUSED = "CAPNP-TS112 Attempted to re-use question id (%s).";
+export const RPC_UNKNOWN_EXPORT_ID = "CAPNP-TS113 Capability table references unknown export ID (%s).";
+export const RPC_UNKNOWN_ANSWER_ID = "CAPNP-TS114 Capability table references unknown answer ID (%s).";
+export const RPC_UNKNOWN_CAP_DESCRIPTOR = "CAPNP-TS115 Unknown cap descriptor type (which: %s).";
+export const RPC_METHOD_ERROR = "CAPNP-TS116 RPC method failed at %s.%s(): %s";
+export const RPC_ERROR = "CAPNP-TS117 RPC call failed, reason: %s";

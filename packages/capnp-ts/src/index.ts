@@ -48,3 +48,5 @@ export {
   getUint64Mask,
   getUint8Mask,
 } from "./serialization";
+
+export { Transport, Conn, Call, Client, Pipeline, RPCMessage, Method, Server, Registry } from "./rpc";

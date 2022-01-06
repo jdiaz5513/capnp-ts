@@ -110,8 +110,6 @@ export class Pointer {
     if (byteOffset < 0 || byteOffset > segment.byteLength) {
       throw new Error(format(PTR_OFFSET_OUT_OF_BOUNDS, byteOffset));
     }
-
-    trace("new %s", this);
   }
 
   toString(): string {
@@ -281,6 +279,12 @@ export function copyFrom(src: Pointer, p: Pointer): void {
       copyFromList(src, p);
 
       break;
+
+    case PointerType.OTHER: {
+      copyFromInterface(src, p);
+
+      break;
+    }
 
     /* istanbul ignore next */
     default:
@@ -802,6 +806,16 @@ export function setInterfacePointer(capId: number, p: Pointer): void {
 }
 
 /**
+ * Reads a raw interface pointer
+ *
+ * @param {Pointer} p The pointer to read.
+ * @returns {number} The capability ID.
+ */
+export function getInterfacePointer(p: Pointer): number {
+  return p.segment.getUint32(p.byteOffset + 4);
+}
+
+/**
  * Write a raw list pointer.
  *
  * @param {number} offsetWords The number of words from the end of this pointer to the beginning of the list content.
@@ -890,6 +904,30 @@ export function validate(pointerType: PointerType, p: Pointer, elementSize?: Lis
       throw new Error(format(PTR_WRONG_LIST_TYPE, p, ListElementSize[elementSize]));
     }
   }
+}
+
+export function copyFromInterface(src: Pointer, dst: Pointer): void {
+  const srcCapId = getInterfacePointer(src);
+  if (srcCapId < 0) {
+    trace("copyFromInterface: src has no capId");
+    return;
+  }
+
+  const srcCapTable = src.segment.message._capnp.capTable;
+  if (!srcCapTable) {
+    trace("copyFromInterface: src pointer's message has no cap table");
+    return;
+  }
+
+  const client = srcCapTable[srcCapId];
+  if (!client) {
+    trace("copyFromInterface: src capId is not mapped to a client");
+    return;
+  }
+
+  const dstCapId = dst.segment.message.addCap(client);
+  trace("copyFromInterface: src capId %d => dst capId %d", srcCapId, dstCapId);
+  setInterfacePointer(dstCapId, dst);
 }
 
 export function copyFromList(src: Pointer, dst: Pointer): void {

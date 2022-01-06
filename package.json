@@ -69,6 +69,7 @@
     "coverage": "make coverage",
     "coverage:watch": "npm run nodemon make coverage",
     "lint": "make lint",
+    "lint:watch": "npm run nodemon make lint",
     "nodemon": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -w ./packages/capnp-ts/test -w ./packages/capnpc-ts/test -w ./packages/capnp-ts-test/test -w ./**/tsconfig.json -i './packages/capnp-ts/src/std' -i './packages/**/*.d.ts' -i './packages/**/*.capnp.ts' -e .ts -x ",
     "prepare": "husky install",
     "prepublishOnly": "make build",

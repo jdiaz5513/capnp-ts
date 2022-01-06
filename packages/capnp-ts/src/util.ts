@@ -2,8 +2,6 @@
  * @author jdiaz5513
  */
 
-// LINT: a lot of the util functions need the any type.
-/* tslint:disable:no-any no-unsafe-any */
 import initTrace from "debug";
 
 import { MAX_BUFFER_DUMP_BYTES, MAX_INT32, MAX_UINT32 } from "./constants";
