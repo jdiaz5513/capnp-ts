@@ -3,10 +3,6 @@ import { Pointer } from "../serialization/pointers/pointer";
 import { Message } from "../serialization/message";
 import { Method } from "./method";
 
-import initTrace from "debug";
-const trace = initTrace("capnp:rpc:call");
-trace("load");
-
 // The Call type holds the record for an outgoing interface call.
 export type Call<P extends Struct, R extends Struct> = FuncCall<P, R> | DataCall<P, R>;
 

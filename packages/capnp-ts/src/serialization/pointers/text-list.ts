@@ -2,20 +2,15 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import { ListElementSize } from "../list-element-size";
 import { _ListCtor, List } from "./list";
 import { Text } from "./text";
 import { getContent } from "./pointer";
 
-const trace = initTrace("capnp:list:composite");
-trace("load");
-
 export class TextList extends List<string> {
   static readonly _capnp: _ListCtor = {
     displayName: "List<Text>" as string,
-    size: ListElementSize.POINTER
+    size: ListElementSize.POINTER,
   };
 
   get(index: number): string {

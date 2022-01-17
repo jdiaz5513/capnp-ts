@@ -141,7 +141,7 @@ void tap.test("Message.allocateSegment()", (t) => {
 });
 
 void tap.test("Message.dump()", (t) => {
-  const m1 = new Message(new MultiSegmentArena());
+  const m1 = new Message(new MultiSegmentArena([]));
 
   t.equal(
     m1.dump(),
@@ -172,15 +172,18 @@ Segment #0
 });
 
 void tap.test("Message.getSegment()", (t) => {
-  const s = new Message(new MultiSegmentArena()).getSegment(0);
+  const s = new Message(new MultiSegmentArena([])).getSegment(0);
 
   t.equal(s.byteLength, 8, "should preallocate segment 0");
 
   t.throws(() => new Message().getSegment(1), undefined, "should throw when getting out of range segments");
 
-  const m = new Message(new MultiSegmentArena([new ArrayBuffer(2)])); // this is too small to hold the root pointer
-
-  t.throws(() => m.getSegment(0), undefined, "should throw when segment 0 is too small");
+  // this is too small to hold the root pointer
+  t.throws(
+    () => new MultiSegmentArena([new ArrayBuffer(2)]),
+    "CAPNP-TS037",
+    "should throw when segment 0 is too small"
+  );
 
   t.end();
 });
@@ -219,12 +222,12 @@ void tap.test("Message.toPackedArrayBuffer()", (t) => {
 void tap.test("preallocateSegments()", (t) => {
   t.throws(
     () => {
-      const message = new Message(new MultiSegmentArena());
+      const message = new Message(new MultiSegmentArena([new ArrayBuffer(8), new ArrayBuffer(7)]));
 
       preallocateSegments(message);
     },
-    undefined,
-    "should throw when preallocating an empty arena"
+    "CAPNP-TS005",
+    "should throw when preallocating with invalid buffers"
   );
 
   t.end();

@@ -33,7 +33,6 @@ import {
 } from "../../errors";
 
 const trace = initTrace("capnp:pointer");
-trace("load");
 
 export interface _PointerCtor {
   readonly displayName: string;
@@ -145,12 +144,7 @@ export function disown<T extends Pointer>(p: T): Orphan<T> {
 }
 
 export function dump(p: Pointer): string {
-  const f = followFars(p);
-  const pHex = bufferToHex(p.segment.buffer.slice(p.byteOffset, p.byteOffset + 8));
-  if (f.byteOffset === p.byteOffset && f.segment === p.segment) {
-    return pHex;
-  }
-  return `${pHex} > ${bufferToHex(f.segment.buffer.slice(f.byteOffset, f.byteOffset + 8))}`;
+  return bufferToHex(p.segment.buffer.slice(p.byteOffset, p.byteOffset + 8));
 }
 
 /**
@@ -257,11 +251,7 @@ export function add(offset: number, p: Pointer): Pointer {
 export function copyFrom(src: Pointer, p: Pointer): void {
   // If the pointer is the same then this is a noop.
 
-  if (p.segment === src.segment && p.byteOffset === src.byteOffset) {
-    trace("ignoring copy operation from identical pointer %s", src);
-
-    return;
-  }
+  if (p.segment === src.segment && p.byteOffset === src.byteOffset) return;
 
   // Make sure we erase this pointer's contents before moving on. If src is null, that's all we do.
 
@@ -685,14 +675,12 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
   if (p.segment !== contentSegment) {
     // Need a far pointer.
 
-    trace("Initializing far pointer %s -> %s.", p, contentSegment);
-
     if (!contentSegment.hasCapacity(8)) {
       // GAH! Not enough space in the content segment for a landing pad so we need a double far pointer.
 
       const landingPad = p.segment.allocate(16);
 
-      trace("GAH! Initializing double-far pointer in %s from %s -> %s.", p, contentSegment, landingPad);
+      trace("Initializing double-far pointer in %s from %s -> %s.", p, contentSegment, landingPad);
 
       setFarPointer(true, landingPad.byteOffset / 8, landingPad.segment.id, p);
       setFarPointer(false, contentOffset / 8, contentSegment.id, landingPad);
@@ -714,8 +702,6 @@ export function initPointer(contentSegment: Segment, contentOffset: number, p: P
 
     return new PointerAllocationResult(landingPad, (contentOffset - landingPad.byteOffset - 8) / 8);
   }
-
-  trace("Initializing intra-segment pointer %s -> %a.", p, contentOffset);
 
   return new PointerAllocationResult(p, (contentOffset - p.byteOffset - 8) / 8);
 }

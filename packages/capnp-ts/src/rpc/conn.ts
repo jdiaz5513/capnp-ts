@@ -9,12 +9,18 @@ import {
   Return_Which,
   Payload,
   CapDescriptor,
-  MessageTarget_Which,
   MessageTarget,
+  MessageTarget_Which,
 } from "../std/rpc.capnp";
 import { RPCError } from "./rpc-error";
 import { AnswerEntry, Answer } from "./answer";
-import { newMessage, newFinishMessage, newUnimplementedMessage } from "./capability";
+import {
+  newMessage,
+  newFinishMessage,
+  newUnimplementedMessage,
+  newReturnMessage,
+  setReturnException,
+} from "./capability";
 import { Pipeline } from "./pipeline";
 import { Struct } from "../serialization/pointers/struct";
 import { promisedAnswerOpsToTransform, transformToPromisedAnswer } from "./promised-answer";
@@ -37,6 +43,8 @@ import { joinAnswer } from "./join";
 import {
   INVARIANT_UNREACHABLE_CODE,
   RPC_BAD_TARGET,
+  RPC_FINISH_UNKNOWN_ANSWER,
+  RPC_NO_MAIN_INTERFACE,
   RPC_ONERROR_CALLBACK_MISSING,
   RPC_QUESTION_ID_REUSED,
   RPC_RETURN_FOR_UNKNOWN_QUESTION,
@@ -45,9 +53,12 @@ import {
   RPC_UNKNOWN_EXPORT_ID,
 } from "../errors";
 import { format } from "../util";
+import { Interface, Message } from "../serialization";
+import { AnyStruct } from "../serialization/pointers/any-struct";
+import { InterfaceCtor, ServerTarget } from "../serialization/pointers/interface";
+import { Server } from "./server";
 
 const trace = initTrace("capnp:rpc:conn");
-trace("load");
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type QuestionSlot = Question<any, any> | null;
@@ -71,7 +82,9 @@ export class Conn {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   answers = {} as { [key: number]: AnswerEntry<any> };
 
-  onError?: (err: Error) => void;
+  onError?: (err?: Error) => void;
+  main?: Client;
+  working = false;
 
   /**
    * Create a new connection
@@ -88,30 +101,71 @@ export class Conn {
     this.finalize = finalize;
     this.questionID = new IDGen();
     this.questions = [];
-
     this.startWork();
   }
 
-  bootstrap(): PipelineClient<Struct, Struct, Struct> {
+  bootstrap<C>(InterfaceClass: InterfaceCtor<C, Server>): C {
     const q = this.newQuestion();
     const msg = newMessage();
     const boot = msg.initBootstrap();
     boot.setQuestionId(q.id);
 
     this.sendMessage(msg);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new Pipeline(Struct as any, q).client();
+    return new InterfaceClass.Client(new Pipeline(AnyStruct, q).client());
+  }
+
+  initMain<S extends InterfaceCtor<unknown, Server>>(InterfaceClass: S, target: ServerTarget<S>): void {
+    this.main = new InterfaceClass.Server(target);
+    this.addExport(this.main);
   }
 
   startWork(): void {
     this.work().catch((e) => {
       if (this.onError) {
         this.onError(e);
-      } else {
-        // FIXME: that's no good
-        throw new Error(format(RPC_ONERROR_CALLBACK_MISSING, e as Error));
+      } else if (e !== undefined) {
+        trace(format(RPC_ONERROR_CALLBACK_MISSING, e));
+        throw e;
       }
     });
+  }
+
+  sendReturnException(id: number, err: Error): void {
+    const m = newReturnMessage(id);
+    setReturnException(m.getReturn(), err);
+    this.sendMessage(m);
+  }
+
+  handleBootstrapMessage(m: RPCMessage): void {
+    trace("BOOTSTRAP received; main: %s", this.main);
+    const boot = m.getBootstrap();
+    const id = boot.getQuestionId();
+    const ret = newReturnMessage(id);
+    ret.getReturn().setReleaseParamCaps(false);
+    const a = this.insertAnswer(id);
+    if (a === null) return this.sendReturnException(id, new Error(RPC_QUESTION_ID_REUSED));
+    if (this.main === undefined) return a.reject(new Error(RPC_NO_MAIN_INTERFACE));
+
+    const msg = new Message();
+    msg.addCap(this.main);
+    a.fulfill(new Interface(msg.getSegment(0), 0));
+  }
+
+  handleFinishMessage(m: RPCMessage): void {
+    const finish = m.getFinish();
+    const id = finish.getQuestionId();
+    const a = this.popAnswer(id);
+    trace("FINISH received; id: %s", id);
+    if (a === null) {
+      throw new Error(format(RPC_FINISH_UNKNOWN_ANSWER, id));
+    }
+    if (finish.getReleaseResultCaps()) {
+      const caps = a.resultCaps;
+      let i = caps.length;
+      while (--i >= 0) {
+        this.releaseExport(i, 1);
+      }
+    }
   }
 
   handleMessage(m: RPCMessage): void {
@@ -120,17 +174,26 @@ export class Conn {
         // no-op for now to avoid feedback loop
         break;
       }
+      case RPCMessage.BOOTSTRAP: {
+        this.handleBootstrapMessage(m);
+        break;
+      }
       case RPCMessage.ABORT: {
         this.shutdown(new RPCError(m.getAbort()));
         break;
       }
+      case RPCMessage.FINISH:
+        this.handleFinishMessage(m);
+        break;
       case RPCMessage.RETURN: {
+        // Make a copy to allow `m` to fall out of scope for GC and finalization
+        // this.handleReturnMessage(m.segment.message.copy().initRoot(RPCMessage));
         this.handleReturnMessage(m);
         break;
       }
       case RPCMessage.CALL: {
-        // TODO: the Go implementation copies the RPC message here
-        // figure out why they do that.
+        // Make a copy to allow `m` to fall out of scope for GC and finalization
+        // this.handleCallMessage(m.segment.message.copy().initRoot(RPCMessage));
         this.handleCallMessage(m);
         break;
       }
@@ -144,6 +207,7 @@ export class Conn {
     const ret = m.getReturn();
     const id = ret.getAnswerId();
     const q = this.popQuestion(id);
+    trace("RETURN received; id: %s, question: %s, release params: %s", id, q, ret.getReleaseParamCaps());
     if (!q) {
       throw new Error(format(RPC_RETURN_FOR_UNKNOWN_QUESTION, id));
     }
@@ -189,7 +253,8 @@ export class Conn {
   handleCallMessage(m: RPCMessage): void {
     const mcall = m.getCall();
     const mt = mcall.getTarget();
-    if (mt.which() !== MessageTarget_Which.IMPORTED_CAP && mt.which() !== MessageTarget_Which.PROMISED_ANSWER) {
+    trace("CALL received; target: ", MessageTarget_Which[mt.which()]);
+    if (mt.which() !== MessageTarget.IMPORTED_CAP && mt.which() !== MessageTarget.PROMISED_ANSWER) {
       const um = newUnimplementedMessage(m);
       this.sendMessage(um);
       return;
@@ -237,7 +302,6 @@ export class Conn {
       params: Struct.getAs(method.ParamsClass, paramContent),
     };
     try {
-      trace(id);
       this.routeCallMessage(a, mt, call);
     } catch (e) {
       a.reject(e as Error);
@@ -250,7 +314,7 @@ export class Conn {
     cl: Call<P, R>
   ): void {
     switch (mt.which()) {
-      case MessageTarget_Which.IMPORTED_CAP: {
+      case MessageTarget.IMPORTED_CAP: {
         const id = mt.getImportedCap();
         const e = this.findExport(id);
         if (!e) {
@@ -260,14 +324,13 @@ export class Conn {
         joinAnswer(result, answer);
         break;
       }
-      case MessageTarget_Which.PROMISED_ANSWER: {
+      case MessageTarget.PROMISED_ANSWER: {
         const mpromise = mt.getPromisedAnswer();
         const id = mpromise.getQuestionId();
         if (id === result.id) {
           // Grandfather paradox
           throw new Error(RPC_BAD_TARGET);
         }
-        trace(this.answers);
         const pa = this.answers[id] as AnswerEntry<R>;
         if (!pa) {
           throw new Error(RPC_BAD_TARGET);
@@ -555,9 +618,16 @@ export class Conn {
   }
 
   private async work() {
-    for (;;) {
-      const m = await this.transport.recvMessage();
-      this.handleMessage(m);
+    this.working = true;
+    while (this.working) {
+      try {
+        const m = await this.transport.recvMessage();
+        this.handleMessage(m);
+      } catch (err) {
+        if (err !== undefined) throw err;
+        this.working = false;
+        trace("aborting work loop: connection closed");
+      }
     }
   }
 }

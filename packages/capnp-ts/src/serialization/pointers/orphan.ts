@@ -25,7 +25,6 @@ import {
 import { PointerType } from "./pointer-type";
 
 const trace = initTrace("capnp:orphan");
-trace("load");
 
 export interface _Orphan {
   capId: number;

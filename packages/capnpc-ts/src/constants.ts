@@ -3,11 +3,7 @@
  */
 
 import * as s from "capnp-ts/src/std/schema.capnp.js";
-import initTrace from "debug";
 import ts, { factory as f } from "typescript";
-
-const trace = initTrace("capnpc:constants");
-trace("load");
 
 /** undefined */
 

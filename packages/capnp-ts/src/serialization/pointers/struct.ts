@@ -50,7 +50,6 @@ import {
 } from "../../errors";
 
 const trace = initTrace("capnp:struct");
-trace("load");
 
 // Used to apply bit masks (default values).
 const TMP_WORD = new DataView(new ArrayBuffer(8));

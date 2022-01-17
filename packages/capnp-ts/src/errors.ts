@@ -4,12 +4,7 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import { MAX_SEGMENT_LENGTH } from "./constants";
-
-const trace = initTrace("capnp:errors");
-trace("load");
 
 // Invariant violations (sometimes known as "precondition failed").
 //
@@ -135,3 +130,6 @@ export const RPC_UNKNOWN_ANSWER_ID = "CAPNP-TS114 Capability table references un
 export const RPC_UNKNOWN_CAP_DESCRIPTOR = "CAPNP-TS115 Unknown cap descriptor type (which: %s).";
 export const RPC_METHOD_ERROR = "CAPNP-TS116 RPC method failed at %s.%s(): %s";
 export const RPC_ERROR = "CAPNP-TS117 RPC call failed, reason: %s";
+export const RPC_NO_MAIN_INTERFACE = "CAPNP-TS118 Received bootstrap message without main interface set.";
+export const RPC_FINISH_UNKNOWN_ANSWER = "CAPNP-TS119 Received finish message for unknown answer ID (%s).";
+export const RPC_FULFILL_ALREADY_CALLED = "CAPNP-TS120 Fulfill called more than once for question (%s).";

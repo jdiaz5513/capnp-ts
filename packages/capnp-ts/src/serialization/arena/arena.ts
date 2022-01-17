@@ -2,7 +2,6 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
 import { assertNever } from "../../errors";
 import { Segment } from "../segment";
 import { AnyArena } from "./any-arena";
@@ -11,11 +10,9 @@ import { ArenaKind } from "./arena-kind";
 import { MultiSegmentArena } from "./multi-segment-arena";
 import { SingleSegmentArena } from "./single-segment-arena";
 
-const trace = initTrace("capnp:arena");
-trace("load");
-
 export abstract class Arena {
   static readonly allocate = allocate;
+  static readonly copy = copy;
   static readonly getBuffer = getBuffer;
   static readonly getNumSegments = getNumSegments;
 }
@@ -27,6 +24,24 @@ export function allocate(minSize: number, segments: Segment[], a: AnyArena): Are
 
     case ArenaKind.SINGLE_SEGMENT:
       return SingleSegmentArena.allocate(minSize, segments, a);
+
+    default:
+      return assertNever(a);
+  }
+}
+
+export function copy(a: AnyArena): AnyArena {
+  switch (a.kind) {
+    case ArenaKind.MULTI_SEGMENT: {
+      let i = a.buffers.length;
+      const buffers = new Array<ArrayBuffer>(i);
+      while (--i >= 0) {
+        buffers[i] = a.buffers[i].slice(0);
+      }
+      return new MultiSegmentArena(buffers);
+    }
+    case ArenaKind.SINGLE_SEGMENT:
+      return new SingleSegmentArena(a.buffer.slice(0));
 
     default:
       return assertNever(a);

@@ -6,14 +6,11 @@ import * as s from "capnp-ts/src/std/schema.capnp.js";
 import * as capnp from "capnp-ts";
 import { format, pad } from "capnp-ts/src/util";
 import ts, { factory as f } from "typescript";
-import initTrace from "debug";
 import { CodeGeneratorFileContext } from "./code-generator-file-context";
 import { __, READONLY, STATIC, VOID_TYPE, CAPNP } from "./constants";
 import * as E from "./errors";
 import { getDisplayNamePrefix, getFullClassName, getJsType } from "./file";
 import * as util from "./util";
-
-const trace = initTrace("capnpc:ast-creators");
 
 export function createBigIntExpression(value: bigint): ts.Expression {
   let v = value.toString(16);
@@ -91,8 +88,6 @@ export function createUnionConstProperty(fullClassName: string, field: s.Field):
 }
 
 export function createValueExpression(value: s.Value): ts.Expression {
-  trace("createValueExpression(%s)", value);
-
   let p: capnp.Pointer;
 
   switch (value.which()) {

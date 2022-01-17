@@ -10,7 +10,6 @@ import { Pointer, validate, getContent } from "./pointer";
 import { PointerType } from "./pointer-type";
 
 const trace = initTrace("capnp:data");
-trace("load");
 
 /**
  * A generic blob of bytes. Can be converted to a DataView or Uint8Array to access its contents using `toDataView()` and
@@ -29,11 +28,7 @@ export class Data extends List<number> {
   }
 
   protected static _fromPointerUnchecked(pointer: Pointer): Data {
-    return new this(
-      pointer.segment,
-      pointer.byteOffset,
-      pointer._capnp.depthLimit
-    );
+    return new this(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
   }
 
   /**
@@ -56,30 +51,18 @@ export class Data extends List<number> {
     const i =
       src instanceof ArrayBuffer
         ? new Uint8Array(src)
-        : new Uint8Array(
-            src.buffer,
-            src.byteOffset,
-            Math.min(dstLength, srcLength)
-          );
+        : new Uint8Array(src.buffer, src.byteOffset, Math.min(dstLength, srcLength));
 
     const o = new Uint8Array(c.segment.buffer, c.byteOffset, this.getLength());
 
     o.set(i);
 
     if (dstLength > srcLength) {
-      trace(
-        "Zeroing out remaining %d bytes after copy into %s.",
-        dstLength - srcLength,
-        this
-      );
+      trace("Zeroing out remaining %d bytes after copy into %s.", dstLength - srcLength, this);
 
       o.fill(0, srcLength, dstLength);
     } else if (dstLength < srcLength) {
-      trace(
-        "Truncated %d bytes from source buffer while copying to %s.",
-        srcLength - dstLength,
-        this
-      );
+      trace("Truncated %d bytes from source buffer while copying to %s.", srcLength - dstLength, this);
     }
   }
 
@@ -118,10 +101,7 @@ export class Data extends List<number> {
 
   toArrayBuffer(): ArrayBuffer {
     const c = getContent(this);
-    return c.segment.buffer.slice(
-      c.byteOffset,
-      c.byteOffset + this.getLength()
-    );
+    return c.segment.buffer.slice(c.byteOffset, c.byteOffset + this.getLength());
   }
 
   /**

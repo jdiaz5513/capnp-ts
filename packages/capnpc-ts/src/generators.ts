@@ -53,7 +53,6 @@ import {
 import * as util from "./util";
 
 const trace = initTrace("capnpc:generators");
-trace("load");
 
 export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
   // Look for the special importPath annotation on the file to see if we need a different import path for capnp-ts.
@@ -105,7 +104,6 @@ export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
 
     const importStatement = `import { ${imports} } from "${importPath}"`;
 
-    trace("emitting import statement:", importStatement);
     ctx.statements.push(f.createExpressionStatement(f.createIdentifier(importStatement)));
   });
 }
@@ -176,8 +174,6 @@ export function generateDefaultValue(field: s.Field): ts.PropertyAssignment {
 }
 
 export function generateEnumNode(ctx: CodeGeneratorFileContext, node: s.Node): void {
-  trace("generateEnumNode(%s) [%s]", node, node.getDisplayName());
-
   const members = node
     .getEnum()
     .getEnumerants()
@@ -190,8 +186,6 @@ export function generateEnumNode(ctx: CodeGeneratorFileContext, node: s.Node): v
 }
 
 export function generateFileId(ctx: CodeGeneratorFileContext): void {
-  trace("generateFileId()");
-
   // export const _capnpFileId = BigInt('0xabcdef');
   const fileId = f.createCallExpression(BIGINT, __, [f.createStringLiteral(`0x${ctx.file.getId().toString(16)}`)]);
   ctx.statements.push(
@@ -203,8 +197,6 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
 }
 
 export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.Node): void {
-  trace("generateInterfaceClasses(%s) [%s]", node, node.getDisplayName());
-
   // Generate the parameter and result structs first
   generateMethodStructs(ctx, node);
 
@@ -214,8 +206,6 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
 }
 
 export function generateMethodStructs(ctx: CodeGeneratorFileContext, node: s.Node): void {
-  trace("generateMethodStructs(%s) [%s]", node, node.getDisplayName());
-
   node
     .getInterface()
     .getMethods()
@@ -231,8 +221,6 @@ export function generateMethodStructs(ctx: CodeGeneratorFileContext, node: s.Nod
 
 export function generateServer(ctx: CodeGeneratorFileContext, node: s.Node): void {
   // TODO: handle superclasses
-  trace("generateServer(%s) [%s]", node, node.getDisplayName());
-
   const fullClassName = getFullClassName(node);
   const serverName = `${fullClassName}$Server`;
   const serverTargetName = `${serverName}$Target`;
@@ -404,8 +392,6 @@ export function generateClientMethod(
   method: s.Method,
   index: number
 ): void {
-  trace("generateClientMethod(%s, %s, %d) [%s]", node, method, index, node.getDisplayName());
-
   const name = method.getName();
 
   const paramTypeName = getFullClassName(lookupNode(ctx, method.getParamStructType()));
@@ -533,8 +519,6 @@ export function generateClientMethod(
 }
 
 export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): void {
-  trace("generateClient(%s) [%s]", node, node.getDisplayName());
-
   const fullClassName = getFullClassName(node);
   const clientName = `${fullClassName}$Client`;
 
@@ -610,8 +594,6 @@ export function generateClient(ctx: CodeGeneratorFileContext, node: s.Node): voi
 }
 
 export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void {
-  trace("generateNode(%s, %s)", ctx, node.getId().toString(16));
-
   const nodeId = node.getId();
   const nodeIdHex = nodeId.toString(16);
 
@@ -665,8 +647,6 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
 }
 
 export function generateResultPromise(ctx: CodeGeneratorFileContext, node: s.Node): void {
-  trace("generateResultsPromise(%s) [%s]", node, node.getDisplayName());
-
   const nodeId = node.getId();
 
   if (ctx.generatedResultsPromiseIds.has(nodeId)) return;
@@ -1188,8 +1168,6 @@ export function generateStructFieldMethods(
 }
 
 export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, interfaceNode: boolean): void {
-  trace("generateStructNode(%s) [%s]", node, node.getDisplayName());
-
   const displayNamePrefix = getDisplayNamePrefix(node);
   const fullClassName = getFullClassName(node);
   const nestedNodes = node

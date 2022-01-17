@@ -3,13 +3,30 @@
  * @author fasterthanlime
  */
 
-import { MAX_DEPTH } from "../../constants";
-import { Segment } from "../segment";
-import { Pointer, getTargetPointerType } from "./pointer";
-import { CapabilityID } from "../../rpc/capability";
-import { Client } from "../../rpc";
-import { PointerType } from "./pointer-type";
 import { format } from "../../util";
+import { MAX_DEPTH } from "../../constants";
+import { Pointer, getTargetPointerType } from "./pointer";
+import { PointerType } from "./pointer-type";
+import type { CapabilityID } from "../../rpc/capability";
+import type { Client, Server } from "../../rpc";
+import type { ObjectSize } from "../object-size";
+import type { Segment } from "../segment";
+
+export type ServerTarget<S extends InterfaceCtor<unknown, Server>> = ConstructorParameters<S["Server"]>[0];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface InterfaceCtor<C, S extends Server> {
+  readonly _capnp: {
+    displayName: string;
+    id: string;
+    size: ObjectSize;
+  };
+  readonly Client: { new (client: Client): C };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly Server: { new (target: any): S };
+
+  new (segment: Segment, byteOffset: number, depthLimit?: number): Interface;
+}
 
 export class Interface extends Pointer {
   static readonly _capnp = {

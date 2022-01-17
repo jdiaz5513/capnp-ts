@@ -9,7 +9,10 @@ import { clientFromResolution } from "./client";
 import { newMessage } from "./capability";
 import { transformToPromisedAnswer } from "./promised-answer";
 import { Pointer } from "../serialization/pointers/pointer";
-import { NOT_IMPLEMENTED } from "../errors";
+import { NOT_IMPLEMENTED, RPC_FULFILL_ALREADY_CALLED } from "../errors";
+import initTrace from "debug";
+
+const trace = initTrace("capnp:rpc:question");
 
 export enum QuestionState {
   IN_PROGRESS,
@@ -49,12 +52,13 @@ export class Question<P extends Struct, R extends Struct> implements Answer<R> {
   fulfill(obj: Pointer): void {
     // TODO: derived, see https://sourcegraph.com/github.com/capnproto/go-capnproto2@e1ae1f982d9908a41db464f02861a850a0880a5a/-/blob/rpc/question.go#L105
     if (this.state !== QuestionState.IN_PROGRESS) {
-      throw new Error(`question.fulfill called more than once`);
+      throw new Error(RPC_FULFILL_ALREADY_CALLED);
     }
     if (this.method) {
       this.obj = Struct.getAs(this.method.ResultsClass, obj);
     } else {
       // ugly, but when bootstrapping, method is null
+      trace("method is null");
       this.obj = obj as R;
     }
     this.state = QuestionState.RESOLVED;

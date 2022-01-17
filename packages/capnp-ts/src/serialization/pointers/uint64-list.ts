@@ -2,14 +2,9 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import { ListElementSize } from "../list-element-size";
 import { _ListCtor, List } from "./list";
 import { getContent } from "./pointer";
-
-const trace = initTrace("capnp:list:composite");
-trace("load");
 
 export class Uint64List extends List<bigint> {
   static readonly _capnp: _ListCtor = {

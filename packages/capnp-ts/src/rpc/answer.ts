@@ -49,6 +49,7 @@ export class AnswerEntry<R extends Struct> {
       throw new Error(`answer.fulfill called more than once`);
     }
 
+    this.done = true;
     this.obj = obj;
 
     const retmsg = newReturnMessage(this.id);
@@ -59,6 +60,7 @@ export class AnswerEntry<R extends Struct> {
     let firstErr: Error | undefined;
     try {
       this.conn.makeCapTable(ret.segment, (len) => payload.initCapTable(len));
+      this.deferred.resolve(obj);
       this.conn.sendMessage(retmsg);
     } catch (err) {
       if (!firstErr) {

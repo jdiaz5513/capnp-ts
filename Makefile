@@ -12,7 +12,7 @@ SHELL := bash
 # environment variables
 
 CAPNP_BIN := capnp
-TAP_FLAGS ?= -j8 --no-coverage --ts -Rterse -c
+TAP_FLAGS ?= --no-coverage --ts -c
 TAP_TS := 1
 TSC_FLAGS ?=
 STANDARD_FLAGS ?= --dry-run

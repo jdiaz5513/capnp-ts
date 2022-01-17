@@ -8,7 +8,6 @@ import * as E from "./errors";
 import * as util from "./util";
 
 const trace = initTrace("capnpc:file");
-trace("load");
 
 export function compareCodeOrder(a: { getCodeOrder(): number }, b: { getCodeOrder(): number }): number {
   return a.getCodeOrder() - b.getCodeOrder();

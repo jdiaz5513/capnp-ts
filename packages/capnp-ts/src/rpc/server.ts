@@ -26,8 +26,9 @@ export class Server implements Client {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   methods: Array<ServerMethod<any, any>>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(target: unknown, methods: Array<ServerMethod<any, any>>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+  constructor(target: any, methods: Array<ServerMethod<any, any>>) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.target = target;
     this.methods = methods;
   }
