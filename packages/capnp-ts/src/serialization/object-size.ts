@@ -2,12 +2,7 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import * as _ from "../util";
-
-const trace = initTrace("capnp:object-size");
-trace("load");
 
 /**
  * A simple object that describes the size of a struct.
@@ -31,11 +26,7 @@ export class ObjectSize {
   }
 
   toString(): string {
-    return _.format(
-      "ObjectSize_dw:%d,pc:%d",
-      getDataWordLength(this),
-      this.pointerLength
-    );
+    return _.format("ObjectSize_dw:%d,pc:%d", getDataWordLength(this), this.pointerLength);
   }
 }
 

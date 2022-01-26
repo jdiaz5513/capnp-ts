@@ -2,15 +2,10 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import { ListElementSize } from "../list-element-size";
 import { _ListCtor, List, ListCtor } from "./list";
 import { Struct, StructCtor } from "./struct";
 import { copyFrom } from "./pointer";
-
-const trace = initTrace("capnp:list:composite");
-trace("load");
 
 export function CompositeList<T extends Struct>(CompositeClass: StructCtor<T>): ListCtor<T> {
   return class extends List<T> {

@@ -2,16 +2,11 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import { MAX_SEGMENT_LENGTH, NATIVE_LITTLE_ENDIAN } from "../constants";
 import { SEG_REPLACEMENT_BUFFER_TOO_SMALL, SEG_SIZE_OVERFLOW } from "../errors";
 import { format, padToWord } from "../util";
 import { Message } from "./message";
 import { Pointer } from "./pointers";
-
-const trace = initTrace("capnp:segment");
-trace("load");
 
 export class Segment implements DataView {
   buffer: ArrayBuffer;
@@ -56,8 +51,6 @@ export class Segment implements DataView {
    */
 
   allocate(byteLength: number): Pointer {
-    trace("allocate(%d)", byteLength);
-
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let segment: Segment = this;
 
@@ -74,8 +67,6 @@ export class Segment implements DataView {
     const byteOffset = segment.byteLength;
 
     segment.byteLength = segment.byteLength + byteLength;
-
-    trace("Allocated %x bytes in %s (requested segment: %s).", byteLength, this, segment);
 
     return new Pointer(segment, byteOffset);
   }
@@ -254,8 +245,6 @@ export class Segment implements DataView {
   }
 
   hasCapacity(byteLength: number): boolean {
-    trace("hasCapacity(%d)", byteLength);
-
     // capacity - allocated >= requested
 
     return this.buffer.byteLength - this.byteLength >= byteLength;
@@ -286,8 +275,6 @@ export class Segment implements DataView {
    */
 
   replaceBuffer(buffer: ArrayBuffer): void {
-    trace("replaceBuffer(%p)", buffer);
-
     if (this.buffer === buffer) return;
 
     if (buffer.byteLength < this.byteLength) {

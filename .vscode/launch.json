@@ -11,18 +11,38 @@
       "type": "node"
     },
     {
-      "cwd": "${workspaceRoot}",
+      "env": {
+        "NODE_ENV": "development",
+        "TAP_TIMEOUT": "0"
+      },
+      "name": "Debug all",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "runtimeArgs": ["run", "test:watch"],
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    },
+    {
       "env": {
         "DEBUG": "capnp:*",
-        "NODE_ENV": "development"
+        "NODE_ENV": "development",
+        "TAP_TIMEOUT": "0"
       },
-      "name": "Debug (Test)",
-      "preLaunchTask": "build",
-      "program": "${file}",
+      "name": "Debug current test",
+      "type": "node",
       "request": "launch",
-      "sourceMaps": true,
-      "stopOnEntry": false,
-      "type": "node"
+      // "preLaunchTask": "build",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tap",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "runtimeArgs": ["--no-coverage", "--ts", "-c", "-Rspec", "${file}"],
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
     }
   ]
 }

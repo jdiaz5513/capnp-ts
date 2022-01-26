@@ -2,19 +2,14 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import { ListElementSize } from "../list-element-size";
 import { _ListCtor, List } from "./list";
 import { getContent } from "./pointer";
 
-const trace = initTrace("capnp:list:composite");
-trace("load");
-
 export class Float64List extends List<number> {
   static readonly _capnp: _ListCtor = {
     displayName: "List<Float64>" as string,
-    size: ListElementSize.BYTE_8
+    size: ListElementSize.BYTE_8,
   };
 
   get(index: number): number {

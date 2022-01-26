@@ -2,14 +2,9 @@
  * @author jdiaz5513
  */
 
-import initTrace from "debug";
-
 import { ListElementSize } from "../list-element-size";
 import { _ListCtor, List, ListCtor } from "./list";
 import { Pointer, PointerCtor, getContent, copyFrom } from "./pointer";
-
-const trace = initTrace("capnp:list:composite");
-trace("load");
 
 export function PointerList<T extends Pointer>(PointerClass: PointerCtor<T>): ListCtor<T> {
   return class extends List<T> {

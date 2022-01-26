@@ -1,5 +1,4 @@
 import { pad } from "capnp-ts/src/util";
-import initTrace from "debug";
 
 // Yep, this is silly. :)
 
@@ -12,9 +11,6 @@ interface Hex2Dec {
 /* eslint-disable @typescript-eslint/unbound-method */
 const { decToHex, hexToDec } = require("hex2dec") as Hex2Dec;
 /* eslint-enable */
-
-const trace = initTrace("capnpc:util");
-trace("load");
 
 export function c2s(s: string): string {
   return splitCamel(s)

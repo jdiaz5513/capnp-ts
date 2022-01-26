@@ -11,7 +11,6 @@ import { Pointer, validate, isNull, getContent, erase } from "./pointer";
 import { PointerType } from "./pointer-type";
 
 const trace = initTrace("capnp:text");
-trace("load");
 
 export class Text extends List<string> {
   static fromPointer(pointer: Pointer): Text {
@@ -38,13 +37,7 @@ export class Text extends List<string> {
 
     // Remember to exclude the NUL byte.
 
-    return decodeUtf8(
-      new Uint8Array(
-        c.segment.buffer,
-        c.byteOffset + index,
-        this.getLength() - index
-      )
-    );
+    return decodeUtf8(new Uint8Array(c.segment.buffer, c.byteOffset + index, this.getLength() - index));
   }
 
   /**
@@ -88,19 +81,10 @@ export class Text extends List<string> {
       if (originalLength >= index) {
         originalLength = index;
       } else {
-        trace(
-          "%d byte gap exists between original text and new text in %s.",
-          index - originalLength,
-          this
-        );
+        trace("%d byte gap exists between original text and new text in %s.", index - originalLength, this);
       }
 
-      original = new Uint8Array(
-        c.segment.buffer.slice(
-          c.byteOffset,
-          c.byteOffset + Math.min(originalLength, index)
-        )
-      );
+      original = new Uint8Array(c.segment.buffer.slice(c.byteOffset, c.byteOffset + Math.min(originalLength, index)));
 
       erase(this);
     }
@@ -123,9 +107,5 @@ export class Text extends List<string> {
 }
 
 function textFromPointerUnchecked(pointer: Pointer): Text {
-  return new Text(
-    pointer.segment,
-    pointer.byteOffset,
-    pointer._capnp.depthLimit
-  );
+  return new Text(pointer.segment, pointer.byteOffset, pointer._capnp.depthLimit);
 }

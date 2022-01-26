@@ -18,9 +18,6 @@ import {
   initPointer,
 } from "./pointer";
 
-const trace = initTrace("capnp:list");
-trace("load");
-
 export interface _ListCtor {
   readonly compositeSize?: ObjectSize;
   readonly displayName: string;
@@ -349,8 +346,6 @@ export function initList<T>(
       c = l.segment.allocate(byteLength + 8);
 
       setStructPointer(length, compositeSize, c);
-
-      trace("Wrote composite tag word %s for %s.", c, l);
 
       break;
     }

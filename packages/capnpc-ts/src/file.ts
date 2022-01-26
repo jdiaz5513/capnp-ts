@@ -8,7 +8,6 @@ import * as E from "./errors";
 import * as util from "./util";
 
 const trace = initTrace("capnpc:file");
-trace("load");
 
 export function compareCodeOrder(a: { getCodeOrder(): number }, b: { getCodeOrder(): number }): number {
   return a.getCodeOrder() - b.getCodeOrder();
@@ -74,7 +73,7 @@ export function getJsType(ctx: CodeGeneratorFileContext, type: s.Type, construct
       return "bigint";
 
     case s.Type.INTERFACE:
-      return "capnp.Interface";
+      return getFullClassName(lookupNode(ctx, type.getInterface().getTypeId()));
 
     case s.Type.LIST:
       return `capnp.List${constructor ? "Ctor" : ""}<${getJsType(ctx, type.getList().getElementType(), false)}>`;

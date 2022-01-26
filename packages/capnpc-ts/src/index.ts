@@ -8,7 +8,6 @@ import { loadRequest, writeTsFiles } from "./compiler";
 import * as E from "./errors";
 
 const trace = initTrace("capnpc");
-trace("load");
 
 /**
  * The equivalent of tsconfig.json used when compiling the emitted .ts file to .js.
@@ -50,7 +49,6 @@ export async function run(): Promise<CodeGeneratorContext> {
   const chunks: Buffer[] = [];
 
   process.stdin.on("data", (chunk: Buffer) => {
-    trace("reading data chunk (%d bytes)", chunk.byteLength);
     chunks.push(chunk);
   });
 
@@ -66,16 +64,8 @@ export async function run(): Promise<CodeGeneratorContext> {
     i += chunk.byteLength;
   });
 
-  trace("reqBuffer (length: %d)", reqBuffer.length, reqBuffer);
-
   const message = new capnp.Message(reqBuffer, false);
-
-  trace("message: %s", message.dump());
-
   const req = message.getRoot(s.CodeGeneratorRequest);
-
-  trace("%s", req);
-
   const ctx = loadRequest(req);
 
   writeTsFiles(ctx);
@@ -84,8 +74,6 @@ export async function run(): Promise<CodeGeneratorContext> {
 }
 
 export function transpileAll(ctx: CodeGeneratorContext): void {
-  trace("transpileAll()", ctx.files);
-
   const tsFilePaths = ctx.files.map((f) => f.tsPath);
 
   const program = ts.createProgram(tsFilePaths, COMPILE_OPTIONS);
@@ -114,10 +102,8 @@ export function transpileAll(ctx: CodeGeneratorContext): void {
       if (diagnostic.file && diagnostic.start) {
         const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
 
-        /* tslint:disable-next-line:no-console */
         console.log(`${diagnostic.file.fileName}:${line + 1}:${character + 1} ${message}`);
       } else {
-        /* tslint:disable-next-line:no-console */
         console.log(`==> ${message}`);
       }
     });

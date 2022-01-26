@@ -9,6 +9,7 @@ export class CodeGeneratorFileContext {
   concreteLists: Array<[string, s.Field]>;
   file: s.CodeGeneratorRequest_RequestedFile;
   generatedNodeIds: string[];
+  generatedResultsPromiseIds: Set<bigint>;
   imports: s.CodeGeneratorRequest_RequestedFile_Import[];
   nodes: s.Node[];
   req: s.CodeGeneratorRequest;
@@ -21,6 +22,7 @@ export class CodeGeneratorFileContext {
     this.nodes = req.getNodes().toArray();
     this.concreteLists = [];
     this.generatedNodeIds = [];
+    this.generatedResultsPromiseIds = new Set();
     this.statements = [];
     this.tsPath = "";
     this.imports = file.getImports().toArray();

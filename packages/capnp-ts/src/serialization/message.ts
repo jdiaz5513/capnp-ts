@@ -4,12 +4,7 @@
 
 import initTrace from "debug";
 import { DEFAULT_TRAVERSE_LIMIT, DEFAULT_BUFFER_SIZE } from "../constants";
-import {
-  MSG_INVALID_FRAME_HEADER,
-  MSG_SEGMENT_OUT_OF_BOUNDS,
-  MSG_SEGMENT_TOO_SMALL,
-  MSG_NO_SEGMENTS_IN_ARENA,
-} from "../errors";
+import { MSG_INVALID_FRAME_HEADER, MSG_SEGMENT_OUT_OF_BOUNDS, MSG_SEGMENT_TOO_SMALL } from "../errors";
 import { dumpBuffer, format, padToWord } from "../util";
 import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena, ArenaKind } from "./arena";
 import { pack, unpack } from "./packing";
@@ -17,14 +12,15 @@ import { Pointer, StructCtor, PointerType, Struct } from "./pointers";
 import { Segment } from "./segment";
 import { getTargetStructSize, validate } from "./pointers/pointer";
 import { resize, initStruct } from "./pointers/struct";
+import { Client } from "../rpc/client";
 
 const trace = initTrace("capnp:message");
-trace("load");
 
 export interface _Message {
   readonly arena: AnyArena;
   segments: Segment[];
   traversalLimit: number;
+  capTable?: Array<Client | null>;
 }
 
 export class Message {
@@ -71,13 +67,20 @@ export class Message {
   constructor(src?: AnyArena | ArrayBufferView | ArrayBuffer, packed = true, singleSegment = false) {
     this._capnp = initMessage(src, packed, singleSegment);
 
-    if (src && !isAnyArena(src)) preallocateSegments(this);
-
-    trace("new %s", this);
+    if (src) preallocateSegments(this);
   }
 
   allocateSegment(byteLength: number): Segment {
     return allocateSegment(byteLength, this);
+  }
+
+  /**
+   * Copies the contents of this message into an identical message with its own ArrayBuffers.
+   *
+   * @returns A copy of this message.
+   */
+  copy(): Message {
+    return copy(this);
   }
 
   /**
@@ -168,6 +171,15 @@ export class Message {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     return `Message_arena:${this._capnp.arena}`;
   }
+
+  addCap(client: Client | null): number {
+    if (!this._capnp.capTable) {
+      this._capnp.capTable = [];
+    }
+    const id = this._capnp.capTable.length;
+    this._capnp.capTable.push(client);
+    return id;
+  }
 }
 
 export interface CreateMessageOptions {
@@ -192,7 +204,7 @@ export function initMessage(
     return { arena: src, segments: [], traversalLimit: DEFAULT_TRAVERSE_LIMIT };
   }
 
-  let buf: ArrayBuffer = src as ArrayBuffer;
+  let buf = src;
 
   if (isArrayBufferView(buf)) {
     buf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
@@ -233,8 +245,6 @@ export function getFramedSegments(message: ArrayBuffer): ArrayBuffer[] {
 
   const segments = new Array(segmentCount) as ArrayBuffer[];
 
-  trace("reading %d framed segments from stream", segmentCount);
-
   let byteOffset = 4 + segmentCount * 4;
   byteOffset += byteOffset % 8;
 
@@ -271,12 +281,16 @@ export function getFramedSegments(message: ArrayBuffer): ArrayBuffer[] {
 export function preallocateSegments(m: Message): void {
   const numSegments = Arena.getNumSegments(m._capnp.arena);
 
-  if (numSegments < 1) throw new Error(MSG_NO_SEGMENTS_IN_ARENA);
-
   m._capnp.segments = new Array(numSegments) as Segment[];
 
   for (let i = 0; i < numSegments; i++) {
     // Set up each segment so that they're fully allocated to the extents of the existing buffers.
+
+    if (i === 0 && Arena.getBuffer(i, m._capnp.arena).byteLength < 8) {
+      // This is not a valid message if it can't fit a single pointer.
+
+      throw new Error(MSG_SEGMENT_TOO_SMALL);
+    }
 
     const buffer = Arena.getBuffer(i, m._capnp.arena);
     const segment = new Segment(i, m, buffer, buffer.byteLength);
@@ -294,8 +308,6 @@ function isAnyArena(o: unknown): o is AnyArena {
 }
 
 export function allocateSegment(byteLength: number, m: Message): Segment {
-  trace("allocating %x bytes for %s", byteLength, m);
-
   const res = Arena.allocate(byteLength, m._capnp.segments, m._capnp.arena);
   let s: Segment;
 
@@ -305,15 +317,11 @@ export function allocateSegment(byteLength: number, m: Message): Segment {
 
     s = new Segment(res.id, m, res.buffer);
 
-    trace("adding new segment %s", s);
-
     m._capnp.segments.push(s);
   } else if (res.id < 0 || res.id > m._capnp.segments.length) {
     throw new Error(format(MSG_SEGMENT_OUT_OF_BOUNDS, res.id, m));
   } else {
     s = m._capnp.segments[res.id];
-
-    trace("replacing segment %s with buffer (len:%d)", s, res.buffer.byteLength);
 
     s.replaceBuffer(res.buffer);
   }
@@ -401,8 +409,6 @@ export function initRoot<T extends Struct>(RootStruct: StructCtor<T>, m: Message
   const root = new RootStruct(m.getSegment(0), 0);
 
   initStruct(RootStruct._capnp.size, root);
-
-  trace("Initialized root pointer %s for %s.", root, m);
 
   return root;
 }
@@ -493,15 +499,15 @@ export function getStreamFrame(m: Message): ArrayBuffer {
   const frameLength = 4 + length * 4 + (1 - (length % 2)) * 4;
   const out = new DataView(new ArrayBuffer(frameLength));
 
-  trace("Writing message stream frame with segment count: %d.", length);
-
   out.setUint32(0, length - 1, true);
 
   m._capnp.segments.forEach((s, i) => {
-    trace("Message segment %d word count: %d.", s.id, s.byteLength / 8);
-
     out.setUint32(i * 4 + 4, s.byteLength / 8, true);
   });
 
   return out.buffer;
+}
+
+export function copy(m: Message): Message {
+  return new Message(Arena.copy(m._capnp.arena));
 }

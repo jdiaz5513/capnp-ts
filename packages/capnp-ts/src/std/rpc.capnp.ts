@@ -4,7 +4,7 @@
  */
 
 import * as capnp from "../index";
-import { ObjectSize as __O, Struct as __S } from "../index";
+import { ObjectSize as __O, Struct as __S, Interface as __I } from '../index';
 export const _capnpFileId = "b312981b2552a250";
 export enum Message_Which {
     UNIMPLEMENTED = 0,

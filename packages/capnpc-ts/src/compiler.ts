@@ -18,7 +18,6 @@ import {
 } from "./generators";
 
 const trace = initTrace("capnpc:compile");
-trace("load");
 
 export function compile(ctx: CodeGeneratorFileContext): string {
   generateCapnpImport(ctx);
@@ -42,8 +41,6 @@ export function compile(ctx: CodeGeneratorFileContext): string {
 }
 
 export function loadRequest(req: s.CodeGeneratorRequest): CodeGeneratorContext {
-  trace("loadRequest(%s)", req);
-
   const ctx = new CodeGeneratorContext();
 
   ctx.files = req.getRequestedFiles().map((file) => loadRequestedFile(req, file));
@@ -52,14 +49,10 @@ export function loadRequest(req: s.CodeGeneratorRequest): CodeGeneratorContext {
 }
 
 export function printSourceFiles(ctx: CodeGeneratorContext): string[] {
-  trace("printSourceFiles()");
-
   return ctx.files.map(compile);
 }
 
 export function writeTsFiles(ctx: CodeGeneratorContext): void {
-  trace("writeTsFiles()");
-
   ctx.files.forEach((f) => {
     trace("writing %s", f.tsPath);
 

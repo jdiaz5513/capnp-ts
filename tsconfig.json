@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
+    "baseUrl": "packages",
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "incremental": true,
-    "lib": ["es2015"],
+    "lib": ["es2015", "ES2021.WeakRef"],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "newLine": "LF",
@@ -14,6 +15,10 @@
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "noUnusedParameters": true,
+    "paths": {
+      "capnp-ts": ["capnp-ts/src"],
+      "capnpc-ts": ["capnpc-ts/src"]
+    },
     "pretty": true,
     "sourceMap": true,
     "strict": true,

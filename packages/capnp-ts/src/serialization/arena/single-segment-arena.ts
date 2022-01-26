@@ -11,24 +11,18 @@ import { ArenaAllocationResult } from "./arena-allocation-result";
 import { ArenaKind } from "./arena-kind";
 
 const trace = initTrace("capnp:arena:single");
-trace("load");
 
 export class SingleSegmentArena {
   static readonly allocate = allocate;
   static readonly getBuffer = getBuffer;
   static readonly getNumSegments = getNumSegments;
 
-  buffer: ArrayBuffer;
   readonly kind = ArenaKind.SINGLE_SEGMENT;
 
-  constructor(buffer = new ArrayBuffer(DEFAULT_BUFFER_SIZE)) {
+  constructor(public buffer = new ArrayBuffer(DEFAULT_BUFFER_SIZE)) {
     if ((buffer.byteLength & 7) !== 0) {
       throw new Error(format(SEG_NOT_WORD_ALIGNED, buffer.byteLength));
     }
-
-    this.buffer = buffer;
-
-    trace("new %s", this);
   }
 
   toString(): string {
