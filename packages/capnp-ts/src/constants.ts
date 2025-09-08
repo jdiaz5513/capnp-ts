@@ -29,7 +29,7 @@ export const DEFAULT_DEPTH_LIMIT = 64;
  * message's traversal limit gets decremented each time.
  */
 
-export const DEFAULT_TRAVERSE_LIMIT = 64 << 20; // 64 MiB
+export const DEFAULT_TRAVERSE_LIMIT = 128 << 20; // 128 MiB
 
 /**
  * When allocating array buffers dynamically (while packing or in certain Arena implementations) the previous buffer's
