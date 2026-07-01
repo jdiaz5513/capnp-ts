@@ -13,7 +13,6 @@ void tap.test("new Pointer()", (t) => {
     () => {
       new Pointer(s, 0, 0);
     },
-    undefined,
     "should throw when exceeding the depth limit"
   );
 
@@ -25,7 +24,6 @@ void tap.test("new Pointer()", (t) => {
     () => {
       new Pointer(s, -1);
     },
-    undefined,
     "should throw with a negative offset"
   );
 
@@ -33,7 +31,6 @@ void tap.test("new Pointer()", (t) => {
     () => {
       new Pointer(s, 100);
     },
-    undefined,
     "should throw when exceeding segment bounds"
   );
 

@@ -180,7 +180,7 @@ void tap.test("adoption", (t) => {
   t.equal(alice2.getId(), 456);
   t.equal(alice1.getId(), 456);
 
-  t.throws(() => addressBook.adoptPeople(o), undefined, "should not allow multiple adoption");
+  t.throws(() => addressBook.adoptPeople(o), "should not allow multiple adoption");
 
   t.end();
 });

@@ -158,7 +158,7 @@ const UINT_8_MASKS = [
 function makeMaskTest<T>(name: string, fn: (x: T) => DataView, testData: MaskArray<T>) {
   void tap.test(name, (t) => {
     testData.forEach(({ mask, val }) => {
-      compareBuffers(t, fn(val).buffer, new Uint8Array(mask).buffer);
+      compareBuffers(t, fn(val).buffer as ArrayBuffer, new Uint8Array(mask).buffer as ArrayBuffer);
     });
 
     t.end();
@@ -167,7 +167,7 @@ function makeMaskTest<T>(name: string, fn: (x: T) => DataView, testData: MaskArr
 
 void tap.test("getBitMask()", (t) => {
   BIT_MASKS.forEach(({ bitOffset, mask, val }) => {
-    compareBuffers(t, getBitMask(val, bitOffset).buffer, new Uint8Array(mask).buffer);
+    compareBuffers(t, getBitMask(val, bitOffset).buffer as ArrayBuffer, new Uint8Array(mask).buffer as ArrayBuffer);
   });
 
   t.end();

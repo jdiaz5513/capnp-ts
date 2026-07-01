@@ -126,7 +126,6 @@ void tap.test("Orphan._moveTo()", (t) => {
     () => {
       structOrphan._moveTo(root.initTest());
     },
-    undefined,
     "should not allow re-adoption"
   );
 
@@ -135,7 +134,6 @@ void tap.test("Orphan._moveTo()", (t) => {
       const o = root.disownTest();
       o._moveTo(new Message().initRoot(TestStruct));
     },
-    undefined,
     "should not allow moving to a different message"
   );
 

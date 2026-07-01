@@ -195,7 +195,11 @@ export function initMessage(
   let buf: ArrayBuffer = src as ArrayBuffer;
 
   if (isArrayBufferView(buf)) {
-    buf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    // TS 5.7+ widened ArrayBufferView.buffer to `ArrayBufferLike` (i.e.
+    // possibly a SharedArrayBuffer). We never actually accept shared buffers
+    // here, so cast back to the narrower type after slicing.
+    const view = buf;
+    buf = view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength) as ArrayBuffer;
   }
 
   if (packed) buf = unpack(buf);

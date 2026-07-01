@@ -120,7 +120,7 @@ void tap.test("encodeUtf8()", (t) => {
     // The output buffer might be longer than its contents so we need to slice it.
 
     const out = util.encodeUtf8(str);
-    compareBuffers(t, out.buffer.slice(0, out.byteLength), buf.buffer);
+    compareBuffers(t, out.buffer.slice(0, out.byteLength) as ArrayBuffer, buf.buffer);
   });
 
   t.end();

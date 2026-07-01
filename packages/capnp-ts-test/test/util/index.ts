@@ -8,8 +8,6 @@ import { Test } from "tap";
 import initTrace from "debug";
 
 const trace = initTrace("capnp-ts-test:util");
-const x = new Test();
-type Test = typeof x;
 
 function diffHex(found: ArrayBuffer, wanted: ArrayBuffer): string {
   const a = new Uint8Array(found);
@@ -72,7 +70,6 @@ export function compareBuffers(
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function logBench(suite: Suite): Suite {
   return suite
@@ -98,7 +95,7 @@ export function logBench(suite: Suite): Suite {
 export function readFileBuffer(filePath: string): ArrayBuffer {
   const b = readFileSync(path.join(__dirname, "../../", filePath));
 
-  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer;
 }
 
 export function runTestCheck<TArgs>(
