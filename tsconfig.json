@@ -3,9 +3,10 @@
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0",
     "importHelpers": true,
     "incremental": true,
-    "lib": ["es2015"],
+    "lib": ["ES2020"],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "newLine": "LF",
@@ -15,10 +16,12 @@
     "noUnusedLocals": false,
     "noUnusedParameters": true,
     "pretty": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "stripInternal": true,
-    "target": "es2015"
+    "target": "ES2020",
+    "types": ["node"]
   },
   "include": ["packages/*/src/**/*", "packages/*/test/**/*"]
 }

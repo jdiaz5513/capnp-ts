@@ -1,3 +1,6 @@
 *.capnp.ts
 *.capnp.js
 **/lib/
+**/node_modules/
+**/coverage/
+packages/capnp-ts/src/std/

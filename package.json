@@ -5,37 +5,24 @@
   },
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",
   "devDependencies": {
-    "@types/benchmark": "^2.1.0",
-    "@types/debug": "^4.1.5",
-    "@types/mkdirp": "^1.0.1",
-    "@types/node": "^15.3.1",
-    "@types/tap": "^15.0.1",
-    "@typescript-eslint/eslint-plugin": "^4.24.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^4.24.0",
-    "@typescript-eslint/parser": "^4.24.0",
+    "@eslint/js": "^10.0.1",
+    "@types/benchmark": "^2.1.5",
+    "@types/debug": "^4.1.12",
+    "@types/node": "^24.0.0",
     "benchmark": "^2.1.4",
-    "eslint": "^7.26.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.23.2",
-    "eslint-plugin-jsdoc": "^34.8.2",
-    "eslint-plugin-no-null": "^1.0.2",
-    "eslint-plugin-prefer-arrow": "^1.2.3",
-    "husky": "^6.0.0",
-    "lint-staged": "^11.0.0",
-    "nodemon": "^2.0.7",
-    "prettier": "^2.3.0",
-    "standard-version": "^9.3.1",
-    "tap": "^15.0.9",
+    "eslint": "^10.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.9.0",
+    "tap": "^21.7.0",
     "testcheck": "^1.0.0-rc.2",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.4"
+    "tsx": "^4.22.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.62.0"
   },
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "keywords": [
     "capnp",
     "rpc",
@@ -43,21 +30,21 @@
   ],
   "license": "MIT",
   "lint-staged": {
-    "linters": {
-      "*.ts": [
-        "prettier --write",
-        "eslint -p .",
-        "git add"
-      ]
-    },
-    "ignore": [
-      "packages/capnpc-ts/bin/**/*.ts"
+    "*.ts": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,yml}": [
+      "prettier --write"
     ]
   },
   "prettier": {
     "printWidth": 120
   },
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
@@ -68,25 +55,15 @@
     "build:watch": "npm run nodemon make build",
     "coverage": "make coverage",
     "coverage:watch": "npm run nodemon make coverage",
+    "format": "prettier --write .",
     "lint": "make lint",
-    "nodemon": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -w ./packages/capnp-ts/test -w ./packages/capnpc-ts/test -w ./packages/capnp-ts-test/test -w ./**/tsconfig.json -i './packages/capnp-ts/src/std' -i './packages/**/*.d.ts' -i './packages/**/*.capnp.ts' -e .ts -x ",
-    "prepare": "husky install",
+    "lint:fix": "eslint . --fix",
+    "nodemon": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -w ./packages/capnp-ts-test/test -w ./packages/capnpc-ts/test -w ./**/tsconfig.json -i './packages/capnp-ts/src/std' -i './packages/**/*.d.ts' -i './packages/**/*.capnp.ts' -e .ts -x ",
+    "prepare": "husky",
     "prepublishOnly": "make build",
-    "publish": "make publish",
-    "release": "make release",
     "test": "make test",
     "test:watch": "npm run nodemon make test",
     "watch": "npm run test:watch"
-  },
-  "standard-version": {
-    "bumpFiles": [
-      "packages/capnp-ts/package.json",
-      "packages/capnpc-ts/package.json"
-    ],
-    "packageFiles": [
-      "packages/capnp-ts/package.json",
-      "packages/capnpc-ts/package.json"
-    ]
   },
   "workspaces": [
     "packages/capnp-ts",

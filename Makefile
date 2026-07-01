@@ -12,22 +12,23 @@ SHELL := bash
 # environment variables
 
 CAPNP_BIN := capnp
-TAP_FLAGS ?= -j8 --no-coverage --ts -Rterse -c
+TAP_FLAGS ?= --disable-coverage --reporter=terse
 TAP_TS := 1
 TSC_FLAGS ?=
-STANDARD_FLAGS ?= --dry-run
 
 ##############
 # binary paths
 
-capnpc := $(shell which capnpc)
-node := $(shell which node)
+# Resolve the capnp binary at recipe time, not parse time. `which` can come
+# back empty during make parse in some sandboxed build environments where the
+# PATH isn't fully populated until the shell spawns the recipe.
+capnp_bin ?= capnp
+node ?= node
 node_bin := node_modules/.bin
 tsc := $(node_bin)/tsc $(TSC_FLAGS)
 tap := $(node_bin)/tap $(TAP_FLAGS)
 eslint := $(node_bin)/eslint
-standard := $(node_bin)/standard-version $(STANDARD_FLAGS)
-npm := $(shell which npm)
+npm := npm
 
 ######
 # vars
@@ -47,9 +48,14 @@ capnp_out := $(patsubst %.capnp,%.capnp.js,$(capnp_in))
 ################
 # build commands
 
+# Put the plugin's bin directory on PATH so capnp can discover it via the
+# `capnpc-<lang>` lookup convention. Spawning via path is more portable than
+# `-o./relative/path` across sandboxed build environments.
+export PATH := $(CURDIR)/$(capnpc_ts)/bin:$(PATH)
+
 %.capnp.js: $(capnp_deps)
 %.capnp.js: %.capnp
-	$(capnpc) -o./$(capnpc_ts)/bin/capnpc-ts.js -I $(capnp_ts)/src/std $<	
+	$(capnp_bin) compile -ots -I $(CURDIR)/$(capnp_ts)/src/std $<
 
 .PHONY: benchmark
 benchmark: build
@@ -82,6 +88,7 @@ clean:
 	@find packages -name "*.js" -not -path "*/bin/*" -not -path "*/node_modules/*" | xargs -r rm
 	@find packages -name "*.map" -not -path "*/node_modules/*" | xargs -r rm
 	@find packages -name "*.tsbuildinfo" -not -path "*/node_modules/*" | xargs -r rm
+	@rm -f tsconfig.*.tsbuildinfo
 	@rm -f $(capnp_out)
 
 .PHONY: test
@@ -94,13 +101,13 @@ coverage: build
 
 .PHONY: lint
 lint: build
-	$(eslint) . --ext .ts
+	$(eslint) .
 
-.PHONY: release
-release: build
-	$(standard)
+.PHONY: format
+format:
+	$(node_bin)/prettier --write .
 
 .PHONY: publish
 publish:
-	$(npm) publish -w capnp-ts
-	$(npm) publish -w capnpc-ts
+	$(npm) publish -w capnp-ts --access public
+	$(npm) publish -w capnpc-ts --access public
