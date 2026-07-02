@@ -9,14 +9,14 @@ import initTrace from "debug";
 
 const trace = initTrace("capnp-ts-test:util");
 
-function diffHex(found: ArrayBuffer, wanted: ArrayBuffer): string {
+function diffHex(found: ArrayBufferLike, wanted: ArrayBufferLike): string {
   const a = new Uint8Array(found);
   const b = new Uint8Array(wanted);
 
   for (let i = 0; i < a.byteLength && i < b.byteLength; i++) {
     if (a[i] !== b[i]) {
-      trace(dumpBuffer(found));
-      trace(dumpBuffer(wanted));
+      trace(dumpBuffer(a));
+      trace(dumpBuffer(b));
       return format("addr:%a,found:%s,wanted:%s", i, pad(a[i].toString(16), 2), pad(b[i].toString(16), 2));
     }
   }
@@ -32,8 +32,8 @@ function diffHex(found: ArrayBuffer, wanted: ArrayBuffer): string {
 
 export function compareBuffers(
   parentTest: Test,
-  found: ArrayBuffer,
-  wanted: ArrayBuffer,
+  found: ArrayBufferLike,
+  wanted: ArrayBufferLike,
   name = "should have the same buffer contents"
 ): void {
   void parentTest.test(name, (t) => {
@@ -94,8 +94,11 @@ export function logBench(suite: Suite): Suite {
 
 export function readFileBuffer(filePath: string): ArrayBuffer {
   const b = readFileSync(path.join(__dirname, "../../", filePath));
-
-  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer;
+  const buf = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+  if (!(buf instanceof ArrayBuffer)) {
+    throw new Error(`readFileSync returned a non-ArrayBuffer for ${filePath}`);
+  }
+  return buf;
 }
 
 export function runTestCheck<TArgs>(
