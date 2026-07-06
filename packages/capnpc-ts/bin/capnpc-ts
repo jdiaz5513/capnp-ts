@@ -1,0 +1,5 @@
+#!/bin/sh
+# Shim so capnp can find the plugin via PATH lookup (`capnpc-ts`).
+# The published npm package sets up this same name via the `bin` field;
+# in-tree builds use this shell wrapper instead.
+exec node "$(dirname "$0")/capnpc-ts.js" "$@"
