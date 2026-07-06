@@ -19,9 +19,6 @@ TSC_FLAGS ?=
 ##############
 # binary paths
 
-# Resolve the capnp binary at recipe time, not parse time. `which` can come
-# back empty during make parse in some sandboxed build environments where the
-# PATH isn't fully populated until the shell spawns the recipe.
 capnp_bin ?= capnp
 node ?= node
 node_bin := node_modules/.bin
@@ -48,9 +45,6 @@ capnp_out := $(patsubst %.capnp,%.capnp.js,$(capnp_in))
 ################
 # build commands
 
-# Put the plugin's bin directory on PATH so capnp can discover it via the
-# `capnpc-<lang>` lookup convention. Spawning via path is more portable than
-# `-o./relative/path` across sandboxed build environments.
 export PATH := $(CURDIR)/$(capnpc_ts)/bin:$(PATH)
 
 %.capnp.js: $(capnp_deps)

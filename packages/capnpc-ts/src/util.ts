@@ -4,9 +4,6 @@ import initTrace from "debug";
 const trace = initTrace("capnpc:util");
 trace("load");
 
-// hex2dec was a dependency that pre-dated native BigInt support. It's gone now;
-// these helpers wrap the equivalent BigInt math so call sites don't change.
-
 function decToHex(d: string): string {
   // Match the old hex2dec shape: "0x..." or "-0x..." for negatives.
   const n = BigInt(d);
@@ -14,10 +11,8 @@ function decToHex(d: string): string {
 }
 
 function hexToDec(h: string): string {
-  // hex2dec was lenient about bare hex digits (no "0x" prefix). Keep that.
-  const normalized = h.startsWith("0x") || h.startsWith("-0x") || h.startsWith("0X") || h.startsWith("-0X")
-    ? h
-    : `0x${h}`;
+  const normalized =
+    h.startsWith("0x") || h.startsWith("-0x") || h.startsWith("0X") || h.startsWith("-0X") ? h : `0x${h}`;
   return BigInt(normalized).toString();
 }
 
