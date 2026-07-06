@@ -14,7 +14,6 @@
     "eslint-config-prettier": "^10.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
-    "nodemon": "^3.1.0",
     "prettier": "^3.9.0",
     "tap": "^21.7.0",
     "testcheck": "^1.0.0-rc.2",
@@ -52,18 +51,14 @@
   "scripts": {
     "benchmark": "make benchmark",
     "build": "make build",
-    "build:watch": "npm run nodemon make build",
     "coverage": "make coverage",
-    "coverage:watch": "npm run nodemon make coverage",
     "format": "prettier --write .",
     "lint": "make lint",
     "lint:fix": "eslint . --fix",
-    "nodemon": "nodemon -w ./packages/capnp-ts/src -w ./packages/capnpc-ts/src -w ./packages/capnp-ts-test/test -w ./packages/capnpc-ts/test -w ./**/tsconfig.json -i './packages/capnp-ts/src/std' -i './packages/**/*.d.ts' -i './packages/**/*.capnp.ts' -e .ts -x ",
     "prepare": "husky",
     "prepublishOnly": "make build",
-    "test": "make test",
-    "test:watch": "npm run nodemon make test",
-    "watch": "npm run test:watch"
+    "repl": "tap repl",
+    "test": "make test"
   },
   "workspaces": [
     "packages/capnp-ts",
