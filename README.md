@@ -172,25 +172,20 @@ A deliberate effort was made to avoid using nodejs specific features (at the exp
 
 ## Building
 
-Before building the source you will need a few prerequisites:
-
-- [**nodejs**](https://nodejs.org/en/) (latest LTS or 8.x.x is recommended)
-- [**yarn**](https://yarnpkg.com/en/)
-
-> [nvm](https://github.com/creationix/nvm) is highly recommended for managing multiple nodejs versions.
+Before building the source you will need a few prerequisites which can be managed automatically by using [nix](https://nixos.org) and [direnv](https://direnv.net),
 
 ### Initial Setup
 
-Run `yarn install` to set up the **node_modules** directories for the monorepo and each package.
+Run `direnv allow` to set up system dependencies and the **node_modules** directories for the monorepo and each package.
 
-### Build Tasks
+### Build Targets
 
-The following package scripts are available for build tasks.
+The following makefile targets are available for build tasks.
 
-Using npm:
+To build the library and schema files simply run make with no arguments:
 
 ```shell
-npm run build
+make 
 ```
 
 ---

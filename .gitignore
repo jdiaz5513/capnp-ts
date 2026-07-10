@@ -44,15 +44,17 @@ jspm_packages
 *.tgz
 
 # Build output
+.tap/
 .tmp
 *.d.ts
 *.map
 *.tsbuildinfo
-packages/*/bin/**/*.d.ts
 packages/*/src/**/*.d.ts
 packages/*/src/**/*.js
 packages/*/test/**/*.d.ts
 packages/*/test/**/*.js
 
-# tap 21 scratch (process info, test results)
-.tap/
+# nix
+.direnv/
+result
+result-*
