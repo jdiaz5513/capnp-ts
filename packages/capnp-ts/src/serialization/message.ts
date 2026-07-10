@@ -178,7 +178,7 @@ export interface CreateMessageOptions {
 export function initMessage(
   src?: AnyArena | ArrayBufferView | ArrayBuffer,
   packed = true,
-  singleSegment = false
+  singleSegment = false,
 ): _Message {
   if (src === undefined) {
     return {
@@ -192,10 +192,15 @@ export function initMessage(
     return { arena: src, segments: [], traversalLimit: DEFAULT_TRAVERSE_LIMIT };
   }
 
-  let buf: ArrayBuffer = src as ArrayBuffer;
+  let buf: ArrayBuffer;
 
-  if (isArrayBufferView(buf)) {
-    buf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  if (isArrayBufferView(src)) {
+    if (!(src.buffer instanceof ArrayBuffer)) {
+      throw new Error("capnp-ts does not support SharedArrayBuffer");
+    }
+    buf = src.buffer.slice(src.byteOffset, src.byteOffset + src.byteLength);
+  } else {
+    buf = src;
   }
 
   if (packed) buf = unpack(buf);

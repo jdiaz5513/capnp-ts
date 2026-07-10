@@ -114,10 +114,8 @@ export function transpileAll(ctx: CodeGeneratorContext): void {
       if (diagnostic.file && diagnostic.start) {
         const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
 
-        /* tslint:disable-next-line:no-console */
         console.log(`${diagnostic.file.fileName}:${line + 1}:${character + 1} ${message}`);
       } else {
-        /* tslint:disable-next-line:no-console */
         console.log(`==> ${message}`);
       }
     });

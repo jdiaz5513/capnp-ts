@@ -154,6 +154,17 @@ export class Segment implements DataView {
   }
 
   /**
+   * Read a float16 value out of this segment.
+   *
+   * @param {number} byteOffset The offset in bytes to the value.
+   * @returns {number} The value.
+   */
+
+  getFloat16(byteOffset: number): number {
+    return this._dv.getFloat16(byteOffset, true);
+  }
+
+  /**
    * Read a float64 value out of this segment.
    *
    * @param {number} byteOffset The offset in bytes to the value.
@@ -318,6 +329,18 @@ export class Segment implements DataView {
 
   setFloat32(byteOffset: number, val: number): void {
     this._dv.setFloat32(byteOffset, val, true);
+  }
+
+  /**
+   * Write a float16 value to the specified offset.
+   *
+   * @param {number} byteOffset The offset from the beginning of the buffer.
+   * @param {number} val The value to store.
+   * @returns {void}
+   */
+
+  setFloat16(byteOffset: number, val: number): void {
+    this._dv.setFloat16(byteOffset, val, true);
   }
 
   /**

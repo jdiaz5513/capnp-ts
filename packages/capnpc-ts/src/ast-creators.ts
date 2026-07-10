@@ -24,14 +24,14 @@ export function createConcreteListProperty(ctx: CodeGeneratorFileContext, field:
   const name = `_${util.c2t(field.getName())}`;
   const type = f.createTypeReferenceNode(getJsType(ctx, field.getSlot().getType(), true), __);
   let u: ts.Expression | undefined;
-  return f.createPropertyDeclaration(__, [STATIC], name, __, type, u as ts.Expression);
+  return f.createPropertyDeclaration([STATIC], name, __, type, u as ts.Expression);
 }
 
 export function createConstProperty(node: s.Node): ts.PropertyDeclaration {
   const name = util.c2s(getDisplayNamePrefix(node));
   const initializer = createValueExpression(node.getConst().getValue());
 
-  return f.createPropertyDeclaration(__, [STATIC, READONLY], name, __, __, initializer);
+  return f.createPropertyDeclaration([STATIC, READONLY], name, __, __, initializer);
 }
 
 export function createExpressionBlock(
@@ -56,7 +56,6 @@ export function createMethod(
   return f.createMethodDeclaration(
     __,
     __,
-    __,
     name,
     __,
     __,
@@ -70,14 +69,28 @@ export function createNestedNodeProperty(node: s.Node): ts.PropertyDeclaration {
   const name = getDisplayNamePrefix(node);
   const initializer = f.createIdentifier(getFullClassName(node));
 
-  return f.createPropertyDeclaration(__, [STATIC, READONLY], name, __, __, initializer);
+  return f.createPropertyDeclaration([STATIC, READONLY], name, __, __, initializer);
 }
 
 export function createUnionConstProperty(fullClassName: string, field: s.Field): ts.PropertyDeclaration {
   const name = util.c2s(field.getName());
   const initializer = f.createPropertyAccessExpression(f.createIdentifier(`${fullClassName}_Which`), name);
 
-  return f.createPropertyDeclaration(__, [STATIC, READONLY], name, __, __, initializer);
+  return f.createPropertyDeclaration([STATIC, READONLY], name, __, __, initializer);
+}
+
+/**
+ * Build a numeric literal expression, handling the sign correctly.
+ *
+ * TypeScript 6 rejects negative number literals passed to createNumericLiteral;
+ * they must be wrapped in a PrefixUnaryExpression (MinusToken + numeric literal).
+ */
+function createSignedNumericLiteral(value: number): ts.Expression {
+  if (Object.is(value, -0)) value = 0;
+  if (value < 0) {
+    return f.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, f.createNumericLiteral((-value).toString()));
+  }
+  return f.createNumericLiteral(value.toString());
 }
 
 export function createValueExpression(value: s.Value): ts.Expression {
@@ -93,16 +106,16 @@ export function createValueExpression(value: s.Value): ts.Expression {
       return f.createNumericLiteral(value.getEnum().toString());
 
     case s.Value.FLOAT32:
-      return f.createNumericLiteral(value.getFloat32().toString());
+      return createSignedNumericLiteral(value.getFloat32());
 
     case s.Value.FLOAT64:
-      return f.createNumericLiteral(value.getFloat64().toString());
+      return createSignedNumericLiteral(value.getFloat64());
 
     case s.Value.INT16:
-      return f.createNumericLiteral(value.getInt16().toString());
+      return createSignedNumericLiteral(value.getInt16());
 
     case s.Value.INT32:
-      return f.createNumericLiteral(value.getInt32().toString());
+      return createSignedNumericLiteral(value.getInt32());
 
     case s.Value.INT64: {
       let v = value.getInt64().toString(16);
@@ -114,7 +127,7 @@ export function createValueExpression(value: s.Value): ts.Expression {
       return f.createCallExpression(f.createIdentifier(`${neg}BigInt`), __, [f.createStringLiteral(`0x${v}`)]);
     }
     case s.Value.INT8:
-      return f.createNumericLiteral(value.getInt8().toString());
+      return createSignedNumericLiteral(value.getInt8());
 
     case s.Value.TEXT:
       return f.createStringLiteral(value.getText());

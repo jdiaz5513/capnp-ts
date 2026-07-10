@@ -1,7 +1,6 @@
 import * as s from "capnp-ts/src/std/schema.capnp.js";
 import initTrace from "debug";
 import fs from "fs";
-import mkdirp from "mkdirp";
 import path from "path";
 import ts from "typescript";
 
@@ -63,7 +62,7 @@ export function writeTsFiles(ctx: CodeGeneratorContext): void {
   ctx.files.forEach((f) => {
     trace("writing %s", f.tsPath);
 
-    mkdirp.sync(path.dirname(f.tsPath));
+    fs.mkdirSync(path.dirname(f.tsPath), { recursive: true });
 
     fs.writeFileSync(f.tsPath, compile(f), { encoding: "utf-8" });
   });

@@ -53,7 +53,6 @@ void tap.test("getFramedSegments()", (t) => {
           0x00, // need at least 4 more bytes for an empty message
         ]).buffer
       ),
-    undefined,
     "should throw when segment counts are missing"
   );
 
@@ -71,7 +70,6 @@ void tap.test("getFramedSegments()", (t) => {
           0x00, // need at least 4 more bytes for the second segment length
         ]).buffer
       ),
-    undefined,
     "should throw when there are not enough segment counts"
   );
 
@@ -105,7 +103,6 @@ void tap.test("getFramedSegments()", (t) => {
           0x00, // but only get 2
         ]).buffer
       ),
-    undefined,
     "should throw when message is truncated"
   );
 
@@ -176,11 +173,11 @@ void tap.test("Message.getSegment()", (t) => {
 
   t.equal(s.byteLength, 8, "should preallocate segment 0");
 
-  t.throws(() => new Message().getSegment(1), undefined, "should throw when getting out of range segments");
+  t.throws(() => new Message().getSegment(1), "should throw when getting out of range segments");
 
   const m = new Message(new MultiSegmentArena([new ArrayBuffer(2)])); // this is too small to hold the root pointer
 
-  t.throws(() => m.getSegment(0), undefined, "should throw when segment 0 is too small");
+  t.throws(() => m.getSegment(0), "should throw when segment 0 is too small");
 
   t.end();
 });
@@ -195,7 +192,6 @@ void tap.test("Message.onCreatePointer()", (t) => {
     () => {
       for (let i = 0; i < C.DEFAULT_TRAVERSE_LIMIT + 1; i++) p.getPhones();
     },
-    undefined,
     "should throw when exceeding the pointer traversal limit"
   );
 
@@ -223,7 +219,6 @@ void tap.test("preallocateSegments()", (t) => {
 
       preallocateSegments(message);
     },
-    undefined,
     "should throw when preallocating an empty arena"
   );
 

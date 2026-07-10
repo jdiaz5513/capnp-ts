@@ -1,20 +1,20 @@
 import { pad } from "capnp-ts/src/util";
 import initTrace from "debug";
 
-// Yep, this is silly. :)
-
-interface Hex2Dec {
-  decToHex(d: string): string;
-  hexToDec(h: string): string;
-}
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/unbound-method */
-const { decToHex, hexToDec } = require("hex2dec") as Hex2Dec;
-/* eslint-enable */
-
 const trace = initTrace("capnpc:util");
 trace("load");
+
+function decToHex(d: string): string {
+  // Match the old hex2dec shape: "0x..." or "-0x..." for negatives.
+  const n = BigInt(d);
+  return n < 0n ? `-0x${(-n).toString(16)}` : `0x${n.toString(16)}`;
+}
+
+function hexToDec(h: string): string {
+  const normalized =
+    h.startsWith("0x") || h.startsWith("-0x") || h.startsWith("0X") || h.startsWith("-0X") ? h : `0x${h}`;
+  return BigInt(normalized).toString();
+}
 
 export function c2s(s: string): string {
   return splitCamel(s)
@@ -23,15 +23,15 @@ export function c2s(s: string): string {
 }
 
 export function c2t(s: string): string {
-  return s.substr(0, 1).toUpperCase() + s.substr(1);
+  return s.slice(0, 1).toUpperCase() + s.slice(1);
 }
 
 export function d2h(d: string): string {
-  let h = decToHex(d).substr(2);
+  let h = decToHex(d).slice(2);
   let neg = false;
 
   if (h[0] === "-") {
-    h = h.substr(1);
+    h = h.slice(1);
 
     neg = true;
   }
@@ -44,10 +44,10 @@ export function decToHexBytes(d: string): string[] {
   const neg = h[0] === "-";
   const out = neg ? ["-"] : [];
 
-  if (neg) h = h.substr(1);
+  if (neg) h = h.slice(1);
 
   for (let i = 0; i < h.length; i += 2) {
-    out.push(h.substr(i, 2));
+    out.push(h.slice(i, i + 2));
   }
 
   return out;
