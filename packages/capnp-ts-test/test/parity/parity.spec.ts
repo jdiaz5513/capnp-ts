@@ -1,53 +1,12 @@
+import * as path from "path";
 import * as capnp from "capnp-ts";
-import { spawnSync } from "child_process";
 import tap from "tap";
+
+import { capnpDecode, capnpEncode, compareBuffers, hasCapnp } from "../util";
 
 import "./parity-test.capnp.js";
 
-const SCHEMA_DIR = __dirname;
-const SCHEMA_FILE = "parity-test.capnp";
-
-function spawn(args: string[], input?: Buffer): Buffer {
-  const res = spawnSync("capnp", args, {
-    cwd: SCHEMA_DIR,
-    input,
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  if (res.status !== 0) {
-    throw new Error(`capnp ${args.join(" ")} failed: ${res.stderr.toString()}`);
-  }
-  return res.stdout;
-}
-
-function toArrayBuffer(buf: Buffer): ArrayBuffer {
-  const ab = new ArrayBuffer(buf.byteLength);
-  new Uint8Array(ab).set(buf);
-  return ab;
-}
-
-function capnpEncode(text: string, rootType: string, packed = false): ArrayBuffer {
-  const args = ["encode"];
-  if (packed) args.push("--packed");
-  args.push(SCHEMA_FILE, rootType);
-  return toArrayBuffer(spawn(args, Buffer.from(text)));
-}
-
-function capnpDecode(buf: ArrayBuffer, rootType: string, packed = false): string {
-  const args = ["decode"];
-  if (packed) args.push("--packed");
-  args.push(SCHEMA_FILE, rootType);
-  return spawn(args, Buffer.from(buf)).toString();
-}
-
-function buffersEqual(a: ArrayBuffer, b: ArrayBuffer): boolean {
-  if (a.byteLength !== b.byteLength) return false;
-  const ua = new Uint8Array(a);
-  const ub = new Uint8Array(b);
-  for (let i = 0; i < ua.byteLength; i++) if (ua[i] !== ub[i]) return false;
-  return true;
-}
-
-const HAS_CAPNP = spawnSync("capnp", ["--version"], { cwd: SCHEMA_DIR }).status === 0;
+const SCHEMA = path.join(__dirname, "parity-test.capnp");
 
 interface Case {
   name: string;
@@ -238,32 +197,31 @@ const CASES: Case[] = [
   },
 ];
 
-tap.test("parity against C++ reference implementation", { skip: !HAS_CAPNP ? "capnp binary not on PATH" : undefined }, (t) => {
-  for (const c of CASES) {
-    void t.test(c.name, (t) => {
-      const refUnpacked = capnpEncode(c.text, c.type, false);
-      const refPacked = capnpEncode(c.text, c.type, true);
-      const refText = capnpDecode(refUnpacked, c.type);
+void tap.test(
+  "parity against C++ reference implementation",
+  { skip: !hasCapnp() ? "capnp binary not on PATH" : undefined },
+  (t) => {
+    for (const c of CASES) {
+      void t.test(c.name, (t) => {
+        const refUnpacked = capnpEncode(SCHEMA, c.text, c.type, false);
+        const refPacked = capnpEncode(SCHEMA, c.text, c.type, true);
+        const refText = capnpDecode(SCHEMA, refUnpacked, c.type);
 
-      // Read parity: C++ unpacked bytes -> capnp-ts reads -> re-serializes -> byte-exact match.
-      const m1 = new capnp.Message(refUnpacked.slice(0), false);
-      const out1 = m1.toArrayBuffer();
-      t.ok(buffersEqual(out1, refUnpacked), "unpacked round trip preserves bytes");
+        const m1 = new capnp.Message(refUnpacked.slice(0), false);
+        compareBuffers(t, m1.toArrayBuffer(), refUnpacked, "unpacked round trip preserves bytes");
 
-      // Cross-format: C++ packed -> capnp-ts unpacks -> re-serializes unpacked -> matches C++ unpacked.
-      const m2 = new capnp.Message(refPacked.slice(0));
-      const out2 = m2.toArrayBuffer();
-      t.ok(buffersEqual(out2, refUnpacked), "C++-packed -> ts -> unpacked matches C++ unpacked");
+        const m2 = new capnp.Message(refPacked.slice(0));
+        compareBuffers(t, m2.toArrayBuffer(), refUnpacked, "C++-packed -> ts -> unpacked matches C++ unpacked");
 
-      // Cross-format: C++ unpacked -> capnp-ts packs -> C++ unpacks -> text matches.
-      const m3 = new capnp.Message(refUnpacked.slice(0), false);
-      const out3packed = m3.toPackedArrayBuffer();
-      const text3 = capnpDecode(out3packed, c.type, true);
-      t.equal(text3, refText, "ts-packed round trips through C++ decode");
+        const m3 = new capnp.Message(refUnpacked.slice(0), false);
+        const tsPacked = m3.toPackedArrayBuffer();
+        const text3 = capnpDecode(SCHEMA, tsPacked, c.type, true);
+        t.equal(text3, refText, "ts-packed round trips through C++ decode");
 
-      t.end();
-    });
-  }
+        t.end();
+      });
+    }
 
-  t.end();
-});
+    t.end();
+  },
+);

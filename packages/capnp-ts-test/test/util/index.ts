@@ -1,4 +1,5 @@
 import Benchmark, { Suite } from "benchmark";
+import { spawnSync } from "child_process";
 import { readFileSync } from "fs";
 import * as path from "path";
 import { check, CheckOptions, Property } from "testcheck";
@@ -114,4 +115,38 @@ export function runTestCheck<TArgs>(
 
     t.end();
   });
+}
+
+export function hasCapnp(): boolean {
+  return spawnSync("capnp", ["--version"]).status === 0;
+}
+
+export function capnpEncode(schemaPath: string, text: string, rootType: string, packed = false): ArrayBuffer {
+  const args = ["encode"];
+  if (packed) args.push("--packed");
+  args.push(schemaPath, rootType);
+  const res = spawnSync("capnp", args, {
+    input: Buffer.from(text),
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  if (res.status !== 0) {
+    throw new Error(`capnp encode failed: ${res.stderr.toString()}`);
+  }
+  const ab = new ArrayBuffer(res.stdout.byteLength);
+  new Uint8Array(ab).set(res.stdout);
+  return ab;
+}
+
+export function capnpDecode(schemaPath: string, buf: ArrayBuffer, rootType: string, packed = false): string {
+  const args = ["decode"];
+  if (packed) args.push("--packed");
+  args.push(schemaPath, rootType);
+  const res = spawnSync("capnp", args, {
+    input: Buffer.from(buf),
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  if (res.status !== 0) {
+    throw new Error(`capnp decode failed: ${res.stderr.toString()}`);
+  }
+  return res.stdout.toString();
 }
