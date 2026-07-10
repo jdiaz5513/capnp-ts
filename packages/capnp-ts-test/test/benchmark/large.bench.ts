@@ -5,6 +5,7 @@
 import { Suite } from "benchmark";
 
 import * as capnp from "capnp-ts";
+import { getUnpackedByteLength, PackedReader, unpack } from "capnp-ts/src/serialization/packing";
 import { AddressBook } from "../integration/serialization-demo";
 import { logBench } from "../util";
 
@@ -108,3 +109,24 @@ logBench(parseOnly).run();
 logBench(selective).run();
 logBench(lengthOnly).run();
 logBench(fullTraversal).run();
+
+// --- Benchmark 5: Packed read — 2-pass vs streaming 1-pass ---
+
+const packedSingle = new capnp.Message(capnpBuf, false, true).toPackedArrayBuffer();
+const packedArr = new Uint8Array(packedSingle);
+
+const packedRead = new Suite(`packed unpack (${N_PEOPLE} people)`)
+  .add("2-pass (getUnpackedByteLength + unpack)", () => {
+    const len = getUnpackedByteLength(packedSingle);
+    const dst = new Uint8Array(new ArrayBuffer(len));
+    unpack(packedArr, 0, dst);
+  })
+  .add("1-pass (PackedReader streaming)", () => {
+    const reader = new PackedReader(packedArr);
+    const hdr = new Uint8Array(8);
+    reader.read(hdr);
+    const seg0Words = new DataView(hdr.buffer).getUint32(4, true);
+    reader.read(new Uint8Array(new ArrayBuffer(seg0Words * 8)));
+  });
+
+logBench(packedRead).run();
