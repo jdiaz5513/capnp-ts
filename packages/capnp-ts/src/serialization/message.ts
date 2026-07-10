@@ -12,7 +12,7 @@ import {
 } from "../errors";
 import { dumpBuffer, format, padToWord } from "../util";
 import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena, ArenaKind } from "./arena";
-import { pack, unpack } from "./packing";
+import { pack, unpack, getUnpackedByteLength } from "./packing";
 import { Pointer, StructCtor, PointerType, Struct } from "./pointers";
 import { Segment } from "./segment";
 import { getTargetStructSize, validate } from "./pointers/pointer";
@@ -203,7 +203,13 @@ export function initMessage(
     buf = src;
   }
 
-  if (packed) buf = unpack(buf);
+  if (packed) {
+    const len = getUnpackedByteLength(buf);
+    const srcArr = new Uint8Array(buf);
+    const dst = new Uint8Array(new ArrayBuffer(len));
+    unpack(srcArr, 0, dst);
+    buf = dst.buffer;
+  }
 
   if (singleSegment) {
     return {

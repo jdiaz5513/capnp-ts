@@ -124,7 +124,9 @@ void tap.test("pack()", (t) => {
 
 void tap.test("unpack()", (t) => {
   PACKING_DATA.forEach(({ name, packed, unpacked }) => {
-    compareBuffers(t, unpack(packed), unpacked, name);
+    const dst = new Uint8Array(new ArrayBuffer(getUnpackedByteLength(packed)));
+    unpack(new Uint8Array(packed), 0, dst);
+    compareBuffers(t, dst.buffer, unpacked, name);
   });
 
   t.end();
