@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.8.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.7.0...v0.8.0) (2026-07-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* `capnpc-ts` now uses the 6.0 version of the TypeScript compiler. Changes to emitted code should be minimal if any.
+* `capnp-js` and `capnp-ts` now targets the latest NodeJS LTS (v24) for testing and supports up to v20.
+* `SharedArrayBuffer` is now explicitly not supported with a runtime check.
+
+### Bug Fixes
+
+* increase traverse limit for large capnp files to 128MB ([0b7d322](https://github.com/jdiaz5513/capnp-ts/commit/0b7d3223d5ba951d7ab102e25d315ed8d77d9cfc))
+* remove redundant _capnp declaration causing vite build errors ([64d1ee9](https://github.com/jdiaz5513/capnp-ts/commit/64d1ee942ec620412e5d7d8f05a8e7ae8833b943))
+
 ## [0.7.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.5.1...v0.7.0) (2021-08-19)
 
 

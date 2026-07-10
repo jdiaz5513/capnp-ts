@@ -58,7 +58,7 @@
 
       # To recompute when package-lock.json changes:
       #   nix run nixpkgs#prefetch-npm-deps -- package-lock.json
-      npmDepsHash = "sha256-NO3eQtBxras1/buZQafHCXyGvDw3KxhKQP9QAre4v+g=";
+      npmDepsHash = "sha256-ZoorbSMLSvrMMUdjQz53Gm729haq0K2yHM50/0h+UeQ=";
 
       pkgs = import nixpkgs {inherit system;};
 

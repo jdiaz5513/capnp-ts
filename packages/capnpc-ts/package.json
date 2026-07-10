@@ -7,7 +7,7 @@
     "url": "https://github.com/jdiaz5513/capnp-ts/issues"
   },
   "dependencies": {
-    "capnp-ts": "^0.7.0",
+    "capnp-ts": "^0.8.0",
     "debug": "^4.4.0",
     "tslib": "^2.8.0",
     "typescript": "^6.0.0"
@@ -31,5 +31,5 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "types": "./src/index.d.ts",
-  "version": "0.7.0"
+  "version": "0.8.0"
 }

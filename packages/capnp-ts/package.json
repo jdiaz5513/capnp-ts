@@ -25,5 +25,5 @@
     "url": "git+https://github.com/jdiaz5513/capnp-ts.git"
   },
   "types": "./src/index.d.ts",
-  "version": "0.7.0"
+  "version": "0.8.0"
 }
