@@ -12,7 +12,7 @@ import {
 } from "../errors";
 import { dumpBuffer, format, padToWord } from "../util";
 import { AnyArena, Arena, MultiSegmentArena, SingleSegmentArena, ArenaKind } from "./arena";
-import { pack, unpack, getUnpackedByteLength } from "./packing";
+import { pack, unpack, getUnpackedByteLength, PackedReader } from "./packing";
 import { Pointer, StructCtor, PointerType, Struct } from "./pointers";
 import { Segment } from "./segment";
 import { getTargetStructSize, validate } from "./pointers/pointer";
@@ -204,11 +204,22 @@ export function initMessage(
   }
 
   if (packed) {
-    const len = getUnpackedByteLength(buf);
-    const srcArr = new Uint8Array(buf);
-    const dst = new Uint8Array(new ArrayBuffer(len));
-    unpack(srcArr, 0, dst);
-    buf = dst.buffer;
+    if (singleSegment) {
+      const len = getUnpackedByteLength(buf);
+      const srcArr = new Uint8Array(buf);
+      const dst = new Uint8Array(new ArrayBuffer(len));
+      unpack(srcArr, 0, dst);
+      return {
+        arena: new SingleSegmentArena(dst.buffer),
+        segments: [],
+        traversalLimit: DEFAULT_TRAVERSE_LIMIT,
+      };
+    }
+    return {
+      arena: new MultiSegmentArena(unpackFramedSegments(new Uint8Array(buf))),
+      segments: [],
+      traversalLimit: DEFAULT_TRAVERSE_LIMIT,
+    };
   }
 
   if (singleSegment) {
@@ -263,6 +274,36 @@ export function getFramedSegments(message: ArrayBuffer): ArrayBuffer[] {
     segments[i] = message.slice(byteOffset, byteOffset + byteLength);
 
     byteOffset += byteLength;
+  }
+
+  return segments;
+}
+
+export function unpackFramedSegments(src: Uint8Array): ArrayBuffer[] {
+  const reader = new PackedReader(src);
+
+  const firstWord = new Uint8Array(8);
+  reader.read(firstWord);
+  const segmentCount = new DataView(firstWord.buffer).getUint32(0, true) + 1;
+
+  const headerContentBytes = 4 + segmentCount * 4;
+  const headerWords = Math.ceil(headerContentBytes / 8);
+  const headerPadded = headerWords * 8;
+
+  const header = new Uint8Array(headerPadded);
+  header.set(firstWord);
+  if (headerPadded > 8) {
+    reader.read(header.subarray(8));
+  }
+
+  const hdv = new DataView(header.buffer);
+  const segments: ArrayBuffer[] = new Array(segmentCount);
+
+  for (let i = 0; i < segmentCount; i++) {
+    const wordCount = hdv.getUint32(4 + i * 4, true);
+    const segDst = new Uint8Array(new ArrayBuffer(wordCount * 8));
+    reader.read(segDst);
+    segments[i] = segDst.buffer;
   }
 
   return segments;

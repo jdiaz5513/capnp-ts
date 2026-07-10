@@ -315,33 +315,47 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
  */
 
 export function unpack(src: Uint8Array, srcOffset: number, dst: Uint8Array): number {
-  let si = srcOffset;
-  let di = 0;
-  const dstLen = dst.byteLength;
-  let lastTag = PackedTag.NONZERO_NONSPAN;
+  return new PackedReader(src, srcOffset).read(dst);
+}
 
-  while (di < dstLen) {
-    const tag = src[si];
+export class PackedReader {
+  private lastTag = PackedTag.NONZERO_NONSPAN;
 
-    if (lastTag === PackedTag.ZERO) {
-      di += tag * 8;
-      si++;
-      lastTag = PackedTag.NONZERO_NONSPAN;
-    } else if (lastTag === PackedTag.SPAN) {
-      const spanBytes = tag * 8;
-      dst.set(src.subarray(si + 1, si + 1 + spanBytes), di);
-      di += spanBytes;
-      si += 1 + spanBytes;
-      lastTag = PackedTag.NONZERO_NONSPAN;
-    } else {
-      si++;
-      for (let bit = 1; bit <= 0x80; bit <<= 1) {
-        if ((tag & bit) !== 0) dst[di] = src[si++];
-        di++;
+  constructor(private readonly src: Uint8Array, private offset = 0) {}
+
+  read(dst: Uint8Array): number {
+    const src = this.src;
+    const dstLen = dst.byteLength;
+    const start = this.offset;
+    let di = 0;
+    let si = this.offset;
+    let lastTag = this.lastTag;
+
+    while (di < dstLen) {
+      const tag = src[si];
+
+      if (lastTag === PackedTag.ZERO) {
+        di += tag * 8;
+        si++;
+        lastTag = PackedTag.NONZERO_NONSPAN;
+      } else if (lastTag === PackedTag.SPAN) {
+        const spanBytes = tag * 8;
+        dst.set(src.subarray(si + 1, si + 1 + spanBytes), di);
+        di += spanBytes;
+        si += 1 + spanBytes;
+        lastTag = PackedTag.NONZERO_NONSPAN;
+      } else {
+        si++;
+        for (let bit = 1; bit <= 0x80; bit <<= 1) {
+          if ((tag & bit) !== 0) dst[di] = src[si++];
+          di++;
+        }
+        lastTag = tag;
       }
-      lastTag = tag;
     }
-  }
 
-  return si - srcOffset;
+    this.offset = si;
+    this.lastTag = lastTag;
+    return si - start;
+  }
 }
