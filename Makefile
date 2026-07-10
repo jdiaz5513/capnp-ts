@@ -31,6 +31,7 @@ npm := npm
 # vars
 
 capnp_ts := packages/capnp-ts
+capnp_ts_test := packages/capnp-ts-test
 capnpc_ts := packages/capnpc-ts
 js_examples := packages/js_examples
 
@@ -54,7 +55,7 @@ export PATH := $(CURDIR)/$(capnpc_ts)/bin:$(PATH)
 .PHONY: benchmark
 benchmark: build
 benchmark:
-	$(node) $(capnp_ts)/benchmark/index.js
+	$(node) $(capnp_ts_test)/test/benchmark/index.js
 	@echo
 
 .PHONY: build-prelude

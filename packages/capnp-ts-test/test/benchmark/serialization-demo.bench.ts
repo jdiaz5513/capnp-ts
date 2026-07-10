@@ -14,8 +14,7 @@ import { logBench, readFileBuffer } from "../util";
 const jsonBuffer = new Uint8Array(readFileBuffer("test/data/serialization-demo.json"));
 const jsonString = readFileSync(path.join(__dirname, "../../", "test/data/serialization-demo.json"), "utf-8");
 const messageData = readFileBuffer("test/data/serialization-demo.bin");
-// Let's preprocess it so we have just the raw segment data.
-const messageSegment = new capnp.Message(messageData).getSegment(0).buffer;
+const messageSegment = new capnp.Message(messageData, false).getSegment(0).buffer;
 
 const deeplyNested = new Suite("iteration over deeply nested lists")
 
