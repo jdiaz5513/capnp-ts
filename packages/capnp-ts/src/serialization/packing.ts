@@ -314,54 +314,48 @@ export function pack(unpacked: ArrayBuffer, byteOffset = 0, byteLength?: number)
  * @returns {ArrayBuffer} The unpacked message.
  */
 
-export function unpack(packed: ArrayBuffer): ArrayBuffer {
-  // We have no choice but to read the packed buffer one byte at a time.
+export function unpack(src: Uint8Array, srcOffset: number, dst: Uint8Array): number {
+  return new PackedReader(src, srcOffset).read(dst);
+}
 
-  const src = new Uint8Array(packed);
-  const dst = new Uint8Array(new ArrayBuffer(getUnpackedByteLength(packed)));
+export class PackedReader {
+  private lastTag = PackedTag.NONZERO_NONSPAN;
 
-  /** The last tag byte that we've seen - it starts at a "neutral" value. */
+  constructor(private readonly src: Uint8Array, private offset = 0) {}
 
-  let lastTag = PackedTag.NONZERO_NONSPAN;
+  read(dst: Uint8Array): number {
+    const src = this.src;
+    const dstLen = dst.byteLength;
+    const start = this.offset;
+    let di = 0;
+    let si = this.offset;
+    let lastTag = this.lastTag;
 
-  for (let srcByteOffset = 0, dstByteOffset = 0; srcByteOffset < src.byteLength; ) {
-    const tag = src[srcByteOffset];
+    while (di < dstLen) {
+      const tag = src[si];
 
-    if (lastTag === PackedTag.ZERO) {
-      // We have a span of zeroes. New array buffers are guaranteed to be initialized to zero so we just seek ahead.
-
-      dstByteOffset += tag * 8;
-
-      srcByteOffset++;
-
-      lastTag = PackedTag.NONZERO_NONSPAN;
-    } else if (lastTag === PackedTag.SPAN) {
-      // We have a span of unpacked bytes. Copy them verbatim from the source buffer.
-
-      const spanByteLength = tag * 8;
-
-      dst.set(src.subarray(srcByteOffset + 1, srcByteOffset + 1 + spanByteLength), dstByteOffset);
-
-      dstByteOffset += spanByteLength;
-      srcByteOffset += 1 + spanByteLength;
-
-      lastTag = PackedTag.NONZERO_NONSPAN;
-    } else {
-      // Okay, a normal tag. Let's read past the tag and copy bytes that have a bit set in the tag.
-
-      srcByteOffset++;
-
-      for (let i = 1; i <= 0b10000000; i <<= 1) {
-        // We only need to actually touch `dst` if there's a nonzero byte (it's already initialized to zeroes).
-
-        if ((tag & i) !== 0) dst[dstByteOffset] = src[srcByteOffset++];
-
-        dstByteOffset++;
+      if (lastTag === PackedTag.ZERO) {
+        di += tag * 8;
+        si++;
+        lastTag = PackedTag.NONZERO_NONSPAN;
+      } else if (lastTag === PackedTag.SPAN) {
+        const spanBytes = tag * 8;
+        dst.set(src.subarray(si + 1, si + 1 + spanBytes), di);
+        di += spanBytes;
+        si += 1 + spanBytes;
+        lastTag = PackedTag.NONZERO_NONSPAN;
+      } else {
+        si++;
+        for (let bit = 1; bit <= 0x80; bit <<= 1) {
+          if ((tag & bit) !== 0) dst[di] = src[si++];
+          di++;
+        }
+        lastTag = tag;
       }
-
-      lastTag = tag;
     }
-  }
 
-  return dst.buffer;
+    this.offset = si;
+    this.lastTag = lastTag;
+    return si - start;
+  }
 }

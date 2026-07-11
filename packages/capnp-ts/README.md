@@ -7,11 +7,11 @@ Here's a quick usage example:
 ```typescript
 import * as capnp from 'capnp-ts';
 
-import {MyStruct} from './myschema.capnp';
+import {MyStruct} from './myschema.capnp.js';
 
 export function loadMessage(buffer: ArrayBuffer): MyStruct {
 
-  const message = capnp.Message.fromArrayBuffer(buffer);
+  const message = new capnp.Message(buffer, false);
 
   return message.getRoot(MyStruct);
 
