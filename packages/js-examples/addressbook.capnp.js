@@ -50,8 +50,25 @@ var Person_PhoneNumber_Type;
 class Person_PhoneNumber extends capnp_ts_1.Struct {
     getNumber() { return capnp_ts_1.Struct.getText(0, this); }
     setNumber(value) { capnp_ts_1.Struct.setText(0, value, this); }
+    get number() { return this.getNumber(); }
+    set number(value) { this.setNumber(value); }
     getType() { return capnp_ts_1.Struct.getUint16(0, this); }
     setType(value) { capnp_ts_1.Struct.setUint16(0, value, this); }
+    get type() { return this.getType(); }
+    set type(value) { this.setType(value); }
+    set(value) {
+        if (value.number !== undefined)
+            this.setNumber(value.number);
+        if (value.type !== undefined)
+            this.setType(value.type);
+    }
+    get() {
+        return {
+            number: this.getNumber(),
+            type: this.getType(),
+        };
+    }
+    toJSON() { return this.get(); }
     toString() { return "Person_PhoneNumber_" + super.toString(); }
 }
 exports.Person_PhoneNumber = Person_PhoneNumber;
@@ -76,6 +93,8 @@ class Person_Employment extends capnp_ts_1.Struct {
         capnp_ts_1.Struct.setUint16(4, 1, this);
         capnp_ts_1.Struct.setText(3, value, this);
     }
+    get employer() { return this.getEmployer(); }
+    set employer(value) { this.setEmployer(value); }
     getSchool() {
         capnp_ts_1.Struct.testWhich("school", capnp_ts_1.Struct.getUint16(4, this), 2, this);
         return capnp_ts_1.Struct.getText(3, this);
@@ -85,8 +104,24 @@ class Person_Employment extends capnp_ts_1.Struct {
         capnp_ts_1.Struct.setUint16(4, 2, this);
         capnp_ts_1.Struct.setText(3, value, this);
     }
+    get school() { return this.getSchool(); }
+    set school(value) { this.setSchool(value); }
     isSelfEmployed() { return capnp_ts_1.Struct.getUint16(4, this) === 3; }
     setSelfEmployed() { capnp_ts_1.Struct.setUint16(4, 3, this); }
+    set(value) {
+        if (value.unemployed !== undefined)
+            this.setUnemployed();
+        if (value.employer !== undefined)
+            this.setEmployer(value.employer);
+        if (value.school !== undefined)
+            this.setSchool(value.school);
+        if (value.selfEmployed !== undefined)
+            this.setSelfEmployed();
+    }
+    get() {
+        return Object.assign(Object.assign(Object.assign(Object.assign({}, (this.isUnemployed() ? { unemployed: null } : {})), (this.isEmployer() ? { employer: this.getEmployer() } : {})), (this.isSchool() ? { school: this.getSchool() } : {})), (this.isSelfEmployed() ? { selfEmployed: null } : {}));
+    }
+    toJSON() { return this.get(); }
     toString() { return "Person_Employment_" + super.toString(); }
     which() { return capnp_ts_1.Struct.getUint16(4, this); }
 }
@@ -99,18 +134,51 @@ Person_Employment._capnp = { displayName: "employment", id: "e88780a90af3da0c", 
 class Person extends capnp_ts_1.Struct {
     getId() { return capnp_ts_1.Struct.getUint32(0, this); }
     setId(value) { capnp_ts_1.Struct.setUint32(0, value, this); }
+    get id() { return this.getId(); }
+    set id(value) { this.setId(value); }
     getName() { return capnp_ts_1.Struct.getText(0, this); }
     setName(value) { capnp_ts_1.Struct.setText(0, value, this); }
+    get name() { return this.getName(); }
+    set name(value) { this.setName(value); }
     getEmail() { return capnp_ts_1.Struct.getText(1, this); }
     setEmail(value) { capnp_ts_1.Struct.setText(1, value, this); }
+    get email() { return this.getEmail(); }
+    set email(value) { this.setEmail(value); }
     adoptPhones(value) { capnp_ts_1.Struct.adopt(value, capnp_ts_1.Struct.getPointer(2, this)); }
     disownPhones() { return capnp_ts_1.Struct.disown(this.getPhones()); }
     getPhones() { return capnp_ts_1.Struct.getList(2, Person._Phones, this); }
     hasPhones() { return !capnp_ts_1.Struct.isNull(capnp_ts_1.Struct.getPointer(2, this)); }
     initPhones(length) { return capnp_ts_1.Struct.initList(2, Person._Phones, length, this); }
     setPhones(value) { capnp_ts_1.Struct.copyFrom(value, capnp_ts_1.Struct.getPointer(2, this)); }
+    get phones() { return this.getPhones(); }
+    set phones(value) { if (value instanceof capnp.List) {
+        this.setPhones(value);
+    }
+    else {
+        this.set({ phones: value });
+    } }
     getEmployment() { return capnp_ts_1.Struct.getAs(Person_Employment, this); }
     initEmployment() { return capnp_ts_1.Struct.getAs(Person_Employment, this); }
+    get employment() { return this.getEmployment(); }
+    set employment(value) { this.initEmployment().set(value); }
+    set(value) {
+        if (value.id !== undefined)
+            this.setId(value.id);
+        if (value.name !== undefined)
+            this.setName(value.name);
+        if (value.email !== undefined)
+            this.setEmail(value.email);
+        if (value.phones !== undefined) {
+            const l = this.initPhones(value.phones.length);
+            value.phones.forEach((e, i) => l.get(i).set(e));
+        }
+        if (value.employment !== undefined)
+            this.initEmployment().set(value.employment);
+    }
+    get() {
+        return Object.assign(Object.assign({ id: this.getId(), name: this.getName(), email: this.getEmail() }, (this.hasPhones() ? { phones: this.getPhones().toArray().map((e) => e.get()) } : {})), { employment: this.getEmployment().get() });
+    }
+    toJSON() { return this.get(); }
     toString() { return "Person_" + super.toString(); }
 }
 exports.Person = Person;
@@ -123,6 +191,23 @@ class AddressBook extends capnp_ts_1.Struct {
     hasPeople() { return !capnp_ts_1.Struct.isNull(capnp_ts_1.Struct.getPointer(0, this)); }
     initPeople(length) { return capnp_ts_1.Struct.initList(0, AddressBook._People, length, this); }
     setPeople(value) { capnp_ts_1.Struct.copyFrom(value, capnp_ts_1.Struct.getPointer(0, this)); }
+    get people() { return this.getPeople(); }
+    set people(value) { if (value instanceof capnp.List) {
+        this.setPeople(value);
+    }
+    else {
+        this.set({ people: value });
+    } }
+    set(value) {
+        if (value.people !== undefined) {
+            const l = this.initPeople(value.people.length);
+            value.people.forEach((e, i) => l.get(i).set(e));
+        }
+    }
+    get() {
+        return Object.assign({}, (this.hasPeople() ? { people: this.getPeople().toArray().map((e) => e.get()) } : {}));
+    }
+    toJSON() { return this.get(); }
     toString() { return "AddressBook_" + super.toString(); }
 }
 exports.AddressBook = AddressBook;

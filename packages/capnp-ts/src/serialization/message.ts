@@ -17,12 +17,15 @@ import { Pointer, StructCtor, PointerType, Struct } from "./pointers";
 import { Segment } from "./segment";
 import { getTargetStructSize, validate } from "./pointers/pointer";
 import { resize, initStruct } from "./pointers/struct";
+import type { Client } from "../rpc/client";
 
 const trace = initTrace("capnp:message");
 trace("load");
 
 export interface _Message {
   readonly arena: AnyArena;
+  /** Capability clients for interface pointers in this message; indexed by capability ID. */
+  capTable?: Array<Client | null>;
   segments: Segment[];
   traversalLimit: number;
 }
@@ -74,6 +77,14 @@ export class Message {
     if (src && !isAnyArena(src)) preallocateSegments(this);
 
     trace("new %s", this);
+  }
+
+  /** Add a capability to this message's cap table, returning its capability ID. */
+
+  addCap(client: Client | null): number {
+    if (this._capnp.capTable === undefined) this._capnp.capTable = [];
+
+    return this._capnp.capTable.push(client) - 1;
   }
 
   allocateSegment(byteLength: number): Segment {
@@ -297,7 +308,7 @@ export function unpackFramedSegments(src: Uint8Array): ArrayBuffer[] {
   }
 
   const hdv = new DataView(header.buffer);
-  const segments: ArrayBuffer[] = new Array(segmentCount);
+  const segments = new Array<ArrayBuffer>(segmentCount);
 
   for (let i = 0; i < segmentCount; i++) {
     const wordCount = hdv.getUint32(4 + i * 4, true);

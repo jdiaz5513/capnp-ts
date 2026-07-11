@@ -2,7 +2,6 @@ import * as s from "capnp-ts/src/std/schema.capnp.js";
 import initTrace from "debug";
 import fs from "fs";
 import path from "path";
-import ts from "typescript";
 
 import { CodeGeneratorContext } from "./code-generator-context";
 import { CodeGeneratorFileContext } from "./code-generator-file-context";
@@ -12,8 +11,8 @@ import {
   generateCapnpImport,
   generateConcreteListInitializer,
   generateFileId,
-  generateNode,
   generateNestedImports,
+  generateNode,
 } from "./generators";
 
 const trace = initTrace("capnpc:compile");
@@ -33,11 +32,7 @@ export function compile(ctx: CodeGeneratorFileContext): string {
 
   ctx.concreteLists.forEach(([fullClassName, field]) => generateConcreteListInitializer(ctx, fullClassName, field));
 
-  const sourceFile = ts.createSourceFile(ctx.tsPath, "", ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
-  const printer = ts.createPrinter();
-  const source = ctx.statements.map((s) => printer.printNode(ts.EmitHint.Unspecified, s, sourceFile)).join("\n") + "\n";
-
-  return SOURCE_COMMENT + source;
+  return SOURCE_COMMENT + ctx.sourceParts.join("\n") + "\n";
 }
 
 export function loadRequest(req: s.CodeGeneratorRequest): CodeGeneratorContext {

@@ -42,9 +42,7 @@ const jsonStr = JSON.stringify({
   })),
 });
 
-// eslint-disable-next-line no-console
 console.log(`\nDataset: ${N_PEOPLE} people x ${N_PHONES} phones each`);
-// eslint-disable-next-line no-console
 console.log(`  capnp: ${capnpBuf.byteLength} bytes, JSON: ${Buffer.byteLength(jsonStr)} bytes`);
 
 // --- Benchmark 1: Parse only (no field access) ---
@@ -62,7 +60,7 @@ const parseOnly = new Suite(`parse only (${N_PEOPLE} people)`)
 const selective = new Suite(`selective access (person #${N_PEOPLE >> 1} name only)`)
   .add("JSON.parse + access", () => {
     const ab = JSON.parse(jsonStr);
-    ab.people[N_PEOPLE >> 1].name;
+    void ab.people[N_PEOPLE >> 1].name;
   })
   .add("capnp.Message + access", () => {
     const m = new capnp.Message(capnpBuf, false, true);
@@ -73,7 +71,7 @@ const selective = new Suite(`selective access (person #${N_PEOPLE >> 1} name onl
 
 const lengthOnly = new Suite(`list length only (${N_PEOPLE} people)`)
   .add("JSON.parse + .length", () => {
-    JSON.parse(jsonStr).people.length;
+    void JSON.parse(jsonStr).people.length;
   })
   .add("capnp.Message + getLength()", () => {
     new capnp.Message(capnpBuf, false, true).getRoot(AddressBook).getPeople().getLength();

@@ -1,8 +1,25 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. Entries are drafted from [Conventional Commits](https://www.conventionalcommits.org) by the release script (`nix run .#release`).
 
-## [0.8.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.7.0...v0.8.0) (2026-07-26)
+## [0.9.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.8.0...v0.9.0) (2026-07-09)
+
+### ⚠ BREAKING CHANGES
+* `capnpc-ts` is refactored to use templated code generation rather than direct AST manipulation. Emitted code is call-compatible at the API level; most of the changes are additions.
+* Structs now have `.set` and `.toJSON` instance methods as well as property setters/getters for all JSON-compatible fields. Depending on the schema there is a risk of name collision (which will be flagged as a type error) when upgrading to this version.
+
+### Features
+
+* RPC Level 1 runtime added with a reference WebSocket transport.
+* Promise pipelining: calls on unreturned results (before `await`) use only one round trip for the whole call chain.  
+* Full support for interface code generation with `Client`/`Server`/`RemotePromise` classes.
+* Generic interfaces and structs: brand resolution at codegen with runtime binding of constructors and fully typed RemotePromise pipelines.
+* JSON support for generated structs with `.toJSON()` and generic `.set({ stringField: "bar" })` instance methods.
+* Property accessors for all generated structs (can replace calls to `obj.setA(0)` with `obj.a = 0`).
+* Expanded test coverage including WebSocket round trip client/server testing.
+* Serialization round trip and RPC conformance tests added to compare output byte-for-byte with the C++ implementation.
+
+## [0.8.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.7.0...v0.8.0) (2026-07-09)
 
 
 ### ⚠ BREAKING CHANGES

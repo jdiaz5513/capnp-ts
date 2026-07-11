@@ -58,7 +58,7 @@
 
       # To recompute when package-lock.json changes:
       #   nix run nixpkgs#prefetch-npm-deps -- package-lock.json
-      npmDepsHash = "sha256-oeNLod+US+j8/x+wAwRQZhZYjF1BvNn58mXxNYGQCaI=";
+      npmDepsHash = "sha256-3EHc8WxvKoAK7IiNpWkvNvye3epcfrZfRFKrm6h+LXs=";
 
       pkgs = import nixpkgs {inherit system;};
 
@@ -70,45 +70,97 @@
 
       publish = pkgs.writeShellApplication {
         name = "publish";
-        runtimeInputs = [nodejs pkgs.gnumake];
+        runtimeInputs = [nodejs pkgs.git pkgs.gnumake];
         text = ''
           set -euo pipefail
-          if [ -z "''${NPM_TOKEN:-}" ]; then
-            echo "NPM_TOKEN is not set. Ask NPM nicely for one." >&2
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Working tree is dirty; commit or stash first." >&2
+            exit 1
+          fi
+          version="$(node -p "require('./packages/capnp-ts/package.json').version")"
+          if [ "$(git rev-parse -q --verify "refs/tags/v$version^{commit}" || true)" != "$(git rev-parse HEAD)" ]; then
+            echo "HEAD is not the v$version release commit; run release first." >&2
             exit 1
           fi
           make build
-          SCRATCH="$(mktemp -d)"
-          trap 'rm -rf "$SCRATCH"' EXIT
-          export HOME="$SCRATCH"
-          NPMRC="$HOME/.npmrc"
-          printf '//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" > "$NPMRC"
-          npm whoami
+          # Interactive npm auth (oauth); whoami fails fast with a login hint if needed.
+          npm whoami || {
+            echo "Not logged in to npm; run 'npm login' first." >&2
+            exit 1
+          }
           npm publish -w capnp-ts --access public
           npm publish -w capnpc-ts --access public
-          echo "Libraries published to NPM."
+          echo "Published capnp-ts@$version and capnpc-ts@$version."
         '';
       };
 
       release = pkgs.writeShellApplication {
         name = "release";
-        runtimeInputs = [nodejs pkgs.git];
+        runtimeInputs = [nodejs pkgs.git pkgs.prefetch-npm-deps];
         text = ''
           set -euo pipefail
           if [ "$#" -eq 0 ]; then
-            echo "usage: release <version>" >&2
-            echo "  e.g. release 0.8.0  or  release patch" >&2
+            echo "usage: release <version|patch|minor|major>" >&2
             exit 1
           fi
-          version="$1"
-          npm version "$version" --workspaces-update
-          git add -A
-          git commit -m "chore(release): v$version" || {
-            echo "Nothing to commit; did the version actually change?" >&2
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Working tree is dirty; commit or stash first." >&2
             exit 1
-          }
+          fi
+
+          prev="$(git describe --tags --abbrev=0)"
+          repo="https://github.com/jdiaz5513/capnp-ts"
+
+          # Bump the root, both published packages, and js-examples in lockstep,
+          # then point every internal capnp-ts dependency at the new version.
+          version="$(npm version "$1" --no-git-tag-version)"
+          version="''${version#v}"
+          npm version "$version" --no-git-tag-version \
+            -w capnp-ts -w capnpc-ts -w capnp-ts-js-examples >/dev/null
+          npm pkg set "dependencies.capnp-ts=^$version" \
+            -w capnpc-ts -w capnp-ts-test -w capnp-ts-js-examples
+          npm install --package-lock-only >/dev/null
+
+          # The lockfile changed, so the nix FOD hash must follow.
+          hash="$(prefetch-npm-deps package-lock.json)"
+          sed -i "s|npmDepsHash = \"sha256-[^\"]*\"|npmDepsHash = \"$hash\"|" flake.nix
+
+          # Draft a changelog section from conventional commits since the last tag.
+          {
+            head -n 4 CHANGELOG.md
+            echo "## [$version]($repo/compare/$prev...v$version) ($(date +%Y-%m-%d))"
+            echo ""
+            breaking="$(git log "$prev..HEAD" --format='%b' | sed -n 's/^BREAKING CHANGES*: */* /p')"
+            if [ -n "$breaking" ]; then
+              echo "### ⚠ BREAKING CHANGES"
+              echo ""
+              echo "$breaking"
+              echo ""
+            fi
+            section() {
+              local title="$1" type="$2" out
+              out="$(git log "$prev..HEAD" --format='%H%x09%s' | awk -F'\t' -v t="$type" -v repo="$repo" '
+                $2 ~ "^" t "(\\(|!|:)" {
+                  sub("^[^:]*: *", "", $2)
+                  printf "* %s ([%s](%s/commit/%s))\n", $2, substr($1, 1, 7), repo, $1
+                }')"
+              if [ -n "$out" ]; then
+                echo "### $title"
+                echo ""
+                echo "$out"
+                echo ""
+              fi
+            }
+            section "Features" feat
+            section "Bug Fixes" fix
+            tail -n +5 CHANGELOG.md
+          } > CHANGELOG.md.new
+          mv CHANGELOG.md.new CHANGELOG.md
+
+          git add CHANGELOG.md flake.nix package.json package-lock.json packages/*/package.json
+          git commit -m "chore(release): $version"
           git tag "v$version"
-          echo "Tagged. Push and run publish."
+          echo "Released $version. Review CHANGELOG.md (amend if needed), push with tags, then run publish."
         '';
       };
 
@@ -135,12 +187,12 @@
         };
         default = self.apps.${system}.capnpc-ts;
         publish = {
-          meta.description = "Publish script to prepare the capnp-ts repository for release";
+          meta.description = "Publish capnp-ts and capnpc-ts to npm (requires a clean tree on the release tag)";
           program = "${publish}/bin/publish";
           type = "app";
         };
         release = {
-          meta.description = "Script to automate releasing new versions of capnp-ts to NPM";
+          meta.description = "Bump all package versions, draft the changelog, commit and tag";
           program = "${release}/bin/release";
           type = "app";
         };

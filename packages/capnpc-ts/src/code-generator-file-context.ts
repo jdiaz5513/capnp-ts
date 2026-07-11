@@ -3,16 +3,17 @@
  */
 
 import * as s from "capnp-ts/src/std/schema.capnp.js";
-import ts from "typescript";
 
 export class CodeGeneratorFileContext {
   concreteLists: Array<[string, s.Field]>;
   file: s.CodeGeneratorRequest_RequestedFile;
   generatedNodeIds: string[];
+  implicitScopes: Map<string, unknown>;
   imports: s.CodeGeneratorRequest_RequestedFile_Import[];
   nodes: s.Node[];
   req: s.CodeGeneratorRequest;
-  statements: ts.Statement[];
+  /** Emitted source text parts, joined with newlines to form the output file. */
+  sourceParts: string[];
   tsPath: string;
 
   constructor(req: s.CodeGeneratorRequest, file: s.CodeGeneratorRequest_RequestedFile) {
@@ -21,7 +22,8 @@ export class CodeGeneratorFileContext {
     this.nodes = req.getNodes().toArray();
     this.concreteLists = [];
     this.generatedNodeIds = [];
-    this.statements = [];
+    this.implicitScopes = new Map();
+    this.sourceParts = [];
     this.tsPath = "";
     this.imports = file.getImports().toArray();
   }

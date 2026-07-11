@@ -387,7 +387,7 @@ export class Return extends __S {
     getAnswerId(): number { return __S.getUint32(0, this); }
     setAnswerId(value: number): void { __S.setUint32(0, value, this); }
     getReleaseParamCaps(): boolean { return __S.getBit(32, this, Return._capnp.defaultReleaseParamCaps); }
-    setReleaseParamCaps(value: boolean): void { __S.setBit(32, value, this); }
+    setReleaseParamCaps(value: boolean): void { __S.setBit(32, value, this, Return._capnp.defaultReleaseParamCaps); }
     adoptResults(value: capnp.Orphan<Payload>): void {
         __S.setUint16(6, 0, this);
         __S.adopt(value, __S.getPointer(0, this));
@@ -462,7 +462,7 @@ export class Finish extends __S {
     getQuestionId(): number { return __S.getUint32(0, this); }
     setQuestionId(value: number): void { __S.setUint32(0, value, this); }
     getReleaseResultCaps(): boolean { return __S.getBit(32, this, Finish._capnp.defaultReleaseResultCaps); }
-    setReleaseResultCaps(value: boolean): void { __S.setBit(32, value, this); }
+    setReleaseResultCaps(value: boolean): void { __S.setBit(32, value, this, Finish._capnp.defaultReleaseResultCaps); }
     toString(): string { return "Finish_" + super.toString(); }
 }
 export enum Resolve_Which {

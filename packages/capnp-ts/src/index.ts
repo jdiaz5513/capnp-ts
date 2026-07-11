@@ -3,6 +3,8 @@
  */
 
 export {
+  bindGeneric,
+  getGenericBinding,
   ListElementSize,
   Message,
   ObjectSize,
@@ -48,3 +50,25 @@ export {
   getUint64Mask,
   getUint8Mask,
 } from "./serialization";
+
+export { base64ToBytes, bytesToBase64 } from "./util";
+
+export {
+  applyParams,
+  Client,
+  ClientLike,
+  Conn,
+  ConnOptions,
+  getInterfaceClient,
+  InterfaceCtor,
+  Method,
+  ParamsInit,
+  RemotePromise,
+  Server,
+  ServerMethod,
+  ServerMethodImpl,
+  setInterfaceClient,
+  Transport,
+  WebSocketLike,
+  WebSocketTransport,
+} from "./rpc";

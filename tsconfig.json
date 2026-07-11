@@ -6,7 +6,7 @@
     "ignoreDeprecations": "6.0",
     "importHelpers": true,
     "incremental": true,
-    "lib": ["ES2020"],
+    "lib": ["ES2021", "ESNext.Disposable"],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "newLine": "LF",
