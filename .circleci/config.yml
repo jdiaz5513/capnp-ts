@@ -1,0 +1,18 @@
+version: 2.1
+
+jobs:
+  flake_check:
+    docker:
+      - image: nixos/nix:latest
+    environment:
+      NIX_CONFIG: "experimental-features = nix-command flakes"
+    steps:
+      - checkout
+      - run:
+          name: Run Flake Check
+          command: nix --extra-experimental-features 'nix-command flakes' flake check
+
+workflows:
+  ci:
+    jobs:
+      - flake_check
