@@ -7,6 +7,9 @@ jobs:
     environment:
       NIX_CONFIG: "experimental-features = nix-command flakes"
     steps:
+      - run:
+          name: Install git and SSH
+          command: nix-env -iA nixpkgs.git nixpkgs.openssh
       - checkout
       - run:
           name: Run Flake Check
