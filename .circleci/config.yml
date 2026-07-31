@@ -1,0 +1,23 @@
+version: 2.1
+
+jobs:
+  flake_check:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - run:
+          name: Install Nix
+          command: |
+            sudo curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sudo sh -s -- install linux --no-confirm --init none
+            sudo chown -R $(whoami) /nix
+      - run:
+          name: Run Flake Check
+          command: |
+            . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+            nix flake check
+
+workflows:
+  ci:
+    jobs:
+      - flake_check
