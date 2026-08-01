@@ -23,6 +23,12 @@ const BAD_UTF8 = [
   new Uint8Array([0xf0, 0x9f]),
   new Uint8Array([0xf0, 0x9f, 0x92]),
 ];
+const UNPAIRED_SURROGATES = [
+  { bytes: [0xef, 0xbf, 0xbd], str: String.fromCharCode(0xd800) },
+  { bytes: [0xef, 0xbf, 0xbd, 0x61], str: String.fromCharCode(0xd800) + "a" },
+  { bytes: [0xef, 0xbf, 0xbd], str: String.fromCharCode(0xdc00) },
+  { bytes: [0xef, 0xbf, 0xbd, 0xf0, 0x9f, 0x92, 0xa9], str: String.fromCharCode(0xd83d, 0xd83d, 0xdca9) },
+];
 const UTF8_BUFFERS = [
   { buf: new Uint8Array([0x21]), str: "!" },
   { buf: new Uint8Array([0xc3, 0xad]), str: "í" },
@@ -183,6 +189,35 @@ void tap.test("encodeUtf8()", (t) => {
     const out = util.encodeUtf8(str);
     compareBuffers(t, out.buffer.slice(0, out.byteLength), buf.buffer);
   });
+
+  UNPAIRED_SURROGATES.forEach(({ bytes, str }) => {
+    t.strictSame(Array.from(util.encodeUtf8(str)), bytes);
+  });
+
+  t.end();
+});
+
+void tap.test("encodeUtf8Fallback()", (t) => {
+  UTF8_BUFFERS.forEach(({ buf, str }) => {
+    const out = util.encodeUtf8Fallback(str);
+    compareBuffers(t, out.buffer.slice(0, out.byteLength), buf.buffer);
+  });
+
+  UNPAIRED_SURROGATES.forEach(({ bytes, str }) => {
+    t.strictSame(Array.from(util.encodeUtf8Fallback(str)), bytes);
+  });
+
+  // The fallback must agree byte-for-byte with the native encoder for every UTF-16 code unit sequence, paired or not.
+
+  runTestCheck(
+    t,
+    property(gen.array(gen.intWithin(0, 0xffff)), (a) => {
+      const s = String.fromCharCode(...a);
+
+      return Array.from(util.encodeUtf8Fallback(s)).join() === Array.from(util.encodeUtf8(s)).join();
+    }),
+    { numTests: 1000 }
+  );
 
   t.end();
 });

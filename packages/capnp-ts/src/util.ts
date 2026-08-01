@@ -38,6 +38,10 @@ interface NodeBufferCtor {
 }
 
 const NATIVE_BUFFER = (globalThis as { Buffer?: NodeBufferCtor }).Buffer;
+const NATIVE_TEXT_ENCODER = (() => {
+  const G = globalThis as { TextEncoder?: new () => { encode(input: string): Uint8Array } };
+  return G.TextEncoder === undefined ? undefined : new G.TextEncoder();
+})();
 const NATIVE_TO_BASE64 = typeof (Uint8Array.prototype as unknown as { toBase64?: unknown }).toBase64 === "function";
 const NATIVE_U8 = Uint8Array as unknown as { fromBase64?: (value: string) => Uint8Array };
 
@@ -260,9 +264,12 @@ export function dumpBuffer(buffer: ArrayBuffer | ArrayBufferView): string {
 }
 
 /**
- * Encode a JavaScript string (UCS-2) to a UTF-8 encoded string inside a Uint8Array.
+ * Encode a JavaScript string (UCS-2) to a UTF-8 encoded string inside a Uint8Array. Delegates to a native codec where
+ * one exists.
  *
  * Note that the underlying buffer for the array will likely be larger than the actual contents; ignore the extra bytes.
+ *
+ * Unpaired surrogates are encoded as U+FFFD REPLACEMENT CHARACTER, matching `TextEncoder`.
  *
  * @export
  * @param {string} src The input string.
@@ -270,37 +277,58 @@ export function dumpBuffer(buffer: ArrayBuffer | ArrayBufferView): string {
  */
 
 export function encodeUtf8(src: string): Uint8Array {
+  if (NATIVE_TEXT_ENCODER) return NATIVE_TEXT_ENCODER.encode(src);
+
+  return encodeUtf8Fallback(src);
+}
+
+/**
+ * Encode a JavaScript string (UCS-2) to a UTF-8 encoded string inside a Uint8Array without native codecs.
+ *
+ * @export
+ * @param {string} src The input string.
+ * @returns {Uint8Array} A UTF-8 encoded buffer with the string's contents.
+ */
+
+export function encodeUtf8Fallback(src: string): Uint8Array {
   const l = src.length;
   const dst = new Uint8Array(new ArrayBuffer(l * 4));
   let j = 0;
 
   for (let i = 0; i < l; i++) {
-    const c = src.charCodeAt(i);
+    let c = src.charCodeAt(i);
+
+    if (c >= 0xd800 && c <= 0xdfff) {
+      const next = i + 1 < l ? src.charCodeAt(i + 1) : 0;
+
+      if (c <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) {
+        // I cast thee back into the astral plane.
+
+        const cp = (((c - 0xd800) << 10) | (next - 0xdc00)) + 0x00010000;
+        i++;
+
+        dst[j++] = 0b11110000 | (cp >>> 18);
+        dst[j++] = 0b10000000 | ((cp >>> 12) & 0b00111111);
+        dst[j++] = 0b10000000 | ((cp >>> 6) & 0b00111111);
+        dst[j++] = 0b10000000 | ((cp >>> 0) & 0b00111111);
+
+        continue;
+      }
+
+      // An unpaired surrogate has no UTF-8 representation; WHATWG says it becomes U+FFFD.
+
+      c = 0xfffd;
+    }
 
     if (c <= 0x7f) {
       dst[j++] = c;
     } else if (c <= 0x07ff) {
       dst[j++] = 0b11000000 | (c >>> 6);
       dst[j++] = 0b10000000 | ((c >>> 0) & 0b00111111);
-    } else if (c <= 0xd7ff || c >= 0xe000) {
+    } else {
       dst[j++] = 0b11100000 | (c >>> 12);
       dst[j++] = 0b10000000 | ((c >>> 6) & 0b00111111);
       dst[j++] = 0b10000000 | ((c >>> 0) & 0b00111111);
-    } else {
-      // Make sure the surrogate pair is complete.
-      /* istanbul ignore next */
-      if (i + 1 >= l) throw new RangeError(RANGE_INVALID_UTF8);
-
-      // I cast thee back into the astral plane.
-
-      const hi = c - 0xd800;
-      const lo = src.charCodeAt(++i) - 0xdc00;
-      const cp = ((hi << 10) | lo) + 0x00010000;
-
-      dst[j++] = 0b11110000 | (cp >>> 18);
-      dst[j++] = 0b10000000 | ((cp >>> 12) & 0b00111111);
-      dst[j++] = 0b10000000 | ((cp >>> 6) & 0b00111111);
-      dst[j++] = 0b10000000 | ((cp >>> 0) & 0b00111111);
     }
   }
 
