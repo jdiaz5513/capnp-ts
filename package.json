@@ -16,7 +16,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
     "prettier": "^3.9.0",
-    "tap": "^21.7.0",
+    "tap": "^21.7.5",
     "testcheck": "^1.0.0-rc.2",
     "tsx": "^4.22.0",
     "typescript": "^6.0.0",
