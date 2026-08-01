@@ -4,26 +4,9 @@
 
 import * as s from "capnp-ts/src/std/schema.capnp.js";
 import initTrace from "debug";
-import ts, { factory as f } from "typescript";
 
 const trace = initTrace("capnpc:constants");
 trace("load");
-
-/** undefined */
-
-export const __ = undefined;
-
-/** BigInt */
-
-export const BIGINT = f.createIdentifier("BigInt");
-
-/** boolean */
-
-export const BOOLEAN_TYPE = f.createTypeReferenceNode("boolean", __);
-
-/** capnp */
-
-export const CAPNP = f.createIdentifier("capnp");
 
 /** A Mapping of various types to their list type constructor. */
 
@@ -48,14 +31,6 @@ export const ConcreteListType = {
   [s.Type.UINT8]: "capnp.Uint8List",
   [s.Type.VOID]: "capnp.VoidList",
 };
-
-/** export */
-
-export const EXPORT = f.createToken(ts.SyntaxKind.ExportKeyword);
-
-/** length */
-
-export const LENGTH = f.createIdentifier("length");
 
 /** Some data used to help generate code for primitive struct fields. */
 
@@ -140,18 +115,6 @@ export const Primitive: { [t: number]: { byteLength: number; getter: string; mas
   },
 };
 
-/** number */
-
-export const NUMBER_TYPE = f.createTypeReferenceNode("number", __);
-
-/** __O */
-// This is referenced so frequently it gets a shorthand!
-export const OBJECT_SIZE = f.createIdentifier("__O");
-
-/** readonly */
-
-export const READONLY = f.createToken(ts.SyntaxKind.ReadonlyKeyword);
-
 /** No... comment? */
 
 export const SOURCE_COMMENT = `/* eslint-disable */
@@ -162,22 +125,6 @@ export const SOURCE_COMMENT = `/* eslint-disable */
 
 `;
 
-/** static */
-
-export const STATIC = f.createToken(ts.SyntaxKind.StaticKeyword);
-
-/** string */
-
-export const STRING_TYPE = f.createTypeReferenceNode("string", __);
-
-/** __S */
-// This is referenced so frequently it gets a shorthand!
-export const STRUCT = f.createIdentifier("__S");
-
-/** this */
-
-export const THIS = f.createThis();
-
 /**
  * Used to look up the ts.capnp file by its ID.
  *
@@ -185,11 +132,3 @@ export const THIS = f.createThis();
  */
 
 export const TS_FILE_ID = "e37ded525a68a7c9";
-
-/** value */
-
-export const VALUE = f.createIdentifier("value");
-
-/** void */
-
-export const VOID_TYPE = f.createTypeReferenceNode("void", __);

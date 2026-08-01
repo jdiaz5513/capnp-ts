@@ -370,12 +370,10 @@ export function initList<T>(
   setListPointer(res.offsetWords, elementSize, length, res.pointer, compositeSize);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function get<T>(_index: number, _l: List<T>): T {
   throw new TypeError();
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function set<T>(_index: number, _value: T, _l: List<T>): void {
   throw new TypeError();
 }

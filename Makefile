@@ -48,8 +48,7 @@ capnp_out := $(patsubst %.capnp,%.capnp.js,$(capnp_in))
 
 export PATH := $(CURDIR)/$(capnpc_ts)/bin:$(PATH)
 
-%.capnp.js: $(capnp_deps)
-%.capnp.js: %.capnp
+%.capnp.js: %.capnp $(capnp_deps)
 	$(capnp_bin) compile -ots -I $(CURDIR)/$(capnp_ts)/src/std $<
 
 .PHONY: benchmark
@@ -101,8 +100,3 @@ lint: build
 .PHONY: format
 format:
 	$(node_bin)/prettier --write .
-
-.PHONY: publish
-publish:
-	$(npm) publish -w capnp-ts --access public
-	$(npm) publish -w capnpc-ts --access public

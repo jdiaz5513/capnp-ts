@@ -20,6 +20,7 @@ export { Orphan } from "./orphan";
 export { PointerList } from "./pointer-list";
 export { PointerType } from "./pointer-type";
 export { Pointer } from "./pointer";
+export { bindGeneric, getGenericBinding } from "./generics";
 export { _StructCtor, Struct, StructCtor } from "./struct";
 export { Text } from "./text";
 export { TextList } from "./text-list";

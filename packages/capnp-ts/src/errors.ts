@@ -113,3 +113,13 @@ export const TYPE_SET_GENERIC_LIST = "CAPNP-TS042 Attempted to call set() on a g
 
 export const PTR_WRITE_CONST_LIST = "CAPNP-TS043 Attempted to write to a const list.";
 export const PTR_WRITE_CONST_STRUCT = "CAPNP-TS044 Attempted to write to a const struct.";
+
+// Interface/RPC errors.
+//
+// Long distance relationships are hard. You'll get through it.
+
+export const GENERIC_READ_UNBOUND = "CAPNP-TS045 Generic read on unbound constructor: pass the struct constructor explicitly or construct via a bound client.";
+export const RPC_NO_MAIN_INTERFACE = "CAPNP-TS046 No bootstrap interface was offered by this vat.";
+export const RPC_PROMISE_NOT_INITIALIZED = "CAPNP-TS047 RemotePromise was constructed outside the RPC runtime.";
+export const RPC_UNKNOWN_ANSWER_ID = "CAPNP-TS048 Call targets an unknown answer id.";
+export const RPC_UNKNOWN_EXPORT_ID = "CAPNP-TS049 Call targets an unknown export id.";

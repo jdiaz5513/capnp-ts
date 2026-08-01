@@ -27,6 +27,105 @@ export function bufferToHex(buffer: ArrayBuffer): string {
   return `[${h.join(" ")}]`;
 }
 
+const BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const BASE64_CODES = new Int8Array(128).fill(-1);
+for (let i = 0; i < BASE64_CHARS.length; i++) BASE64_CODES[BASE64_CHARS.charCodeAt(i)] = i;
+BASE64_CODES["=".charCodeAt(0)] = 0;
+
+interface NodeBufferCtor {
+  from(input: string, encoding: "base64"): Uint8Array;
+  from(input: ArrayBufferLike, byteOffset: number, length: number): { toString(encoding: "base64"): string };
+}
+
+const NATIVE_BUFFER = (globalThis as { Buffer?: NodeBufferCtor }).Buffer;
+const NATIVE_TO_BASE64 = typeof (Uint8Array.prototype as unknown as { toBase64?: unknown }).toBase64 === "function";
+const NATIVE_U8 = Uint8Array as unknown as { fromBase64?: (value: string) => Uint8Array };
+
+/**
+ * Decode a base64 string into bytes.
+ *
+ * Delegates to Uint8Array.fromBase64, Buffer.from, or a JS fallback if neither is available.
+ *
+ * @export
+ * @param {string} value The base64 string.
+ * @returns {Uint8Array} The decoded bytes.
+ */
+
+export function base64ToBytes(value: string): Uint8Array {
+  if (NATIVE_U8.fromBase64) return NATIVE_U8.fromBase64(value);
+  if (NATIVE_BUFFER) return NATIVE_BUFFER.from(value, "base64");
+
+  return base64ToBytesFallback(value);
+}
+
+/**
+ * Decode a base64 string into bytes without native codecs.
+ *
+ * @export
+ * @param {string} value The base64 string.
+ * @returns {Uint8Array} The decoded bytes.
+ */
+
+export function base64ToBytesFallback(value: string): Uint8Array {
+  let padding = 0;
+  while (padding < 2 && value.length > 0 && value[value.length - 1 - padding] === "=") padding++;
+  const out = new Uint8Array(((value.length / 4) * 3 - padding) | 0);
+  let o = 0;
+
+  for (let i = 0; i < value.length; i += 4) {
+    const n =
+      (BASE64_CODES[value.charCodeAt(i)] << 18) |
+      (BASE64_CODES[value.charCodeAt(i + 1)] << 12) |
+      (BASE64_CODES[value.charCodeAt(i + 2)] << 6) |
+      BASE64_CODES[value.charCodeAt(i + 3)];
+
+    if (o < out.length) out[o++] = (n >> 16) & 0xff;
+    if (o < out.length) out[o++] = (n >> 8) & 0xff;
+    if (o < out.length) out[o++] = n & 0xff;
+  }
+
+  return out;
+}
+
+/**
+ * Encode bytes as a base64 string. Delegates to a native codec where one exists.
+ *
+ * @export
+ * @param {Uint8Array} bytes The bytes to encode.
+ * @returns {string} The base64 string.
+ */
+
+export function bytesToBase64(bytes: Uint8Array): string {
+  if (NATIVE_TO_BASE64) return (bytes as unknown as { toBase64(): string }).toBase64();
+  if (NATIVE_BUFFER) return NATIVE_BUFFER.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString("base64");
+
+  return bytesToBase64Fallback(bytes);
+}
+
+/**
+ * Encode bytes as a base64 string without native codecs.
+ *
+ * @export
+ * @param {Uint8Array} bytes The bytes to encode.
+ * @returns {string} The base64 string.
+ */
+
+export function bytesToBase64Fallback(bytes: Uint8Array): string {
+  let out = "";
+
+  for (let i = 0; i < bytes.length; i += 3) {
+    const remaining = bytes.length - i;
+    const n = (bytes[i] << 16) | ((remaining > 1 ? bytes[i + 1] : 0) << 8) | (remaining > 2 ? bytes[i + 2] : 0);
+
+    out += BASE64_CHARS[(n >> 18) & 0x3f];
+    out += BASE64_CHARS[(n >> 12) & 0x3f];
+    out += remaining > 1 ? BASE64_CHARS[(n >> 6) & 0x3f] : "=";
+    out += remaining > 2 ? BASE64_CHARS[n & 0x3f] : "=";
+  }
+
+  return out;
+}
+
 /**
  * Throw an error if the provided value cannot be represented as a 32-bit integer.
  *

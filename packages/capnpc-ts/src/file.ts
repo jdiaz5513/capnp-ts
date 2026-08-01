@@ -154,3 +154,160 @@ export function needsConcreteListClass(field: s.Field): boolean {
 
   return elementType.isStruct() || elementType.isList();
 }
+
+/**
+ * A single type parameter visible to a node. `flatIndex` is its position in
+ * the node's full scope chain (outermost scope first). This is the index used
+ * for runtime constructor bindings.
+ */
+
+export interface GenericParam {
+  flatIndex: number;
+  name: string;
+  parameterIndex: number;
+  scopeId: bigint;
+}
+
+/** Get all type parameters in scope for `node`, outermost scope first. */
+export function genericParams(ctx: CodeGeneratorFileContext, node: s.Node): GenericParam[] {
+  const implicit = ctx.implicitScopes.get(node.getId().toString());
+  if (implicit !== undefined) return implicit as GenericParam[];
+
+  const chain: s.Node[] = [];
+  let cur = node;
+
+  for (;;) {
+    chain.unshift(cur);
+    const scopeId = cur.getScopeId();
+    if (scopeId === BigInt(0) || !hasNode(ctx, scopeId)) break;
+    cur = lookupNode(ctx, scopeId);
+  }
+
+  const out: GenericParam[] = [];
+  for (const n of chain) {
+    n.getParameters()
+      .toArray()
+      .forEach((p, parameterIndex) => {
+        out.push({
+          flatIndex: out.length,
+          name: p.getName(),
+          parameterIndex,
+          scopeId: n.getId(),
+        });
+      });
+  }
+
+  const seen = new Set<string>();
+  for (const p of out) {
+    if (seen.has(p.name)) p.name = `${p.name}_${p.flatIndex}`;
+    seen.add(p.name);
+  }
+
+  return out;
+}
+
+/** `<State extends capnp.Struct = capnp.Struct>`, or empty. */
+export function genericParamDecl(params: GenericParam[]): string {
+  if (params.length === 0) return "";
+  return `<${params.map((p) => `${p.name} extends capnp.Struct = capnp.Struct`).join(", ")}>`;
+}
+
+/** `<State>`, or empty. */
+export function genericArgNames(params: GenericParam[]): string {
+  if (params.length === 0) return "";
+  return `<${params.map((p) => p.name).join(", ")}>`;
+}
+
+export interface BrandBinding {
+  ctorExpr: string;
+  typeArg: string;
+}
+
+/**
+ * Resolve a use-site `Brand` against `targetId`'s parameter list. Every
+ * parameter must bind to a concrete struct (or a parameter of the
+ * enclosing generic context, `env`) or the whole resolution fails.
+ */
+
+export function resolveBrand(
+  ctx: CodeGeneratorFileContext,
+  targetId: bigint,
+  brand: s.Brand,
+  env: GenericParam[],
+): BrandBinding[] | null {
+  const params = genericParams(ctx, lookupNode(ctx, targetId));
+  if (params.length === 0) return null;
+
+  const scopes = brand.getScopes().toArray();
+  const out: BrandBinding[] = [];
+  for (const p of params) {
+    const scope = scopes.find((sc) => sc.getScopeId() === p.scopeId);
+    if (scope === undefined || !scope.isBind()) return null;
+
+    const bind = scope.getBind().toArray();
+    const binding = bind[p.parameterIndex];
+    if (binding === undefined || !binding.isType()) return null;
+
+    const resolved = resolveBindingType(ctx, binding.getType(), env);
+    if (resolved === null) return null;
+
+    out.push(resolved);
+  }
+
+  return out;
+}
+
+function resolveBindingType(
+  ctx: CodeGeneratorFileContext,
+  type: s.Type,
+  env: GenericParam[],
+): BrandBinding | null {
+  switch (type.which()) {
+    case s.Type.STRUCT: {
+      const node = lookupNode(ctx, type.getStruct().getTypeId());
+      const name = getFullClassName(node);
+      const nested = resolveBrand(ctx, node.getId(), type.getStruct().getBrand(), env);
+      if (nested === null) return { ctorExpr: name, typeArg: name };
+
+      return {
+        ctorExpr: `capnp.bindGeneric(${name}, [${nested.map((b) => b.ctorExpr).join(", ")}])`,
+        typeArg: `${name}<${nested.map((b) => b.typeArg).join(", ")}>`,
+      };
+    }
+    case s.Type.ANY_POINTER: {
+      const any = type.getAnyPointer();
+      if (any.which() !== s.Type_AnyPointer.PARAMETER) return null;
+
+      const ref = any.getParameter();
+      const p = env.find(
+        (e) => e.scopeId === ref.getScopeId() && e.parameterIndex === ref.getParameterIndex(),
+      );
+      if (p === undefined) return null;
+
+      // Re-binding through an enclosing generic: the ctor comes off the
+      // instance's own bindings at accessor-emission sites (`this`).
+      return {
+        ctorExpr: `capnp.getGenericBinding(this, ${p.flatIndex})`,
+        typeArg: p.name,
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+/**
+ * The in-scope parameter matching an `AnyPointer.parameter` reference,
+ * if `type` is one.
+ */
+
+export function parameterRef(type: s.Type, env: GenericParam[]): GenericParam | undefined {
+  if (type.which() !== s.Type.ANY_POINTER) return undefined;
+  const any = type.getAnyPointer();
+  if (any.which() !== s.Type_AnyPointer.PARAMETER) return undefined;
+
+  const ref = any.getParameter();
+  return env.find(
+    (e) => e.scopeId === ref.getScopeId() && e.parameterIndex === ref.getParameterIndex(),
+  );
+}

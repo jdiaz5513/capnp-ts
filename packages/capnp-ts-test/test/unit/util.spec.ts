@@ -6,6 +6,13 @@ import { RANGE_INVALID_UTF8 } from "capnp-ts/src/errors";
 import * as util from "capnp-ts/src/util";
 import { compareBuffers, runTestCheck } from "../util";
 
+const BASE64_VECTORS = [
+  { b64: "", bytes: [] },
+  { b64: "AA==", bytes: [0x00] },
+  { b64: "AQI=", bytes: [0x01, 0x02] },
+  { b64: "AQID", bytes: [0x01, 0x02, 0x03] },
+  { b64: "AQID/w==", bytes: [0x01, 0x02, 0x03, 0xff] },
+];
 const BAD_UTF8 = [
   new Uint8Array([0xff, 0xff]),
   new Uint8Array([0xf4, 0xaf, 0x92, 0xa9]),
@@ -23,8 +30,62 @@ const UTF8_BUFFERS = [
   { buf: new Uint8Array([0xf0, 0x9f, 0x92, 0xa9]), str: "💩" },
 ];
 
+void tap.test("base64ToBytes()", (t) => {
+  BASE64_VECTORS.forEach(({ b64, bytes }) => {
+    t.strictSame(Array.from(util.base64ToBytes(b64)), bytes);
+  });
+
+  t.end();
+});
+
+void tap.test("base64ToBytesFallback()", (t) => {
+  BASE64_VECTORS.forEach(({ b64, bytes }) => {
+    t.strictSame(Array.from(util.base64ToBytesFallback(b64)), bytes);
+  });
+
+  t.end();
+});
+
 void tap.test("bufferToHex()", (t) => {
   t.equal(util.bufferToHex(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]).buffer), "[aa bb cc dd]");
+
+  t.end();
+});
+
+void tap.test("bytesToBase64()", (t) => {
+  BASE64_VECTORS.forEach(({ b64, bytes }) => {
+    t.equal(util.bytesToBase64(new Uint8Array(bytes)), b64);
+  });
+
+  t.end();
+});
+
+void tap.test("bytesToBase64(base64ToBytes())", (t) => {
+  // Round-trip through the public codecs and check the fallbacks agree byte-for-byte with whichever native path is
+  // active in this environment.
+
+  runTestCheck(
+    t,
+    property(gen.array(gen.intWithin(0, 255)), (a) => {
+      const bytes = new Uint8Array(a);
+      const b64 = util.bytesToBase64(bytes);
+
+      return (
+        b64 === util.bytesToBase64Fallback(bytes) &&
+        Array.from(util.base64ToBytes(b64)).join() === a.join() &&
+        Array.from(util.base64ToBytesFallback(b64)).join() === a.join()
+      );
+    }),
+    { numTests: 1000 }
+  );
+
+  t.end();
+});
+
+void tap.test("bytesToBase64Fallback()", (t) => {
+  BASE64_VECTORS.forEach(({ b64, bytes }) => {
+    t.equal(util.bytesToBase64Fallback(new Uint8Array(bytes)), b64);
+  });
 
   t.end();
 });
