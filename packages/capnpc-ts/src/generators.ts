@@ -53,6 +53,48 @@ export function generateConcreteListInitializer(
   );
 }
 
+export function generateConstNode(ctx: CodeGeneratorFileContext, node: s.Node): void {
+  const constNode = node.getConst();
+  const name = getDisplayNamePrefix(node);
+  const value = createValueExpression(constNode.getValue());
+
+  // Pointer-typed constants are emitted as functions so the class wrapping the raw bytes is not resolved until the
+  // constant is first used; a module-scope value could observe partially-initialized imports in a dependency cycle.
+
+  switch (constNode.getType().which()) {
+    case s.Type.DATA:
+      ctx.sourceParts.push(`export function get${util.c2t(name)}(): capnp.Data {
+    return capnp.Data.fromPointer(${value});
+}`);
+
+      break;
+
+    case s.Type.LIST: {
+      const listClass = getConcreteListType(ctx, constNode.getType());
+      const jsType = getJsType(ctx, constNode.getType(), false);
+      ctx.sourceParts.push(`export function get${util.c2t(name)}(): ${jsType} {
+    const p = ${value};
+    return new (${listClass})(p.segment, p.byteOffset);
+}`);
+
+      break;
+    }
+
+    case s.Type.STRUCT: {
+      const structClass = getJsType(ctx, constNode.getType(), false);
+      ctx.sourceParts.push(`export function get${util.c2t(name)}(): ${structClass} {
+    const p = ${value};
+    return new ${structClass}(p.segment, p.byteOffset);
+}`);
+
+      break;
+    }
+
+    default:
+      ctx.sourceParts.push(`export const ${name} = ${value};`);
+  }
+}
+
 export function generateDefaultValue(field: s.Field): string {
   const name = field.getName();
   const slot = field.getSlot();
@@ -430,7 +472,10 @@ export function generateNode(ctx: CodeGeneratorFileContext, node: s.Node): void 
       break;
 
     case s.Node.CONST:
-      // Const nodes are generated along with the containing class, ignore these.
+      // Struct-scoped consts are generated as statics along with the containing class; file-scoped consts have no
+      // containing class and are emitted at module scope.
+
+      if (node.getScopeId() === ctx.file.getId()) generateConstNode(ctx, node);
 
       break;
 
