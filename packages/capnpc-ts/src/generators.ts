@@ -371,6 +371,10 @@ export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
 
     if (name.substr(0, 7) === "/capnp/") {
       importPath = `capnp-ts/src/std/${name.substr(7)}.js`;
+    } else if (name[0] === "/") {
+      // Absolute imports resolve against the compiler's -I search paths; emit them relative to the output directory
+      // and assume the imported schema's own output lands alongside it.
+      importPath = `.${name}.js`;
     } else {
       importPath = name[0] === "." ? `${name}.js` : `./${name}.js`;
     }

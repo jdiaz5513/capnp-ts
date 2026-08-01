@@ -49,7 +49,7 @@ capnp_out := $(patsubst %.capnp,%.capnp.js,$(capnp_in))
 export PATH := $(CURDIR)/$(capnpc_ts)/bin:$(PATH)
 
 %.capnp.js: %.capnp $(capnp_deps)
-	$(capnp_bin) compile -ots -I $(CURDIR)/$(capnp_ts)/src/std $<
+	$(capnp_bin) compile -ots -I $(CURDIR)/$(capnp_ts)/src/std -I $(CURDIR)/$(capnp_ts_test)/test/integration $<
 
 .PHONY: benchmark
 benchmark: build
