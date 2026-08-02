@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. Entries are drafted from [Conventional Commits](https://www.conventionalcommits.org) by the release script (`nix run .#release`).
 
+## [0.9.1](https://github.com/jdiaz5513/capnp-ts/compare/v0.9.0...v0.9.1) (2026-08-01)
+
+### Features
+
+* namespace aliases for nested declarations (#44) (#193) ([813032e](https://github.com/jdiaz5513/capnp-ts/commit/813032e93744d49ead7ac0a03a639231461737da))
+
+### Bug Fixes
+
+* emit file scoped constants correctly (#190) ([92840b5](https://github.com/jdiaz5513/capnp-ts/commit/92840b5a4011ca91609fbdb4fdbfd87f8911cdfd))
+* emit valid paths for absolute schema imports (#191) ([942c9d6](https://github.com/jdiaz5513/capnp-ts/commit/942c9d605ae3e870428d73a6f12fd9027bc014d1))
+* encode unpaired UTF-8 surrogates as U+FFFD (#192) ([4514392](https://github.com/jdiaz5513/capnp-ts/commit/45143923abd26c50a745b618c1fb05e0ce130092))
+
 ## [0.9.0](https://github.com/jdiaz5513/capnp-ts/compare/v0.8.0...v0.9.0) (2026-07-09)
 
 ### ⚠ BREAKING CHANGES
