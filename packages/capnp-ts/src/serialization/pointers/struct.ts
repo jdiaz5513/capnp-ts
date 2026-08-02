@@ -4,6 +4,7 @@
 
 import initTrace from "debug";
 
+import { SchemaAnnotation } from "../../annotations";
 import { MAX_DEPTH, NATIVE_LITTLE_ENDIAN } from "../../constants";
 import { format, padToWord } from "../../util";
 import { ListElementSize } from "../list-element-size";
@@ -52,6 +53,8 @@ trace("load");
 const TMP_WORD = new DataView(new ArrayBuffer(8));
 
 export interface _StructCtor extends _PointerCtor {
+  readonly annotations?: SchemaAnnotation[];
+  readonly fieldAnnotations?: { [field: string]: SchemaAnnotation[] };
   readonly id: string;
   readonly size: ObjectSize;
 }

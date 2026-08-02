@@ -51,6 +51,8 @@ export {
   getUint8Mask,
 } from "./serialization";
 
+export { getAnnotation, getAnnotations, SchemaAnnotation } from "./annotations";
+
 export { base64ToBytes, bytesToBase64 } from "./util";
 
 export {
