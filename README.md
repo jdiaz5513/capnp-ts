@@ -148,7 +148,7 @@ Structs assign from plain objects; arrays become lists, nested objects become st
 ```typescript
 import * as capnp from "capnp-ts";
 
-import { AddressBook, Person_PhoneNumber_Type } from "./addressbook.capnp.js";
+import { AddressBook, Person } from "./addressbook.capnp.js";
 
 const message = new capnp.Message();
 const book = message.initRoot(AddressBook);
@@ -159,7 +159,7 @@ book.people = [
     name: "Alice",
     email: "alice@example.com",
     employment: { school: "MIT" },
-    phones: [{ number: "555-1212", type: Person_PhoneNumber_Type.MOBILE }],
+    phones: [{ number: "555-1212", type: Person.PhoneNumber.Type.MOBILE }],
   },
 ];
 

@@ -20,8 +20,8 @@ void tap.test("schema roundtrip", (t) => {
 
   const capnpVersion = req.getCapnpVersion();
 
-  t.equal(capnpVersion.getMajor(), 0);
-  t.equal(capnpVersion.getMinor(), 6);
+  t.equal(capnpVersion.getMajor(), 1);
+  t.equal(capnpVersion.getMinor(), 4);
   t.equal(capnpVersion.getMicro(), 0);
 
   const requestedFiles = req.getRequestedFiles();

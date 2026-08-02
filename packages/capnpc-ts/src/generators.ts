@@ -978,15 +978,6 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
     }),
   );
 
-  // static readonly NestedStruct = MyStruct_NestedStruct;
-  members.push(...nestedNodes.map((n) => `static readonly ${getDisplayNamePrefix(n)} = ${getFullClassName(n)};`));
-
-  // static readonly Client = MyInterface_Client; static readonly Server = MyInterface_Server;
-  if (interfaceNode) {
-    members.push(`static readonly Client = ${fullClassName}_Client;`);
-    members.push(`static readonly Server = ${fullClassName}_Server;`);
-  }
-
   const defaultValues = fields.reduce(
     (acc, f) =>
       f.isSlot() &&
@@ -1033,7 +1024,56 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
     generateInterfaceClasses(ctx, node);
   }
 
-  ctx.sourceParts.push(klass(fullClassName + genericParamDecl(genericParams(ctx, node)), members));
+  const gparams = genericParams(ctx, node);
+
+  ctx.sourceParts.push(klass(fullClassName + genericParamDecl(gparams), members));
+
+  // export namespace MyStruct { export import NestedStruct = MyStruct_NestedStruct; ... }
+  //
+  // Merging a namespace onto the class gives dotted access to nested declarations in both value and type positions
+  // (`let f: CodeGeneratorRequest.RequestedFile`), which the old `static readonly` aliases could not provide. The flat
+  // names remain canonical; schema-declared members win any collision with the synthetic aliases.
+  const groupNodes = ctx.nodes.filter((n) => n.getScopeId() === nodeId && n.isStruct() && n.getStruct().getIsGroup());
+  const aliases = new Map<string, string>();
+
+  [...nestedNodes, ...groupNodes]
+    .filter((n) => n.isStruct() || n.isEnum() || n.isInterface())
+    .forEach((n) => {
+      const memberName = util.c2t(getDisplayNamePrefix(n));
+      aliases.set(memberName, `export import ${memberName} = ${getFullClassName(n)};`);
+    });
+
+  if (hasUnnamedUnion && !aliases.has("Which")) {
+    aliases.set("Which", `export import Which = ${fullClassName}_Which;`);
+  }
+
+  if (interfaceNode) {
+    const decl = genericParamDecl(gparams);
+    const args = genericArgNames(gparams);
+
+    // Client and Server are plain classes with no merged namespace of their own, and ambient `export import` (which
+    // declaration emit produces) requires namespace meaning on the target — alias them as a const/type pair instead.
+    if (!aliases.has("Client")) {
+      aliases.set(
+        "Client",
+        `export const Client = ${fullClassName}_Client;\nexport type Client${decl} = ${fullClassName}_Client${args};`,
+      );
+    }
+    if (!aliases.has("Server")) {
+      aliases.set(
+        "Server",
+        `export const Server = ${fullClassName}_Server;\nexport type Server${decl} = ${fullClassName}_Server${args};`,
+      );
+    }
+    if (!aliases.has("Ref")) aliases.set("Ref", `export type Ref${decl} = ${fullClassName}_Ref${args};`);
+  } else {
+    if (!aliases.has("Json")) aliases.set("Json", `export type Json = ${fullClassName}_Json;`);
+    if (!aliases.has("Shape")) aliases.set("Shape", `export type Shape = ${fullClassName}_Shape;`);
+  }
+
+  const aliasLines = [...aliases.keys()].sort().map((k) => aliases.get(k) as string);
+
+  ctx.sourceParts.push(`export namespace ${fullClassName} {\n${aliasLines.map(indent).join("\n")}\n}`);
 
   // Write out the concrete list type initializer after all the class definitions. It can't be initialized within the
   // class's static initializer because the nested type might not be defined yet.

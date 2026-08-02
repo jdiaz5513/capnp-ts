@@ -72,8 +72,10 @@ class Person_PhoneNumber extends capnp_ts_1.Struct {
     toString() { return "Person_PhoneNumber_" + super.toString(); }
 }
 exports.Person_PhoneNumber = Person_PhoneNumber;
-Person_PhoneNumber.Type = Person_PhoneNumber_Type;
 Person_PhoneNumber._capnp = { displayName: "PhoneNumber", id: "af663da31c027e0e", size: new capnp_ts_1.ObjectSize(8, 1) };
+(function (Person_PhoneNumber) {
+    Person_PhoneNumber.Type = Person_PhoneNumber_Type;
+})(Person_PhoneNumber || (exports.Person_PhoneNumber = Person_PhoneNumber = {}));
 var Person_Employment_Which;
 (function (Person_Employment_Which) {
     Person_Employment_Which[Person_Employment_Which["UNEMPLOYED"] = 0] = "UNEMPLOYED";
@@ -131,6 +133,9 @@ Person_Employment.EMPLOYER = Person_Employment_Which.EMPLOYER;
 Person_Employment.SCHOOL = Person_Employment_Which.SCHOOL;
 Person_Employment.SELF_EMPLOYED = Person_Employment_Which.SELF_EMPLOYED;
 Person_Employment._capnp = { displayName: "employment", id: "e88780a90af3da0c", size: new capnp_ts_1.ObjectSize(8, 4) };
+(function (Person_Employment) {
+    Person_Employment.Which = Person_Employment_Which;
+})(Person_Employment || (exports.Person_Employment = Person_Employment = {}));
 class Person extends capnp_ts_1.Struct {
     getId() { return capnp_ts_1.Struct.getUint32(0, this); }
     setId(value) { capnp_ts_1.Struct.setUint32(0, value, this); }
@@ -182,8 +187,11 @@ class Person extends capnp_ts_1.Struct {
     toString() { return "Person_" + super.toString(); }
 }
 exports.Person = Person;
-Person.PhoneNumber = Person_PhoneNumber;
 Person._capnp = { displayName: "Person", id: "d94307c4985be8e7", size: new capnp_ts_1.ObjectSize(8, 4) };
+(function (Person) {
+    Person.Employment = Person_Employment;
+    Person.PhoneNumber = Person_PhoneNumber;
+})(Person || (exports.Person = Person = {}));
 class AddressBook extends capnp_ts_1.Struct {
     adoptPeople(value) { capnp_ts_1.Struct.adopt(value, capnp_ts_1.Struct.getPointer(0, this)); }
     disownPeople() { return capnp_ts_1.Struct.disown(this.getPeople()); }
