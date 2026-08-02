@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. Entries are drafted from [Conventional Commits](https://www.conventionalcommits.org) by the release script (`nix run .#release`).
 
+## [0.9.2](https://github.com/jdiaz5513/capnp-ts/compare/v0.9.1...v0.9.2) (2026-08-01)
+
+### Features
+
+* add support for annotations (#195) ([f0538f4](https://github.com/jdiaz5513/capnp-ts/commit/f0538f4ebf5f56a4a5107c61f6901d459c20086a))
+
+### Bug Fixes
+
+* exclude TypeScript source files from npm tarballs (#194) ([afd475e](https://github.com/jdiaz5513/capnp-ts/commit/afd475e535fbf1303e9ad6af48fbb02a50c68b33))
+
 ## [0.9.1](https://github.com/jdiaz5513/capnp-ts/compare/v0.9.0...v0.9.1) (2026-08-01)
 
 ### Features
