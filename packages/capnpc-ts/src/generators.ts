@@ -29,6 +29,14 @@ import { createValueExpression } from "./values";
 const trace = initTrace("capnpc:generators");
 trace("load");
 
+/** `[{ id: "ea88d419cd1a22c8", value: "widget" }]` — annotation ids are hex strings like `_capnp.id`. */
+
+export function annotationsExpression(annotations: s.Annotation[]): string {
+  return `[${annotations
+    .map((a) => `{ id: ${str(a.getId().toString(16))}, value: ${createValueExpression(a.getValue())} }`)
+    .join(", ")}]`;
+}
+
 export function generateCapnpImport(ctx: CodeGeneratorFileContext): void {
   const fileNode = lookupNode(ctx, ctx.file);
   const tsFileId = util.hexToBigInt(TS_FILE_ID);
@@ -160,6 +168,12 @@ export function generateFileId(ctx: CodeGeneratorFileContext): void {
   trace("generateFileId()");
 
   ctx.sourceParts.push(`export const _capnpFileId = BigInt(${str(`0x${ctx.file.getId().toString(16)}`)});`);
+
+  const fileAnnotations = lookupNode(ctx, ctx.file).getAnnotations().toArray();
+
+  if (fileAnnotations.length > 0) {
+    ctx.sourceParts.push(`export const _capnpFileAnnotations = ${annotationsExpression(fileAnnotations)};`);
+  }
 }
 
 export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.Node): void {
@@ -994,7 +1008,24 @@ export function generateStructNode(ctx: CodeGeneratorFileContext, node: s.Node, 
     `displayName: ${str(displayNamePrefix)}`,
     `id: ${str(nodeIdHex)}`,
     `size: new __O(${dataByteLength}, ${pointerCount})`,
-  ].concat(defaultValues);
+  ];
+
+  // Schema annotations surface at runtime so applications can build their own behavior on them (#126).
+  const nodeAnnotations = node.getAnnotations().toArray();
+
+  if (nodeAnnotations.length > 0) capnpProps.push(`annotations: ${annotationsExpression(nodeAnnotations)}`);
+
+  const annotatedFields = fields.filter((f) => f.getAnnotations().getLength() > 0);
+
+  if (annotatedFields.length > 0) {
+    capnpProps.push(
+      `fieldAnnotations: { ${annotatedFields
+        .map((f) => `${str(f.getName())}: ${annotationsExpression(f.getAnnotations().toArray())}`)
+        .join(", ")} }`,
+    );
+  }
+
+  capnpProps.push(...defaultValues);
   members.push(`static readonly _capnp = { ${capnpProps.join(", ")} };`);
 
   // static _ConcreteListClass: MyStruct_ConcreteListClass;

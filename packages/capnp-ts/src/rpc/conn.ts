@@ -25,6 +25,7 @@ import {
   Payload,
   Return_Which,
 } from "../std/rpc.capnp.js";
+import { SchemaAnnotation } from "../annotations";
 import { RPC_NO_MAIN_INTERFACE, RPC_UNKNOWN_ANSWER_ID, RPC_UNKNOWN_EXPORT_ID } from "../errors";
 import { format } from "../util";
 import { Message } from "../serialization/message";
@@ -121,7 +122,7 @@ export interface ConnOptions {
 /** The static surface of a generated interface class, as far as Conn is concerned. */
 
 export interface InterfaceCtor<C> {
-  readonly _capnp: { displayName: string; id: string };
+  readonly _capnp: { annotations?: SchemaAnnotation[]; displayName: string; id: string };
   readonly Client: new (client: Client) => C;
 }
 
