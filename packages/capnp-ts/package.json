@@ -11,6 +11,11 @@
   "engines": {
     "node": ">=20"
   },
+  "files": [
+    "src/**/*.js",
+    "src/**/*.js.map",
+    "src/**/*.d.ts"
+  ],
   "homepage": "https://github.com/jdiaz5513/capnp-ts#readme",
   "keywords": [
     "capnp",
