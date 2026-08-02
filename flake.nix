@@ -15,7 +15,7 @@
       inherit (pkgs) lib;
 
       capnpc-ts = pkgs.buildNpmPackage {
-        inherit src nodejs npmDepsHash;
+        inherit src nodejs npmDeps npmConfigHook;
 
         buildPhase = ''
           runHook preBuild
@@ -56,9 +56,10 @@
 
       nodejs = pkgs.nodejs_24;
 
-      # To recompute when package-lock.json changes:
-      #   nix run nixpkgs#prefetch-npm-deps -- package-lock.json
-      npmDepsHash = "sha256-afTDd7faDInY5IcHq+hHJJRPlnyTkhGpo5+vBqp6KhI=";
+      # Each dependency is fetched from its package-lock.json integrity hash directly.
+      npmConfigHook = pkgs.importNpmLock.npmConfigHook;
+
+      npmDeps = pkgs.importNpmLock {npmRoot = ./.;};
 
       pkgs = import nixpkgs {inherit system;};
 
@@ -96,7 +97,7 @@
 
       release = pkgs.writeShellApplication {
         name = "release";
-        runtimeInputs = [nodejs pkgs.git pkgs.prefetch-npm-deps];
+        runtimeInputs = [nodejs pkgs.git];
         text = ''
           set -euo pipefail
           if [ "$#" -eq 0 ]; then
@@ -120,10 +121,6 @@
           npm pkg set "dependencies.capnp-ts=^$version" \
             -w capnpc-ts -w capnp-ts-test -w capnp-ts-js-examples
           npm install --package-lock-only >/dev/null
-
-          # The lockfile changed, so the nix FOD hash must follow.
-          hash="$(prefetch-npm-deps package-lock.json)"
-          sed -i "s|npmDepsHash = \"sha256-[^\"]*\"|npmDepsHash = \"$hash\"|" flake.nix
 
           # Draft a changelog section from conventional commits since the last tag.
           {
@@ -157,7 +154,7 @@
           } > CHANGELOG.md.new
           mv CHANGELOG.md.new CHANGELOG.md
 
-          git add CHANGELOG.md flake.nix package.json package-lock.json packages/*/package.json
+          git add CHANGELOG.md package.json package-lock.json packages/*/package.json
           git commit -m "chore(release): $version"
           git tag "v$version"
           echo "Released $version. Review CHANGELOG.md (amend if needed), push with tags, then run publish."
@@ -199,7 +196,7 @@
       };
 
       checks.tests = pkgs.buildNpmPackage {
-        inherit src nodejs npmDepsHash;
+        inherit src nodejs npmDeps npmConfigHook;
 
         buildPhase = ''
           runHook preBuild
