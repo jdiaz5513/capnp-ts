@@ -4,7 +4,7 @@
     "url": "https://github.com/jdiaz5513/capnp-ts/issues"
   },
   "dependencies": {
-    "capnp-ts": "^0.9.2",
+    "capnp-ts": "^0.9.3",
     "tslib": "^2.8.0"
   },
   "description": "Strongly typed Cap'n Proto implementation for the browser and Node.js using TypeScript",

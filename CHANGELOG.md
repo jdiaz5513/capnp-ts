@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. Entries are drafted from [Conventional Commits](https://www.conventionalcommits.org) by the release script (`nix run .#release`).
 
+## [0.9.3](https://github.com/jdiaz5513/capnp-ts/compare/v0.9.2...v0.9.3) (2026-08-20)
+
+### Features
+
+* flatten interface inheritance into generated clients and servers (#200) ([bdb765e](https://github.com/jdiaz5513/capnp-ts/commit/bdb765e7c3cfeb6f0d3b85e7dd59888edde14371))
+
 ## [0.9.2](https://github.com/jdiaz5513/capnp-ts/compare/v0.9.1...v0.9.2) (2026-08-01)
 
 ### Features
