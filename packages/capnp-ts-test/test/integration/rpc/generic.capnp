@@ -22,3 +22,20 @@ interface Holder(T) {
 interface Depot {
     thingHolder @0 () -> (holder :Holder(Thing));
 }
+
+interface ThingHolder extends(Holder(Thing)) {
+    size @0 () -> (count :UInt32);
+}
+
+interface SubHolder(U) extends(Holder(U)) {
+    relabel @0 (label :Text) -> ();
+}
+
+interface ThingSubHolder extends(SubHolder(Thing)) {
+}
+
+interface BoxHolder(U) extends(Holder(Box(U))) {
+}
+
+interface ThingBoxHolder extends(BoxHolder(Thing)) {
+}

@@ -6,7 +6,13 @@ import { CodeGeneratorFileContext } from "./code-generator-file-context";
 import { ConcreteListType, Primitive, TS_FILE_ID } from "./constants";
 import * as E from "./errors";
 import {
+  brandBound,
+  brandCtorExpr,
+  brandParametersIn,
+  brandTypeArg,
   compareCodeOrder,
+  FlatMethod,
+  flattenMethods,
   genericArgNames,
   genericParamDecl,
   genericParams,
@@ -183,6 +189,7 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
   const gparams = genericParams(ctx, node);
   // The method list index IS the method id; do not reorder.
   const methods = node.getInterface().getMethods().toArray();
+  const flat = flattenMethods(ctx, node);
 
   methods.forEach((m) => {
     ctx.implicitScopes.set(m.getParamStructType().toString(), gparams);
@@ -192,8 +199,8 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
   });
 
   methods.forEach((m) => generateResultPromise(ctx, node, m));
-  generateInterfaceClient(ctx, node, fullClassName, methods, gparams);
-  generateInterfaceServer(ctx, fullClassName, methods, gparams);
+  generateInterfaceClient(ctx, node, fullClassName, flat, gparams);
+  generateInterfaceServer(ctx, node, fullClassName, flat, gparams);
   const decl = genericParamDecl(gparams);
   const args = genericArgNames(gparams);
   ctx.sourceParts.push(
@@ -201,47 +208,75 @@ export function generateInterfaceClasses(ctx: CodeGeneratorFileContext, node: s.
   );
 }
 
+const interfaceIdExpr = (node: s.Node): string => `BigInt(${str(`0x${node.getId().toString(16)}`)})`;
+
+const ownedBy = (node: s.Node, e: FlatMethod): boolean => e.declaring.getId() === node.getId();
+
+const entryArgs = (node: s.Node, e: FlatMethod, ownArgs: string, gparams: GenericParam[]): string => {
+  if (ownedBy(node, e)) return ownArgs;
+  if (e.bindings === null) return "";
+  if (!e.bindings.every((b) => brandParametersIn(b, gparams))) return "";
+  return `<${e.bindings.map(brandTypeArg).join(", ")}>`;
+};
+
+const entryCtor = (node: s.Node, className: string, e: FlatMethod): string => {
+  if (ownedBy(node, e) || e.bindings === null) return className;
+  if (!e.bindings.every(brandBound)) return className;
+  const ctors = e.bindings.map((b) => brandCtorExpr(b, () => null));
+  return `capnp.bindGeneric(${className}, [${ctors.join(", ")}])`;
+};
+
+const entryInstanceCtorArgs = (e: FlatMethod, gparams: GenericParam[]): string | null => {
+  if (e.bindings === null || e.bindings.every(brandBound)) return null;
+  const refs = e.bindings.map((b) =>
+    brandCtorExpr(b, (ref) => {
+      const p = gparams.find((g) => g.scopeId === ref.scopeId && g.parameterIndex === ref.parameterIndex);
+      return p === undefined ? null : `bindings[${p.flatIndex}]`;
+    }),
+  );
+  if (refs.some((r) => r === null)) return null;
+  return `[${refs.join(", ")}]`;
+};
+
 function generateInterfaceClient(
   ctx: CodeGeneratorFileContext,
   node: s.Node,
   fullClassName: string,
-  methods: s.Method[],
+  flat: FlatMethod[],
   gparams: GenericParam[],
 ): void {
-  const interfaceId = `BigInt(${str(`0x${node.getId().toString(16)}`)})`;
   const generic = gparams.length > 0;
   const args = genericArgNames(gparams);
   const members: string[] = [];
 
-  members.push(`static readonly interfaceId: bigint = ${interfaceId};`);
+  members.push(`static readonly interfaceId: bigint = ${interfaceIdExpr(node)};`);
+
+  const paramsClassOf = (e: FlatMethod) => getFullClassName(lookupNode(ctx, e.method.getParamStructType()));
+  const resultsClassOf = (e: FlatMethod) => getFullClassName(lookupNode(ctx, e.method.getResultStructType()));
 
   const methodTypes = (bound: boolean) =>
-    methods.map(
-      (m) =>
-        `capnp.Method<${getFullClassName(lookupNode(ctx, m.getParamStructType()))}${bound ? args : ""}, ` +
-        `${getFullClassName(lookupNode(ctx, m.getResultStructType()))}${bound ? args : ""}>`,
-    );
-  const methodDefs = methods.map((m, i) => {
-    const paramsClass = getFullClassName(lookupNode(ctx, m.getParamStructType()));
-    const resultsClass = getFullClassName(lookupNode(ctx, m.getResultStructType()));
-
+    flat.map((e) => {
+      const targs = entryArgs(node, e, bound ? args : "", gparams);
+      return `capnp.Method<${paramsClassOf(e)}${targs}, ${resultsClassOf(e)}${targs}>`;
+    });
+  const methodDefs = flat.map((e) => {
     return (
       `{\n` +
       indent(
         [
-          `interfaceId: ${interfaceId},`,
-          `interfaceName: ${str(node.getDisplayName())},`,
-          `methodId: ${i},`,
-          `methodName: ${str(m.getName())},`,
-          `ParamsClass: ${paramsClass},`,
-          `ResultsClass: ${resultsClass},`,
+          `interfaceId: ${interfaceIdExpr(e.declaring)},`,
+          `interfaceName: ${str(e.declaring.getDisplayName())},`,
+          `methodId: ${e.methodId},`,
+          `methodName: ${str(e.method.getName())},`,
+          `ParamsClass: ${entryCtor(node, paramsClassOf(e), e)},`,
+          `ResultsClass: ${entryCtor(node, resultsClassOf(e), e)},`,
         ].join("\n"),
       ) +
       `\n}`
     );
   });
 
-  if (methods.length === 0) {
+  if (flat.length === 0) {
     members.push(`static readonly methods: [] = [];`);
     members.push(`readonly client: capnp.Client;`);
     members.push(`constructor(client: capnp.Client) { this.client = client; }`);
@@ -255,13 +290,20 @@ function generateInterfaceClient(
     members.push(`constructor(client: capnp.Client) { this.client = client; }`);
   } else {
     const bindingsTuple = `[${gparams.map((p) => `capnp.StructCtor<${p.name}>`).join(", ")}]`;
-    const boundDefs = methods.map((m, i) => {
-      const paramsClass = getFullClassName(lookupNode(ctx, m.getParamStructType()));
-      const resultsClass = getFullClassName(lookupNode(ctx, m.getResultStructType()));
+    const boundDefs = flat.map((e, i) => {
+      if (!ownedBy(node, e)) {
+        const instanceArgs = entryInstanceCtorArgs(e, gparams);
+        if (instanceArgs === null) return `{ ...${fullClassName}_Methods[${i}] }`;
+        return (
+          `{ ...${fullClassName}_Methods[${i}], ` +
+          `ParamsClass: capnp.bindGeneric(${paramsClassOf(e)}, ${instanceArgs}), ` +
+          `ResultsClass: capnp.bindGeneric(${resultsClassOf(e)}, ${instanceArgs}) }`
+        );
+      }
       return (
         `{ ...${fullClassName}_Methods[${i}], ` +
-        `ParamsClass: capnp.bindGeneric(${paramsClass}${args}, bindings), ` +
-        `ResultsClass: capnp.bindGeneric(${resultsClass}${args}, bindings) }`
+        `ParamsClass: capnp.bindGeneric(${paramsClassOf(e)}${args}, bindings), ` +
+        `ResultsClass: capnp.bindGeneric(${resultsClassOf(e)}${args}, bindings) }`
       );
     });
     members.push(`readonly bindings: ${bindingsTuple};`);
@@ -280,21 +322,20 @@ function generateInterfaceClient(
     );
   }
 
-  methods.forEach((m, i) => {
-    const paramsClass = getFullClassName(lookupNode(ctx, m.getParamStructType()));
-    const resultsNode = lookupNode(ctx, m.getResultStructType());
-    const resultsClass = getFullClassName(resultsNode);
-    const promiseName = resultPromiseName(ctx, node, m);
-    const boundArgs = generic ? args : "";
-    const returnType = promiseName ?? `capnp.RemotePromise<${resultsClass}${boundArgs}>`;
+  flat.forEach((e, i) => {
+    const paramsClass = paramsClassOf(e);
+    const resultsClass = resultsClassOf(e);
+    const promiseName = resultPromiseName(ctx, e.declaring, e.method);
+    const targs = entryArgs(node, e, generic ? args : "", gparams);
+    const returnType = promiseName ?? `capnp.RemotePromise<${resultsClass}${targs}>`;
     const table = generic ? `this.methods` : `${fullClassName}_Client.methods`;
     const callArgs =
       promiseName === null ? `${table}[${i}], params` : `${table}[${i}], params, ${promiseName}`;
 
     members.push(
       method(
-        m.getName(),
-        [`params?: ((params: ${paramsClass}${boundArgs}) => void) | ${paramsClass}_Shape`],
+        e.method.getName(),
+        [`params?: ((params: ${paramsClass}${targs}) => void) | ${paramsClass}_Shape`],
         returnType,
         [`this.client.call(${callArgs})`],
       ),
@@ -304,7 +345,7 @@ function generateInterfaceClient(
   members.push(method("dispose", [], "void", ["this.client.dispose()"]));
   members.push(`[Symbol.dispose](): void { this.client.dispose(); }`);
 
-  if (generic && methods.length > 0) {
+  if (generic && flat.length > 0) {
     ctx.sourceParts.push(
       `const ${fullClassName}_Methods: [\n${indent(methodTypes(false).join(",\n"))}\n] = [\n${indent(
         methodDefs.join(",\n"),
@@ -318,8 +359,9 @@ function generateInterfaceClient(
 
 function generateInterfaceServer(
   ctx: CodeGeneratorFileContext,
+  node: s.Node,
   fullClassName: string,
-  methods: s.Method[],
+  flat: FlatMethod[],
   gparams: GenericParam[],
 ): void {
   const generic = gparams.length > 0;
@@ -327,11 +369,13 @@ function generateInterfaceServer(
   const args = genericArgNames(gparams);
   const boundArgs = generic ? args : "";
 
-  const targetMembers = methods.map(
-    (m) =>
-      `${m.getName()}: capnp.ServerMethodImpl<${getFullClassName(lookupNode(ctx, m.getParamStructType()))}${boundArgs}, ` +
-      `${getFullClassName(lookupNode(ctx, m.getResultStructType()))}${boundArgs}>;`,
-  );
+  const targetMembers = flat.map((e) => {
+    const targs = entryArgs(node, e, boundArgs, gparams);
+    return (
+      `${e.method.getName()}: capnp.ServerMethodImpl<${getFullClassName(lookupNode(ctx, e.method.getParamStructType()))}${targs}, ` +
+      `${getFullClassName(lookupNode(ctx, e.method.getResultStructType()))}${targs}>;`
+    );
+  });
 
   ctx.sourceParts.push(
     `export interface ${fullClassName}_ServerTarget${decl} {\n${targetMembers.map(indent).join("\n")}\n}`,
@@ -341,16 +385,29 @@ function generateInterfaceServer(
   // Generic servers re-bind their table rows so dispatch constructs
   // params/results through the bound ctors — impls get typed instances.
   // Bindings are optional: an unbound server still dispatches, its
-  // impls just read parameter fields via explicit ctors.
-  const rows = methods.map((m, i) => {
-    if (!generic) return `{ ...${table}[${i}], impl: target.${m.getName()} },`;
-    const paramsClass = getFullClassName(lookupNode(ctx, m.getParamStructType()));
-    const resultsClass = getFullClassName(lookupNode(ctx, m.getResultStructType()));
+  // impls just read parameter fields via explicit ctors. Inherited rows
+  // arrive pre-bound from the flattened table (or rebind through the
+  // instance bindings when the brand references the inheritor's own
+  // parameters).
+  const rows = flat.map((e, i) => {
+    if (!generic) return `{ ...${table}[${i}], impl: target.${e.method.getName()} },`;
+    const paramsClass = getFullClassName(lookupNode(ctx, e.method.getParamStructType()));
+    const resultsClass = getFullClassName(lookupNode(ctx, e.method.getResultStructType()));
+    if (!ownedBy(node, e)) {
+      const instanceArgs = entryInstanceCtorArgs(e, gparams);
+      if (instanceArgs === null) return `{ ...${table}[${i}], impl: target.${e.method.getName()} },`;
+      return (
+        `{ ...${table}[${i}], ...(bindings === undefined ? {} : { ` +
+        `ParamsClass: capnp.bindGeneric(${paramsClass}, ${instanceArgs}), ` +
+        `ResultsClass: capnp.bindGeneric(${resultsClass}, ${instanceArgs}) }), ` +
+        `impl: target.${e.method.getName()} },`
+      );
+    }
     return (
       `{ ...${table}[${i}], ...(bindings === undefined ? {} : { ` +
       `ParamsClass: capnp.bindGeneric(${paramsClass}, bindings), ` +
       `ResultsClass: capnp.bindGeneric(${resultsClass}, bindings) }), ` +
-      `impl: target.${m.getName()} },`
+      `impl: target.${e.method.getName()} },`
     );
   });
   const bindingsTuple = generic
@@ -360,7 +417,7 @@ function generateInterfaceServer(
     ? `target: ${fullClassName}_ServerTarget${args}, bindings?: ${bindingsTuple}`
     : `target: ${fullClassName}_ServerTarget`;
   const ctor =
-    methods.length === 0
+    flat.length === 0
       ? `constructor(_target: ${fullClassName}_ServerTarget) { super([]); }`
       : `constructor(${ctorParams}) {\n${indent(
           `super([\n${indent(rows.join("\n"))}\n]);`,
@@ -385,8 +442,11 @@ function generateResultPromise(ctx: CodeGeneratorFileContext, node: s.Node, m: s
     const iface = f.getSlot().getType().getInterface();
     const ifaceClient = `${getFullClassName(lookupNode(ctx, iface.getTypeId()))}_Client`;
     const bound = resolveBrand(ctx, iface.getTypeId(), iface.getBrand(), env);
-    const args = bound === null ? "" : `<${bound.map((b) => b.typeArg).join(", ")}>`;
-    const ctors = bound === null ? "" : `, [${bound.map((b) => b.ctorExpr).join(", ")}]`;
+    const args = bound === null ? "" : `<${bound.map(brandTypeArg).join(", ")}>`;
+    const ctors =
+      bound === null
+        ? ""
+        : `, [${bound.map((b) => brandCtorExpr(b, (p) => `capnp.getGenericBinding(this, ${p.flatIndex})`)).join(", ")}]`;
 
     return method(`get${util.c2t(f.getName())}`, [], `${ifaceClient}${args}`, [
       `new ${ifaceClient}${args}(this.pipelineClient(${f.getSlot().getOffset()})${ctors})`,
@@ -440,9 +500,21 @@ export function generateNestedImports(ctx: CodeGeneratorFileContext): void {
         const c = getFullClassName(n);
 
         // Struct shapes come along for cross-file struct fields;
-        // interfaces bring their client/server/ref surface.
+        // interfaces bring their client/server/ref surface plus their
+        // methods' params/results classes, which subclasses in this file
+        // reference by name when flattening inherited methods.
         if (n.isStruct()) return `${c}, ${c}_Shape, ${c}_Json`;
-        if (n.isInterface()) return `${c}, ${c}_Client, ${c}_Server, ${c}_Ref`;
+        if (n.isInterface()) {
+          const surface = [c, `${c}_Client`, `${c}_Server`, `${c}_Ref`];
+          for (const m of n.getInterface().getMethods().toArray()) {
+            const params = getFullClassName(lookupNode(ctx, m.getParamStructType()));
+            const results = getFullClassName(lookupNode(ctx, m.getResultStructType()));
+            surface.push(params, `${params}_Shape`, results);
+            const promiseName = resultPromiseName(ctx, n, m);
+            if (promiseName !== null) surface.push(promiseName);
+          }
+          return surface.join(", ");
+        }
         return c;
       })
       .join(", ");
@@ -703,9 +775,11 @@ export function generateStructFieldMethods(
       const iface = field.getSlot().getType().getInterface();
       const ifaceName = getFullClassName(lookupNode(ctx, iface.getTypeId()));
       const bound = resolveBrand(ctx, iface.getTypeId(), iface.getBrand(), gparams);
-      const args = bound === null ? "" : `<${bound.map((b) => b.typeArg).join(", ")}>`;
+      const args = bound === null ? "" : `<${bound.map(brandTypeArg).join(", ")}>`;
       const ctors =
-        bound === null ? "" : `, [${bound.map((b) => b.ctorExpr).join(", ")}]`;
+        bound === null
+          ? ""
+          : `, [${bound.map((b) => brandCtorExpr(b, (p) => `capnp.getGenericBinding(this, ${p.flatIndex})`)).join(", ")}]`;
 
       jsType = `${ifaceName}_Client${args}`;
       /** new Foo_Client(capnp.getInterfaceClient(0, this), [Bindings]) */
@@ -749,9 +823,9 @@ export function generateStructFieldMethods(
         const st = field.getSlot().getType().getStruct();
         const bound = resolveBrand(ctx, st.getTypeId(), st.getBrand(), gparams);
         if (bound !== null) {
-          jsType = `${structType}<${bound.map((b) => b.typeArg).join(", ")}>`;
+          jsType = `${structType}<${bound.map(brandTypeArg).join(", ")}>`;
           structType = `capnp.bindGeneric(${jsType}, [${bound
-            .map((b) => b.ctorExpr)
+            .map((b) => brandCtorExpr(b, (p) => `capnp.getGenericBinding(this, ${p.flatIndex})`))
             .join(", ")}])`;
         }
       }
