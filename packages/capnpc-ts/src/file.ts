@@ -218,10 +218,62 @@ export function genericArgNames(params: GenericParam[]): string {
   return `<${params.map((p) => p.name).join(", ")}>`;
 }
 
-export interface BrandBinding {
-  ctorExpr: string;
-  typeArg: string;
+export interface StructBinding {
+  kind: "struct";
+  /** Nested brand bindings for a generic struct, or null for a plain one. */
+  bindings: BrandBinding[] | null;
+  name: string;
 }
+
+export interface ParameterBinding {
+  kind: "parameter";
+  parameter: GenericParam;
+}
+
+export type BrandBinding = StructBinding | ParameterBinding;
+
+/** True when the binding is fully concrete: a static ctor expression exists. */
+export const brandBound = (b: BrandBinding): boolean =>
+  b.kind === "struct" && (b.bindings === null || b.bindings.every(brandBound));
+
+/** The TypeScript type argument for a binding, e.g. `Box<Thing>` or `U`. */
+export const brandTypeArg = (b: BrandBinding): string =>
+  b.kind === "parameter"
+    ? b.parameter.name
+    : b.bindings === null
+      ? b.name
+      : `${b.name}<${b.bindings.map(brandTypeArg).join(", ")}>`;
+
+/**
+ * The runtime ctor expression for a binding, rendering parameter references
+ * through `parameterExpr` (context decides: `capnp.getGenericBinding(this, i)`
+ * at struct accessor sites, `bindings[i]` in client/server constructors).
+ * Null when any parameter has no rendering in the calling context.
+ */
+
+export const brandCtorExpr = (
+  b: BrandBinding,
+  parameterExpr: (p: GenericParam) => string | null,
+): string | null => {
+  if (b.kind === "parameter") return parameterExpr(b.parameter);
+  if (b.bindings === null) return b.name;
+  const nested = b.bindings.map((n) => brandCtorExpr(n, parameterExpr));
+  if (nested.some((n) => n === null)) return null;
+  return `capnp.bindGeneric(${b.name}, [${nested.join(", ")}])`;
+};
+
+/** Replace parameter references with the bindings they compose through. */
+export const brandSubstitute = (b: BrandBinding, bindings: BrandBinding[]): BrandBinding => {
+  if (b.kind === "parameter") return bindings[b.parameter.flatIndex] ?? b;
+  if (b.bindings === null) return b;
+  return { ...b, bindings: b.bindings.map((n) => brandSubstitute(n, bindings)) };
+};
+
+/** True when every parameter reference in the tree is a member of `env`. */
+export const brandParametersIn = (b: BrandBinding, env: GenericParam[]): boolean =>
+  b.kind === "parameter"
+    ? env.some((g) => g.scopeId === b.parameter.scopeId && g.parameterIndex === b.parameter.parameterIndex)
+    : (b.bindings?.every((n) => brandParametersIn(n, env)) ?? true);
 
 /**
  * Resolve a use-site `Brand` against `targetId`'s parameter list. Every
@@ -267,12 +319,7 @@ function resolveBindingType(
       const node = lookupNode(ctx, type.getStruct().getTypeId());
       const name = getFullClassName(node);
       const nested = resolveBrand(ctx, node.getId(), type.getStruct().getBrand(), env);
-      if (nested === null) return { ctorExpr: name, typeArg: name };
-
-      return {
-        ctorExpr: `capnp.bindGeneric(${name}, [${nested.map((b) => b.ctorExpr).join(", ")}])`,
-        typeArg: `${name}<${nested.map((b) => b.typeArg).join(", ")}>`,
-      };
+      return { kind: "struct", bindings: nested, name };
     }
     case s.Type.ANY_POINTER: {
       const any = type.getAnyPointer();
@@ -284,16 +331,69 @@ function resolveBindingType(
       );
       if (p === undefined) return null;
 
-      // Re-binding through an enclosing generic: the ctor comes off the
-      // instance's own bindings at accessor-emission sites (`this`).
-      return {
-        ctorExpr: `capnp.getGenericBinding(this, ${p.flatIndex})`,
-        typeArg: p.name,
-      };
+      return { kind: "parameter", parameter: p };
     }
     default:
       return null;
   }
+}
+
+/**
+ * One row of an interface's flattened method table: the method, the interface
+ * that declares it, its id within that interface, and the brand bindings
+ * resolved from the `extends` chain (null when nothing needs substituting).
+ */
+
+export interface FlatMethod {
+  bindings: BrandBinding[] | null;
+  declaring: s.Node;
+  method: s.Method;
+  methodId: number;
+}
+
+/**
+ * Flatten an interface's own and transitively inherited methods into one
+ * table. Own methods come first so existing table indices stay stable;
+ * inherited methods follow in superclass declaration order, deduplicated by
+ * (declaring interface, method id) to survive diamonds. Each hop's brand is
+ * resolved against the declaring scope and composed through the accumulated
+ * bindings, so re-parameterized chains like `B(U) extends(A(U))` used as
+ * `extends(B(Thing))` arrive fully bound. The one unresolved corner: an
+ * intermediate's parameter nested inside a struct brand (`extends(A(Box(U)))`)
+ * stays unbound and callers fall back to explicit ctors.
+ */
+
+export function flattenMethods(ctx: CodeGeneratorFileContext, node: s.Node): FlatMethod[] {
+  const out: FlatMethod[] = [];
+  const seen = new Set<string>();
+
+  const visit = (iface: s.Node, bindings: BrandBinding[] | null): void => {
+    iface
+      .getInterface()
+      .getMethods()
+      .toArray()
+      .forEach((method, methodId) => {
+        const key = `${iface.getId()}:${methodId}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push({ bindings, declaring: iface, method, methodId });
+      });
+    const env = genericParams(ctx, iface);
+    iface
+      .getInterface()
+      .getSuperclasses()
+      .toArray()
+      .forEach((superclass) => {
+        if (!hasNode(ctx, superclass.getId())) return;
+        const raw = resolveBrand(ctx, superclass.getId(), superclass.getBrand(), env);
+        const composed =
+          bindings === null ? raw : (raw?.map((b) => brandSubstitute(b, bindings)) ?? null);
+        visit(lookupNode(ctx, superclass.getId()), composed);
+      });
+  };
+
+  visit(node, null);
+  return out;
 }
 
 /**
